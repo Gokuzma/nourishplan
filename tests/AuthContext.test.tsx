@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act, waitFor } from '@testing-library/react'
 import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+function createWrapper() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children)
+}
 
 // Mock supabase — use inline functions to avoid hoisting issues
 vi.mock('../src/lib/supabase', () => ({
@@ -43,7 +50,8 @@ describe('AuthContext', () => {
     render(
       React.createElement(AuthProvider, null,
         React.createElement(TestConsumer, null)
-      )
+      ),
+      { wrapper: createWrapper() }
     )
 
     expect(screen.getByText('loading')).toBeInTheDocument()
@@ -66,7 +74,8 @@ describe('AuthContext', () => {
     const { AuthProvider } = await import('../src/contexts/AuthContext')
 
     const { unmount } = render(
-      React.createElement(AuthProvider, null, React.createElement('div', null))
+      React.createElement(AuthProvider, null, React.createElement('div', null)),
+      { wrapper: createWrapper() }
     )
 
     await waitFor(() => {
@@ -99,7 +108,8 @@ describe('AuthContext', () => {
     render(
       React.createElement(AuthProvider, null,
         React.createElement(TestConsumer, null)
-      )
+      ),
+      { wrapper: createWrapper() }
     )
 
     await waitFor(() => {
@@ -138,7 +148,8 @@ describe('AuthContext', () => {
     const { getByRole } = render(
       React.createElement(AuthProvider, null,
         React.createElement(TestConsumer, null)
-      )
+      ),
+      { wrapper: createWrapper() }
     )
 
     await waitFor(() => {

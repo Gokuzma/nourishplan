@@ -20,7 +20,7 @@ export function useHousehold() {
   const { session } = useAuth()
 
   return useQuery({
-    queryKey: ['household'],
+    queryKey: ['household', session?.user.id],
     queryFn: async (): Promise<HouseholdWithName | null> => {
       if (!session?.user.id) return null
 
@@ -42,11 +42,12 @@ export function useHousehold() {
  * the member's public profile (display name).
  */
 export function useHouseholdMembers() {
+  const { session } = useAuth()
   const { data: membership } = useHousehold()
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['household', 'members', householdId],
+    queryKey: ['household', session?.user.id, 'members', householdId],
     queryFn: async (): Promise<MemberWithProfile[]> => {
       const { data, error } = await supabase
         .from('household_members')
@@ -186,7 +187,7 @@ export function useMemberProfiles() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['household', 'member_profiles', householdId],
+    queryKey: ['household', session?.user.id, 'member_profiles', householdId],
     queryFn: async (): Promise<MemberProfile[]> => {
       const { data, error } = await supabase
         .from('member_profiles')
@@ -226,7 +227,7 @@ export function useCreateMemberProfile() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['household', 'member_profiles'] })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }
@@ -256,7 +257,7 @@ export function useUpdateMemberProfile() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['household', 'member_profiles'] })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }
@@ -273,7 +274,7 @@ export function useDeleteMemberProfile() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['household', 'member_profiles'] })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }
