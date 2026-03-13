@@ -5,6 +5,9 @@ import { useHousehold } from './hooks/useHousehold'
 import { AuthPage } from './pages/AuthPage'
 import { HouseholdSetup } from './pages/HouseholdSetup'
 import { HouseholdPage } from './pages/HouseholdPage'
+import { HomePage } from './pages/HomePage'
+import { SettingsPage } from './pages/SettingsPage'
+import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
 
 const queryClient = new QueryClient({
@@ -78,12 +81,12 @@ function JoinPage() {
   )
 }
 
-function HomePage() {
+function ComingSoonPage() {
   return (
     <div className="min-h-screen bg-background px-4 py-8 font-sans flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-primary">NourishPlan</h1>
-        <p className="mt-2 text-text/60">Your household is set up. More features coming soon.</p>
+        <h1 className="text-2xl font-bold text-primary mb-2">Coming Soon</h1>
+        <p className="text-text/60">This feature is not available yet.</p>
       </div>
     </div>
   )
@@ -120,23 +123,19 @@ function AppRoutes() {
         }
       />
 
-      {/* Auth + household required */}
+      {/* Auth + household required — wrapped in AppShell */}
       <Route
-        path="/"
         element={
           <AuthGuard>
-            <HomePage />
+            <AppShell />
           </AuthGuard>
         }
-      />
-      <Route
-        path="/household"
-        element={
-          <AuthGuard>
-            <HouseholdPage />
-          </AuthGuard>
-        }
-      />
+      >
+        <Route path="/" element={<HomePage />} />
+        <Route path="/household" element={<HouseholdPage />} />
+        <Route path="/plan" element={<ComingSoonPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

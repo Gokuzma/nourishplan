@@ -1,10 +1,86 @@
-// PLAT-01: App is mobile-first responsive — bottom tabs render at mobile viewport;
-//           sidebar renders at 768px+
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
+
+// Mock useAuth
+vi.mock('../src/contexts/AuthContext', () => ({
+  useAuth: vi.fn().mockReturnValue({
+    session: { user: { email: 'test@example.com' } },
+    loading: false,
+    signOut: vi.fn(),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+}))
+
 describe('AppShell', () => {
-  // TODO: render AppShell at 375px viewport width and verify bottom tab bar is present (PLAT-01)
-  // TODO: render AppShell at 1024px viewport width and verify sidebar is present instead (PLAT-01)
-  // TODO: verify 4 tabs are rendered: Home, Plan, Household, Settings
-  test('AppShell describe placeholder', () => expect(true).toBe(true))
+  it('renders 4 navigation tabs', async () => {
+    const { TabBar } = await import('../src/components/layout/TabBar')
+
+    render(
+      React.createElement(MemoryRouter, null,
+        React.createElement(TabBar, null)
+      )
+    )
+
+    expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.getByText('Plan')).toBeInTheDocument()
+    expect(screen.getByText('Household')).toBeInTheDocument()
+    expect(screen.getByText('Settings')).toBeInTheDocument()
+  })
+
+  it('Plan tab has coming-soon indicator', async () => {
+    const { TabBar } = await import('../src/components/layout/TabBar')
+
+    render(
+      React.createElement(MemoryRouter, null,
+        React.createElement(TabBar, null)
+      )
+    )
+
+    // Plan tab should have a coming-soon badge or aria-label
+    const planTab = screen.getByRole('link', { name: /plan/i })
+    expect(planTab).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('Sidebar renders 4 navigation items', async () => {
+    const { Sidebar } = await import('../src/components/layout/Sidebar')
+
+    render(
+      React.createElement(MemoryRouter, null,
+        React.createElement(Sidebar, null)
+      )
+    )
+
+    expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.getByText('Plan')).toBeInTheDocument()
+    expect(screen.getByText('Household')).toBeInTheDocument()
+    expect(screen.getByText('Settings')).toBeInTheDocument()
+  })
+
+  it('Sidebar shows app name', async () => {
+    const { Sidebar } = await import('../src/components/layout/Sidebar')
+
+    render(
+      React.createElement(MemoryRouter, null,
+        React.createElement(Sidebar, null)
+      )
+    )
+
+    expect(screen.getByText('NourishPlan')).toBeInTheDocument()
+  })
+
+  it('Sidebar has a logout button', async () => {
+    const { Sidebar } = await import('../src/components/layout/Sidebar')
+
+    render(
+      React.createElement(MemoryRouter, null,
+        React.createElement(Sidebar, null)
+      )
+    )
+
+    expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument()
+  })
 })
 
 test('AppShell test infrastructure works', () => expect(true).toBe(true))
