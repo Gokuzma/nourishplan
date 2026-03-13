@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-auth/01-03-PLAN.md
-last_updated: "2026-03-13T02:37:24.328Z"
+stopped_at: Completed 01-foundation-auth/01-02-PLAN.md
+last_updated: "2026-03-13T02:40:00.987Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-foundation-auth P01 | 427 | 3 tasks | 20 files |
 | Phase 01-foundation-auth P03 | 245 | 2 tasks | 10 files |
+| Phase 01-foundation-auth P02 | 480 | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,10 @@ Recent decisions affecting current work:
 - [Phase 01-foundation-auth]: Used maybeSingle() for useHousehold to return null gracefully for new users without a household
 - [Phase 01-foundation-auth]: AuthGuard skips household redirect for /setup and /join routes to prevent redirect loop
 - [Phase 01-foundation-auth]: JoinHousehold accepts full invite URLs or raw tokens to improve paste UX
+- [Phase 01-foundation-auth]: AuthContext exports both AuthProvider and useAuth — hook re-exported in useAuth.ts for backward compat
+- [Phase 01-foundation-auth]: TabBar Plan tab uses role=link + aria-disabled=true (span element) to pass as accessible disabled link
+- [Phase 01-foundation-auth]: window.matchMedia mock added to tests/setup.ts globally — jsdom does not implement matchMedia
+- [Phase 01-foundation-auth]: AppShell used as layout route in App.tsx with Outlet for nested authenticated routes pattern
 
 ### Pending Todos
 
@@ -82,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T02:37:24.322Z
-Stopped at: Completed 01-foundation-auth/01-03-PLAN.md
+Last session: 2026-03-13T02:40:00.983Z
+Stopped at: Completed 01-foundation-auth/01-02-PLAN.md
 Resume file: None

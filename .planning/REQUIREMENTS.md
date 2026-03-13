@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can create an account with email and password
-- [ ] **AUTH-02**: User can log in and stay logged in across browser sessions
-- [ ] **AUTH-03**: User can log out from any page
-- [ ] **AUTH-04**: User can reset password via email link
+- [x] **AUTH-01**: User can create an account with email and password
+- [x] **AUTH-02**: User can log in and stay logged in across browser sessions
+- [x] **AUTH-03**: User can log out from any page
+- [x] **AUTH-04**: User can reset password via email link
 
 ### Household
 
@@ -61,7 +61,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platform & Design
 
-- [ ] **PLAT-01**: App is mobile-first responsive — optimized for phone use in kitchen/at table
+- [x] **PLAT-01**: App is mobile-first responsive — optimized for phone use in kitchen/at table
 - [x] **PLAT-02**: Minimalist UI with pastel colour scheme
 - [ ] **PLAT-03**: PWA installable to home screen on mobile devices
 - [ ] **PLAT-04**: Core features work offline with sync when reconnected
@@ -103,10 +103,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
 | HSHD-01 | Phase 1 | Complete |
 | HSHD-02 | Phase 1 | Complete |
 | HSHD-03 | Phase 1 | Complete |
@@ -137,7 +137,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRCK-05 | Phase 5 | Pending |
 | TRCK-06 | Phase 4 | Pending |
 | TRCK-07 | Phase 4 | Pending |
-| PLAT-01 | Phase 1 | Pending |
+| PLAT-01 | Phase 1 | Complete |
 | PLAT-02 | Phase 1 | Complete |
 | PLAT-03 | Phase 4 | Pending |
 | PLAT-04 | Phase 4 | Pending |
