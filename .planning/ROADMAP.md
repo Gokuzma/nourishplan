@@ -47,7 +47,13 @@ Plans:
   3. User can create a recipe by adding food items as ingredients with quantities and see the per-serving nutrition calculated automatically
   4. User can add another recipe as an ingredient inside a recipe (nested recipes work without circular references)
   5. User can toggle ingredient weight state (raw vs cooked) on a recipe and see nutrition recalculate
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 02-01-PLAN.md — DB schema, types, and TDD nutrition utility functions
+- [ ] 02-02-PLAN.md — Edge Functions for USDA, Open Food Facts, and AI verification
+- [ ] 02-03-PLAN.md — Food search UI, custom food CRUD, and /foods route
+- [ ] 02-04-PLAN.md — Recipe builder with ingredients, servings, and sticky nutrition bar
+- [ ] 02-05-PLAN.md — Nested recipes, raw/cooked toggle, AI verification, and user verification
 
 ### Phase 3: Meal Planning & Targets
 **Goal**: Households can build and share a weekly meal plan, and each member has personal nutrition targets set
@@ -90,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 3/4 | In Progress|  |
-| 2. Food Data & Recipe Builder | 0/TBD | Not started | - |
+| 2. Food Data & Recipe Builder | 0/5 | Not started | - |
 | 3. Meal Planning & Targets | 0/TBD | Not started | - |
 | 4. Daily Logging & Summary | 0/TBD | Not started | - |
 | 5. Portion Suggestions & Polish | 0/TBD | Not started | - |
