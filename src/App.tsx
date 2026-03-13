@@ -9,6 +9,8 @@ import { HomePage } from './pages/HomePage'
 import { FoodsPage } from './pages/FoodsPage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipePage } from './pages/RecipePage'
+import { MealsPage } from './pages/MealsPage'
+import { MealPage } from './pages/MealPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { MemberTargetsPage } from './pages/MemberTargetsPage'
 import { AppShell } from './components/layout/AppShell'
@@ -139,6 +141,8 @@ function AppRoutes() {
         <Route path="/foods" element={<FoodsPage />} />
         <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/recipes/:id" element={<RecipePage />} />
+        <Route path="/meals" element={<MealsPage />} />
+        <Route path="/meals/:id" element={<MealPage />} />
         <Route path="/household" element={<HouseholdPage />} />
         <Route path="/plan" element={<ComingSoonPage />} />
         <Route path="/settings" element={<SettingsPage />} />
