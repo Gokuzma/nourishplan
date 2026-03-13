@@ -4,6 +4,8 @@ import { useHousehold } from '../../hooks/useHousehold'
 
 const navItems = [
   { label: 'Home', to: '/', icon: '🏠' },
+  { label: 'Foods', to: '/foods', icon: '🥦' },
+  { label: 'Recipes', to: '/recipes', icon: '📖' },
   { label: 'Plan', to: '/plan', icon: '📋', comingSoon: true },
   { label: 'Household', to: '/household', icon: '👨‍👩‍👧' },
   { label: 'Settings', to: '/settings', icon: '⚙️' },
