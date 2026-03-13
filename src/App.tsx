@@ -7,6 +7,8 @@ import { HouseholdSetup } from './pages/HouseholdSetup'
 import { HouseholdPage } from './pages/HouseholdPage'
 import { HomePage } from './pages/HomePage'
 import { FoodsPage } from './pages/FoodsPage'
+import { RecipesPage } from './pages/RecipesPage'
+import { RecipePage } from './pages/RecipePage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
@@ -134,6 +136,8 @@ function AppRoutes() {
       >
         <Route path="/" element={<HomePage />} />
         <Route path="/foods" element={<FoodsPage />} />
+        <Route path="/recipes" element={<RecipesPage />} />
+        <Route path="/recipes/:id" element={<RecipePage />} />
         <Route path="/household" element={<HouseholdPage />} />
         <Route path="/plan" element={<ComingSoonPage />} />
         <Route path="/settings" element={<SettingsPage />} />
