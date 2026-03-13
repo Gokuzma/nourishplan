@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -66,7 +67,15 @@ export function MemberList() {
                 </p>
               </div>
             </div>
-            <RoleBadge role={member.role} />
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/members/${member.user_id}/targets`}
+                className="rounded-full px-2 py-0.5 text-xs font-medium text-primary border border-primary/30 hover:bg-primary/10 transition-colors"
+              >
+                Set Targets
+              </Link>
+              <RoleBadge role={member.role} />
+            </div>
           </li>
         )
       })}
@@ -95,9 +104,17 @@ export function MemberList() {
                   )}
                 </div>
               </div>
-              <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-semibold text-accent">
-                Child
-              </span>
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`/members/${profile.id}/targets`}
+                  className="rounded-full px-2 py-0.5 text-xs font-medium text-primary border border-primary/30 hover:bg-primary/10 transition-colors"
+                >
+                  Set Targets
+                </Link>
+                <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-semibold text-accent">
+                  Child
+                </span>
+              </div>
             </li>
           ))}
         </>

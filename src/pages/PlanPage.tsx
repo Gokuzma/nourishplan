@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { useHousehold } from '../hooks/useHousehold'
 import { useAuth } from '../hooks/useAuth'
 import { useMealPlan, useCreateMealPlan } from '../hooks/useMealPlan'
+import { useRepeatLastWeek, useLoadTemplate } from '../hooks/useMealPlanTemplates'
 import { useNutritionTarget } from '../hooks/useNutritionTargets'
 import { getWeekStart } from '../utils/mealPlan'
 import { PlanGrid } from '../components/plan/PlanGrid'
 import { MemberSelector } from '../components/plan/MemberSelector'
+import { NewWeekPrompt } from '../components/plan/NewWeekPrompt'
+import { TemplateManager } from '../components/plan/TemplateManager'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00Z')
@@ -43,6 +46,8 @@ export function PlanPage() {
 
   const { data: plan, isPending: planPending } = useMealPlan(weekStart)
   const createPlan = useCreateMealPlan()
+  const repeatLastWeek = useRepeatLastWeek()
+  const loadTemplate = useLoadTemplate()
   const { data: memberTarget } = useNutritionTarget(householdId, selectedMemberId, selectedMemberType)
 
   function handlePrevWeek() {
@@ -58,8 +63,15 @@ export function PlanPage() {
     setSelectedMemberType(type)
   }
 
-  async function handleCreatePlan() {
-    await createPlan.mutateAsync(weekStart)
+  async function handleNewWeekChoice(choice: 'fresh' | 'repeat' | 'template', templateId?: string) {
+    const newPlan = await createPlan.mutateAsync(weekStart)
+
+    if (choice === 'repeat') {
+      const previousWeekStart = addDays(weekStart, -7)
+      await repeatLastWeek.mutateAsync({ currentPlanId: newPlan.id, previousWeekStart })
+    } else if (choice === 'template' && templateId) {
+      await loadTemplate.mutateAsync({ templateId, planId: newPlan.id })
+    }
   }
 
   return (
@@ -102,23 +114,17 @@ export function PlanPage() {
           ))}
         </div>
       ) : !plan ? (
-        <div className="text-center py-16">
-          <p className="text-text/50 text-sm mb-4">No plan for this week yet.</p>
-          <button
-            onClick={handleCreatePlan}
-            disabled={createPlan.isPending}
-            className="rounded-[--radius-btn] bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
-            {createPlan.isPending ? 'Creating…' : 'Create Plan for This Week'}
-          </button>
-        </div>
+        <NewWeekPrompt weekStart={weekStart} onChoice={handleNewWeekChoice} />
       ) : (
-        <PlanGrid
-          planId={plan.id}
-          weekStart={weekStart}
-          weekStartDay={weekStartDay}
-          memberTarget={memberTarget ?? null}
-        />
+        <>
+          <TemplateManager planId={plan.id} />
+          <PlanGrid
+            planId={plan.id}
+            weekStart={weekStart}
+            weekStartDay={weekStartDay}
+            memberTarget={memberTarget ?? null}
+          />
+        </>
       )}
     </div>
   )

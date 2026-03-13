@@ -25,7 +25,7 @@ vi.mock('../src/hooks/useHousehold', () => ({
 }))
 
 describe('AppShell', () => {
-  it('renders 5 navigation tabs', async () => {
+  it('renders 5 navigation tabs: Home, Foods, Recipes, Meals, Plan', async () => {
     const { TabBar } = await import('../src/components/layout/TabBar')
 
     render(
@@ -37,11 +37,11 @@ describe('AppShell', () => {
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Foods')).toBeInTheDocument()
     expect(screen.getByText('Recipes')).toBeInTheDocument()
-    expect(screen.getByText('Household')).toBeInTheDocument()
-    expect(screen.getByText('Settings')).toBeInTheDocument()
+    expect(screen.getByText('Meals')).toBeInTheDocument()
+    expect(screen.getByText('Plan')).toBeInTheDocument()
   })
 
-  it('Sidebar renders 6 navigation items including coming-soon Plan', async () => {
+  it('Sidebar renders 7 navigation items including Meals and functional Plan', async () => {
     const { Sidebar } = await import('../src/components/layout/Sidebar')
 
     render(
@@ -53,13 +53,14 @@ describe('AppShell', () => {
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Foods')).toBeInTheDocument()
     expect(screen.getByText('Recipes')).toBeInTheDocument()
+    expect(screen.getByText('Meals')).toBeInTheDocument()
     expect(screen.getByText('Plan')).toBeInTheDocument()
     expect(screen.getByText('Household')).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
 
-    // Plan tab should have coming-soon indicator
+    // Plan tab should now be a functional link (no longer coming-soon)
     const planTab = screen.getByRole('link', { name: /plan/i })
-    expect(planTab).toHaveAttribute('aria-disabled', 'true')
+    expect(planTab).not.toHaveAttribute('aria-disabled')
   })
 
   it('Sidebar shows app name', async () => {
