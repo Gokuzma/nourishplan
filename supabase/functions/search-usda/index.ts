@@ -23,6 +23,7 @@ interface UsdaFood {
 }
 
 interface NormalizedFood {
+  id: string;
   fdcId: number;
   name: string;
   source: "usda";
@@ -73,6 +74,7 @@ function normalizeFood(food: UsdaFood): NormalizedFood {
   }));
 
   return {
+    id: String(food.fdcId),
     fdcId: food.fdcId,
     name: food.description,
     source: "usda",
