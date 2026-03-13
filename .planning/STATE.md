@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-food-data-recipe-builder-02-02-PLAN.md
-last_updated: "2026-03-13T04:07:24.925Z"
+stopped_at: Completed 02-food-data-recipe-builder plan 01
+last_updated: "2026-03-13T04:08:49.475Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 9
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation-auth P03 | 245 | 2 tasks | 10 files |
 | Phase 01-foundation-auth P02 | 480 | 2 tasks | 18 files |
 | Phase 02-food-data-recipe-builder P02 | 2 | 2 tasks | 3 files |
+| Phase 02-food-data-recipe-builder P01 | 3 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation-auth]: AppShell used as layout route in App.tsx with Outlet for nested authenticated routes pattern
 - [Phase 02-food-data-recipe-builder]: USDA deduplication uses priority map (Foundation=0, SR Legacy=1, Survey=2, Branded=3) — lower number wins on duplicate description
 - [Phase 02-food-data-recipe-builder]: verify-nutrition returns HTTP 200 with verified=false on graceful degradation — never blocks food search flow
+- [Phase 02-food-data-recipe-builder]: Polymorphic recipe_ingredients.ingredient_id with no DB FK — ingredient_type discriminates food vs recipe reference
+- [Phase 02-food-data-recipe-builder]: Yield factors >1 for legumes/grains (2.5x water absorption) — applyYieldFactor divides cooked weight to get raw equivalent
+- [Phase 02-food-data-recipe-builder]: USDA_NUTRIENT_IDS exported as typed const — semantic names prevent magic number errors in API consumers
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:07:24.915Z
-Stopped at: Completed 02-food-data-recipe-builder-02-02-PLAN.md
+Last session: 2026-03-13T04:08:49.470Z
+Stopped at: Completed 02-food-data-recipe-builder plan 01
 Resume file: None

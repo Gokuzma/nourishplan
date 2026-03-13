@@ -28,17 +28,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FOOD-02**: User can search additional open food databases (e.g., Open Food Facts) for broader coverage
 - [ ] **FOOD-03**: User can add custom foods with name, serving size, calories, macros, and optional micronutrients
 - [ ] **FOOD-04**: User can edit and delete their custom foods
-- [ ] **FOOD-05**: Nutrition data from multiple sources is normalized to per-100g for consistent calculations
+- [x] **FOOD-05**: Nutrition data from multiple sources is normalized to per-100g for consistent calculations
 - [x] **FOOD-06**: AI verification layer cross-checks nutrition data for accuracy when multiple sources disagree
 
 ### Recipes
 
 - [ ] **RECP-01**: User can create a recipe by adding food items as ingredients with quantities
-- [ ] **RECP-02**: Recipe nutrition per serving is auto-calculated from ingredients
+- [x] **RECP-02**: Recipe nutrition per serving is auto-calculated from ingredients
 - [ ] **RECP-03**: User can set number of servings a recipe makes
-- [ ] **RECP-04**: User can use another recipe as an ingredient (nested recipes)
+- [x] **RECP-04**: User can use another recipe as an ingredient (nested recipes)
 - [ ] **RECP-05**: User can edit and delete their recipes
-- [ ] **RECP-06**: Recipe handles raw vs cooked weight states for ingredients
+- [x] **RECP-06**: Recipe handles raw vs cooked weight states for ingredients
 
 ### Meals & Meal Plans
 
@@ -116,14 +116,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOOD-02 | Phase 2 | Complete |
 | FOOD-03 | Phase 2 | Pending |
 | FOOD-04 | Phase 2 | Pending |
-| FOOD-05 | Phase 2 | Pending |
+| FOOD-05 | Phase 2 | Complete |
 | FOOD-06 | Phase 2 | Complete |
 | RECP-01 | Phase 2 | Pending |
-| RECP-02 | Phase 2 | Pending |
+| RECP-02 | Phase 2 | Complete |
 | RECP-03 | Phase 2 | Pending |
-| RECP-04 | Phase 2 | Pending |
+| RECP-04 | Phase 2 | Complete |
 | RECP-05 | Phase 2 | Pending |
-| RECP-06 | Phase 2 | Pending |
+| RECP-06 | Phase 2 | Complete |
 | MEAL-01 | Phase 3 | Pending |
 | MEAL-02 | Phase 3 | Pending |
 | MEAL-03 | Phase 3 | Pending |
