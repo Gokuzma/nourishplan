@@ -86,7 +86,13 @@ Plans:
   2. User can see a daily summary showing calories, macros, micronutrients, and custom goals versus their personal targets
   3. The app is installable to the home screen on a mobile device as a PWA
   4. Log entries made while offline are saved locally and sync automatically when the device reconnects
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 04-01-PLAN.md — DB migration, FoodLog type, utility functions, and unit tests
+- [ ] 04-02-PLAN.md — Food log CRUD hooks and logging UI components
+- [ ] 04-03-PLAN.md — PWA icons, workbox caching, offline banner, and install prompt
+- [ ] 04-04-PLAN.md — HomePage daily dashboard with progress rings, log list, and logging interactions
+- [ ] 04-05-PLAN.md — Human verification of all Phase 4 features
 
 ### Phase 5: Portion Suggestions & Polish
 **Goal**: The app suggests how much each household member should eat per dish, micronutrients are fully visible, and the PWA passes production quality checks
@@ -108,5 +114,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Auth | 5/5 | Complete   | 2026-03-13 |
 | 2. Food Data & Recipe Builder | 8/8 | Complete   | 2026-03-13 |
 | 3. Meal Planning & Targets | 5/6 | In Progress|  |
-| 4. Daily Logging & Summary | 0/TBD | Not started | - |
+| 4. Daily Logging & Summary | 0/5 | Not started | - |
 | 5. Portion Suggestions & Polish | 0/TBD | Not started | - |
