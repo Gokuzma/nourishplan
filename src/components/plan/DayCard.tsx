@@ -130,41 +130,22 @@ export function DayCard({
 
       {/* Day nutrition bar */}
       <div className="mt-4 pt-3 border-t border-accent/20">
-        <div className="flex items-center gap-3">
-          {/* Progress rings: cal, protein, carbs, fat */}
-          <div className="flex items-center gap-1.5">
-            <div className="flex flex-col items-center gap-0.5">
-              <ProgressRing value={dayTotal.calories} target={memberTarget?.calories ?? 0} size={36} strokeWidth={4} color="#A8C5A0" />
-              <span className="text-[10px] text-text/50">cal</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <ProgressRing value={dayTotal.protein} target={memberTarget?.protein_g ?? 0} size={36} strokeWidth={4} color="#93C5FD" />
-              <span className="text-[10px] text-text/50">P</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <ProgressRing value={dayTotal.carbs} target={memberTarget?.carbs_g ?? 0} size={36} strokeWidth={4} color="#FCD34D" />
-              <span className="text-[10px] text-text/50">C</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <ProgressRing value={dayTotal.fat} target={memberTarget?.fat_g ?? 0} size={36} strokeWidth={4} color="#F9A8D4" />
-              <span className="text-[10px] text-text/50">F</span>
-            </div>
+        <div className="flex items-center justify-around">
+          <div className="flex flex-col items-center gap-0.5">
+            <ProgressRing value={dayTotal.calories} target={memberTarget?.calories ?? 0} size={44} strokeWidth={4} color="#A8C5A0" showValue />
+            <span className="text-[10px] text-text/50">cal</span>
           </div>
-
-          {/* Macro numbers */}
-          <div className="flex-1 text-xs text-text/50 space-y-0.5">
-            <div className="flex gap-3">
-              <span>P {Math.round(dayTotal.protein)}g</span>
-              <span>C {Math.round(dayTotal.carbs)}g</span>
-              <span>F {Math.round(dayTotal.fat)}g</span>
-            </div>
-            {memberTarget && (
-              <div className="flex gap-3 text-[10px] text-text/30">
-                <span>/ {memberTarget.protein_g ?? '—'}g</span>
-                <span>/ {memberTarget.carbs_g ?? '—'}g</span>
-                <span>/ {memberTarget.fat_g ?? '—'}g</span>
-              </div>
-            )}
+          <div className="flex flex-col items-center gap-0.5">
+            <ProgressRing value={dayTotal.protein} target={memberTarget?.protein_g ?? 0} size={36} strokeWidth={4} color="#93C5FD" showValue />
+            <span className="text-[10px] text-text/50">P</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5">
+            <ProgressRing value={dayTotal.carbs} target={memberTarget?.carbs_g ?? 0} size={36} strokeWidth={4} color="#FCD34D" showValue />
+            <span className="text-[10px] text-text/50">C</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5">
+            <ProgressRing value={dayTotal.fat} target={memberTarget?.fat_g ?? 0} size={36} strokeWidth={4} color="#F9A8D4" showValue />
+            <span className="text-[10px] text-text/50">F</span>
           </div>
         </div>
       </div>
