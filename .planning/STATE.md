@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-meal-planning-targets/03-03-PLAN.md
-last_updated: "2026-03-13T21:31:45.676Z"
+stopped_at: Completed 03-meal-planning-targets/03-02-PLAN.md
+last_updated: "2026-03-13T21:32:18.417Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 19
-  completed_plans: 15
+  completed_plans: 16
   percent: 0
 ---
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P08 | 10 | 2 tasks | 2 files |
 | Phase 03-meal-planning-targets P01 | 5 | 2 tasks | 7 files |
 | Phase 03-meal-planning-targets P03 | 2 | 2 tasks | 4 files |
+| Phase 03-meal-planning-targets P02 | 3 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 03-meal-planning-targets]: meal_items stores per-100g macro snapshot columns at insert time — avoids live re-resolution of external food sources on page load
 - [Phase 03-meal-planning-targets]: useUpsertNutritionTargets accepts memberId separately from buildTargetUpsertPayload for cache key invalidation
 - [Phase 03-meal-planning-targets]: MemberTargetsPage resolves memberType dynamically from householdMembers/memberProfiles hooks to avoid encoding type in URL
+- [Phase 03-meal-planning-targets]: MealBuilder shows total nutrition (not per-serving) — meals are atomic units placed into plan slots
+- [Phase 03-meal-planning-targets]: useMeals hooks follow exact useRecipes pattern with household-scoped TanStack Query keys
 
 ### Pending Todos
 
@@ -125,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T21:31:45.673Z
-Stopped at: Completed 03-meal-planning-targets/03-03-PLAN.md
+Last session: 2026-03-13T21:32:18.413Z
+Stopped at: Completed 03-meal-planning-targets/03-02-PLAN.md
 Resume file: None
