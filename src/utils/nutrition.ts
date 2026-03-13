@@ -107,6 +107,25 @@ export function calcMealNutrition(
 }
 
 /**
+ * Scale per-serving snapshot macros by the number of servings logged.
+ */
+export function calcLogEntryNutrition(log: {
+  calories_per_serving: number
+  protein_per_serving: number
+  fat_per_serving: number
+  carbs_per_serving: number
+  servings_logged: number
+}): MacroSummary {
+  const s = log.servings_logged;
+  return {
+    calories: log.calories_per_serving * s,
+    protein: log.protein_per_serving * s,
+    fat: log.fat_per_serving * s,
+    carbs: log.carbs_per_serving * s,
+  };
+}
+
+/**
  * Sum all meal nutritions across all slots in a day.
  */
 export function calcDayNutrition(

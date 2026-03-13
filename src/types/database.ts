@@ -157,6 +157,29 @@ export interface NutritionTarget {
   updated_at: string
 }
 
+export interface FoodLog {
+  id: string
+  household_id: string
+  logged_by: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  log_date: string
+  slot_name: string | null
+  meal_id: string | null
+  item_type: string | null
+  item_id: string | null
+  item_name: string
+  servings_logged: number
+  calories_per_serving: number
+  protein_per_serving: number
+  fat_per_serving: number
+  carbs_per_serving: number
+  micronutrients: Record<string, number>
+  is_private: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface MacroSummary {
   calories: number
   protein: number
@@ -269,6 +292,11 @@ export type Database = {
         Row: NutritionTarget
         Insert: Omit<NutritionTarget, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
         Update: Partial<Omit<NutritionTarget, 'id' | 'created_at'>>
+      }
+      food_logs: {
+        Row: FoodLog
+        Insert: Omit<FoodLog, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
+        Update: Partial<Omit<FoodLog, 'id' | 'created_at'>>
       }
     }
     Enums: {
