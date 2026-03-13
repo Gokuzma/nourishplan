@@ -24,12 +24,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Food Data
 
-- [ ] **FOOD-01**: User can search USDA FoodData Central for foods by name
-- [ ] **FOOD-02**: User can search additional open food databases (e.g., Open Food Facts) for broader coverage
+- [x] **FOOD-01**: User can search USDA FoodData Central for foods by name
+- [x] **FOOD-02**: User can search additional open food databases (e.g., Open Food Facts) for broader coverage
 - [ ] **FOOD-03**: User can add custom foods with name, serving size, calories, macros, and optional micronutrients
 - [ ] **FOOD-04**: User can edit and delete their custom foods
 - [ ] **FOOD-05**: Nutrition data from multiple sources is normalized to per-100g for consistent calculations
-- [ ] **FOOD-06**: AI verification layer cross-checks nutrition data for accuracy when multiple sources disagree
+- [x] **FOOD-06**: AI verification layer cross-checks nutrition data for accuracy when multiple sources disagree
 
 ### Recipes
 
@@ -112,12 +112,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HSHD-03 | Phase 1 | Complete |
 | HSHD-04 | Phase 1 | Complete |
 | HSHD-05 | Phase 1 | Complete |
-| FOOD-01 | Phase 2 | Pending |
-| FOOD-02 | Phase 2 | Pending |
+| FOOD-01 | Phase 2 | Complete |
+| FOOD-02 | Phase 2 | Complete |
 | FOOD-03 | Phase 2 | Pending |
 | FOOD-04 | Phase 2 | Pending |
 | FOOD-05 | Phase 2 | Pending |
-| FOOD-06 | Phase 2 | Pending |
+| FOOD-06 | Phase 2 | Complete |
 | RECP-01 | Phase 2 | Pending |
 | RECP-02 | Phase 2 | Pending |
 | RECP-03 | Phase 2 | Pending |
