@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-13T02:03:53.212Z"
+stopped_at: Completed 01-foundation-auth/01-01-PLAN.md
+last_updated: "2026-03-13T02:30:37.243Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-foundation-auth P01 | 427 | 3 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - Stack: Vite 7 + React 19 + Supabase + TanStack Query + Tailwind CSS 4 (from research)
 - Data model: per-100g normalization at ingest, polymorphic recipe_ingredients, template/instance distinction for meal plans
 - Household isolation: Postgres RLS enforcement (not application layer only)
+- [Phase 01-foundation-auth]: Vite 8 + react-router-dom v7 scaffolded as latest stable; SPA usage identical to planned v7/v6
+- [Phase 01-foundation-auth]: Tailwind CSS 4 uses @tailwindcss/vite plugin with CSS-first @theme tokens; no tailwind.config.js needed
+- [Phase 01-foundation-auth]: Bootstrap household creation with separate RLS policy allowing creator to insert self as admin before any membership exists
 
 ### Pending Todos
 
@@ -74,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T02:03:53.209Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-foundation-auth/01-CONTEXT.md
+Last session: 2026-03-13T02:30:37.240Z
+Stopped at: Completed 01-foundation-auth/01-01-PLAN.md
+Resume file: None

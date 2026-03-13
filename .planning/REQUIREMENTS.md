@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **HSHD-02**: User can invite family members to join their household via link or email
 - [ ] **HSHD-03**: User can view all members of their household
 - [ ] **HSHD-04**: Parent role can manage children's profiles and nutrition targets
-- [ ] **HSHD-05**: Household data is isolated — members cannot see other households' data
+- [x] **HSHD-05**: Household data is isolated — members cannot see other households' data
 
 ### Food Data
 
@@ -62,7 +62,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Platform & Design
 
 - [ ] **PLAT-01**: App is mobile-first responsive — optimized for phone use in kitchen/at table
-- [ ] **PLAT-02**: Minimalist UI with pastel colour scheme
+- [x] **PLAT-02**: Minimalist UI with pastel colour scheme
 - [ ] **PLAT-03**: PWA installable to home screen on mobile devices
 - [ ] **PLAT-04**: Core features work offline with sync when reconnected
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HSHD-02 | Phase 1 | Pending |
 | HSHD-03 | Phase 1 | Pending |
 | HSHD-04 | Phase 1 | Pending |
-| HSHD-05 | Phase 1 | Pending |
+| HSHD-05 | Phase 1 | Complete |
 | FOOD-01 | Phase 2 | Pending |
 | FOOD-02 | Phase 2 | Pending |
 | FOOD-03 | Phase 2 | Pending |
@@ -138,7 +138,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRCK-06 | Phase 4 | Pending |
 | TRCK-07 | Phase 4 | Pending |
 | PLAT-01 | Phase 1 | Pending |
-| PLAT-02 | Phase 1 | Pending |
+| PLAT-02 | Phase 1 | Complete |
 | PLAT-03 | Phase 4 | Pending |
 | PLAT-04 | Phase 4 | Pending |
 
