@@ -1,0 +1,152 @@
+# Requirements: NourishPlan
+
+**Defined:** 2026-03-12
+**Core Value:** Families can share one meal plan while each person gets personalized portion suggestions based on their individual nutritional targets.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Authentication
+
+- [ ] **AUTH-01**: User can create an account with email and password
+- [ ] **AUTH-02**: User can log in and stay logged in across browser sessions
+- [ ] **AUTH-03**: User can log out from any page
+- [ ] **AUTH-04**: User can reset password via email link
+
+### Household
+
+- [ ] **HSHD-01**: User can create a household
+- [ ] **HSHD-02**: User can invite family members to join their household via link or email
+- [ ] **HSHD-03**: User can view all members of their household
+- [ ] **HSHD-04**: Parent role can manage children's profiles and nutrition targets
+- [ ] **HSHD-05**: Household data is isolated — members cannot see other households' data
+
+### Food Data
+
+- [ ] **FOOD-01**: User can search USDA FoodData Central for foods by name
+- [ ] **FOOD-02**: User can search additional open food databases (e.g., Open Food Facts) for broader coverage
+- [ ] **FOOD-03**: User can add custom foods with name, serving size, calories, macros, and optional micronutrients
+- [ ] **FOOD-04**: User can edit and delete their custom foods
+- [ ] **FOOD-05**: Nutrition data from multiple sources is normalized to per-100g for consistent calculations
+- [ ] **FOOD-06**: AI verification layer cross-checks nutrition data for accuracy when multiple sources disagree
+
+### Recipes
+
+- [ ] **RECP-01**: User can create a recipe by adding food items as ingredients with quantities
+- [ ] **RECP-02**: Recipe nutrition per serving is auto-calculated from ingredients
+- [ ] **RECP-03**: User can set number of servings a recipe makes
+- [ ] **RECP-04**: User can use another recipe as an ingredient (nested recipes)
+- [ ] **RECP-05**: User can edit and delete their recipes
+- [ ] **RECP-06**: Recipe handles raw vs cooked weight states for ingredients
+
+### Meals & Meal Plans
+
+- [ ] **MEAL-01**: User can compose a meal from multiple recipes and/or individual foods
+- [ ] **MEAL-02**: User can create a weekly meal plan with breakfast, lunch, dinner, and snack slots
+- [ ] **MEAL-03**: Meal plan is shared across all household members automatically
+- [ ] **MEAL-04**: User can swap individual meals on a given day without changing the template
+- [ ] **MEAL-05**: User can save and reuse meal plan templates
+- [ ] **MEAL-06**: Each recipe in a meal plan displays its full nutrition breakdown
+
+### Tracking & Targets
+
+- [ ] **TRCK-01**: Each household member can set personal calorie and macro (P/C/F) targets
+- [ ] **TRCK-02**: Each household member can set micronutrient targets (vitamins, minerals, fiber, sodium)
+- [ ] **TRCK-03**: Each household member can set custom nutrition goals (e.g., water intake, sugar limit)
+- [ ] **TRCK-04**: Each household member can log what they ate with portion size (e.g., 1.5 servings)
+- [ ] **TRCK-05**: System suggests portion sizes per person per dish based on their individual targets
+- [ ] **TRCK-06**: User can override suggested portions with actual amount eaten
+- [ ] **TRCK-07**: Daily nutrition summary shows calories, macros, micros, and custom goals vs targets
+
+### Platform & Design
+
+- [ ] **PLAT-01**: App is mobile-first responsive — optimized for phone use in kitchen/at table
+- [ ] **PLAT-02**: Minimalist UI with pastel colour scheme
+- [ ] **PLAT-03**: PWA installable to home screen on mobile devices
+- [ ] **PLAT-04**: Core features work offline with sync when reconnected
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Grocery & Convenience
+
+- **GROC-01**: Grocery list auto-generated from meal plan ingredients
+- **GROC-02**: Leftovers tracking with partial consumption and date tracking
+
+### Reports & Insights
+
+- **REPT-01**: Weekly nutrition summary report per person
+- **REPT-02**: Nutrition trend charts over time
+- **REPT-03**: Household-level nutrition overview
+
+### Extended Data
+
+- **DATA-01**: Barcode scanning to look up food items
+- **DATA-02**: AI-suggested recipes based on preferences and history
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Native iOS/Android apps | Mobile-first PWA is sufficient for v1; no app store gatekeeping |
+| Social/public recipe sharing | v1 is household-only; public content creates moderation burden |
+| Real-time collaborative editing | Last-write-wins is sufficient; families rarely edit simultaneously |
+| TDEE auto-calculation | Users set their own targets; avoids liability and misinterpretation |
+| Weight/body tracking | Outside core value — nutrition data is the product |
+| AI meal plan generation | Requires preference signal accumulation; not useful on day one |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| AUTH-01 | — | Pending |
+| AUTH-02 | — | Pending |
+| AUTH-03 | — | Pending |
+| AUTH-04 | — | Pending |
+| HSHD-01 | — | Pending |
+| HSHD-02 | — | Pending |
+| HSHD-03 | — | Pending |
+| HSHD-04 | — | Pending |
+| HSHD-05 | — | Pending |
+| FOOD-01 | — | Pending |
+| FOOD-02 | — | Pending |
+| FOOD-03 | — | Pending |
+| FOOD-04 | — | Pending |
+| FOOD-05 | — | Pending |
+| FOOD-06 | — | Pending |
+| RECP-01 | — | Pending |
+| RECP-02 | — | Pending |
+| RECP-03 | — | Pending |
+| RECP-04 | — | Pending |
+| RECP-05 | — | Pending |
+| RECP-06 | — | Pending |
+| MEAL-01 | — | Pending |
+| MEAL-02 | — | Pending |
+| MEAL-03 | — | Pending |
+| MEAL-04 | — | Pending |
+| MEAL-05 | — | Pending |
+| MEAL-06 | — | Pending |
+| TRCK-01 | — | Pending |
+| TRCK-02 | — | Pending |
+| TRCK-03 | — | Pending |
+| TRCK-04 | — | Pending |
+| TRCK-05 | — | Pending |
+| TRCK-06 | — | Pending |
+| TRCK-07 | — | Pending |
+| PLAT-01 | — | Pending |
+| PLAT-02 | — | Pending |
+| PLAT-03 | — | Pending |
+| PLAT-04 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 38 total
+- Mapped to phases: 0
+- Unmapped: 38 ⚠️
+
+---
+*Requirements defined: 2026-03-12*
+*Last updated: 2026-03-12 after initial definition*
