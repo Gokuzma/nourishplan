@@ -49,20 +49,22 @@ completed: 2026-03-13
 - **Duration:** ~5 min
 - **Started:** 2026-03-13T17:05:00Z
 - **Completed:** 2026-03-13T17:10:00Z
-- **Tasks:** 1 (code), 1 pending human verification
+- **Tasks:** 2 (1 code, 1 human-verify — approved)
 - **Files modified:** 2
 
 ## Accomplishments
-- Migration 007 created: `ALTER COLUMN ingredient_id TYPE text USING ingredient_id::text`
+- Migration 007 created and applied: `ALTER COLUMN ingredient_id TYPE text USING ingredient_id::text`
 - USDA edge function NormalizedFood interface gains `id: string` field
 - normalizeFood return object now includes `id: String(food.fdcId)` as first field
 - TypeScript compiles clean with no errors
+- End-to-end verified: USDA food added as recipe ingredient without 22P02 error (user confirmed)
 
 ## Task Commits
 
 1. **Task 1: Migrate ingredient_id to text and add id field to USDA edge function** - `3b89575` (feat)
+2. **Task 2: Verify external food can be added as recipe ingredient** - human-verify checkpoint, approved by user
 
-**Plan metadata:** pending final docs commit
+**Plan metadata:** `7688160` (docs: complete plan — awaiting verify), final docs commit pending
 
 ## Files Created/Modified
 - `supabase/migrations/007_ingredient_id_to_text.sql` - ALTER TABLE recipe_ingredients ALTER COLUMN ingredient_id TYPE text
@@ -82,11 +84,7 @@ None.
 
 ## User Setup Required
 
-**Deployment required before full fix is live.** Two manual steps needed:
-1. Apply migration 007 via Supabase Dashboard SQL Editor: paste `supabase/migrations/007_ingredient_id_to_text.sql` and run
-2. Deploy updated USDA edge function: `supabase functions deploy search-usda --no-verify-jwt`
-
-After deployment: USDA and OFF foods should be addable as recipe ingredients without 22P02 UUID error.
+Deployment complete. User applied migration 007 via `supabase db push` and redeployed `search-usda` edge function — both succeeded. No further setup needed.
 
 ## Next Phase Readiness
 - Core recipe builder flow unblocked for all food sources once migration + edge function deployed

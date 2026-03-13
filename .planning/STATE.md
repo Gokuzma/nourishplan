@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-food-data-recipe-builder plan 08 — awaiting human verification at checkpoint
-last_updated: "2026-03-13T17:31:20.200Z"
+stopped_at: Completed 02-food-data-recipe-builder plan 08 — all tasks done, verification passed
+last_updated: "2026-03-13T17:40:19.531Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P07 | 5 | 1 tasks | 1 files |
 | Phase 02-food-data-recipe-builder P06 | 1 | 2 tasks | 1 files |
 | Phase 02-food-data-recipe-builder P08 | 5 | 1 tasks | 2 files |
+| Phase 02-food-data-recipe-builder P08 | 10 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Recent decisions affecting current work:
 - [Phase 02-food-data-recipe-builder]: RLS policy names kept identical to migration 004 originals through drop/recreate cycle for consistency
 - [Phase 02-food-data-recipe-builder]: ingredient_id widened to text via USING cast — existing UUIDs preserved as text, enables USDA numeric and OFF barcode IDs
 - [Phase 02-food-data-recipe-builder]: USDA edge function id field = String(fdcId) alongside existing fdcId for backward compat — aligns with NormalizedFoodResult.id
+- [Phase 02-food-data-recipe-builder]: ingredient_id widened to text via USING cast — existing UUIDs preserved as text, enables USDA numeric and OFF barcode IDs
+- [Phase 02-food-data-recipe-builder]: USDA edge function id field = String(fdcId) alongside existing fdcId for backward compat — aligns with NormalizedFoodResult.id
 
 ### Pending Todos
 
@@ -115,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T17:31:20.196Z
-Stopped at: Completed 02-food-data-recipe-builder plan 08 — awaiting human verification at checkpoint
+Last session: 2026-03-13T17:40:19.527Z
+Stopped at: Completed 02-food-data-recipe-builder plan 08 — all tasks done, verification passed
 Resume file: None
