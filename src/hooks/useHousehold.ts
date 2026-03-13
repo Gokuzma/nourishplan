@@ -26,7 +26,7 @@ export function useHousehold() {
 
       const { data, error } = await supabase
         .from('household_members')
-        .select('id, household_id, role, households(id, name, created_at)')
+        .select('id, household_id, role, households(id, name, week_start_day, created_at)')
         .eq('user_id', session.user.id)
         .maybeSingle()
 
