@@ -10,7 +10,9 @@ requires:
     provides: search-usda, search-off, verify-nutrition edge function source code
 provides:
   - Deployment script for all three food search edge functions
-  - Instructions for setting USDA_API_KEY and ANTHROPIC_API_KEY secrets
+  - All three edge functions deployed and ACTIVE on Supabase project qyablbzodmftobjslgri
+  - Migrations 004-006 applied to remote database
+  - USDA_API_KEY and ANTHROPIC_API_KEY secrets configured
 affects: [food-search, recipe-builder, nutrition-verification]
 
 # Tech tracking
@@ -39,27 +41,28 @@ completed: 2026-03-13
 
 # Phase 2 Plan 7: Edge Function Deployment Summary
 
-**Deployment script for search-usda, search-off, and verify-nutrition edge functions with secret setup reminders**
+**search-usda, search-off, and verify-nutrition edge functions deployed and ACTIVE on Supabase with USDA + Anthropic secrets configured**
 
 ## Performance
 
-- **Duration:** ~5 min
+- **Duration:** ~15 min (Task 1 automated + Task 2 user deployment)
 - **Started:** 2026-03-13T09:13:43Z
-- **Completed:** 2026-03-13T09:18:00Z
-- **Tasks:** 1 of 2 automated (Task 2 is human-action: deploy via Supabase CLI)
+- **Completed:** 2026-03-13
+- **Tasks:** 2 of 2 complete
 - **Files modified:** 1
 
 ## Accomplishments
 - Created `scripts/deploy-edge-functions.sh` with guards and deploy commands for all three edge functions
-- Documented secret setup steps (USDA_API_KEY, ANTHROPIC_API_KEY) in the script output
-- Awaiting user to run the script against their linked Supabase project
+- User applied migrations 004, 005, 006 via `supabase db push` to remote database
+- User deployed all three edge functions (search-usda, search-off, verify-nutrition) — all ACTIVE
+- USDA_API_KEY and ANTHROPIC_API_KEY secrets set on Supabase project
 
 ## Task Commits
 
 Each task was committed atomically:
 
 1. **Task 1: Create edge function deployment script** - `152ecae` (chore)
-2. **Task 2: Deploy edge functions and apply RLS migration** - PENDING (human-action checkpoint)
+2. **Task 2: Deploy edge functions and apply RLS migration** - user CLI action (no code commit — deployment/secrets)
 
 ## Files Created/Modified
 - `scripts/deploy-edge-functions.sh` - Deploys search-usda, search-off, verify-nutrition with --no-verify-jwt and prints secret setup reminders
@@ -77,20 +80,17 @@ None.
 
 ## User Setup Required
 
-The following manual steps are required before food search works end-to-end:
-
-1. Ensure Supabase CLI is installed: https://supabase.com/docs/guides/cli/getting-started
-2. Link project: `supabase link --project-ref <your-project-ref>`
-3. Set secrets:
-   - `supabase secrets set USDA_API_KEY=your_key_here` (get from https://fdc.nal.usda.gov/api-key-signup/)
-   - `supabase secrets set ANTHROPIC_API_KEY=sk-ant-...` (from Anthropic Console -> API Keys)
-4. Apply RLS fix migration (plan 02-06): run `006_fix_food_recipe_rls.sql` via Supabase Dashboard SQL Editor
-5. Deploy edge functions: `bash scripts/deploy-edge-functions.sh`
-6. Verify: navigate to /foods, search "chicken" in USDA tab, confirm results appear
+Completed by user during Task 2:
+- Supabase CLI linked to project qyablbzodmftobjslgri
+- `supabase db push` applied migrations 004, 005, 006
+- `supabase secrets set USDA_API_KEY=...` — configured
+- `supabase secrets set ANTHROPIC_API_KEY=...` — configured
+- `bash scripts/deploy-edge-functions.sh` — all three functions deployed and ACTIVE
 
 ## Next Phase Readiness
-- Once user completes Task 2 deployment steps, food search (USDA + OFF tabs), AI nutrition verification, and custom food CRUD will be fully operational
-- UAT tests 2-21 are unblocked after deployment
+- Food search (USDA + OFF tabs), AI nutrition verification, and custom food CRUD are fully operational
+- UAT tests 2-21 are unblocked
+- Phase 2 is complete — Phase 3 (Meal Planning & Targets) can begin
 
 ---
 *Phase: 02-food-data-recipe-builder*
