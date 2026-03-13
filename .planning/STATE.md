@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-food-data-recipe-builder plan 04
-last_updated: "2026-03-13T04:18:56.662Z"
+stopped_at: Completed 02-food-data-recipe-builder plan 05
+last_updated: "2026-03-13T04:25:05.595Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P01 | 3 | 3 tasks | 8 files |
 | Phase 02-food-data-recipe-builder P03 | 18 | 3 tasks | 9 files |
 | Phase 02-food-data-recipe-builder P04 | 15 | 3 tasks | 7 files |
+| Phase 02-food-data-recipe-builder P05 | 8 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 02-food-data-recipe-builder]: USDA_NUTRIENT_IDS exported as typed const — semantic names prevent magic number errors in API consumers
 - [Phase 02-food-data-recipe-builder]: TabBar Plan tab replaced with Foods tab — Plan feature comes in Phase 3
 - [Phase 02-food-data-recipe-builder]: FoodDataMap captures macros at add-time from NormalizedFoodResult — avoids re-fetching multiple food sources for live nutrition calculation
+- [Phase 02-food-data-recipe-builder]: Recipe picker as Food|Recipe tab inside search overlay — reuses existing back/close UX instead of separate modal
+- [Phase 02-food-data-recipe-builder]: DEFAULT_YIELD_FACTOR=0.85 (vegetables category) for ingredients without known category — general cooking loss heuristic
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:18:56.657Z
-Stopped at: Completed 02-food-data-recipe-builder plan 04
+Last session: 2026-03-13T04:24:59.535Z
+Stopped at: Completed 02-food-data-recipe-builder plan 05
 Resume file: None
