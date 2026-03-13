@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 1/4 | In Progress|  |
+| 1. Foundation & Auth | 2/4 | In Progress|  |
 | 2. Food Data & Recipe Builder | 0/TBD | Not started | - |
 | 3. Meal Planning & Targets | 0/TBD | Not started | - |
 | 4. Daily Logging & Summary | 0/TBD | Not started | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-auth/01-01-PLAN.md
-last_updated: "2026-03-13T02:30:37.243Z"
+stopped_at: Completed 01-foundation-auth/01-03-PLAN.md
+last_updated: "2026-03-13T02:37:24.328Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-foundation-auth P01 | 427 | 3 tasks | 20 files |
+| Phase 01-foundation-auth P03 | 245 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation-auth]: Vite 8 + react-router-dom v7 scaffolded as latest stable; SPA usage identical to planned v7/v6
 - [Phase 01-foundation-auth]: Tailwind CSS 4 uses @tailwindcss/vite plugin with CSS-first @theme tokens; no tailwind.config.js needed
 - [Phase 01-foundation-auth]: Bootstrap household creation with separate RLS policy allowing creator to insert self as admin before any membership exists
+- [Phase 01-foundation-auth]: Used maybeSingle() for useHousehold to return null gracefully for new users without a household
+- [Phase 01-foundation-auth]: AuthGuard skips household redirect for /setup and /join routes to prevent redirect loop
+- [Phase 01-foundation-auth]: JoinHousehold accepts full invite URLs or raw tokens to improve paste UX
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T02:30:37.240Z
-Stopped at: Completed 01-foundation-auth/01-01-PLAN.md
+Last session: 2026-03-13T02:37:24.322Z
+Stopped at: Completed 01-foundation-auth/01-03-PLAN.md
 Resume file: None

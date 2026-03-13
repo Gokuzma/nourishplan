@@ -16,10 +16,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Household
 
-- [ ] **HSHD-01**: User can create a household
-- [ ] **HSHD-02**: User can invite family members to join their household via link or email
-- [ ] **HSHD-03**: User can view all members of their household
-- [ ] **HSHD-04**: Parent role can manage children's profiles and nutrition targets
+- [x] **HSHD-01**: User can create a household
+- [x] **HSHD-02**: User can invite family members to join their household via link or email
+- [x] **HSHD-03**: User can view all members of their household
+- [x] **HSHD-04**: Parent role can manage children's profiles and nutrition targets
 - [x] **HSHD-05**: Household data is isolated — members cannot see other households' data
 
 ### Food Data
@@ -107,10 +107,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
 | AUTH-04 | Phase 1 | Pending |
-| HSHD-01 | Phase 1 | Pending |
-| HSHD-02 | Phase 1 | Pending |
-| HSHD-03 | Phase 1 | Pending |
-| HSHD-04 | Phase 1 | Pending |
+| HSHD-01 | Phase 1 | Complete |
+| HSHD-02 | Phase 1 | Complete |
+| HSHD-03 | Phase 1 | Complete |
+| HSHD-04 | Phase 1 | Complete |
 | HSHD-05 | Phase 1 | Complete |
 | FOOD-01 | Phase 2 | Pending |
 | FOOD-02 | Phase 2 | Pending |
