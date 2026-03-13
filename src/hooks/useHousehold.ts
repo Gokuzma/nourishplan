@@ -75,21 +75,21 @@ export function useCreateHousehold() {
       const userId = session?.user.id
       if (!userId) throw new Error('Not authenticated')
 
-      const { data: household, error: hhError } = await supabase
+      const householdId = crypto.randomUUID()
+
+      const { error: hhError } = await supabase
         .from('households')
-        .insert({ name })
-        .select()
-        .single()
+        .insert({ id: householdId, name })
 
       if (hhError) throw hhError
 
       const { error: memberError } = await supabase
         .from('household_members')
-        .insert({ household_id: household.id, user_id: userId, role: 'admin' })
+        .insert({ household_id: householdId, user_id: userId, role: 'admin' })
 
       if (memberError) throw memberError
 
-      return household
+      return { id: householdId, name, created_at: new Date().toISOString() }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['household'] })
