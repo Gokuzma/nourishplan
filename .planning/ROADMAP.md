@@ -68,7 +68,14 @@ Plans:
   3. User can swap a single meal on a specific day without altering the underlying template
   4. User can save a meal plan as a reusable template
   5. Each household member can set personal calorie, macro, micronutrient, and custom nutrition targets
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+- [ ] 03-01-PLAN.md — DB migration, TypeScript types, and nutrition/meal-plan utility functions
+- [ ] 03-02-PLAN.md — Meals CRUD hooks and MealBuilder UI
+- [ ] 03-03-PLAN.md — Nutrition targets hooks and member targets page
+- [ ] 03-04-PLAN.md — Meal plan grid, day cards, slot assignment, and progress rings
+- [ ] 03-05-PLAN.md — Template save/load, new week prompt, and navigation wiring
+- [ ] 03-06-PLAN.md — Human verification of all Phase 3 features
 
 ### Phase 4: Daily Logging & Summary
 **Goal**: Each household member can log what they ate and see their daily nutrition progress against their targets
@@ -100,6 +107,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 5/5 | Complete   | 2026-03-13 |
 | 2. Food Data & Recipe Builder | 8/8 | Complete   | 2026-03-13 |
-| 3. Meal Planning & Targets | 0/TBD | Not started | - |
+| 3. Meal Planning & Targets | 0/6 | Not started | - |
 | 4. Daily Logging & Summary | 0/TBD | Not started | - |
 | 5. Portion Suggestions & Polish | 0/TBD | Not started | - |
