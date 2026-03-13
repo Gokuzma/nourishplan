@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-foundation-auth plan 04
-last_updated: "2026-03-13T14:33:38.524Z"
+stopped_at: Completed 01-foundation-auth plan 05
+last_updated: "2026-03-13T16:00:02.512Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 10
+  completed_plans: 10
   percent: 0
 ---
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P04 | 15 | 3 tasks | 7 files |
 | Phase 02-food-data-recipe-builder P05 | 8 | 2 tasks | 3 files |
 | Phase 01-foundation-auth P04 | 10 | 2 tasks | 6 files |
+| Phase 01-foundation-auth P05 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 02-food-data-recipe-builder]: DEFAULT_YIELD_FACTOR=0.85 (vegetables category) for ingredients without known category — general cooking loss heuristic
 - [Phase 01-foundation-auth]: useCreateHousehold uses client-generated crypto.randomUUID() for RLS-bootstrap-safe household creation
 - [Phase 01-foundation-auth]: main.tsx simplified — providers (QueryClient, BrowserRouter) colocated in App.tsx as single provider hierarchy
+- [Phase 01-foundation-auth]: has_valid_invite() security-definer helper avoids RLS recursion when checking household_invites from a household_members policy
+- [Phase 01-foundation-auth]: User-scoped query keys (session.user.id as second segment) prevent stale cache data leaking between user sessions
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T14:28:46.599Z
-Stopped at: Completed 01-foundation-auth plan 04
+Last session: 2026-03-13T16:00:02.507Z
+Stopped at: Completed 01-foundation-auth plan 05
 Resume file: None
