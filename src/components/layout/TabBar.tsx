@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 const tabs = [
   { label: 'Home', to: '/', icon: '🏠' },
-  { label: 'Plan', to: '/plan', icon: '📋', comingSoon: true },
+  { label: 'Foods', to: '/foods', icon: '🥦' },
   { label: 'Household', to: '/household', icon: '👨‍👩‍👧' },
   { label: 'Settings', to: '/settings', icon: '⚙️' },
 ]
