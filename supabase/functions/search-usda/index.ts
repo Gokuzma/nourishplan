@@ -113,7 +113,7 @@ serve(async (req) => {
   const params = new URLSearchParams({
     api_key: apiKey,
     query: query,
-    dataType: "Foundation,SR%20Legacy,Survey%20(FNDDS),Branded",
+    dataType: "Foundation,SR Legacy,Survey (FNDDS),Branded",
     pageSize: String(pageSize),
   });
 

@@ -1,14 +1,17 @@
 ---
 phase: 02-food-data-recipe-builder
 verified: 2026-03-13T12:53:00Z
-status: passed
+status: gaps_found
 score: 17/17 must-haves verified
-re_verification:
-  previous_status: passed
-  previous_score: 17/17
-  gaps_closed: []
-  gaps_remaining: []
-  regressions: []
+gaps:
+  - id: G1
+    summary: "ingredient_id UUID column rejects external food IDs (USDA/OFF string IDs)"
+    severity: blocking
+    status: failed
+  - id: G2
+    summary: "Open Food Facts tab may be unnecessary — USDA Branded covers most use cases"
+    severity: design
+    status: open
 ---
 
 # Phase 2: Food Data & Recipe Builder Verification Report
@@ -142,6 +145,15 @@ re_verification:
 **All 12 requirements satisfied. No orphaned requirements.**
 
 All 12 requirement IDs declared in plan frontmatter match REQUIREMENTS.md entries. REQUIREMENTS.md traceability table marks all 12 as Phase 2 / Complete.
+
+---
+
+## Gaps Found During Live Demo
+
+| # | Gap | Severity | Details |
+|---|-----|----------|---------|
+| G1 | `ingredient_id` is UUID but USDA/OFF foods use string IDs | **Blocking** | `recipe_ingredients.ingredient_id` is typed as UUID in migration 004. External food IDs (e.g., `usda-331960`) cannot be inserted — Postgres returns `22P02: invalid input syntax for type uuid`. Custom foods (which have real UUIDs) work fine. **Fix:** Either change `ingredient_id` to `text` type, or auto-save external foods to `custom_foods` on selection so they get a UUID. |
+| G2 | Open Food Facts may be unnecessary | **Design** | USDA already includes Branded food types covering commercial products. OFF results are mostly European brands with inconsistent data quality. Consider removing the OFF tab to simplify UI, or keeping it as low-priority. User flagged this during demo. |
 
 ---
 
