@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Switch dark mode from media-query to class-based so we can toggle */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Light mode tokens */
+  --color-primary: #A8C5A0;
+  --color-secondary: #F5EDE3;
+  --color-accent: #E8B4A2;
+  --color-text: #3D3D3D;
+  --color-background: #FAFAF7;
+  --color-surface: #FFFFFF;
+
+  /* Font */
+  --font-sans: 'Nunito Variable', sans-serif;
+
+  /* Border radius */
+  --radius-card: 1rem;
+  --radius-btn: 0.5rem;
+}
+
+/* Dark mode overrides applied when .dark class is on <html> */
+@layer base {
+  .dark {
+    --color-text: #E8E5E0;
+    --color-background: #1A1D1A;
+    --color-surface: #252825;
+  }
+}
