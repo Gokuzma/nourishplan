@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-food-data-recipe-builder plan 05
-last_updated: "2026-03-13T04:29:24.897Z"
+stopped_at: Completed 01-foundation-auth plan 04
+last_updated: "2026-03-13T14:28:46.603Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P03 | 18 | 3 tasks | 9 files |
 | Phase 02-food-data-recipe-builder P04 | 15 | 3 tasks | 7 files |
 | Phase 02-food-data-recipe-builder P05 | 8 | 2 tasks | 3 files |
+| Phase 01-foundation-auth P04 | 10 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 02-food-data-recipe-builder]: FoodDataMap captures macros at add-time from NormalizedFoodResult — avoids re-fetching multiple food sources for live nutrition calculation
 - [Phase 02-food-data-recipe-builder]: Recipe picker as Food|Recipe tab inside search overlay — reuses existing back/close UX instead of separate modal
 - [Phase 02-food-data-recipe-builder]: DEFAULT_YIELD_FACTOR=0.85 (vegetables category) for ingredients without known category — general cooking loss heuristic
+- [Phase 01-foundation-auth]: useCreateHousehold uses client-generated crypto.randomUUID() for RLS-bootstrap-safe household creation
+- [Phase 01-foundation-auth]: main.tsx simplified — providers (QueryClient, BrowserRouter) colocated in App.tsx as single provider hierarchy
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:24:59.535Z
-Stopped at: Completed 02-food-data-recipe-builder plan 05
+Last session: 2026-03-13T14:28:46.599Z
+Stopped at: Completed 01-foundation-auth plan 04
 Resume file: None
