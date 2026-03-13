@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { TabBar } from './TabBar'
 import { Sidebar } from './Sidebar'
+import { OfflineBanner } from '../log/OfflineBanner'
 
 export function AppShell() {
   return (
@@ -10,6 +11,7 @@ export function AppShell() {
 
       {/* Main content area */}
       <main className="flex-1 pb-16 md:pb-0">
+        <OfflineBanner />
         <Outlet />
       </main>
 

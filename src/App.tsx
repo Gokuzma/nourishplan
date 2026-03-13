@@ -16,6 +16,7 @@ import { MemberTargetsPage } from './pages/MemberTargetsPage'
 import { PlanPage } from './pages/PlanPage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
+import { InstallPrompt } from './components/log/InstallPrompt'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -162,6 +163,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
+          <InstallPrompt />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
