@@ -42,18 +42,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Meals & Meal Plans
 
-- [ ] **MEAL-01**: User can compose a meal from multiple recipes and/or individual foods
-- [ ] **MEAL-02**: User can create a weekly meal plan with breakfast, lunch, dinner, and snack slots
+- [x] **MEAL-01**: User can compose a meal from multiple recipes and/or individual foods
+- [x] **MEAL-02**: User can create a weekly meal plan with breakfast, lunch, dinner, and snack slots
 - [ ] **MEAL-03**: Meal plan is shared across all household members automatically
 - [ ] **MEAL-04**: User can swap individual meals on a given day without changing the template
 - [ ] **MEAL-05**: User can save and reuse meal plan templates
-- [ ] **MEAL-06**: Each recipe in a meal plan displays its full nutrition breakdown
+- [x] **MEAL-06**: Each recipe in a meal plan displays its full nutrition breakdown
 
 ### Tracking & Targets
 
-- [ ] **TRCK-01**: Each household member can set personal calorie and macro (P/C/F) targets
-- [ ] **TRCK-02**: Each household member can set micronutrient targets (vitamins, minerals, fiber, sodium)
-- [ ] **TRCK-03**: Each household member can set custom nutrition goals (e.g., water intake, sugar limit)
+- [x] **TRCK-01**: Each household member can set personal calorie and macro (P/C/F) targets
+- [x] **TRCK-02**: Each household member can set micronutrient targets (vitamins, minerals, fiber, sodium)
+- [x] **TRCK-03**: Each household member can set custom nutrition goals (e.g., water intake, sugar limit)
 - [ ] **TRCK-04**: Each household member can log what they ate with portion size (e.g., 1.5 servings)
 - [ ] **TRCK-05**: System suggests portion sizes per person per dish based on their individual targets
 - [ ] **TRCK-06**: User can override suggested portions with actual amount eaten
@@ -124,15 +124,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RECP-04 | Phase 2 | Complete |
 | RECP-05 | Phase 2 | Complete |
 | RECP-06 | Phase 2 | Complete |
-| MEAL-01 | Phase 3 | Pending |
-| MEAL-02 | Phase 3 | Pending |
+| MEAL-01 | Phase 3 | Complete |
+| MEAL-02 | Phase 3 | Complete |
 | MEAL-03 | Phase 3 | Pending |
 | MEAL-04 | Phase 3 | Pending |
 | MEAL-05 | Phase 3 | Pending |
-| MEAL-06 | Phase 3 | Pending |
-| TRCK-01 | Phase 3 | Pending |
-| TRCK-02 | Phase 3 | Pending |
-| TRCK-03 | Phase 3 | Pending |
+| MEAL-06 | Phase 3 | Complete |
+| TRCK-01 | Phase 3 | Complete |
+| TRCK-02 | Phase 3 | Complete |
+| TRCK-03 | Phase 3 | Complete |
 | TRCK-04 | Phase 4 | Pending |
 | TRCK-05 | Phase 5 | Pending |
 | TRCK-06 | Phase 4 | Pending |

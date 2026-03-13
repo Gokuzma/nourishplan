@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-13T18:15:12.647Z"
+stopped_at: Completed 03-meal-planning-targets/03-01-PLAN.md
+last_updated: "2026-03-13T21:27:21.928Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 19
+  completed_plans: 14
   percent: 0
 ---
 
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P06 | 1 | 2 tasks | 1 files |
 | Phase 02-food-data-recipe-builder P08 | 5 | 1 tasks | 2 files |
 | Phase 02-food-data-recipe-builder P08 | 10 | 2 tasks | 2 files |
+| Phase 03-meal-planning-targets P01 | 5 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 02-food-data-recipe-builder]: USDA edge function id field = String(fdcId) alongside existing fdcId for backward compat — aligns with NormalizedFoodResult.id
 - [Phase 02-food-data-recipe-builder]: ingredient_id widened to text via USING cast — existing UUIDs preserved as text, enables USDA numeric and OFF barcode IDs
 - [Phase 02-food-data-recipe-builder]: USDA edge function id field = String(fdcId) alongside existing fdcId for backward compat — aligns with NormalizedFoodResult.id
+- [Phase 03-meal-planning-targets]: getWeekStart uses UTC methods (getUTCDay/setUTCDate/toISOString) to avoid timezone drift when Date is constructed from YYYY-MM-DD strings
+- [Phase 03-meal-planning-targets]: nutrition_targets uses dual nullable FKs (user_id, member_profile_id) with DB check constraint enforcing exactly one non-null — supports auth users and managed child profiles
+- [Phase 03-meal-planning-targets]: meal_items stores per-100g macro snapshot columns at insert time — avoids live re-resolution of external food sources on page load
 
 ### Pending Todos
 
@@ -118,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T18:15:12.643Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-meal-planning-targets/03-CONTEXT.md
+Last session: 2026-03-13T21:27:21.925Z
+Stopped at: Completed 03-meal-planning-targets/03-01-PLAN.md
+Resume file: None
