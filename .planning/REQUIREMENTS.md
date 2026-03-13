@@ -33,11 +33,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Recipes
 
-- [ ] **RECP-01**: User can create a recipe by adding food items as ingredients with quantities
+- [x] **RECP-01**: User can create a recipe by adding food items as ingredients with quantities
 - [x] **RECP-02**: Recipe nutrition per serving is auto-calculated from ingredients
-- [ ] **RECP-03**: User can set number of servings a recipe makes
+- [x] **RECP-03**: User can set number of servings a recipe makes
 - [x] **RECP-04**: User can use another recipe as an ingredient (nested recipes)
-- [ ] **RECP-05**: User can edit and delete their recipes
+- [x] **RECP-05**: User can edit and delete their recipes
 - [x] **RECP-06**: Recipe handles raw vs cooked weight states for ingredients
 
 ### Meals & Meal Plans
@@ -118,11 +118,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOOD-04 | Phase 2 | Complete |
 | FOOD-05 | Phase 2 | Complete |
 | FOOD-06 | Phase 2 | Complete |
-| RECP-01 | Phase 2 | Pending |
+| RECP-01 | Phase 2 | Complete |
 | RECP-02 | Phase 2 | Complete |
-| RECP-03 | Phase 2 | Pending |
+| RECP-03 | Phase 2 | Complete |
 | RECP-04 | Phase 2 | Complete |
-| RECP-05 | Phase 2 | Pending |
+| RECP-05 | Phase 2 | Complete |
 | RECP-06 | Phase 2 | Complete |
 | MEAL-01 | Phase 3 | Pending |
 | MEAL-02 | Phase 3 | Pending |

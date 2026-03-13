@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-food-data-recipe-builder plan 03
-last_updated: "2026-03-13T04:14:19.563Z"
+stopped_at: Completed 02-food-data-recipe-builder plan 04
+last_updated: "2026-03-13T04:18:56.662Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-food-data-recipe-builder P02 | 2 | 2 tasks | 3 files |
 | Phase 02-food-data-recipe-builder P01 | 3 | 3 tasks | 8 files |
 | Phase 02-food-data-recipe-builder P03 | 18 | 3 tasks | 9 files |
+| Phase 02-food-data-recipe-builder P04 | 15 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Recent decisions affecting current work:
 - [Phase 02-food-data-recipe-builder]: Yield factors >1 for legumes/grains (2.5x water absorption) — applyYieldFactor divides cooked weight to get raw equivalent
 - [Phase 02-food-data-recipe-builder]: USDA_NUTRIENT_IDS exported as typed const — semantic names prevent magic number errors in API consumers
 - [Phase 02-food-data-recipe-builder]: TabBar Plan tab replaced with Foods tab — Plan feature comes in Phase 3
+- [Phase 02-food-data-recipe-builder]: FoodDataMap captures macros at add-time from NormalizedFoodResult — avoids re-fetching multiple food sources for live nutrition calculation
 
 ### Pending Todos
 
@@ -96,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:14:19.557Z
-Stopped at: Completed 02-food-data-recipe-builder plan 03
+Last session: 2026-03-13T04:18:56.657Z
+Stopped at: Completed 02-food-data-recipe-builder plan 04
 Resume file: None
