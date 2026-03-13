@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-daily-logging-summary-02-PLAN.md
-last_updated: "2026-03-13T23:08:49.484Z"
+stopped_at: Completed 04-daily-logging-summary-04-PLAN.md
+last_updated: "2026-03-13T23:14:57.730Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
   percent: 0
 ---
 
@@ -72,6 +72,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-daily-logging-summary P01 | 8 | 1 tasks | 5 files |
 | Phase 04-daily-logging-summary P03 | 2 | 2 tasks | 8 files |
 | Phase 04-daily-logging-summary P02 | 3 | 2 tasks | 4 files |
+| Phase 04-daily-logging-summary P04 | 4 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,9 @@ Recent decisions affecting current work:
 - [Phase 04-daily-logging-summary]: useFoodLogs memberType parameter selects member_user_id vs member_profile_id filter — avoids two separate hooks for the same query
 - [Phase 04-daily-logging-summary]: FreeformLogModal uses NormalizedFoodResult macros as per-serving values (1 serving = 100g for USDA/OFF) — consistent with how FoodSearch exposes data
 - [Phase 04-daily-logging-summary]: LogMealModal computes meal macros from meal_items snapshots at render time — no extra DB fetch needed
+- [Phase 04-daily-logging-summary]: EditLogModal colocated in HomePage.tsx — keeps mutation hooks at page level, avoids threading delete/update props through DailyLogList
+- [Phase 04-daily-logging-summary]: getDayIndex uses Date.UTC arithmetic on YYYY-MM-DD parts — avoids Date object construction, consistent with Phase 3 UTC decision
+- [Phase 04-daily-logging-summary]: week_start_day added to useHousehold select query — was omitted, causing household week start setting to have no effect
 
 ### Pending Todos
 
@@ -145,6 +149,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T23:08:49.480Z
-Stopped at: Completed 04-daily-logging-summary-02-PLAN.md
+Last session: 2026-03-13T23:14:57.726Z
+Stopped at: Completed 04-daily-logging-summary-04-PLAN.md
 Resume file: None

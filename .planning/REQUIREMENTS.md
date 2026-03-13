@@ -57,7 +57,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TRCK-04**: Each household member can log what they ate with portion size (e.g., 1.5 servings)
 - [ ] **TRCK-05**: System suggests portion sizes per person per dish based on their individual targets
 - [x] **TRCK-06**: User can override suggested portions with actual amount eaten
-- [ ] **TRCK-07**: Daily nutrition summary shows calories, macros, micros, and custom goals vs targets
+- [x] **TRCK-07**: Daily nutrition summary shows calories, macros, micros, and custom goals vs targets
 
 ### Platform & Design
 
@@ -136,7 +136,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRCK-04 | Phase 4 | Complete |
 | TRCK-05 | Phase 5 | Pending |
 | TRCK-06 | Phase 4 | Complete |
-| TRCK-07 | Phase 4 | Pending |
+| TRCK-07 | Phase 4 | Complete |
 | PLAT-01 | Phase 1 | Complete |
 | PLAT-02 | Phase 1 | Complete |
 | PLAT-03 | Phase 4 | Complete |
