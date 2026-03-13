@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useHousehold } from '../../hooks/useHousehold'
 
 const navItems = [
   { label: 'Home', to: '/', icon: '🏠' },
@@ -10,11 +11,16 @@ const navItems = [
 
 export function Sidebar() {
   const { signOut } = useAuth()
+  const { data: membership } = useHousehold()
+  const householdName = membership?.households?.name
 
   return (
     <aside className="hidden md:flex flex-col w-56 min-h-screen bg-surface border-r border-secondary">
       <div className="px-6 py-5 border-b border-secondary">
         <span className="text-xl font-bold text-primary">NourishPlan</span>
+        {householdName && (
+          <p className="text-xs text-text/50 mt-0.5 truncate">{householdName}</p>
+        )}
       </div>
 
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1">

@@ -13,6 +13,17 @@ vi.mock('../src/contexts/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
 }))
 
+// Mock useHousehold to avoid Supabase client initialization in tests
+vi.mock('../src/hooks/useHousehold', () => ({
+  useHousehold: vi.fn().mockReturnValue({
+    data: { household_id: 'hh-1', role: 'admin', households: { name: 'Test Household' } },
+    isPending: false,
+    isError: false,
+  }),
+  useHouseholdMembers: vi.fn().mockReturnValue({ data: [], isPending: false, isError: false }),
+  useCreateInvite: vi.fn().mockReturnValue({ mutate: vi.fn(), isPending: false, error: null }),
+}))
+
 describe('AppShell', () => {
   it('renders 4 navigation tabs', async () => {
     const { TabBar } = await import('../src/components/layout/TabBar')
