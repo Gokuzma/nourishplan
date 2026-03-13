@@ -2,8 +2,8 @@
 status: complete
 phase: 02-food-data-recipe-builder
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md]
-started: 2026-03-13T12:00:00Z
-updated: 2026-03-13T12:10:00Z
+started: 2026-03-13T15:00:00Z
+updated: 2026-03-13T15:40:00Z
 ---
 
 ## Current Test
@@ -12,157 +12,178 @@ updated: 2026-03-13T12:10:00Z
 
 ## Tests
 
-### 1. Food Search — USDA Tab
-expected: Navigate to Foods page via Foods tab. Type food name, USDA results appear with name and macros per 100g.
+### 1. Foods Navigation
+expected: Foods tab appears in the bottom TabBar (mobile) and Sidebar (desktop). Clicking it navigates to the /foods page showing the food search interface.
 result: pass
-method: code verification — FoodsPage renders FoodSearch(mode=browse), USDA is default tab, useFoodSearch calls search-usda edge function, MacroText shows cal/P/C/F per 100g, /foods route and TabBar link verified
+method: Foods tab present in both TabBar (mobile 375px) and Sidebar (desktop 1280px). Navigates to /foods with search box and USDA/OFF/My Foods tabs.
 
-### 2. Food Search — Open Food Facts Tab
-expected: Switch to OFF tab, search for product, results appear with name and macros per 100g.
-result: pass
-method: code verification — OFF tab in FoodSearch tabs array, ApiTab switches to search-off edge function, same MacroText rendering
+### 2. USDA Food Search
+expected: On the Foods page, type a food name. Results appear with macros per 100g.
+result: issue
+reported: "Edge function search-usda is not deployed to Supabase. Searching returns ERR_FAILED (net::ERR_FAILED on supabase.co/functions/v1/search-usda). UI shows 'Search failed. Please try again.' — error handling works but no results possible without deployment."
+severity: blocker
 
-### 3. Food Search — My Foods Tab
-expected: Switch to My Foods tab, custom foods listed with Add/Edit/Delete controls.
-result: pass
-method: code verification — Custom tab uses useCustomFoods hook, shows empty state when none, "+ Add Custom Food" button always visible, Edit/Delete gated by canEditFood (creator or admin)
+### 3. Open Food Facts Search
+expected: Switch to OFF tab. Search for a food. Results appear with macros per 100g.
+result: issue
+reported: "Edge function search-off is not deployed to Supabase. Same ERR_FAILED pattern as USDA. UI shows 'Search failed. Please try again.'"
+severity: blocker
 
 ### 4. Food Detail Panel
-expected: Tap Details on search result, panel shows full nutrition per 100g.
-result: pass
-method: code verification — FoodDetailPanel shows bold primary macros (cal/P/F/C), secondary nutrients (fiber/sugar/sodium), micronutrients from food.micronutrients, "Add to Recipe" button in select mode
+expected: Click "Details" on any search result. Panel shows full nutrition breakdown per 100g.
+result: issue
+reported: "Cannot test — no search results available because edge functions are not deployed. UI component exists in code (FoodDetailPanel.tsx) but untestable without data."
+severity: blocker
 
 ### 5. Create Custom Food
-expected: Tap Add, fill form, submit, new food appears in My Foods.
-result: pass
-method: code verification — CustomFoodForm with required fields (name, serving, macros), expandable micronutrients, useCreateCustomFood invalidates custom-foods query
+expected: In My Foods tab, click Add. Fill form with name and macros. Submit. Food appears in list.
+result: issue
+reported: "403 Forbidden on custom_foods INSERT. RLS policies on custom_foods use raw subquery on household_members table (household_id IN (SELECT household_id FROM household_members WHERE user_id = auth.uid())) instead of the security-definer helper get_user_household_id(). This causes RLS recursion/permission failure."
+severity: blocker
 
 ### 6. Edit Custom Food
-expected: Tap edit, form pre-fills, update, food reflects change.
-result: pass
-method: code verification — Edit button opens CustomFoodForm with food prop, isEdit=true pre-fills all fields, useUpdateCustomFood mutation
+expected: In My Foods, click Edit. Form pre-fills. Change value and save.
+result: issue
+reported: "Cannot test — no custom foods exist due to INSERT failure (Test 5). Same RLS root cause."
+severity: blocker
 
 ### 7. Delete Custom Food
-expected: Tap delete, food removed from list (soft-deleted).
-result: pass
-method: code verification — Delete confirmation dialog, useDeleteCustomFood sets deleted_at, query filters deleted_at IS NULL
-
-### 8. Create New Recipe
-expected: Navigate to Recipes page, tap New Recipe, untitled recipe created, navigated to builder.
+expected: In My Foods, click Delete. Food disappears.
 result: issue
-reported: "RecipesPage exists and creates Untitled Recipe correctly, but there is NO navigation link to /recipes in either the TabBar (mobile) or Sidebar (desktop). Recipes page is unreachable through normal navigation — only accessible by typing /recipes in the URL bar."
+reported: "Cannot test — no custom foods exist due to INSERT failure (Test 5). Same RLS root cause."
+severity: blocker
+
+### 8. My Foods Tab
+expected: Click My Foods tab. See household custom foods.
+result: issue
+reported: "403 Forbidden on custom_foods SELECT. Same RLS subquery issue as Test 5. UI shows 'No matching custom foods' (graceful degradation) but actually failing silently."
 severity: major
 
-### 9. Add Ingredient to Recipe
-expected: In builder, tap Add Ingredient, food search overlay opens, select food, enter quantity, ingredient appears.
+### 9. Recipes Navigation
+expected: Recipes link appears in Sidebar and TabBar. Navigates to /recipes.
 result: pass
-method: code verification — "+ Add Ingredient" opens full-screen overlay with FoodSearch(mode=select), QuantityModal with gram input + portion dropdown, addIngredient mutation stores to recipe_ingredients
+method: Recipes tab present in both TabBar and Sidebar. Navigates to /recipes showing recipe list with "New Recipe" button.
 
-### 10. Live Nutrition Bar
-expected: Sticky bar at bottom showing per-serving cal/P/C/F, updates when ingredients change.
-result: pass
-method: code verification — NutritionBar receives useMemo perServingNutrition computed via calcRecipePerServing, deps include ingredients/recipe/foodDataMap, positioned bottom-16 mobile / bottom-0 desktop
-
-### 11. Edit Ingredient Quantity
-expected: Tap edit on ingredient, quantity modal appears, change and confirm, nutrition updates.
-result: pass
-method: code verification — IngredientRow edit button -> EditQuantityModal with current quantity, handleEditConfirm -> useUpdateIngredient, query invalidation triggers recalc
-
-### 12. Remove Ingredient
-expected: Tap remove on ingredient, ingredient disappears, nutrition recalculates.
-result: pass
-method: code verification — IngredientRow remove button -> handleRemove -> useRemoveIngredient (hard delete from recipe_ingredients), query invalidation triggers recalc
-
-### 13. Edit Recipe Name and Servings
-expected: Tap name to edit, blur saves. Change servings, per-serving nutrition recalculates.
-result: pass
-method: code verification — Name input with onBlur -> handleNameBlur -> updateRecipe. Servings input with onBlur -> handleServingsBlur -> updateRecipe. perServingNutrition depends on recipe.servings
-
-### 14. Recipes List Page
-expected: Navigate to Recipes page, see all recipes with name/servings/date, tap to open builder, delete available.
-result: pass
-method: code verification — useRecipes lists household recipes, shows name/servings/date, click navigates to /recipes/:id, delete button for creator or admin with confirmation modal
-
-### 15. Add Recipe as Sub-Ingredient
-expected: In builder, tap Add Ingredient, Recipe tab appears, select a recipe, it appears with recipe badge.
-result: pass
-method: code verification — Food/Recipe tabs in search overlay, RecipePicker lists household recipes (excluding current), handleRecipeSelected with cycle check, IngredientRow shows "R" badge for ingredient_type=recipe
-
-### 16. Cycle Detection
-expected: If recipe A contains B, editing B and adding A shows error preventing circular reference.
-result: pass
-method: code verification — handleRecipeSelected calls wouldCreateCycle BFS traversal, setCycleError on detection, RecipePicker shows red error message
-
-### 17. Raw/Cooked Weight Toggle
-expected: Ingredient row has Raw/Cooked toggle, tapping switches state, nutrition recalculates with yield factors.
-result: pass
-method: code verification — IngredientRow toggle button shows "Raw"/"Cooked" with distinct styling, onToggleWeightState -> updateIngredient, perServingNutrition memo applies applyYieldFactor(quantity, weight_state, DEFAULT_YIELD_FACTOR)
-
-### 18. AI Verification Badges
-expected: After food search results load, some show verified/warning badges. Degrades gracefully.
-result: pass
-method: code verification — verifyFoodResults calls verify-nutrition for top 5 via Promise.allSettled, ResultRow shows ⓘ (verified) or ⚠ (warning) with tooltip, catch swallows errors silently
-
-## Additional Findings
-
-### A1. Desktop Sidebar Missing Foods/Recipes Links
-expected: Desktop sidebar should include navigation to Foods and Recipes pages.
+### 10. Create Recipe
+expected: Click "New Recipe". Recipe created and navigated to builder.
 result: issue
-reported: "Sidebar.tsx navItems only has Home, Plan (coming soon), Household, Settings. No Foods or Recipes link. Desktop users cannot navigate to these pages via sidebar — only mobile TabBar has a Foods link."
+reported: "403 Forbidden on recipes INSERT. Same RLS pattern — recipes table policies use raw household_members subquery instead of get_user_household_id() helper. Button click fails silently (stays on recipes page, no error shown to user)."
+severity: blocker
+
+### 11. Edit Recipe Name and Servings
+expected: In recipe builder, name and servings are editable and persist.
+result: issue
+reported: "Cannot test — no recipes can be created (Test 10). Same RLS root cause."
+severity: blocker
+
+### 12. Add Ingredient via Food Search
+expected: In recipe builder, click Add Ingredient. Search overlay opens. Select food, enter quantity.
+result: issue
+reported: "Cannot test — no recipes can be created (Test 10). Same RLS root cause."
+severity: blocker
+
+### 13. Live Nutrition Bar
+expected: Sticky bar showing per-serving nutrition. Updates when ingredients change.
+result: issue
+reported: "Cannot test — no recipes can be created (Test 10). Same RLS root cause."
+severity: blocker
+
+### 14. Edit Ingredient Quantity
+expected: Click edit on ingredient. Modal appears. Change quantity. Nutrition updates.
+result: issue
+reported: "Cannot test — no recipes can be created (Test 10). Same RLS root cause."
+severity: blocker
+
+### 15. Remove Ingredient
+expected: Click remove on ingredient. Ingredient removed. Nutrition recalculates.
+result: issue
+reported: "Cannot test — no recipes can be created (Test 10). Same RLS root cause."
+severity: blocker
+
+### 16. Recipe List
+expected: All household recipes listed with name, servings, date.
+result: issue
+reported: "403 on recipes SELECT. Shows 'No recipes yet' but failing silently. Same RLS root cause."
 severity: major
 
-### A2. AppShell Test Failures
-expected: AppShell.test.tsx should pass.
+### 17. Delete Recipe
+expected: Click Delete on a recipe. Recipe removed.
 result: issue
-reported: "2 test failures in tests/AppShell.test.tsx — tests look for a 'Plan' tab (role=link, name=/plan/i) that was replaced with 'Foods' in TabBar during plan 02-03. Tests are stale."
-severity: minor
+reported: "Cannot test — no recipes exist. Same RLS root cause."
+severity: blocker
+
+### 18. Nested Recipe as Ingredient
+expected: Add another recipe as ingredient. Shows recipe badge. Nutrition contributes.
+result: issue
+reported: "Cannot test — no recipes can be created. Same RLS root cause."
+severity: blocker
+
+### 19. Cycle Detection
+expected: Circular reference prevented with error message.
+result: issue
+reported: "Cannot test — no recipes can be created. Same RLS root cause."
+severity: blocker
+
+### 20. Raw/Cooked Weight Toggle
+expected: Toggle changes weight state and recalculates nutrition.
+result: issue
+reported: "Cannot test — no recipes can be created. Same RLS root cause."
+severity: blocker
+
+### 21. AI Verification Badges
+expected: Search results show verification badges when edge function deployed. Graceful degradation otherwise.
+result: issue
+reported: "Cannot test badges — no search results because edge functions not deployed. The verify-nutrition function is also not deployed. However, the graceful degradation path (no badges, no errors) cannot be verified because the search itself fails."
+severity: blocker
 
 ## Summary
 
-total: 20
-passed: 17
-issues: 3
+total: 21
+passed: 2
+issues: 19
 pending: 0
 skipped: 0
 
 ## Gaps
 
-- truth: "Recipes page is accessible through normal navigation"
+- truth: "USDA and Open Food Facts food search returns results"
   status: failed
-  reason: "No navigation link to /recipes exists in TabBar (mobile) or Sidebar (desktop). Only accessible by typing URL directly."
-  severity: major
-  test: 8
-  root_cause: "TabBar.tsx and Sidebar.tsx were not updated to include Recipes when RecipesPage was added in plan 02-04"
+  reason: "Edge functions search-usda and search-off are not deployed to Supabase. All API-based food search fails with net::ERR_FAILED."
+  severity: blocker
+  test: 2
+  root_cause: "Edge functions exist in supabase/functions/ but were never deployed via 'supabase functions deploy'. The Supabase project has no running edge functions."
   artifacts:
-    - path: "src/components/layout/TabBar.tsx"
-      issue: "Missing Recipes tab entry in tabs array"
-    - path: "src/components/layout/Sidebar.tsx"
-      issue: "Missing Foods and Recipes nav items"
+    - path: "supabase/functions/search-usda/index.ts"
+      issue: "Not deployed"
+    - path: "supabase/functions/search-off/index.ts"
+      issue: "Not deployed"
   missing:
-    - "Add { label: 'Recipes', to: '/recipes', icon: '📖' } to TabBar tabs"
-    - "Add Foods and Recipes entries to Sidebar navItems"
+    - "Deploy edge functions: supabase functions deploy search-usda && supabase functions deploy search-off"
+    - "Set USDA_API_KEY secret in Supabase edge function environment"
+  debug_session: ""
 
-- truth: "Desktop sidebar provides navigation to all main sections including Foods and Recipes"
+- truth: "Custom food CRUD operations work for household members"
   status: failed
-  reason: "Sidebar navItems array has only Home, Plan (coming soon), Household, Settings — missing Foods and Recipes links"
-  severity: major
-  test: A1
-  root_cause: "Sidebar.tsx was not updated when FoodsPage and RecipesPage were added in plans 02-03 and 02-04"
+  reason: "403 Forbidden on all custom_foods operations. RLS policies use raw subquery on household_members instead of security-definer helper."
+  severity: blocker
+  test: 5
+  root_cause: "Migration 004 (custom_foods, recipes, recipe_ingredients) RLS policies reference household_members with raw subquery: 'household_id IN (SELECT household_id FROM household_members WHERE user_id = auth.uid())'. Migration 002 established get_user_household_id() as the fix for this exact pattern, but migration 004 was written without using it. The raw subquery hits RLS on household_members which causes permission failure."
   artifacts:
-    - path: "src/components/layout/Sidebar.tsx"
-      issue: "navItems missing Foods and Recipes entries"
+    - path: "supabase/migrations/004_food_recipe.sql"
+      issue: "All 8 policies use raw household_members subquery instead of get_user_household_id()"
   missing:
-    - "Add { label: 'Foods', to: '/foods', icon: '🥦' } to navItems"
-    - "Add { label: 'Recipes', to: '/recipes', icon: '📖' } to navItems"
+    - "Create migration 005 that drops and recreates all custom_foods/recipes/recipe_ingredients RLS policies using public.get_user_household_id() and public.get_user_household_role() helpers"
+  debug_session: ""
 
-- truth: "AppShell tests pass"
+- truth: "Recipe CRUD operations work for household members"
   status: failed
-  reason: "tests/AppShell.test.tsx looks for Plan tab that was replaced with Foods — 2 test failures"
-  severity: minor
-  test: A2
-  root_cause: "Test was written for Phase 1 TabBar which had Plan tab. Phase 2 plan 02-03 replaced Plan with Foods but didn't update the test."
+  reason: "403 Forbidden on recipes INSERT/SELECT. Same RLS pattern as custom_foods."
+  severity: blocker
+  test: 10
+  root_cause: "Same as custom_foods gap — migration 004 policies on recipes table use raw household_members subquery."
   artifacts:
-    - path: "tests/AppShell.test.tsx"
-      issue: "Tests reference Plan tab that no longer exists in TabBar"
+    - path: "supabase/migrations/004_food_recipe.sql"
+      issue: "recipes policies use raw household_members subquery"
   missing:
-    - "Update test to look for Foods tab instead of Plan tab"
+    - "Included in migration 005 fix above"
+  debug_session: ""
