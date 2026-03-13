@@ -30,7 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can create a household and invite family members via a shareable link or email invitation
   4. Household members can only see their own household's data — no cross-household data leakage
   5. The app renders correctly on a phone screen with the pastel colour scheme and is responsive at all viewport sizes
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold, Tailwind theme, DB schema, test infra
+- [ ] 01-02-PLAN.md — Auth system and responsive app shell
+- [ ] 01-03-PLAN.md — Household create/join/invite and member management
+- [ ] 01-04-PLAN.md — Integration wiring, Home page, and end-to-end verification
 
 ### Phase 2: Food Data & Recipe Builder
 **Goal**: Users can search for foods, add custom foods, and build recipes with auto-calculated nutrition
@@ -84,7 +89,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 0/TBD | Not started | - |
+| 1. Foundation & Auth | 0/4 | Planning complete | - |
 | 2. Food Data & Recipe Builder | 0/TBD | Not started | - |
 | 3. Meal Planning & Targets | 0/TBD | Not started | - |
 | 4. Daily Logging & Summary | 0/TBD | Not started | - |
