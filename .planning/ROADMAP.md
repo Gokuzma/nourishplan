@@ -99,7 +99,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 5/5 | Complete   | 2026-03-13 |
-| 2. Food Data & Recipe Builder | 7/8 | Gap closure | 2026-03-13 |
+| 2. Food Data & Recipe Builder | 8/8 | Complete   | 2026-03-13 |
 | 3. Meal Planning & Targets | 0/TBD | Not started | - |
 | 4. Daily Logging & Summary | 0/TBD | Not started | - |
 | 5. Portion Suggestions & Polish | 0/TBD | Not started | - |
