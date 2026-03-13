@@ -1,0 +1,194 @@
+import { useState } from 'react'
+import { PortionStepper } from './PortionStepper'
+import { FoodSearch } from '../food/FoodSearch'
+import { useInsertFoodLog } from '../../hooks/useFoodLogs'
+import type { NormalizedFoodResult } from '../../types/database'
+
+interface FreeformLogModalProps {
+  isOpen: boolean
+  onClose: () => void
+  logDate: string
+  memberId: string
+  memberType: 'user' | 'profile'
+}
+
+type Step = 'search' | 'confirm'
+
+export function FreeformLogModal({
+  isOpen,
+  onClose,
+  logDate,
+  memberId,
+  memberType,
+}: FreeformLogModalProps) {
+  const [step, setStep] = useState<Step>('search')
+  const [selectedFood, setSelectedFood] = useState<NormalizedFoodResult | null>(null)
+  const [servings, setServings] = useState(1.0)
+  const [isPrivate, setIsPrivate] = useState(false)
+
+  const insertLog = useInsertFoodLog()
+
+  if (!isOpen) return null
+
+  function handleFoodSelect(food: NormalizedFoodResult) {
+    setSelectedFood(food)
+    setServings(1.0)
+    setStep('confirm')
+  }
+
+  function handleBack() {
+    setStep('search')
+    setSelectedFood(null)
+    insertLog.reset()
+  }
+
+  async function handleLog() {
+    if (!selectedFood) return
+
+    // For custom foods use serving_grams as base (treated as 1 serving);
+    // for USDA/OFF foods the macros are stored per-100g so 1 serving = 100g.
+    const caloriesPerServing = selectedFood.calories
+    const proteinPerServing = selectedFood.protein
+    const fatPerServing = selectedFood.fat
+    const carbsPerServing = selectedFood.carbs
+
+    // item_type: custom foods use 'food', external sources use their source string
+    const itemType = selectedFood.source === 'custom' ? 'food' : selectedFood.source
+
+    try {
+      await insertLog.mutateAsync({
+        ...(memberType === 'user'
+          ? { member_user_id: memberId }
+          : { member_profile_id: memberId }),
+        log_date: logDate,
+        slot_name: null,
+        meal_id: null,
+        item_type: itemType,
+        item_id: selectedFood.id,
+        item_name: selectedFood.name,
+        servings_logged: servings,
+        calories_per_serving: caloriesPerServing,
+        protein_per_serving: proteinPerServing,
+        fat_per_serving: fatPerServing,
+        carbs_per_serving: carbsPerServing,
+        micronutrients: selectedFood.micronutrients ?? {},
+        is_private: isPrivate,
+      })
+      onClose()
+      setStep('search')
+      setSelectedFood(null)
+    } catch {
+      // Error is surfaced via insertLog.isError
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {step === 'confirm' && (
+              <button
+                onClick={handleBack}
+                className="text-text/40 hover:text-text transition-colors p-1"
+                aria-label="Back to search"
+              >
+                &#8592;
+              </button>
+            )}
+            <h2 className="font-bold text-lg text-primary">
+              {step === 'search' ? 'Log Food' : 'Confirm Serving'}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-text/40 hover:text-text transition-colors p-1"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        {step === 'search' && (
+          <FoodSearch mode="select" onSelect={handleFoodSelect} />
+        )}
+
+        {step === 'confirm' && selectedFood && (
+          <div className="flex flex-col gap-4">
+            {/* Item info */}
+            <div>
+              <p className="font-semibold text-text">{selectedFood.name}</p>
+              <p className="text-xs text-text/50 mt-0.5">
+                Per serving: {Math.round(selectedFood.calories)} kcal &middot; P {selectedFood.protein.toFixed(1)}g &middot; C {selectedFood.carbs.toFixed(1)}g &middot; F {selectedFood.fat.toFixed(1)}g
+              </p>
+            </div>
+
+            {/* Nutrition preview scaled by servings */}
+            <div className="flex gap-4 p-3 rounded-[--radius-card] bg-secondary/20">
+              <div className="text-center flex-1">
+                <p className="text-xs text-text/50">Calories</p>
+                <p className="font-semibold text-text">{Math.round(selectedFood.calories * servings)}</p>
+              </div>
+              <div className="text-center flex-1">
+                <p className="text-xs text-text/50">Protein</p>
+                <p className="font-semibold text-text">{(selectedFood.protein * servings).toFixed(1)}g</p>
+              </div>
+              <div className="text-center flex-1">
+                <p className="text-xs text-text/50">Carbs</p>
+                <p className="font-semibold text-text">{(selectedFood.carbs * servings).toFixed(1)}g</p>
+              </div>
+              <div className="text-center flex-1">
+                <p className="text-xs text-text/50">Fat</p>
+                <p className="font-semibold text-text">{(selectedFood.fat * servings).toFixed(1)}g</p>
+              </div>
+            </div>
+
+            {/* Portion stepper */}
+            <div>
+              <p className="text-sm font-medium text-text/70 mb-2">Servings</p>
+              <PortionStepper value={servings} onChange={setServings} />
+            </div>
+
+            {/* Privacy toggle */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPrivate}
+                onChange={e => setIsPrivate(e.target.checked)}
+                className="rounded border-secondary accent-primary"
+              />
+              <span className="text-sm text-text/70">Mark as private</span>
+            </label>
+
+            {/* Error state */}
+            {insertLog.isError && (
+              <p className="text-sm text-red-500">Failed to log food. Please try again.</p>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleBack}
+                className="flex-1 rounded-[--radius-btn] border border-secondary py-2.5 text-sm text-text/60 hover:text-text transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleLog}
+                disabled={insertLog.isPending}
+                className="flex-1 rounded-[--radius-btn] bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {insertLog.isPending ? 'Logging...' : 'Log Food'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
