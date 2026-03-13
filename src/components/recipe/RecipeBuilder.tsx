@@ -6,12 +6,23 @@ import {
   useAddIngredient,
   useUpdateIngredient,
   useRemoveIngredient,
+  useRecipes,
 } from '../../hooks/useRecipes'
-import { calcIngredientNutrition, calcRecipePerServing } from '../../utils/nutrition'
+import {
+  calcIngredientNutrition,
+  calcRecipePerServing,
+  wouldCreateCycle,
+  applyYieldFactor,
+  YIELD_FACTORS,
+} from '../../utils/nutrition'
+import { supabase } from '../../lib/supabase'
 import { FoodSearch } from '../food/FoodSearch'
 import { NutritionBar } from './NutritionBar'
 import { IngredientRow } from './IngredientRow'
-import type { NormalizedFoodResult, MacroSummary, RecipeIngredient } from '../../types/database'
+import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } from '../../types/database'
+
+// Default yield factor when ingredient category is unknown (general cooking loss ~15%)
+const DEFAULT_YIELD_FACTOR = YIELD_FACTORS['vegetables'] // 0.85
 
 interface RecipeBuilderProps {
   recipeId: string
@@ -166,12 +177,68 @@ function EditQuantityModal({ ingredient, onConfirm, onCancel }: EditQuantityModa
 }
 
 /**
+ * Fetch ingredients for a recipe from Supabase for cycle detection.
+ */
+async function getIngredientsForCycle(id: string): Promise<{ ingredient_type: string; ingredient_id: string }[]> {
+  const { data } = await supabase
+    .from('recipe_ingredients')
+    .select('ingredient_type, ingredient_id')
+    .eq('recipe_id', id)
+  return data ?? []
+}
+
+/**
+ * Recipe picker section shown inside the food search overlay.
+ * Lists all household recipes excluding the current one being edited.
+ */
+interface RecipePickerProps {
+  currentRecipeId: string
+  recipes: Recipe[]
+  onSelect: (recipe: Recipe) => void
+  cycleError: string | null
+}
+
+function RecipePicker({ currentRecipeId, recipes, onSelect, cycleError }: RecipePickerProps) {
+  const available = recipes.filter(r => r.id !== currentRecipeId)
+
+  if (available.length === 0) {
+    return (
+      <p className="text-sm text-text/50 text-center py-4">
+        No other recipes available to add.
+      </p>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {cycleError && (
+        <p className="text-sm text-red-500 bg-red-50 rounded-[--radius-btn] px-3 py-2">
+          {cycleError}
+        </p>
+      )}
+      {available.map(recipe => (
+        <button
+          key={recipe.id}
+          onClick={() => onSelect(recipe)}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-[--radius-btn] border border-secondary/50 bg-surface hover:border-accent/40 transition-colors text-left w-full"
+        >
+          <span className="text-xs bg-accent/20 text-accent font-medium px-1.5 py-0.5 rounded shrink-0">R</span>
+          <span className="text-sm text-text truncate flex-1">{recipe.name}</span>
+          <span className="text-xs text-text/40 shrink-0">{recipe.servings} srv</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/**
  * Main recipe builder component.
  * Manages ingredient list, food search overlay, and live per-serving nutrition bar.
  */
 export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const { data: recipe, isPending: recipePending } = useRecipe(recipeId)
   const { data: ingredients, isPending: ingredientsPending } = useRecipeIngredients(recipeId)
+  const { data: allRecipes } = useRecipes()
 
   const updateRecipe = useUpdateRecipe()
   const addIngredient = useAddIngredient()
@@ -181,9 +248,13 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const [localName, setLocalName] = useState<string | null>(null)
   const [localServings, setLocalServings] = useState<string | null>(null)
   const [showFoodSearch, setShowFoodSearch] = useState(false)
+  const [searchTab, setSearchTab] = useState<'food' | 'recipe'>('food')
   const [pendingFood, setPendingFood] = useState<NormalizedFoodResult | null>(null)
+  const [pendingRecipe, setPendingRecipe] = useState<Recipe | null>(null)
   const [editingIngredient, setEditingIngredient] = useState<RecipeIngredient | null>(null)
   const [foodDataMap, setFoodDataMap] = useState<Record<string, FoodDataEntry>>({})
+  const [cycleError, setCycleError] = useState<string | null>(null)
+  const [cycleCheckInProgress, setCycleCheckInProgress] = useState(false)
 
   const displayName = localName ?? recipe?.name ?? ''
   const displayServings = localServings ?? String(recipe?.servings ?? 1)
@@ -240,6 +311,50 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     setPendingFood(null)
   }
 
+  async function handleRecipeSelected(selectedRecipe: Recipe) {
+    setCycleError(null)
+    setCycleCheckInProgress(true)
+
+    try {
+      const hasCycle = await wouldCreateCycle(recipeId, selectedRecipe.id, getIngredientsForCycle)
+      if (hasCycle) {
+        setCycleError('Cannot add this recipe — it would create a circular reference.')
+        return
+      }
+
+      // Proceed to quantity entry
+      setPendingRecipe(selectedRecipe)
+      setShowFoodSearch(false)
+    } finally {
+      setCycleCheckInProgress(false)
+    }
+  }
+
+  async function handleRecipeQuantityConfirm(grams: number) {
+    if (!pendingRecipe) return
+
+    const selectedRecipe = pendingRecipe
+    // Resolve sub-recipe nutrition: fetch its ingredients and calculate total macros per 100g equivalent
+    const subNutrition = await resolveRecipeNutrition(selectedRecipe.id, grams)
+
+    setFoodDataMap(prev => ({
+      ...prev,
+      [selectedRecipe.id]: { name: selectedRecipe.name, macros: subNutrition.per100g },
+    }))
+
+    const nextOrder = (ingredients?.length ?? 0)
+    addIngredient.mutate({
+      recipe_id: recipeId,
+      ingredient_type: 'recipe',
+      ingredient_id: selectedRecipe.id,
+      quantity_grams: grams,
+      weight_state: 'raw',
+      sort_order: nextOrder,
+    })
+
+    setPendingRecipe(null)
+  }
+
   function handleEditConfirm(grams: number) {
     if (!editingIngredient) return
     updateIngredient.mutate({
@@ -254,6 +369,15 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     removeIngredient.mutate({ id: ingredient.id, recipe_id: ingredient.recipe_id })
   }
 
+  function handleToggleWeightState(ingredient: RecipeIngredient) {
+    const nextState = ingredient.weight_state === 'raw' ? 'cooked' : 'raw'
+    updateIngredient.mutate({
+      id: ingredient.id,
+      recipe_id: ingredient.recipe_id,
+      updates: { weight_state: nextState },
+    })
+  }
+
   const perServingNutrition = useMemo(() => {
     if (!ingredients || !recipe) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
 
@@ -262,13 +386,27 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       .map(ing => {
         const entry = foodDataMap[ing.ingredient_id]
         if (!entry) return null
-        return { nutrition: calcIngredientNutrition(entry.macros, ing.quantity_grams) }
+
+        // Apply yield factor for cooked ingredients
+        const effectiveGrams = applyYieldFactor(
+          ing.quantity_grams,
+          ing.weight_state,
+          DEFAULT_YIELD_FACTOR,
+        )
+
+        return { nutrition: calcIngredientNutrition(entry.macros, effectiveGrams) }
       })
       .filter((x): x is { nutrition: MacroSummary } => x !== null)
 
     if (withNutrition.length === 0) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
     return calcRecipePerServing(withNutrition, servings)
   }, [ingredients, recipe, foodDataMap])
+
+  function handleOpenFoodSearch() {
+    setSearchTab('food')
+    setCycleError(null)
+    setShowFoodSearch(true)
+  }
 
   if (recipePending) {
     return (
@@ -285,6 +423,19 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       </div>
     )
   }
+
+  // Build a NormalizedFoodResult shim so QuantityModal can be reused for recipes
+  const pendingRecipeAsFood: NormalizedFoodResult | null = pendingRecipe
+    ? {
+        id: pendingRecipe.id,
+        name: pendingRecipe.name,
+        source: 'custom',
+        calories: 0,
+        protein: 0,
+        fat: 0,
+        carbs: 0,
+      }
+    : null
 
   return (
     <>
@@ -335,6 +486,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
                   foodData={foodDataMap[ing.ingredient_id] ?? null}
                   onEdit={() => setEditingIngredient(ing)}
                   onRemove={() => handleRemove(ing)}
+                  onToggleWeightState={() => handleToggleWeightState(ing)}
                 />
               ))}
             </div>
@@ -343,7 +495,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
         {/* Add ingredient button */}
         <button
-          onClick={() => setShowFoodSearch(true)}
+          onClick={handleOpenFoodSearch}
           className="w-full rounded-[--radius-btn] border border-primary/40 text-primary hover:bg-primary/5 py-2.5 text-sm font-medium transition-colors"
         >
           + Add Ingredient
@@ -353,7 +505,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       {/* Sticky nutrition bar */}
       <NutritionBar macros={perServingNutrition} />
 
-      {/* Food search overlay */}
+      {/* Food/Recipe search overlay */}
       {showFoodSearch && (
         <div className="fixed inset-0 z-40 flex flex-col bg-background">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-secondary/60">
@@ -366,8 +518,50 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             </button>
             <h2 className="font-semibold text-text">Add Ingredient</h2>
           </div>
+
+          {/* Food / Recipe tabs */}
+          <div className="flex border-b border-secondary/60 px-4">
+            <button
+              onClick={() => { setSearchTab('food'); setCycleError(null) }}
+              className={`py-2 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                searchTab === 'food'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-text/50 hover:text-text'
+              }`}
+            >
+              Food
+            </button>
+            <button
+              onClick={() => { setSearchTab('recipe'); setCycleError(null) }}
+              className={`py-2 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                searchTab === 'recipe'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-text/50 hover:text-text'
+              }`}
+            >
+              Recipe
+            </button>
+          </div>
+
           <div className="flex-1 overflow-y-auto px-4 py-4">
-            <FoodSearch mode="select" onSelect={handleFoodSelected} />
+            {searchTab === 'food' ? (
+              <FoodSearch mode="select" onSelect={handleFoodSelected} />
+            ) : (
+              <div>
+                <p className="text-xs text-text/50 mb-3">
+                  Add an existing recipe as an ingredient. Circular references are prevented.
+                </p>
+                {cycleCheckInProgress && (
+                  <p className="text-sm text-text/50 mb-2">Checking for circular references…</p>
+                )}
+                <RecipePicker
+                  currentRecipeId={recipeId}
+                  recipes={allRecipes ?? []}
+                  onSelect={handleRecipeSelected}
+                  cycleError={cycleError}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -378,6 +572,15 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           food={pendingFood}
           onConfirm={handleQuantityConfirm}
           onCancel={() => setPendingFood(null)}
+        />
+      )}
+
+      {/* Quantity modal after recipe selection */}
+      {pendingRecipeAsFood && (
+        <QuantityModal
+          food={pendingRecipeAsFood}
+          onConfirm={handleRecipeQuantityConfirm}
+          onCancel={() => setPendingRecipe(null)}
         />
       )}
 
@@ -392,3 +595,78 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     </>
   )
 }
+
+/**
+ * Resolve a sub-recipe's aggregate nutrition per 100g equivalent.
+ * Fetches the sub-recipe's ingredients and sums macros, then normalises to per-100g.
+ * Returns zeros on failure to allow graceful degradation.
+ */
+async function resolveRecipeNutrition(
+  recipeId: string,
+  quantityGrams: number,
+): Promise<{ per100g: MacroSummary }> {
+  try {
+    const { data: ings } = await supabase
+      .from('recipe_ingredients')
+      .select('ingredient_type, ingredient_id, quantity_grams, weight_state')
+      .eq('recipe_id', recipeId)
+
+    if (!ings || ings.length === 0) {
+      return { per100g: { calories: 0, protein: 0, fat: 0, carbs: 0 } }
+    }
+
+    // Resolve only food-type ingredients at depth=1 (shallow resolution for v1)
+    const foodIds = ings
+      .filter(i => i.ingredient_type === 'food')
+      .map(i => i.ingredient_id)
+
+    if (foodIds.length === 0) {
+      return { per100g: { calories: 0, protein: 0, fat: 0, carbs: 0 } }
+    }
+
+    // Fetch food nutrition from custom_foods and usda/off cache
+    // For v1, we try custom_foods; external food macros aren't stored server-side per-row,
+    // so we return zero for non-custom foods (they'll show as Loading until browsed).
+    const { data: customFoods } = await supabase
+      .from('custom_foods')
+      .select('id, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g')
+      .in('id', foodIds)
+
+    const foodMacroMap: Record<string, MacroSummary> = {}
+    for (const f of customFoods ?? []) {
+      foodMacroMap[f.id] = {
+        calories: f.calories_per_100g,
+        protein: f.protein_per_100g,
+        fat: f.fat_per_100g,
+        carbs: f.carbs_per_100g,
+      }
+    }
+
+    let totalCal = 0, totalProt = 0, totalFat = 0, totalCarbs = 0
+    for (const ing of ings) {
+      if (ing.ingredient_type !== 'food') continue
+      const m = foodMacroMap[ing.ingredient_id]
+      if (!m) continue
+      const effectiveGrams = applyYieldFactor(ing.quantity_grams, ing.weight_state, DEFAULT_YIELD_FACTOR)
+      const contrib = calcIngredientNutrition(m, effectiveGrams)
+      totalCal += contrib.calories
+      totalProt += contrib.protein
+      totalFat += contrib.fat
+      totalCarbs += contrib.carbs
+    }
+
+    // Normalise total recipe nutrition to per-100g so calcIngredientNutrition works correctly
+    const totalGrams = ings.reduce((s, i) => s + i.quantity_grams, 0) || quantityGrams
+    const per100g: MacroSummary = {
+      calories: (totalCal / totalGrams) * 100,
+      protein: (totalProt / totalGrams) * 100,
+      fat: (totalFat / totalGrams) * 100,
+      carbs: (totalCarbs / totalGrams) * 100,
+    }
+
+    return { per100g }
+  } catch {
+    return { per100g: { calories: 0, protein: 0, fat: 0, carbs: 0 } }
+  }
+}
+

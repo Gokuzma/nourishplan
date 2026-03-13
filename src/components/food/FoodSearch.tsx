@@ -3,6 +3,7 @@ import { useFoodSearch } from '../../hooks/useFoodSearch'
 import { useCustomFoods, useDeleteCustomFood } from '../../hooks/useCustomFoods'
 import { useHousehold } from '../../hooks/useHousehold'
 import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
 import { FoodDetailPanel } from './FoodDetailPanel'
 import { CustomFoodForm } from './CustomFoodForm'
 import type { NormalizedFoodResult, CustomFood } from '../../types/database'
@@ -12,6 +13,12 @@ type ActiveTab = 'usda' | 'off' | 'custom'
 interface FoodSearchProps {
   onSelect?: (food: NormalizedFoodResult) => void
   mode?: 'browse' | 'select'
+}
+
+interface VerificationResult {
+  verified: boolean
+  warning?: string
+  reason?: string
 }
 
 function customFoodToNormalized(food: CustomFood): NormalizedFoodResult {
@@ -58,16 +65,58 @@ interface ResultRowProps {
   canEdit?: boolean
   onEdit?: () => void
   onDelete?: () => void
+  verification?: VerificationResult
 }
 
-function ResultRow({ food, mode, onSelect, onViewDetails, canEdit, onEdit, onDelete }: ResultRowProps) {
+function ResultRow({ food, mode, onSelect, onViewDetails, canEdit, onEdit, onDelete, verification }: ResultRowProps) {
+  const [showVerifTooltip, setShowVerifTooltip] = useState(false)
+
   return (
     <div
       className={`flex items-center gap-2 px-3 py-2.5 rounded-[--radius-btn] border border-secondary/50 bg-surface hover:border-accent/40 transition-colors ${mode === 'select' ? 'cursor-pointer' : ''}`}
       onClick={mode === 'select' ? () => onSelect?.(food) : undefined}
     >
       <div className="flex-1 min-w-0">
-        <span className="text-sm text-text truncate block">{food.name}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-text truncate block">{food.name}</span>
+          {/* AI verification badges */}
+          {verification?.verified && !verification.warning && (
+            <div className="relative shrink-0">
+              <button
+                onClick={e => { e.stopPropagation(); setShowVerifTooltip(v => !v) }}
+                className="text-xs text-blue-500 hover:text-blue-700 transition-colors leading-none"
+                title="AI verified"
+                aria-label="AI verification info"
+              >
+                ⓘ
+              </button>
+              {showVerifTooltip && (
+                <div className="absolute left-0 top-5 z-10 bg-white border border-secondary/60 rounded-lg shadow-lg p-2.5 text-xs text-text w-48">
+                  <p className="font-medium mb-0.5">AI Verified</p>
+                  <p className="text-text/60">{verification.reason ?? 'Nutrition values confirmed by AI.'}</p>
+                </div>
+              )}
+            </div>
+          )}
+          {verification?.warning && (
+            <div className="relative shrink-0">
+              <button
+                onClick={e => { e.stopPropagation(); setShowVerifTooltip(v => !v) }}
+                className="text-xs text-amber-500 hover:text-amber-700 transition-colors leading-none"
+                title="Nutrition warning"
+                aria-label="Nutrition warning info"
+              >
+                ⚠
+              </button>
+              {showVerifTooltip && (
+                <div className="absolute left-0 top-5 z-10 bg-white border border-amber-200 rounded-lg shadow-lg p-2.5 text-xs text-text w-48">
+                  <p className="font-medium mb-0.5 text-amber-700">Nutrition Warning</p>
+                  <p className="text-text/60">{verification.warning}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       <MacroText food={food} />
       <button
@@ -101,6 +150,41 @@ function ResultRow({ food, mode, onSelect, onViewDetails, canEdit, onEdit, onDel
   )
 }
 
+/**
+ * Run AI verification on the top results in the background.
+ * Returns a map of food id -> VerificationResult.
+ * Fails silently — callers display results without badges on error.
+ */
+async function verifyFoodResults(
+  foods: NormalizedFoodResult[],
+): Promise<Record<string, VerificationResult>> {
+  const results: Record<string, VerificationResult> = {}
+  const top5 = foods.slice(0, 5)
+
+  await Promise.allSettled(
+    top5.map(async food => {
+      const { data, error } = await supabase.functions.invoke('verify-nutrition', {
+        body: {
+          foodName: food.name,
+          calories: food.calories,
+          protein: food.protein,
+          fat: food.fat,
+          carbs: food.carbs,
+        },
+      })
+      if (!error && data) {
+        results[food.id] = {
+          verified: data.verified ?? false,
+          warning: data.warning ?? undefined,
+          reason: data.reason ?? undefined,
+        }
+      }
+    })
+  )
+
+  return results
+}
+
 function ApiTab({ tab, query, mode, onSelect, onViewDetails }: {
   tab: 'usda' | 'off'
   query: string
@@ -109,6 +193,19 @@ function ApiTab({ tab, query, mode, onSelect, onViewDetails }: {
   onViewDetails: (food: NormalizedFoodResult) => void
 }) {
   const { data, isLoading, isError } = useFoodSearch(tab, query)
+  const [verificationMap, setVerificationMap] = useState<Record<string, VerificationResult>>({})
+
+  // Run AI verification in the background after results load
+  useEffect(() => {
+    if (!data || data.length === 0) {
+      setVerificationMap({})
+      return
+    }
+    setVerificationMap({})
+    verifyFoodResults(data).then(results => setVerificationMap(results)).catch(() => {
+      // Graceful degradation — no badges shown
+    })
+  }, [data])
 
   if (query.length < 2) {
     return <p className="text-sm text-text/50 text-center py-6">Type at least 2 characters to search.</p>
@@ -126,6 +223,7 @@ function ApiTab({ tab, query, mode, onSelect, onViewDetails }: {
           mode={mode}
           onSelect={onSelect}
           onViewDetails={onViewDetails}
+          verification={verificationMap[food.id]}
         />
       ))}
     </div>
