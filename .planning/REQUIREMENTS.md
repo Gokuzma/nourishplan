@@ -103,50 +103,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| HSHD-01 | — | Pending |
-| HSHD-02 | — | Pending |
-| HSHD-03 | — | Pending |
-| HSHD-04 | — | Pending |
-| HSHD-05 | — | Pending |
-| FOOD-01 | — | Pending |
-| FOOD-02 | — | Pending |
-| FOOD-03 | — | Pending |
-| FOOD-04 | — | Pending |
-| FOOD-05 | — | Pending |
-| FOOD-06 | — | Pending |
-| RECP-01 | — | Pending |
-| RECP-02 | — | Pending |
-| RECP-03 | — | Pending |
-| RECP-04 | — | Pending |
-| RECP-05 | — | Pending |
-| RECP-06 | — | Pending |
-| MEAL-01 | — | Pending |
-| MEAL-02 | — | Pending |
-| MEAL-03 | — | Pending |
-| MEAL-04 | — | Pending |
-| MEAL-05 | — | Pending |
-| MEAL-06 | — | Pending |
-| TRCK-01 | — | Pending |
-| TRCK-02 | — | Pending |
-| TRCK-03 | — | Pending |
-| TRCK-04 | — | Pending |
-| TRCK-05 | — | Pending |
-| TRCK-06 | — | Pending |
-| TRCK-07 | — | Pending |
-| PLAT-01 | — | Pending |
-| PLAT-02 | — | Pending |
-| PLAT-03 | — | Pending |
-| PLAT-04 | — | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| HSHD-01 | Phase 1 | Pending |
+| HSHD-02 | Phase 1 | Pending |
+| HSHD-03 | Phase 1 | Pending |
+| HSHD-04 | Phase 1 | Pending |
+| HSHD-05 | Phase 1 | Pending |
+| FOOD-01 | Phase 2 | Pending |
+| FOOD-02 | Phase 2 | Pending |
+| FOOD-03 | Phase 2 | Pending |
+| FOOD-04 | Phase 2 | Pending |
+| FOOD-05 | Phase 2 | Pending |
+| FOOD-06 | Phase 2 | Pending |
+| RECP-01 | Phase 2 | Pending |
+| RECP-02 | Phase 2 | Pending |
+| RECP-03 | Phase 2 | Pending |
+| RECP-04 | Phase 2 | Pending |
+| RECP-05 | Phase 2 | Pending |
+| RECP-06 | Phase 2 | Pending |
+| MEAL-01 | Phase 3 | Pending |
+| MEAL-02 | Phase 3 | Pending |
+| MEAL-03 | Phase 3 | Pending |
+| MEAL-04 | Phase 3 | Pending |
+| MEAL-05 | Phase 3 | Pending |
+| MEAL-06 | Phase 3 | Pending |
+| TRCK-01 | Phase 3 | Pending |
+| TRCK-02 | Phase 3 | Pending |
+| TRCK-03 | Phase 3 | Pending |
+| TRCK-04 | Phase 4 | Pending |
+| TRCK-05 | Phase 5 | Pending |
+| TRCK-06 | Phase 4 | Pending |
+| TRCK-07 | Phase 4 | Pending |
+| PLAT-01 | Phase 1 | Pending |
+| PLAT-02 | Phase 1 | Pending |
+| PLAT-03 | Phase 4 | Pending |
+| PLAT-04 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 ⚠️
+- Mapped to phases: 38
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-12 after initial definition*
+*Last updated: 2026-03-12 after roadmap creation*
