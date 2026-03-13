@@ -96,6 +96,10 @@ export interface NormalizedFoodResult {
   protein: number
   fat: number
   carbs: number
+  fiber?: number
+  sugar?: number
+  sodium?: number
+  micronutrients?: Record<string, number>
   portions?: { description: string; grams: number }[]
 }
 
