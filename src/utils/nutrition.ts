@@ -89,6 +89,41 @@ export function applyYieldFactor(
 }
 
 /**
+ * Sum all item nutritions for a meal.
+ * Items are expected to have their nutrition pre-calculated (e.g. via calcIngredientNutrition).
+ */
+export function calcMealNutrition(
+  items: { nutrition: MacroSummary }[],
+): MacroSummary {
+  return items.reduce(
+    (acc, item) => ({
+      calories: acc.calories + item.nutrition.calories,
+      protein: acc.protein + item.nutrition.protein,
+      fat: acc.fat + item.nutrition.fat,
+      carbs: acc.carbs + item.nutrition.carbs,
+    }),
+    { calories: 0, protein: 0, fat: 0, carbs: 0 },
+  );
+}
+
+/**
+ * Sum all meal nutritions across all slots in a day.
+ */
+export function calcDayNutrition(
+  mealNutritions: MacroSummary[],
+): MacroSummary {
+  return mealNutritions.reduce(
+    (acc, m) => ({
+      calories: acc.calories + m.calories,
+      protein: acc.protein + m.protein,
+      fat: acc.fat + m.fat,
+      carbs: acc.carbs + m.carbs,
+    }),
+    { calories: 0, protein: 0, fat: 0, carbs: 0 },
+  );
+}
+
+/**
  * BFS cycle detection for nested recipes.
  * Returns true if adding candidateId as an ingredient of recipeId would
  * create a circular reference.

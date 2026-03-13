@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   calcIngredientNutrition,
   calcRecipePerServing,
+  calcMealNutrition,
+  calcDayNutrition,
   wouldCreateCycle,
   applyYieldFactor,
   USDA_NUTRIENT_IDS,
@@ -104,6 +106,59 @@ describe('USDA_NUTRIENT_IDS', () => {
 
   it('has correct mapping for carbs (205)', () => {
     expect(USDA_NUTRIENT_IDS.carbs).toBe(205);
+  });
+});
+
+describe('calcMealNutrition', () => {
+  it('sums nutrition across all meal items', () => {
+    const items = [
+      { nutrition: { calories: 200, protein: 10, fat: 5, carbs: 30 } },
+      { nutrition: { calories: 300, protein: 20, fat: 10, carbs: 40 } },
+    ];
+    const result = calcMealNutrition(items);
+    expect(result.calories).toBe(500);
+    expect(result.protein).toBe(30);
+    expect(result.fat).toBe(15);
+    expect(result.carbs).toBe(70);
+  });
+
+  it('returns all zeros for an empty item list', () => {
+    const result = calcMealNutrition([]);
+    expect(result.calories).toBe(0);
+    expect(result.protein).toBe(0);
+    expect(result.fat).toBe(0);
+    expect(result.carbs).toBe(0);
+  });
+});
+
+describe('calcDayNutrition', () => {
+  it('sums all meal nutritions for a day', () => {
+    const meals = [
+      { calories: 500, protein: 30, fat: 15, carbs: 70 },
+      { calories: 800, protein: 40, fat: 20, carbs: 100 },
+    ];
+    const result = calcDayNutrition(meals);
+    expect(result.calories).toBe(1300);
+    expect(result.protein).toBe(70);
+    expect(result.fat).toBe(35);
+    expect(result.carbs).toBe(170);
+  });
+
+  it('returns correct total for a single meal', () => {
+    const meals = [{ calories: 500, protein: 30, fat: 15, carbs: 70 }];
+    const result = calcDayNutrition(meals);
+    expect(result.calories).toBe(500);
+    expect(result.protein).toBe(30);
+    expect(result.fat).toBe(15);
+    expect(result.carbs).toBe(70);
+  });
+
+  it('returns all zeros for an empty meal list', () => {
+    const result = calcDayNutrition([]);
+    expect(result.calories).toBe(0);
+    expect(result.protein).toBe(0);
+    expect(result.fat).toBe(0);
+    expect(result.carbs).toBe(0);
   });
 });
 

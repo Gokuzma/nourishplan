@@ -8,6 +8,7 @@ export interface Profile {
 export interface Household {
   id: string
   name: string
+  week_start_day: number
   created_at: string
 }
 
@@ -79,6 +80,81 @@ export interface RecipeIngredient {
   weight_state: 'raw' | 'cooked'
   sort_order: number
   created_at: string
+}
+
+export interface Meal {
+  id: string
+  household_id: string
+  created_by: string
+  name: string
+  deleted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MealItem {
+  id: string
+  meal_id: string
+  item_type: 'food' | 'recipe'
+  item_id: string
+  quantity_grams: number
+  calories_per_100g: number
+  protein_per_100g: number
+  fat_per_100g: number
+  carbs_per_100g: number
+  sort_order: number
+  created_at: string
+}
+
+export interface MealPlan {
+  id: string
+  household_id: string
+  week_start: string
+  created_by: string
+  created_at: string
+}
+
+export interface MealPlanSlot {
+  id: string
+  plan_id: string
+  day_index: number
+  slot_name: string
+  slot_order: number
+  meal_id: string | null
+  is_override: boolean
+  created_at: string
+}
+
+export interface MealPlanTemplate {
+  id: string
+  household_id: string
+  name: string
+  created_by: string
+  created_at: string
+}
+
+export interface MealPlanTemplateSlot {
+  id: string
+  template_id: string
+  day_index: number
+  slot_name: string
+  slot_order: number
+  meal_id: string | null
+}
+
+export interface NutritionTarget {
+  id: string
+  household_id: string
+  user_id: string | null
+  member_profile_id: string | null
+  calories: number | null
+  protein_g: number | null
+  carbs_g: number | null
+  fat_g: number | null
+  micronutrients: Record<string, number>
+  custom_goals: Record<string, number>
+  created_at: string
+  updated_at: string
 }
 
 export interface MacroSummary {
@@ -158,6 +234,41 @@ export type Database = {
         Row: RecipeIngredient
         Insert: Omit<RecipeIngredient, 'id' | 'created_at'> & { id?: string; created_at?: string }
         Update: Partial<Omit<RecipeIngredient, 'id' | 'created_at'>>
+      }
+      meals: {
+        Row: Meal
+        Insert: Omit<Meal, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
+        Update: Partial<Omit<Meal, 'id' | 'created_at'>>
+      }
+      meal_items: {
+        Row: MealItem
+        Insert: Omit<MealItem, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<MealItem, 'id' | 'created_at'>>
+      }
+      meal_plans: {
+        Row: MealPlan
+        Insert: Omit<MealPlan, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<MealPlan, 'id' | 'created_at'>>
+      }
+      meal_plan_slots: {
+        Row: MealPlanSlot
+        Insert: Omit<MealPlanSlot, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<MealPlanSlot, 'id' | 'created_at'>>
+      }
+      meal_plan_templates: {
+        Row: MealPlanTemplate
+        Insert: Omit<MealPlanTemplate, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<MealPlanTemplate, 'id' | 'created_at'>>
+      }
+      meal_plan_template_slots: {
+        Row: MealPlanTemplateSlot
+        Insert: Omit<MealPlanTemplateSlot, 'id'> & { id?: string }
+        Update: Partial<Omit<MealPlanTemplateSlot, 'id'>>
+      }
+      nutrition_targets: {
+        Row: NutritionTarget
+        Insert: Omit<NutritionTarget, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
+        Update: Partial<Omit<NutritionTarget, 'id' | 'created_at'>>
       }
     }
     Enums: {
