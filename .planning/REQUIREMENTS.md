@@ -63,8 +63,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PLAT-01**: App is mobile-first responsive — optimized for phone use in kitchen/at table
 - [x] **PLAT-02**: Minimalist UI with pastel colour scheme
-- [ ] **PLAT-03**: PWA installable to home screen on mobile devices
-- [ ] **PLAT-04**: Core features work offline with sync when reconnected
+- [x] **PLAT-03**: PWA installable to home screen on mobile devices
+- [x] **PLAT-04**: Core features work offline with sync when reconnected
 
 ## v2 Requirements
 
@@ -139,8 +139,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRCK-07 | Phase 4 | Pending |
 | PLAT-01 | Phase 1 | Complete |
 | PLAT-02 | Phase 1 | Complete |
-| PLAT-03 | Phase 4 | Pending |
-| PLAT-04 | Phase 4 | Pending |
+| PLAT-03 | Phase 4 | Complete |
+| PLAT-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 38 total
