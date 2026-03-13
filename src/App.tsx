@@ -10,6 +10,7 @@ import { FoodsPage } from './pages/FoodsPage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipePage } from './pages/RecipePage'
 import { SettingsPage } from './pages/SettingsPage'
+import { MemberTargetsPage } from './pages/MemberTargetsPage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
 
@@ -141,6 +142,7 @@ function AppRoutes() {
         <Route path="/household" element={<HouseholdPage />} />
         <Route path="/plan" element={<ComingSoonPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/members/:id/targets" element={<MemberTargetsPage />} />
       </Route>
 
       {/* Catch-all */}
