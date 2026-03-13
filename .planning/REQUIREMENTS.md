@@ -44,8 +44,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **MEAL-01**: User can compose a meal from multiple recipes and/or individual foods
 - [x] **MEAL-02**: User can create a weekly meal plan with breakfast, lunch, dinner, and snack slots
-- [ ] **MEAL-03**: Meal plan is shared across all household members automatically
-- [ ] **MEAL-04**: User can swap individual meals on a given day without changing the template
+- [x] **MEAL-03**: Meal plan is shared across all household members automatically
+- [x] **MEAL-04**: User can swap individual meals on a given day without changing the template
 - [ ] **MEAL-05**: User can save and reuse meal plan templates
 - [x] **MEAL-06**: Each recipe in a meal plan displays its full nutrition breakdown
 
@@ -126,8 +126,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RECP-06 | Phase 2 | Complete |
 | MEAL-01 | Phase 3 | Complete |
 | MEAL-02 | Phase 3 | Complete |
-| MEAL-03 | Phase 3 | Pending |
-| MEAL-04 | Phase 3 | Pending |
+| MEAL-03 | Phase 3 | Complete |
+| MEAL-04 | Phase 3 | Complete |
 | MEAL-05 | Phase 3 | Pending |
 | MEAL-06 | Phase 3 | Complete |
 | TRCK-01 | Phase 3 | Complete |
