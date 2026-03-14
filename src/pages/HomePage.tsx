@@ -164,7 +164,7 @@ export function HomePage() {
   const isOnline = useOnlineStatus()
 
   const householdId = membership?.household_id
-  const weekStartDay = membership?.households?.week_start_day ?? 1
+  const weekStartDay = membership?.households?.week_start_day ?? 0
 
   const [selectedDate, setSelectedDate] = useState(todayString)
   const [selectedMemberId, setSelectedMemberId] = useState<string>(session?.user.id ?? '')
