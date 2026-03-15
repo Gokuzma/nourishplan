@@ -19,6 +19,7 @@ import { supabase } from '../../lib/supabase'
 import { FoodSearch } from '../food/FoodSearch'
 import { NutritionBar } from './NutritionBar'
 import { IngredientRow } from './IngredientRow'
+import { MicronutrientPanel } from '../plan/MicronutrientPanel'
 import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } from '../../types/database'
 
 // Default yield factor when ingredient category is unknown (general cooking loss ~15%)
@@ -31,6 +32,7 @@ interface RecipeBuilderProps {
 interface FoodDataEntry {
   name: string
   macros: MacroSummary
+  micronutrients?: Record<string, number> | null
 }
 
 interface QuantityModalProps {
@@ -295,7 +297,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
     setFoodDataMap(prev => ({
       ...prev,
-      [food.id]: { name: food.name, macros },
+      [food.id]: { name: food.name, macros, micronutrients: food.micronutrients ?? null },
     }))
 
     const nextOrder = (ingredients?.length ?? 0)
@@ -402,6 +404,35 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     return calcRecipePerServing(withNutrition, servings)
   }, [ingredients, recipe, foodDataMap])
 
+  // Aggregate micronutrients from all ingredients that have micronutrient data (per serving)
+  const perServingMicronutrients = useMemo((): Record<string, number> | null => {
+    if (!ingredients || !recipe) return null
+
+    const servings = recipe.servings > 0 ? recipe.servings : 1
+    const totals: Record<string, number> = {}
+    let hasAny = false
+
+    for (const ing of ingredients) {
+      const entry = foodDataMap[ing.ingredient_id]
+      if (!entry?.micronutrients) continue
+
+      const factor = ing.quantity_grams / 100
+      for (const [key, value] of Object.entries(entry.micronutrients)) {
+        if (value == null) continue
+        totals[key] = (totals[key] ?? 0) + value * factor
+        hasAny = true
+      }
+    }
+
+    if (!hasAny) return null
+    // Divide totals by servings to get per-serving values
+    const perServing: Record<string, number> = {}
+    for (const [key, total] of Object.entries(totals)) {
+      perServing[key] = total / servings
+    }
+    return perServing
+  }, [ingredients, recipe, foodDataMap])
+
   function handleOpenFoodSearch() {
     setSearchTab('food')
     setCycleError(null)
@@ -504,6 +535,13 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
       {/* Sticky nutrition bar */}
       <NutritionBar macros={perServingNutrition} />
+
+      {/* Micronutrient panel — shown below macro summary when ingredient data is available */}
+      {perServingMicronutrients && (
+        <div className="px-4 pb-4 max-w-2xl mx-auto w-full">
+          <MicronutrientPanel micronutrients={perServingMicronutrients} />
+        </div>
+      )}
 
       {/* Food/Recipe search overlay */}
       {showFoodSearch && (
