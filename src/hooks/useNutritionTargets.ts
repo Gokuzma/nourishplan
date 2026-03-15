@@ -69,9 +69,10 @@ export function useUpsertNutritionTargets() {
       fat_g?: number
       micronutrients?: Record<string, number>
       custom_goals?: Record<string, number>
+      macro_mode?: 'grams' | 'percent'
     }): Promise<NutritionTarget> => {
-      const { memberId, ...rest } = params
-      const payload = buildTargetUpsertPayload(rest)
+      const { memberId, macro_mode, ...rest } = params
+      const payload = { ...buildTargetUpsertPayload(rest), ...(macro_mode != null ? { macro_mode } : {}) }
 
       const conflictColumn = params.userId
         ? 'household_id,user_id'

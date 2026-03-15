@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNutritionTarget, useUpsertNutritionTargets } from '../../hooks/useNutritionTargets'
 import { TARGET_PRESETS } from '../../utils/mealPlan'
+import {
+  pctToGrams,
+  gramsToPct,
+  isMacroSumValid,
+  PROTEIN_KCAL_PER_G,
+  CARBS_KCAL_PER_G,
+  FAT_KCAL_PER_G,
+} from '../../utils/macroConversion'
 
 const PRESET_NAMES = ['Custom', ...Object.keys(TARGET_PRESETS)] as const
 
@@ -34,6 +42,8 @@ export function NutritionTargetsForm({ householdId, memberId, memberType, canEdi
 
   const [preset, setPreset] = useState<string>('Custom')
   const [macros, setMacros] = useState<MacroState>(emptyMacros)
+  const [percentages, setPercentages] = useState({ protein: '', carbs: '', fat: '' })
+  const [macroMode, setMacroMode] = useState<'grams' | 'percent'>('grams')
   const [micros, setMicros] = useState<Record<string, string>>({})
   const [customGoals, setCustomGoals] = useState<{ key: string; value: string }[]>([])
   const [microsOpen, setMicrosOpen] = useState(false)
@@ -43,11 +53,21 @@ export function NutritionTargetsForm({ householdId, memberId, memberType, canEdi
   // Pre-fill form from loaded target
   useEffect(() => {
     if (!target) return
-    setMacros({
+    const savedMode = target.macro_mode ?? 'grams'
+    setMacroMode(savedMode)
+    const gramsState = {
       calories: target.calories != null ? String(target.calories) : '',
       protein_g: target.protein_g != null ? String(target.protein_g) : '',
       carbs_g: target.carbs_g != null ? String(target.carbs_g) : '',
       fat_g: target.fat_g != null ? String(target.fat_g) : '',
+    }
+    setMacros(gramsState)
+    // Compute initial percentages from saved grams
+    const cal = target.calories ?? 0
+    setPercentages({
+      protein: target.protein_g != null ? String(gramsToPct(target.protein_g, cal, PROTEIN_KCAL_PER_G)) : '',
+      carbs: target.carbs_g != null ? String(gramsToPct(target.carbs_g, cal, CARBS_KCAL_PER_G)) : '',
+      fat: target.fat_g != null ? String(gramsToPct(target.fat_g, cal, FAT_KCAL_PER_G)) : '',
     })
     const microEntries: Record<string, string> = {}
     for (const k of DEFAULT_MICROS.map((m) => m.key)) {
@@ -69,17 +89,88 @@ export function NutritionTargetsForm({ householdId, memberId, memberType, canEdi
     setPreset(name)
     if (name === 'Custom') return
     const p = TARGET_PRESETS[name as keyof typeof TARGET_PRESETS]
-    setMacros({
+    const gramsState = {
       calories: String(p.calories),
       protein_g: String(p.protein_g),
       carbs_g: String(p.carbs_g),
       fat_g: String(p.fat_g),
+    }
+    setMacros(gramsState)
+    setPercentages({
+      protein: String(gramsToPct(p.protein_g, p.calories, PROTEIN_KCAL_PER_G)),
+      carbs: String(gramsToPct(p.carbs_g, p.calories, CARBS_KCAL_PER_G)),
+      fat: String(gramsToPct(p.fat_g, p.calories, FAT_KCAL_PER_G)),
     })
+  }
+
+  function switchMode(mode: 'grams' | 'percent') {
+    if (mode === macroMode) return
+    const cal = parseFloat(macros.calories) || 0
+    if (mode === 'percent') {
+      setPercentages({
+        protein: macros.protein_g ? String(gramsToPct(parseFloat(macros.protein_g), cal, PROTEIN_KCAL_PER_G)) : '',
+        carbs: macros.carbs_g ? String(gramsToPct(parseFloat(macros.carbs_g), cal, CARBS_KCAL_PER_G)) : '',
+        fat: macros.fat_g ? String(gramsToPct(parseFloat(macros.fat_g), cal, FAT_KCAL_PER_G)) : '',
+      })
+    } else {
+      setMacros((m) => ({
+        ...m,
+        protein_g: percentages.protein ? String(pctToGrams(parseFloat(percentages.protein), cal, PROTEIN_KCAL_PER_G)) : '',
+        carbs_g: percentages.carbs ? String(pctToGrams(parseFloat(percentages.carbs), cal, CARBS_KCAL_PER_G)) : '',
+        fat_g: percentages.fat ? String(pctToGrams(parseFloat(percentages.fat), cal, FAT_KCAL_PER_G)) : '',
+      }))
+    }
+    setMacroMode(mode)
   }
 
   function handleMacroChange(field: keyof MacroState, value: string) {
     setPreset('Custom')
     setMacros((m) => ({ ...m, [field]: value }))
+
+    if (field === 'calories') {
+      // Calorie changes in percent mode: prompt to recalculate grams
+      if (macroMode === 'percent') {
+        const newCal = parseFloat(value) || 0
+        const confirmed = window.confirm('Update macro grams to match new calorie target?')
+        if (confirmed) {
+          setMacros((m) => ({
+            ...m,
+            calories: value,
+            protein_g: percentages.protein ? String(pctToGrams(parseFloat(percentages.protein), newCal, PROTEIN_KCAL_PER_G)) : '',
+            carbs_g: percentages.carbs ? String(pctToGrams(parseFloat(percentages.carbs), newCal, CARBS_KCAL_PER_G)) : '',
+            fat_g: percentages.fat ? String(pctToGrams(parseFloat(percentages.fat), newCal, FAT_KCAL_PER_G)) : '',
+          }))
+        } else {
+          // Keep existing grams, but mode becomes stale — switch to grams mode
+          setMacroMode('grams')
+        }
+      }
+      return
+    }
+
+    // When editing grams, recalculate the corresponding percentage
+    if (macroMode === 'grams' || macroMode === 'percent') {
+      const cal = parseFloat(macros.calories) || 0
+      const grams = parseFloat(value) || 0
+      if (field === 'protein_g') {
+        setPercentages((p) => ({ ...p, protein: String(gramsToPct(grams, cal, PROTEIN_KCAL_PER_G)) }))
+      } else if (field === 'carbs_g') {
+        setPercentages((p) => ({ ...p, carbs: String(gramsToPct(grams, cal, CARBS_KCAL_PER_G)) }))
+      } else if (field === 'fat_g') {
+        setPercentages((p) => ({ ...p, fat: String(gramsToPct(grams, cal, FAT_KCAL_PER_G)) }))
+      }
+    }
+  }
+
+  function handlePercentageChange(macro: 'protein' | 'carbs' | 'fat', value: string) {
+    setPreset('Custom')
+    setPercentages((p) => ({ ...p, [macro]: value }))
+    // Recalculate corresponding grams in real time
+    const cal = parseFloat(macros.calories) || 0
+    const pct = parseFloat(value) || 0
+    const field = macro === 'protein' ? 'protein_g' : macro === 'carbs' ? 'carbs_g' : 'fat_g'
+    const kcalPerG = macro === 'fat' ? FAT_KCAL_PER_G : PROTEIN_KCAL_PER_G
+    setMacros((m) => ({ ...m, [field]: String(pctToGrams(pct, cal, kcalPerG)) }))
   }
 
   function handleMicroChange(key: string, value: string) {
@@ -124,6 +215,7 @@ export function NutritionTargetsForm({ householdId, memberId, memberType, canEdi
         fat_g: macros.fat_g ? parseFloat(macros.fat_g) : undefined,
         micronutrients,
         custom_goals,
+        macro_mode: macroMode,
       },
       {
         onSuccess: () => {
@@ -169,35 +261,138 @@ export function NutritionTargetsForm({ householdId, memberId, memberType, canEdi
 
       {/* Calories + Macros */}
       <div className="rounded-card border border-accent/30 bg-surface p-5">
-        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-text/60">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text/60">
           Calories and Macros
         </h3>
+
+        {/* Grams / Percent toggle */}
+        {canEdit && (
+          <div className="flex gap-2 mb-4">
+            <button
+              type="button"
+              onClick={() => switchMode('grams')}
+              className={`rounded-btn px-3 py-1.5 text-xs font-semibold transition-colors ${
+                macroMode === 'grams'
+                  ? 'bg-primary text-white'
+                  : 'border border-secondary bg-surface text-text/70'
+              }`}
+            >
+              Grams
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode('percent')}
+              className={`rounded-btn px-3 py-1.5 text-xs font-semibold transition-colors ${
+                macroMode === 'percent'
+                  ? 'bg-primary text-white'
+                  : 'border border-secondary bg-surface text-text/70'
+              }`}
+            >
+              Percent
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
-          {(
-            [
-              { field: 'calories', label: 'Calories (kcal)' },
-              { field: 'protein_g', label: 'Protein (g)' },
-              { field: 'carbs_g', label: 'Carbs (g)' },
-              { field: 'fat_g', label: 'Fat (g)' },
-            ] as { field: keyof MacroState; label: string }[]
-          ).map(({ field, label }) => (
-            <div key={field} className="flex flex-col gap-1">
-              <label htmlFor={field} className="text-sm font-medium text-text">
-                {label}
-              </label>
-              <input
-                id={field}
-                type="number"
-                min={0}
-                value={macros[field]}
-                onChange={(e) => handleMacroChange(field, e.target.value)}
-                disabled={!canEdit}
-                className="rounded-btn border border-accent/40 bg-surface px-3 py-2 text-text placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
-                placeholder="0"
-              />
-            </div>
-          ))}
+          {/* Calories — always in kcal */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="calories" className="text-sm font-medium text-text">
+              Calories (kcal)
+            </label>
+            <input
+              id="calories"
+              type="number"
+              min={0}
+              value={macros.calories}
+              onChange={(e) => handleMacroChange('calories', e.target.value)}
+              disabled={!canEdit}
+              className="rounded-btn border border-accent/40 bg-surface px-3 py-2 text-text placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              placeholder="0"
+            />
+          </div>
+
+          {/* Protein */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="protein_g" className="text-sm font-medium text-text">
+              {macroMode === 'percent' ? 'Protein (%)' : 'Protein (g)'}
+            </label>
+            <input
+              id="protein_g"
+              type="number"
+              min={0}
+              max={macroMode === 'percent' ? 100 : undefined}
+              value={macroMode === 'percent' ? percentages.protein : macros.protein_g}
+              onChange={(e) =>
+                macroMode === 'percent'
+                  ? handlePercentageChange('protein', e.target.value)
+                  : handleMacroChange('protein_g', e.target.value)
+              }
+              disabled={!canEdit}
+              className="rounded-btn border border-accent/40 bg-surface px-3 py-2 text-text placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              placeholder="0"
+            />
+          </div>
+
+          {/* Carbs */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="carbs_g" className="text-sm font-medium text-text">
+              {macroMode === 'percent' ? 'Carbs (%)' : 'Carbs (g)'}
+            </label>
+            <input
+              id="carbs_g"
+              type="number"
+              min={0}
+              max={macroMode === 'percent' ? 100 : undefined}
+              value={macroMode === 'percent' ? percentages.carbs : macros.carbs_g}
+              onChange={(e) =>
+                macroMode === 'percent'
+                  ? handlePercentageChange('carbs', e.target.value)
+                  : handleMacroChange('carbs_g', e.target.value)
+              }
+              disabled={!canEdit}
+              className="rounded-btn border border-accent/40 bg-surface px-3 py-2 text-text placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              placeholder="0"
+            />
+          </div>
+
+          {/* Fat */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="fat_g" className="text-sm font-medium text-text">
+              {macroMode === 'percent' ? 'Fat (%)' : 'Fat (g)'}
+            </label>
+            <input
+              id="fat_g"
+              type="number"
+              min={0}
+              max={macroMode === 'percent' ? 100 : undefined}
+              value={macroMode === 'percent' ? percentages.fat : macros.fat_g}
+              onChange={(e) =>
+                macroMode === 'percent'
+                  ? handlePercentageChange('fat', e.target.value)
+                  : handleMacroChange('fat_g', e.target.value)
+              }
+              disabled={!canEdit}
+              className="rounded-btn border border-accent/40 bg-surface px-3 py-2 text-text placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              placeholder="0"
+            />
+          </div>
         </div>
+
+        {/* Percent mode: P+C+F sum validation */}
+        {macroMode === 'percent' && (() => {
+          const pPct = parseFloat(percentages.protein) || 0
+          const cPct = parseFloat(percentages.carbs) || 0
+          const fPct = parseFloat(percentages.fat) || 0
+          const sum = Math.round((pPct + cPct + fPct) * 10) / 10
+          if (!isMacroSumValid(pPct, cPct, fPct)) {
+            return (
+              <p className="text-sm text-red-500 mt-3">
+                Percentages must sum to 100% (currently {sum}%)
+              </p>
+            )
+          }
+          return null
+        })()}
       </div>
 
       {/* Micronutrients (expandable) */}
