@@ -234,9 +234,11 @@ describe('hasMacroWarning', () => {
 
   it('no warning when combined total stays within 20% of target', () => {
     // protein target 100g, logged 70g, portion adds 15g => 85g total, within 80-120g range
-    const target = makeTarget({ protein_g: 100, carbs_g: 250, fat_g: 70 });
-    const logs = [makeLog({ protein_per_serving: 70, fat_per_serving: 10, carbs_per_serving: 50, calories_per_serving: 400, servings_logged: 1 })];
-    const portionMacros = { calories: 100, protein: 15, fat: 5, carbs: 20 };
+    // carbs target 100g, logged 60g, portion adds 20g => 80g total, exactly at 80% boundary (no warning)
+    // fat target 100g, logged 60g, portion adds 20g => 80g total, exactly at 80% boundary (no warning)
+    const target = makeTarget({ protein_g: 100, carbs_g: 100, fat_g: 100 });
+    const logs = [makeLog({ protein_per_serving: 70, fat_per_serving: 60, carbs_per_serving: 60, calories_per_serving: 400, servings_logged: 1 })];
+    const portionMacros = { calories: 100, protein: 15, fat: 20, carbs: 20 };
     expect(hasMacroWarning(target, logs, portionMacros)).toBe(false);
   });
 
@@ -250,9 +252,13 @@ describe('hasMacroWarning', () => {
 
   it('does not warn when protein is at 115% of target', () => {
     // protein target 100g, logged 70g, portion adds 45g => 115g total, within 20% over (<=120g)
-    const target = makeTarget({ protein_g: 100, carbs_g: 500, fat_g: 200 });
-    const logs = [makeLog({ protein_per_serving: 70, fat_per_serving: 10, carbs_per_serving: 50, calories_per_serving: 400, servings_logged: 1 })];
-    const portionMacros = { calories: 200, protein: 45, fat: 5, carbs: 20 };
+    // carbs and fat targets set so logged+portion stays within 80-120% range
+    const target = makeTarget({ protein_g: 100, carbs_g: 100, fat_g: 100 });
+    const logs = [makeLog({ protein_per_serving: 70, fat_per_serving: 80, carbs_per_serving: 80, calories_per_serving: 400, servings_logged: 1 })];
+    const portionMacros = { calories: 200, protein: 45, fat: 10, carbs: 10 };
+    // protein: 70+45=115, target*1.2=120 => 115 < 120 => no warning
+    // fat: 80+10=90, target*0.8=80 => 90 >= 80, target*1.2=120 => 90 <= 120 => no warning
+    // carbs: 80+10=90, same as fat => no warning
     expect(hasMacroWarning(target, logs, portionMacros)).toBe(false);
   });
 
