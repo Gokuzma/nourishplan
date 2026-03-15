@@ -4,13 +4,14 @@ interface ProgressRingProps {
   size?: number
   strokeWidth?: number
   color?: string
+  bgColor?: string
   label?: string
   showValue?: boolean
 }
 
 /**
  * SVG circular progress indicator comparing value to target.
- * Background ring is peach (#E8B4A2), fill is sage (#A8C5A0) by default.
+ * Background ring defaults to currentColor at low opacity — adapts to light/dark mode.
  */
 export function ProgressRing({
   value,
@@ -18,6 +19,7 @@ export function ProgressRing({
   size = 40,
   strokeWidth = 4,
   color = '#A8C5A0',
+  bgColor = 'currentColor',
   showValue = false,
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2
@@ -35,8 +37,9 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#E8B4A2"
+          stroke={bgColor}
           strokeWidth={strokeWidth}
+          strokeOpacity={bgColor === 'currentColor' ? 0.12 : 0.2}
         />
         {/* Progress arc */}
         <circle
