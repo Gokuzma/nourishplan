@@ -95,14 +95,21 @@ Plans:
 - [ ] 04-05-PLAN.md — Human verification of all Phase 4 features
 
 ### Phase 5: Portion Suggestions & Polish
-**Goal**: The app suggests how much each household member should eat per dish, micronutrients are fully visible, and the PWA passes production quality checks
+**Goal**: The app suggests how much each household member should eat per dish, micronutrients are fully visible, Open Food Facts is removed and replaced with Canadian Nutrient File, and the PWA passes production quality checks
 **Depends on**: Phase 4
 **Requirements**: TRCK-05
 **Success Criteria** (what must be TRUE):
   1. When viewing a meal plan, each household member sees a suggested portion size for each dish calculated from their personal targets
   2. A household member can view the full micronutrient breakdown for any recipe in the meal plan
   3. The app passes a Lighthouse PWA audit with installability and offline requirements met
-**Plans**: TBD
+  4. Open Food Facts integration is completely removed — no edge function, no UI tab, no references in code
+**Plans**: 5 plans
+Plans:
+- [ ] 05-01-PLAN.md — OFF removal, CNF edge function, type updates, and micronutrient constants
+- [ ] 05-02-PLAN.md — Portion suggestion algorithm TDD (pure functions and tests)
+- [ ] 05-03-PLAN.md — Unified USDA+CNF search UI and micronutrient display panel
+- [ ] 05-04-PLAN.md — Portion suggestion UI on meal plan and LogMealModal pre-fill
+- [ ] 05-05-PLAN.md — PWA audit fixes and human verification
 
 ## Progress
 
@@ -115,4 +122,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Food Data & Recipe Builder | 8/8 | Complete   | 2026-03-13 |
 | 3. Meal Planning & Targets | 5/6 | In Progress|  |
 | 4. Daily Logging & Summary | 3/5 | In Progress|  |
-| 5. Portion Suggestions & Polish | 0/TBD | Not started | - |
+| 5. Portion Suggestions & Polish | 0/5 | Not started | - |
+
+### Phase 6: Launch on gregok.ca
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)
