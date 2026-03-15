@@ -12,7 +12,7 @@ import { NutrientBreakdown } from '../components/log/NutrientBreakdown'
 import { LogMealModal } from '../components/log/LogMealModal'
 import { FreeformLogModal } from '../components/log/FreeformLogModal'
 import { PortionStepper } from '../components/log/PortionStepper'
-import { calcLogEntryNutrition, calcDayNutrition } from '../utils/nutrition'
+import { calcLogEntryNutrition, calcDayNutrition, MICRONUTRIENT_DISPLAY_ORDER, MICRONUTRIENT_LABELS } from '../utils/nutrition'
 import { getWeekStart } from '../utils/mealPlan'
 import { getUnloggedSlots } from '../utils/foodLogs'
 import type { FoodLog } from '../types/database'
@@ -156,6 +156,18 @@ function EditLogModal({ log, onClose }: EditLogModalProps) {
   )
 }
 
+// ─── Micronutrient ring colors ────────────────────────────────────────────────
+
+const MICRO_RING_COLORS: Record<string, string> = {
+  fiber: '#A8C5A0',
+  sodium: '#A2C4D8',
+  calcium: '#C4B4D8',
+  iron: '#D8A2A2',
+  potassium: '#D8C8A2',
+  vitamin_c: '#C8D8A2',
+  vitamin_a: '#D8B4A2',
+}
+
 // ─── HomePage ─────────────────────────────────────────────────────────────────
 
 export function HomePage() {
@@ -185,6 +197,18 @@ export function HomePage() {
   const deleteLog = useDeleteFoodLog()
 
   const totals = calcDayNutrition(logs.map(calcLogEntryNutrition))
+
+  const microTotals = MICRONUTRIENT_DISPLAY_ORDER.reduce((acc, key) => {
+    acc[key] = logs.reduce((sum, log) =>
+      sum + ((log.micronutrients?.[key] ?? 0) * log.servings_logged), 0)
+    return acc
+  }, {} as Record<string, number>)
+
+  const hasIncompleteMicroData = logs.length > 0 && logs.some(log =>
+    Object.keys(log.micronutrients ?? {}).length === 0
+  )
+
+  const [showMicroDetail, setShowMicroDetail] = useState(false)
 
   const dayIndex = getDayIndex(selectedDate, weekStart)
   const daySlots = allSlots.filter(s => s.day_index === dayIndex && s.meal_id != null)
@@ -316,6 +340,63 @@ export function HomePage() {
         </div>
       </div>
 
+      {/* Micronutrient summary — tap to expand detail */}
+      <div
+        className="bg-surface rounded-[--radius-card] border border-secondary"
+        onClick={() => setShowMicroDetail(v => !v)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowMicroDetail(v => !v) }}
+      >
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-text/50 uppercase tracking-wide">Micronutrients</p>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-text/40"
+              style={{ transform: showMicroDetail ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {MICRONUTRIENT_DISPLAY_ORDER.map(key => (
+              <div key={key} className="flex flex-col items-center gap-1">
+                <ProgressRing
+                  value={microTotals[key] ?? 0}
+                  target={target?.micronutrients?.[key] ?? 0}
+                  size={40}
+                  strokeWidth={3}
+                  color={MICRO_RING_COLORS[key]}
+                />
+                <span className="text-xs text-text/50 text-center leading-tight">
+                  {MICRONUTRIENT_LABELS[key]?.toLowerCase() ?? key}
+                </span>
+              </div>
+            ))}
+          </div>
+          {hasIncompleteMicroData && (
+            <p className="text-xs text-text/40 mt-2">
+              * Some foods have no micronutrient data — totals may be incomplete
+            </p>
+          )}
+        </div>
+
+        {/* Expanded detail view with per-nutrient progress bars */}
+        {showMicroDetail && (
+          <div className="border-t border-secondary/50" onClick={(e) => e.stopPropagation()}>
+            <NutrientBreakdown logs={logs} target={target} />
+          </div>
+        )}
+      </div>
+
       {/* Action buttons */}
       <div className="flex items-center gap-3">
         <button
@@ -350,9 +431,6 @@ export function HomePage() {
         onEditLog={log => setEditLog(log)}
         onDeleteLog={handleDeleteLog}
       />
-
-      {/* Nutrient breakdown */}
-      <NutrientBreakdown logs={logs} target={target} />
 
       {/* Log meal modal (new log from plan slot) */}
       {logMealSlot?.meals && (
