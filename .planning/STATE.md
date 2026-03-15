@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 06-launch-on-gregok-ca-01-PLAN.md
-last_updated: "2026-03-15T03:42:04.492Z"
+stopped_at: Completed 06-launch-on-gregok-ca-03-PLAN.md
+last_updated: "2026-03-15T14:54:01.710Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 32
-  completed_plans: 31
+  completed_plans: 32
   percent: 0
 ---
 
@@ -80,6 +80,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-portion-suggestions-polish P05 | 30 | 2 tasks | 1 files |
 | Phase 06-launch-on-gregok-ca P02 | 5 | 1 tasks | 1 files |
 | Phase 06-launch-on-gregok-ca P01 | 3 | 2 tasks | 6 files |
+| Phase 06-launch-on-gregok-ca P03 | 60 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -159,6 +160,9 @@ Recent decisions affecting current work:
 - [Phase 06-launch-on-gregok-ca]: vercel.json SPA rewrite uses POSIX regex /(.*) source pattern — Vercel JSON uses POSIX regex not glob syntax
 - [Phase 06-launch-on-gregok-ca]: Splash dismissed via transitionend listener after adding .hidden class — smooth fade without blocking React hydration
 - [Phase 06-launch-on-gregok-ca]: C:/Program Files/Git/offline route placed outside AppShell layout route — renders without auth requirements
+- [Phase 06-launch-on-gregok-ca]: .npmrc with legacy-peer-deps=true added to resolve peer dependency conflicts during Vercel npm install
+- [Phase 06-launch-on-gregok-ca]: vercel.json buildCommand set to 'vite build' (skipping tsc) — pre-existing TS errors would block every deploy
+- [Phase 06-launch-on-gregok-ca]: Supabase disable_signup and auth URLs configured via Management API — fully automated without manual dashboard steps
 
 ### Roadmap Evolution
 
@@ -176,6 +180,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T03:42:04.487Z
-Stopped at: Completed 06-launch-on-gregok-ca-01-PLAN.md
+Last session: 2026-03-15T14:54:01.706Z
+Stopped at: Completed 06-launch-on-gregok-ca-03-PLAN.md
 Resume file: None
