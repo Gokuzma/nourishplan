@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-daily-logging-summary-04-PLAN.md
-last_updated: "2026-03-14T05:19:35.069Z"
+stopped_at: Phase 5 context gathered
+last_updated: "2026-03-15T02:13:23.762Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 4
   total_plans: 24
   completed_plans: 24
@@ -137,6 +137,10 @@ Recent decisions affecting current work:
 - [Phase 04-daily-logging-summary]: getDayIndex uses Date.UTC arithmetic on YYYY-MM-DD parts — avoids Date object construction, consistent with Phase 3 UTC decision
 - [Phase 04-daily-logging-summary]: week_start_day added to useHousehold select query — was omitted, causing household week start setting to have no effect
 
+### Roadmap Evolution
+
+- Phase 6 added: Launch on gregok.ca
+
 ### Pending Todos
 
 None yet.
@@ -149,6 +153,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T23:14:57.726Z
-Stopped at: Completed 04-daily-logging-summary-04-PLAN.md
-Resume file: None
+Last session: 2026-03-15T02:13:23.758Z
+Stopped at: Phase 5 context gathered
+Resume file: .planning/phases/05-portion-suggestions-polish/05-CONTEXT.md
