@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 context gathered
-last_updated: "2026-03-15T02:13:23.762Z"
+stopped_at: Completed 05-portion-suggestions-polish-01-PLAN.md
+last_updated: "2026-03-15T02:34:34.342Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 24
-  completed_plans: 24
+  total_plans: 29
+  completed_plans: 25
   percent: 0
 ---
 
@@ -73,6 +73,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-daily-logging-summary P03 | 2 | 2 tasks | 8 files |
 | Phase 04-daily-logging-summary P02 | 3 | 2 tasks | 4 files |
 | Phase 04-daily-logging-summary P04 | 4 | 2 tasks | 5 files |
+| Phase 05-portion-suggestions-polish P01 | 12 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,9 @@ Recent decisions affecting current work:
 - [Phase 04-daily-logging-summary]: EditLogModal colocated in HomePage.tsx — keeps mutation hooks at page level, avoids threading delete/update props through DailyLogList
 - [Phase 04-daily-logging-summary]: getDayIndex uses Date.UTC arithmetic on YYYY-MM-DD parts — avoids Date object construction, consistent with Phase 3 UTC decision
 - [Phase 04-daily-logging-summary]: week_start_day added to useHousehold select query — was omitted, causing household week start setting to have no effect
+- [Phase 05-portion-suggestions-polish]: CNF vitamin_a nutrient ID is 319 (not 318 like USDA) — CNF uses retinol activity equivalents
+- [Phase 05-portion-suggestions-polish]: CNF fetch-all-filter: cache full food list at module level, filter by keyword split — avoids per-query HTTP round trips
+- [Phase 05-portion-suggestions-polish]: OFF barcode IDs not reliably distinguishable from USDA IDs in recipe_ingredients — only food_logs with item_type='off' deleted
 
 ### Roadmap Evolution
 
@@ -153,6 +157,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T02:13:23.758Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-portion-suggestions-polish/05-CONTEXT.md
+Last session: 2026-03-15T02:34:34.338Z
+Stopped at: Completed 05-portion-suggestions-polish-01-PLAN.md
+Resume file: None

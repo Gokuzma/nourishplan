@@ -55,7 +55,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TRCK-02**: Each household member can set micronutrient targets (vitamins, minerals, fiber, sodium)
 - [x] **TRCK-03**: Each household member can set custom nutrition goals (e.g., water intake, sugar limit)
 - [x] **TRCK-04**: Each household member can log what they ate with portion size (e.g., 1.5 servings)
-- [ ] **TRCK-05**: System suggests portion sizes per person per dish based on their individual targets
+- [x] **TRCK-05**: System suggests portion sizes per person per dish based on their individual targets
 - [x] **TRCK-06**: User can override suggested portions with actual amount eaten
 - [x] **TRCK-07**: Daily nutrition summary shows calories, macros, micros, and custom goals vs targets
 
@@ -134,7 +134,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRCK-02 | Phase 3 | Complete |
 | TRCK-03 | Phase 3 | Complete |
 | TRCK-04 | Phase 4 | Complete |
-| TRCK-05 | Phase 5 | Pending |
+| TRCK-05 | Phase 5 | Complete |
 | TRCK-06 | Phase 4 | Complete |
 | TRCK-07 | Phase 4 | Complete |
 | PLAT-01 | Phase 1 | Complete |
