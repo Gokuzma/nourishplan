@@ -27,36 +27,23 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-        {navItems.map((item) =>
-          item.comingSoon ? (
-            <span
-              key={item.label}
-              role="link"
-              aria-disabled="true"
-              className="flex items-center gap-3 px-3 py-2 rounded-[--radius-btn] text-text/40 cursor-not-allowed select-none"
-              title="Coming soon"
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </span>
-          ) : (
-            <NavLink
-              key={item.label}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-[--radius-btn] transition-colors ${
-                  isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-text/70 hover:bg-secondary hover:text-text'
-                }`
-              }
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </NavLink>
-          )
-        )}
+        {navItems.map((item) => (
+          <NavLink
+            key={item.label}
+            to={item.to}
+            end={item.to === '/'}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-[--radius-btn] transition-colors ${
+                isActive
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-text/70 hover:bg-secondary hover:text-text'
+              }`
+            }
+          >
+            <span>{item.icon}</span>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
       </nav>
 
       <div className="px-3 py-4 border-t border-secondary">

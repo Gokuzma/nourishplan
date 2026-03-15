@@ -166,7 +166,7 @@ export function useDeleteFoodLog() {
 
 /**
  * Returns all food log entries for the given household and date, across all members.
- * Used by usePortionSuggestions to gather per-member logs without N hook calls.
+ * Gathers per-member logs without N hook calls.
  */
 export function useHouseholdDayLogs(
   householdId: string | undefined,

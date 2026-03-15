@@ -5,7 +5,7 @@ export function toggleTheme(preference: ThemePreference) {
   applyStoredTheme(preference)
 }
 
-export function applyStoredTheme(stored?: string | null) {
+function applyStoredTheme(stored?: string | null) {
   const value = stored ?? localStorage.getItem('theme')
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   document.documentElement.classList.toggle(
