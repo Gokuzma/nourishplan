@@ -92,8 +92,8 @@ export function useCreateHousehold() {
 
       return { id: householdId, name, created_at: new Date().toISOString() }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['household'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }
