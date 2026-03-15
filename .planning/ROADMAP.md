@@ -122,14 +122,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Food Data & Recipe Builder | 8/8 | Complete   | 2026-03-13 |
 | 3. Meal Planning & Targets | 5/6 | In Progress|  |
 | 4. Daily Logging & Summary | 3/5 | In Progress|  |
-| 5. Portion Suggestions & Polish | 0/5 | Not started | - |
+| 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
 
 ### Phase 6: Launch on gregok.ca
 
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Plans:** 2/5 plans executed
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 6 to break down)

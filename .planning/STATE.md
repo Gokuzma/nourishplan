@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 05-portion-suggestions-polish-01-PLAN.md
-last_updated: "2026-03-15T02:34:34.342Z"
+stopped_at: Completed 05-portion-suggestions-polish-02-PLAN.md
+last_updated: "2026-03-15T02:35:15.956Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 29
-  completed_plans: 25
+  completed_plans: 26
   percent: 0
 ---
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-daily-logging-summary P02 | 3 | 2 tasks | 4 files |
 | Phase 04-daily-logging-summary P04 | 4 | 2 tasks | 5 files |
 | Phase 05-portion-suggestions-polish P01 | 12 | 2 tasks | 4 files |
+| Phase 05-portion-suggestions-polish P02 | 12 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,8 @@ Recent decisions affecting current work:
 - [Phase 05-portion-suggestions-polish]: CNF vitamin_a nutrient ID is 319 (not 318 like USDA) — CNF uses retinol activity equivalents
 - [Phase 05-portion-suggestions-polish]: CNF fetch-all-filter: cache full food list at module level, filter by keyword split — avoids per-query HTTP round trips
 - [Phase 05-portion-suggestions-polish]: OFF barcode IDs not reliably distinguishable from USDA IDs in recipe_ingredients — only food_logs with item_type='off' deleted
+- [Phase 05-portion-suggestions-polish]: calcPortionSuggestions uses remaining-calorie proportional split; members with null target receive 1.0 serving and null percentage
+- [Phase 05-portion-suggestions-polish]: hasMacroWarning checks (logged + portion) against target * 1.2 (over) and target * 0.8 (under) for protein, carbs, fat independently
 
 ### Roadmap Evolution
 
@@ -157,6 +160,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T02:34:34.338Z
-Stopped at: Completed 05-portion-suggestions-polish-01-PLAN.md
+Last session: 2026-03-15T02:35:15.950Z
+Stopped at: Completed 05-portion-suggestions-polish-02-PLAN.md
 Resume file: None
