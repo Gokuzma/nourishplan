@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 08-04-PLAN.md
-last_updated: "2026-03-15T17:53:33.627Z"
+stopped_at: Completed 08-05-PLAN.md
+last_updated: "2026-03-15T17:53:47.021Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 8
@@ -87,6 +87,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-v1-1-ui-polish-and-usability-improvements P03 | 2 | 1 tasks | 2 files |
 | Phase 08-v1-1-ui-polish-and-usability-improvements P04 | 153 | 2 tasks | 3 files |
 | Phase 08-v1-1-ui-polish-and-usability-improvements P05 | 20 | 2 tasks | 4 files |
+| Phase 08-v1-1-ui-polish-and-usability-improvements P06 | 10 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -183,6 +184,8 @@ Recent decisions affecting current work:
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: Drawer state kept in TabBar (not AppShell) — z-50 fixed positioning makes it render above all content without needing to lift state
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: Avatar upload validates MIME type (jpg/png/webp) and 2MB max in uploadAvatar before calling Supabase Storage
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: Non-admin users see household name as read-only text label in SettingsPage — no disabled input
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: macros state always holds grams even in percent mode — submit always sends absolute grams without extra conversion
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: calorie change in percent mode uses window.confirm for recalculation prompt; declining switches to grams mode to avoid stale percentages
 
 ### Roadmap Evolution
 
@@ -201,6 +204,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T17:53:22.097Z
-Stopped at: Completed 08-04-PLAN.md
+Last session: 2026-03-15T17:53:36.248Z
+Stopped at: Completed 08-05-PLAN.md
 Resume file: None
