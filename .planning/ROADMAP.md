@@ -114,7 +114,7 @@ Plans:
 ### Phase 6: Launch on gregok.ca
 **Goal**: Deploy NourishPlan as a production PWA at nourishplan.gregok.ca with launch polish, invite-only auth, and a portfolio project card
 **Depends on**: Phase 5
-**Requirements**: LAUNCH-01, LAUNCH-02, LAUNCH-03, LAUNCH-04, LAUNCH-05, LAUNCH-06, LAUNCH-07, LAUNCH-08, LAUNCH-09, LAUNCH-10
+**Requirements**: LAUNCH-01, LAUNCH-02, LAUNCH-03, LAUNCH-04, LAUNCH-05, LAUNCH-06
 **Success Criteria** (what must be TRUE):
   1. NourishPlan is live at https://nourishplan.gregok.ca with all SPA routes working
   2. Branded splash screen appears while the app loads
@@ -161,7 +161,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 ### Phase 8: v1.1 UI polish and usability improvements
 
 **Goal:** Polish existing features with dark mode completeness, meal plan nutrition rings, realistic measurement units, mobile drawer navigation, expanded Settings with profile/household editing, and macro percentage scaling on nutrition targets
-**Requirements**: POLISH-01, POLISH-02, POLISH-03, POLISH-04, POLISH-05, POLISH-06, POLISH-07, POLISH-08, POLISH-09, POLISH-10
+**Requirements**: POLISH-01, POLISH-02, POLISH-03, POLISH-04, POLISH-05, POLISH-06
 **Depends on:** Phase 7
 **Success Criteria** (what must be TRUE):
   1. All components render correctly in dark mode with visible ring colors and proper contrast
