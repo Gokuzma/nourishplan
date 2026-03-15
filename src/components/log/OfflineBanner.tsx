@@ -6,7 +6,7 @@ export function OfflineBanner() {
   if (isOnline) return null
 
   return (
-    <div className="bg-amber-100 text-amber-800 text-sm px-4 py-2 text-center w-full">
+    <div className="bg-accent/20 text-text border-b border-accent/40 text-sm px-4 py-2 text-center w-full">
       You are offline. Some features are unavailable.
     </div>
   )
