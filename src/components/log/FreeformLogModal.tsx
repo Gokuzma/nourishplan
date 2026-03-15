@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PortionStepper } from './PortionStepper'
+import type { PortionUnit } from './PortionStepper'
 import { FoodSearch } from '../food/FoodSearch'
 import { useInsertFoodLog } from '../../hooks/useFoodLogs'
 import type { NormalizedFoodResult } from '../../types/database'
@@ -14,6 +15,19 @@ interface FreeformLogModalProps {
 
 type Step = 'search' | 'confirm'
 
+const GRAMS_UNIT: PortionUnit = { description: 'grams', grams: 1 }
+
+function buildUnits(food: NormalizedFoodResult): PortionUnit[] {
+  if (!food.portions || food.portions.length === 0) return []
+  // Map portions to PortionUnit; append grams as fallback
+  const units: PortionUnit[] = food.portions.map(p => ({
+    description: p.description,
+    grams: p.grams,
+  }))
+  units.push(GRAMS_UNIT)
+  return units
+}
+
 export function FreeformLogModal({
   isOpen,
   onClose,
@@ -23,7 +37,8 @@ export function FreeformLogModal({
 }: FreeformLogModalProps) {
   const [step, setStep] = useState<Step>('search')
   const [selectedFood, setSelectedFood] = useState<NormalizedFoodResult | null>(null)
-  const [servings, setServings] = useState(1.0)
+  const [quantity, setQuantity] = useState(1.0)
+  const [selectedUnit, setSelectedUnit] = useState<PortionUnit>(GRAMS_UNIT)
   const [isPrivate, setIsPrivate] = useState(false)
 
   const insertLog = useInsertFoodLog()
@@ -32,7 +47,10 @@ export function FreeformLogModal({
 
   function handleFoodSelect(food: NormalizedFoodResult) {
     setSelectedFood(food)
-    setServings(1.0)
+    setQuantity(1.0)
+    // Default to first household serving unit, fall back to grams
+    const units = buildUnits(food)
+    setSelectedUnit(units.length > 0 ? units[0] : GRAMS_UNIT)
     setStep('confirm')
   }
 
@@ -42,15 +60,25 @@ export function FreeformLogModal({
     insertLog.reset()
   }
 
+  // Compute total grams from quantity × selected unit
+  function totalGrams(): number {
+    return quantity * selectedUnit.grams
+  }
+
+  // Scale per-100g macros by total grams
+  function scaledMacro(per100g: number): number {
+    return (totalGrams() / 100) * per100g
+  }
+
   async function handleLog() {
     if (!selectedFood) return
 
-    // For custom foods use serving_grams as base (treated as 1 serving);
-    // for USDA/OFF foods the macros are stored per-100g so 1 serving = 100g.
-    const caloriesPerServing = selectedFood.calories
-    const proteinPerServing = selectedFood.protein
-    const fatPerServing = selectedFood.fat
-    const carbsPerServing = selectedFood.carbs
+    const grams = totalGrams()
+    // Store per-serving macros as the macro values for the total amount logged (1 serving = grams logged)
+    const caloriesPerServing = (grams / 100) * selectedFood.calories
+    const proteinPerServing = (grams / 100) * selectedFood.protein
+    const fatPerServing = (grams / 100) * selectedFood.fat
+    const carbsPerServing = (grams / 100) * selectedFood.carbs
 
     // item_type: custom foods use 'food', external sources use their source string
     const itemType = selectedFood.source === 'custom' ? 'food' : selectedFood.source
@@ -66,7 +94,7 @@ export function FreeformLogModal({
         item_type: itemType,
         item_id: selectedFood.id,
         item_name: selectedFood.name,
-        servings_logged: servings,
+        servings_logged: 1,
         calories_per_serving: caloriesPerServing,
         protein_per_serving: proteinPerServing,
         fat_per_serving: fatPerServing,
@@ -81,6 +109,9 @@ export function FreeformLogModal({
       // Error is surfaced via insertLog.isError
     }
   }
+
+  const units = selectedFood ? buildUnits(selectedFood) : []
+  const hasUnits = units.length > 0
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -124,34 +155,42 @@ export function FreeformLogModal({
             <div>
               <p className="font-semibold text-text">{selectedFood.name}</p>
               <p className="text-xs text-text/50 mt-0.5">
-                Per serving: {Math.round(selectedFood.calories)} kcal &middot; P {selectedFood.protein.toFixed(1)}g &middot; C {selectedFood.carbs.toFixed(1)}g &middot; F {selectedFood.fat.toFixed(1)}g
+                Per 100g: {Math.round(selectedFood.calories)} kcal &middot; P {selectedFood.protein.toFixed(1)}g &middot; C {selectedFood.carbs.toFixed(1)}g &middot; F {selectedFood.fat.toFixed(1)}g
               </p>
             </div>
 
-            {/* Nutrition preview scaled by servings */}
+            {/* Nutrition preview scaled by quantity × unit */}
             <div className="flex gap-4 p-3 rounded-[--radius-card] bg-secondary/20">
               <div className="text-center flex-1">
                 <p className="text-xs text-text/50">Calories</p>
-                <p className="font-semibold text-text">{Math.round(selectedFood.calories * servings)}</p>
+                <p className="font-semibold text-text">{Math.round(scaledMacro(selectedFood.calories))}</p>
               </div>
               <div className="text-center flex-1">
                 <p className="text-xs text-text/50">Protein</p>
-                <p className="font-semibold text-text">{(selectedFood.protein * servings).toFixed(1)}g</p>
+                <p className="font-semibold text-text">{scaledMacro(selectedFood.protein).toFixed(1)}g</p>
               </div>
               <div className="text-center flex-1">
                 <p className="text-xs text-text/50">Carbs</p>
-                <p className="font-semibold text-text">{(selectedFood.carbs * servings).toFixed(1)}g</p>
+                <p className="font-semibold text-text">{scaledMacro(selectedFood.carbs).toFixed(1)}g</p>
               </div>
               <div className="text-center flex-1">
                 <p className="text-xs text-text/50">Fat</p>
-                <p className="font-semibold text-text">{(selectedFood.fat * servings).toFixed(1)}g</p>
+                <p className="font-semibold text-text">{scaledMacro(selectedFood.fat).toFixed(1)}g</p>
               </div>
             </div>
 
             {/* Portion stepper */}
             <div>
-              <p className="text-sm font-medium text-text/70 mb-2">Servings</p>
-              <PortionStepper value={servings} onChange={setServings} />
+              <p className="text-sm font-medium text-text/70 mb-2">
+                {hasUnits ? 'Amount' : 'Servings'}
+              </p>
+              <PortionStepper
+                value={quantity}
+                onChange={setQuantity}
+                units={hasUnits ? units : undefined}
+                selectedUnit={hasUnits ? selectedUnit : undefined}
+                onUnitChange={hasUnits ? setSelectedUnit : undefined}
+              />
             </div>
 
             {/* Privacy toggle */}
