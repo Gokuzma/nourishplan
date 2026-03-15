@@ -190,7 +190,9 @@ Plans:
   2. `applyStoredTheme` export is removed from theme.ts (no orphaned exports)
   3. OfflineBanner renders correctly in dark mode using theme tokens instead of hardcoded amber classes
   4. `comingSoon` dead code branch is removed from Sidebar.tsx
-Plans: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme token fix
 
 ### Phase 10: Requirements Documentation Formalization
 **Goal:** Add LAUNCH and POLISH requirement definitions to REQUIREMENTS.md so all implemented features have formal requirement entries
@@ -201,4 +203,6 @@ Plans: TBD
   1. LAUNCH-01 through LAUNCH-10 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
   2. POLISH-01 through POLISH-10 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
   3. Traceability table includes all 20 new requirements mapped to their phases
-Plans: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme token fix
