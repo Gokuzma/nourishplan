@@ -177,6 +177,7 @@ export interface FoodLog {
   fat_per_serving: number
   carbs_per_serving: number
   micronutrients: Record<string, number>
+  serving_unit: string | null
   is_private: boolean
   created_at: string
   updated_at: string

@@ -19,6 +19,7 @@ export interface InsertFoodLogParams {
   fat_per_serving: number
   carbs_per_serving: number
   micronutrients?: Record<string, number>
+  serving_unit?: string | null
   is_private?: boolean
 }
 
@@ -91,6 +92,7 @@ export function useInsertFoodLog() {
           fat_per_serving: params.fat_per_serving,
           carbs_per_serving: params.carbs_per_serving,
           micronutrients: params.micronutrients ?? {},
+          serving_unit: params.serving_unit ?? null,
           is_private: params.is_private ?? false,
         })
         .select()
@@ -118,13 +120,25 @@ export function useUpdateFoodLog() {
     mutationFn: async ({
       id,
       servings_logged,
+      calories_per_serving,
+      protein_per_serving,
+      fat_per_serving,
+      carbs_per_serving,
       is_private,
     }: {
       id: string
       servings_logged: number
+      calories_per_serving?: number
+      protein_per_serving?: number
+      fat_per_serving?: number
+      carbs_per_serving?: number
       is_private?: boolean
     }): Promise<FoodLog> => {
       const updates: Record<string, unknown> = { servings_logged }
+      if (calories_per_serving !== undefined) updates.calories_per_serving = calories_per_serving
+      if (protein_per_serving !== undefined) updates.protein_per_serving = protein_per_serving
+      if (fat_per_serving !== undefined) updates.fat_per_serving = fat_per_serving
+      if (carbs_per_serving !== undefined) updates.carbs_per_serving = carbs_per_serving
       if (is_private !== undefined) updates.is_private = is_private
 
       const { data, error } = await supabase
@@ -221,6 +235,7 @@ export function useBulkInsertFoodLogs() {
         fat_per_serving: params.fat_per_serving,
         carbs_per_serving: params.carbs_per_serving,
         micronutrients: params.micronutrients ?? {},
+        serving_unit: params.serving_unit ?? null,
         is_private: params.is_private ?? false,
       }))
 
