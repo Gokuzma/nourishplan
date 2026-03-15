@@ -36,6 +36,7 @@ key-files:
     - src/components/log/LogEntryItem.tsx
     - src/components/log/DailyLogList.tsx
     - src/components/layout/TabBar.tsx
+    - src/components/layout/Sidebar.tsx
     - src/App.tsx
     - src/components/recipe/RecipeBuilder.tsx
     - src/components/meal/MealBuilder.tsx
@@ -90,6 +91,7 @@ completed: 2026-03-15
 2. **Task 1: Wire HomePage with search bar trigger and FoodSearchOverlay** - `9dc7b3c` (feat)
 3. **Task 2: Add micronutrient drill-down to LogEntryItem** - `801ec97` (feat)
 4. **Task 3: Remove Foods tab, /foods route, delete dead files; wire RecipeBuilder** - `8d5dc80` (feat)
+5. **Fix: Remove Foods link from desktop Sidebar (user-applied during verification)** - `f017d43` (fix)
 
 ## Files Created/Modified
 
@@ -98,6 +100,7 @@ completed: 2026-03-15
 - `src/components/log/LogEntryItem.tsx` - Expandable row with micronutrient section and Edit button
 - `src/components/log/DailyLogList.tsx` - Updated empty state text
 - `src/components/layout/TabBar.tsx` - Removed Foods tab
+- `src/components/layout/Sidebar.tsx` - Removed Foods link (fix applied during checkpoint verification)
 - `src/App.tsx` - Removed FoodsPage import and /foods route
 - `src/components/recipe/RecipeBuilder.tsx` - Migrated from FoodSearch to FoodSearchOverlay; separate recipe picker panel
 - `src/components/meal/MealBuilder.tsx` - Migrated from FoodSearch to FoodSearchOverlay
@@ -140,8 +143,18 @@ completed: 2026-03-15
 
 ---
 
-**Total deviations:** 3 auto-fixed (2 blocking, 1 bug)
-**Impact on plan:** All auto-fixes directly caused by deleting FoodSearch.tsx. No scope creep.
+**4. [Rule 2 - Missing] Sidebar.tsx Foods link not covered by plan**
+- **Found during:** Task 4 checkpoint verification (human review)
+- **Issue:** Desktop Sidebar retained a Foods navigation link after TabBar cleanup; plan only specified TabBar
+- **Fix:** User identified and applied fix — removed Foods link from Sidebar.tsx
+- **Files modified:** src/components/layout/Sidebar.tsx
+- **Verification:** Confirmed via visual inspection during checkpoint — 14/14 checks passed
+- **Committed in:** f017d43 (user-applied fix)
+
+---
+
+**Total deviations:** 4 (3 auto-fixed, 1 user-applied during verification)
+**Impact on plan:** All fixes directly caused by Foods tab removal. No scope creep.
 
 ## Issues Encountered
 
@@ -153,9 +166,11 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- Phase 12 complete. Home page food logging via FoodSearchOverlay is fully wired.
+- Phase 12 complete. All 14 checkpoint checks passed (human-verified).
+- Home page food logging via FoodSearchOverlay is fully wired.
 - RecipeBuilder and MealBuilder both use FoodSearchOverlay consistently.
-- Checkpoint (Task 4) awaits human verification at https://nourishplan.gregok.ca
+- Navigation cleaned up across TabBar and Sidebar; /foods returns 404.
+- Ready for Phase 13: Recipe, Meal Plan & Account Management.
 
 ---
 *Phase: 12-home-page-food-search-redesign*
