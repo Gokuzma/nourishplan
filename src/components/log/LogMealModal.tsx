@@ -40,7 +40,9 @@ export function LogMealModal({
   memberType,
   suggestedServings,
 }: LogMealModalProps) {
-  const [servings, setServings] = useState(suggestedServings ?? 1.0)
+  const [servings, setServings] = useState(
+    suggestedServings !== undefined ? Math.round(suggestedServings * 10) / 10 : 1.0
+  )
   const [isPrivate, setIsPrivate] = useState(false)
   // Track whether user has manually adjusted the stepper
   const hasUserEdited = useRef(false)
@@ -49,7 +51,7 @@ export function LogMealModal({
   // update the stepper only if the user hasn't touched it yet.
   useEffect(() => {
     if (suggestedServings !== undefined && !hasUserEdited.current) {
-      setServings(suggestedServings)
+      setServings(Math.round(suggestedServings * 10) / 10)
     }
   }, [suggestedServings])
 

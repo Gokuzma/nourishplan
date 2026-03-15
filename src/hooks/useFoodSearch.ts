@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { NormalizedFoodResult } from '../types/database'
@@ -47,7 +48,8 @@ export function useFoodSearch(query: string) {
   const error = (usdaQuery.error && cnfQuery.error) ? usdaQuery.error : null
 
   // Merge results: CNF first, skip USDA items whose lowercase name already appears in CNF
-  const data: NormalizedFoodResult[] = (() => {
+  // useMemo prevents new array reference on every render (avoids infinite useEffect loops in consumers)
+  const data = useMemo(() => {
     const cnfResults = cnfQuery.data ?? []
     const usdaResults = usdaQuery.data ?? []
 
@@ -66,7 +68,7 @@ export function useFoodSearch(query: string) {
     }
 
     return merged
-  })()
+  }, [cnfQuery.data, usdaQuery.data])
 
   return { data, isLoading, error }
 }
