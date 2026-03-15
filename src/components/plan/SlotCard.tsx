@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
+import { PortionSuggestionRow } from './PortionSuggestionRow'
 import type { MealPlanSlot, Meal, MealItem } from '../../types/database'
+import type { PortionResult } from '../../utils/portionSuggestions'
 
 export type SlotWithMeal = MealPlanSlot & {
   meals: (Meal & { meal_items: MealItem[] }) | null
@@ -11,6 +14,9 @@ interface SlotCardProps {
   onAssign: () => void
   onClear: () => void
   onSwap: () => void
+  onLog?: () => void
+  suggestions?: PortionResult | null
+  currentUserId?: string
 }
 
 function calcSlotCalories(meal: (Meal & { meal_items: MealItem[] }) | null): number {
@@ -31,8 +37,11 @@ function calcSlotCalories(meal: (Meal & { meal_items: MealItem[] }) | null): num
 
 /**
  * Single meal slot card showing assigned meal name + calories, or an empty state.
+ * When suggestions are provided, shows the current user's portion inline with an
+ * expandable section to see all household members' suggestions.
  */
-export function SlotCard({ slotName, slot, onAssign, onClear, onSwap }: SlotCardProps) {
+export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId }: SlotCardProps) {
+  const [expanded, setExpanded] = useState(false)
   const meal = slot?.meals ?? null
   const calories = calcSlotCalories(meal)
 
@@ -51,48 +60,119 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap }: SlotCard
     )
   }
 
+  const currentUserSuggestion = suggestions?.suggestions.find(s => s.memberId === currentUserId) ?? null
+  const hasExpandableSuggestions = suggestions && suggestions.suggestions.length > 0
+
   return (
-    <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-accent/30 bg-surface shadow-sm">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-text truncate font-sans">{meal.name}</p>
-        <p className="text-xs text-text/50 font-sans">{Math.round(calories)} kcal</p>
-      </div>
-      <div className="flex items-center gap-1 ml-2 shrink-0">
-        {!slot?.is_override && (
+    <div className="rounded-lg border border-accent/30 bg-surface shadow-sm">
+      {/* Main row */}
+      <div className="flex items-center justify-between py-2 px-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-text truncate font-sans">{meal.name}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-text/50 font-sans">{Math.round(calories)} kcal</p>
+            {currentUserSuggestion && (
+              <span className="text-xs text-primary/80 font-sans">
+                You: {currentUserSuggestion.percentage !== null
+                  ? `${Math.round(currentUserSuggestion.percentage)}% (${currentUserSuggestion.servings.toFixed(1)} svg)`
+                  : `${currentUserSuggestion.servings.toFixed(1)} svg`}
+                {currentUserSuggestion.hasMacroWarning && (
+                  <span className="ml-1 inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-400 text-white text-[8px] font-bold leading-none align-middle">!</span>
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-1 ml-2 shrink-0">
+          {hasExpandableSuggestions && (
+            <button
+              onClick={() => setExpanded(e => !e)}
+              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
+              aria-label={expanded ? 'Collapse suggestions' : 'Expand suggestions'}
+              title="Portion suggestions"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+              >
+                <path d="M2 4l4 4 4-4" />
+              </svg>
+            </button>
+          )}
+          {onLog && (
+            <button
+              onClick={onLog}
+              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
+              aria-label="Log meal"
+              title="Log meal"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M8 2v12M2 8h12" />
+              </svg>
+            </button>
+          )}
+          {!slot?.is_override && (
+            <button
+              onClick={onSwap}
+              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
+              aria-label="Swap meal"
+              title="Swap meal"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M1 4h10M8 1l3 3-3 3M15 12H5M8 9l-3 3 3 3" />
+              </svg>
+            </button>
+          )}
+          {slot?.is_override && (
+            <button
+              onClick={onSwap}
+              className="p-1 rounded text-primary hover:bg-primary/10 transition-colors"
+              aria-label="Change meal"
+              title="Change meal"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M11 2l3 3-8 8H3v-3L11 2z" />
+              </svg>
+            </button>
+          )}
           <button
-            onClick={onSwap}
-            className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
-            aria-label="Swap meal"
-            title="Swap meal"
+            onClick={onClear}
+            className="p-1 rounded text-text/30 hover:text-red-500 hover:bg-red-50 transition-colors"
+            aria-label="Remove meal"
+            title="Remove meal"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M1 4h10M8 1l3 3-3 3M15 12H5M8 9l-3 3 3 3" />
+              <path d="M3 3l10 10M13 3L3 13" />
             </svg>
           </button>
-        )}
-        {slot?.is_override && (
-          <button
-            onClick={onSwap}
-            className="p-1 rounded text-primary hover:bg-primary/10 transition-colors"
-            aria-label="Change meal"
-            title="Change meal"
-          >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M11 2l3 3-8 8H3v-3L11 2z" />
-            </svg>
-          </button>
-        )}
-        <button
-          onClick={onClear}
-          className="p-1 rounded text-text/30 hover:text-red-500 hover:bg-red-50 transition-colors"
-          aria-label="Remove meal"
-          title="Remove meal"
-        >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M3 3l10 10M13 3L3 13" />
-          </svg>
-        </button>
+        </div>
       </div>
+
+      {/* Expandable suggestions section */}
+      {expanded && suggestions && (
+        <div className="px-3 pb-2 pt-0 border-t border-accent/10">
+          <div className="mt-1.5 flex flex-col gap-0.5">
+            {suggestions.suggestions.map(s => (
+              <PortionSuggestionRow
+                key={s.memberId}
+                suggestion={s}
+                isCurrentUser={s.memberId === currentUserId}
+              />
+            ))}
+            {suggestions.leftoverPercentage > 1 && (
+              <div className="flex items-center justify-between text-xs pt-0.5 text-text/40">
+                <span>Leftover</span>
+                <span>{Math.round(suggestions.leftoverPercentage)}%</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { PortionStepper } from './PortionStepper'
 import { useInsertFoodLog } from '../../hooks/useFoodLogs'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
@@ -12,6 +12,7 @@ interface LogMealModalProps {
   logDate: string
   memberId: string
   memberType: 'user' | 'profile'
+  suggestedServings?: number
 }
 
 function calcMealMacros(meal_items: MealItem[]) {
@@ -37,9 +38,25 @@ export function LogMealModal({
   logDate,
   memberId,
   memberType,
+  suggestedServings,
 }: LogMealModalProps) {
-  const [servings, setServings] = useState(1.0)
+  const [servings, setServings] = useState(suggestedServings ?? 1.0)
   const [isPrivate, setIsPrivate] = useState(false)
+  // Track whether user has manually adjusted the stepper
+  const hasUserEdited = useRef(false)
+
+  // If suggestedServings arrives async (e.g. data loads after modal opens),
+  // update the stepper only if the user hasn't touched it yet.
+  useEffect(() => {
+    if (suggestedServings !== undefined && !hasUserEdited.current) {
+      setServings(suggestedServings)
+    }
+  }, [suggestedServings])
+
+  function handleServingsChange(value: number) {
+    hasUserEdited.current = true
+    setServings(value)
+  }
 
   const insertLog = useInsertFoodLog()
   const macros = calcMealMacros(meal.meal_items)
@@ -117,7 +134,7 @@ export function LogMealModal({
         {/* Portion stepper */}
         <div className="mb-4">
           <p className="text-sm font-medium text-text/70 mb-2">Servings</p>
-          <PortionStepper value={servings} onChange={setServings} />
+          <PortionStepper value={servings} onChange={handleServingsChange} />
         </div>
 
         {/* Privacy toggle */}

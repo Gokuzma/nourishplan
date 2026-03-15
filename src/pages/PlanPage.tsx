@@ -123,6 +123,10 @@ export function PlanPage() {
             weekStart={weekStart}
             weekStartDay={weekStartDay}
             memberTarget={memberTarget ?? null}
+            householdId={householdId}
+            currentUserId={session?.user.id}
+            selectedMemberId={selectedMemberId}
+            selectedMemberType={selectedMemberType}
           />
         </>
       )}

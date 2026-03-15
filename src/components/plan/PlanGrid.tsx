@@ -1,8 +1,16 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useMealPlanSlots, useAssignSlot, useClearSlot } from '../../hooks/useMealPlan'
 import { useMeals } from '../../hooks/useMeals'
+import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
+import { useNutritionTargets } from '../../hooks/useNutritionTargets'
+import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
+import { calcPortionSuggestions } from '../../utils/portionSuggestions'
+import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
+import { LogMealModal } from '../log/LogMealModal'
 import { DayCard } from './DayCard'
-import type { NutritionTarget, Meal } from '../../types/database'
+import type { NutritionTarget, Meal, MealItem } from '../../types/database'
+import type { SlotWithMeal } from '../../hooks/useMealPlan'
+import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
 
 const DAY_COUNT = 7
 
@@ -51,24 +59,71 @@ interface PlanGridProps {
   weekStart: string
   weekStartDay: number
   memberTarget: NutritionTarget | null
+  householdId?: string
+  currentUserId?: string
+  selectedMemberId?: string
+  selectedMemberType?: 'user' | 'profile'
+  logDate?: string
+}
+
+function calcSlotMacros(meal: (Meal & { meal_items: MealItem[] }) | null) {
+  if (!meal || !meal.meal_items.length) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
+  const items = meal.meal_items.map(item => ({
+    nutrition: calcIngredientNutrition(
+      {
+        calories: item.calories_per_100g,
+        protein: item.protein_per_100g,
+        fat: item.fat_per_100g,
+        carbs: item.carbs_per_100g,
+      },
+      item.quantity_grams,
+    ),
+  }))
+  return calcMealNutrition(items)
 }
 
 /**
  * Week grid orchestrating DayCards.
  * Mobile: single DayCard visible at a time with swipe navigation.
  * Desktop (md+): vertical scrollable stack of all 7 DayCards.
+ *
+ * Fetches household targets + today's logs once at grid level, then
+ * computes per-slot portion suggestions synchronously in useMemo.
  */
-export function PlanGrid({ planId, weekStart, weekStartDay, memberTarget }: PlanGridProps) {
+export function PlanGrid({
+  planId,
+  weekStart,
+  weekStartDay,
+  memberTarget,
+  householdId,
+  currentUserId,
+  selectedMemberId,
+  selectedMemberType,
+  logDate,
+}: PlanGridProps) {
   const { data: slots = [] } = useMealPlanSlots(planId)
   const { data: meals = [] } = useMeals()
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
+
+  // Suggestion data — fetched once for the whole grid
+  const today = logDate ?? new Date().toISOString().slice(0, 10)
+  const { data: targets } = useNutritionTargets(householdId)
+  const { data: allLogs } = useHouseholdDayLogs(householdId, today)
+  const { data: householdMembers } = useHouseholdMembers()
+  const { data: memberProfiles } = useMemberProfiles()
 
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
   const [pickerState, setPickerState] = useState<{
     dayIndex: number
     slotName: string
     isSwap: boolean
+  } | null>(null)
+
+  // Log modal state
+  const [logModalState, setLogModalState] = useState<{
+    slot: SlotWithMeal
+    suggestedServings?: number
   } | null>(null)
 
   // Touch swipe state
@@ -113,25 +168,89 @@ export function PlanGrid({ planId, weekStart, weekStartDay, memberTarget }: Plan
     setPickerState(null)
   }
 
+  // Build MemberInput array from fetched data (memoized — rebuilds when data changes)
+  const memberInputs = useMemo<MemberInput[]>(() => {
+    if (!targets || !allLogs || !householdMembers) return []
+
+    const inputs: MemberInput[] = []
+
+    for (const hm of householdMembers) {
+      const target = targets.find(t => t.user_id === hm.user_id) ?? null
+      const logsToday = allLogs.filter(l => l.member_user_id === hm.user_id)
+      const name = hm.profiles?.display_name ?? hm.user_id.slice(0, 8)
+      inputs.push({
+        memberId: hm.user_id,
+        memberName: name,
+        memberType: 'user',
+        target,
+        logsToday,
+      })
+    }
+
+    for (const profile of (memberProfiles ?? [])) {
+      const target = targets.find(t => t.member_profile_id === profile.id) ?? null
+      const logsToday = allLogs.filter(l => l.member_profile_id === profile.id)
+      inputs.push({
+        memberId: profile.id,
+        memberName: profile.name,
+        memberType: 'profile',
+        target,
+        logsToday,
+      })
+    }
+
+    return inputs
+  }, [targets, allLogs, householdMembers, memberProfiles])
+
+  // Compute per-slot suggestions keyed by "dayIndex:slotName"
+  const slotSuggestionsMap = useMemo<Map<string, PortionResult | null>>(() => {
+    const map = new Map<string, PortionResult | null>()
+    if (!currentUserId || memberInputs.length === 0) return map
+
+    for (const slot of slots) {
+      if (!slot.meals) continue
+      const macros = calcSlotMacros(slot.meals)
+      const key = `${slot.day_index}:${slot.slot_name}`
+      const result = calcPortionSuggestions(memberInputs, macros.calories, macros, currentUserId)
+      map.set(key, result)
+    }
+
+    return map
+  }, [slots, memberInputs, currentUserId])
+
   // Group slots by day_index
   const slotsByDay: Record<number, typeof slots> = {}
   for (let i = 0; i < DAY_COUNT; i++) {
     slotsByDay[i] = slots.filter(s => s.day_index === i)
   }
 
-  const dayCards = Array.from({ length: DAY_COUNT }, (_, i) => (
-    <DayCard
-      key={i}
-      dayIndex={i}
-      weekStart={weekStart}
-      weekStartDay={weekStartDay}
-      slots={slotsByDay[i]}
-      memberTarget={memberTarget}
-      onAssignSlot={slotName => openPicker(i, slotName, false)}
-      onClearSlot={slotId => clearSlot.mutate({ slotId, planId })}
-      onSwapSlot={slotName => openPicker(i, slotName, true)}
-    />
-  ))
+  const dayCards = Array.from({ length: DAY_COUNT }, (_, i) => {
+    // Build per-slot suggestions map for this day (keyed by slot_name)
+    const daySuggestions = new Map<string, PortionResult | null>()
+    for (const slot of (slotsByDay[i] ?? [])) {
+      const key = `${i}:${slot.slot_name}`
+      if (slotSuggestionsMap.has(key)) {
+        daySuggestions.set(slot.slot_name, slotSuggestionsMap.get(key) ?? null)
+      }
+    }
+
+    return (
+      <DayCard
+        key={i}
+        dayIndex={i}
+        weekStart={weekStart}
+        weekStartDay={weekStartDay}
+        slots={slotsByDay[i]}
+        memberTarget={memberTarget}
+        currentUserId={currentUserId}
+        slotSuggestions={daySuggestions}
+        onAssignSlot={slotName => openPicker(i, slotName, false)}
+        onClearSlot={slotId => clearSlot.mutate({ slotId, planId })}
+        onSwapSlot={slotName => openPicker(i, slotName, true)}
+        onLogSlot={(slot, suggestedServings) => setLogModalState({ slot, suggestedServings })}
+      />
+    )
+  })
 
   return (
     <>
@@ -188,6 +307,20 @@ export function PlanGrid({ planId, weekStart, weekStartDay, memberTarget }: Plan
           meals={meals}
           onSelect={handleMealSelect}
           onClose={() => setPickerState(null)}
+        />
+      )}
+
+      {/* Log meal modal */}
+      {logModalState && logModalState.slot.meals && selectedMemberId && (
+        <LogMealModal
+          isOpen={true}
+          onClose={() => setLogModalState(null)}
+          meal={logModalState.slot.meals}
+          slotName={logModalState.slot.slot_name}
+          logDate={today}
+          memberId={selectedMemberId}
+          memberType={selectedMemberType ?? 'user'}
+          suggestedServings={logModalState.suggestedServings}
         />
       )}
     </>

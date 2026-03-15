@@ -4,6 +4,7 @@ import { ProgressRing } from './ProgressRing'
 import { SlotCard } from './SlotCard'
 import type { NutritionTarget } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
+import type { PortionResult } from '../../utils/portionSuggestions'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
@@ -47,9 +48,12 @@ interface DayCardProps {
   weekStartDay: number
   slots: SlotWithMeal[]
   memberTarget: NutritionTarget | null
+  currentUserId?: string
+  slotSuggestions?: Map<string, PortionResult | null>
   onAssignSlot: (slotName: string) => void
   onClearSlot: (slotId: string) => void
   onSwapSlot: (slotName: string) => void
+  onLogSlot?: (slot: SlotWithMeal, suggestedServings?: number) => void
 }
 
 /**
@@ -61,9 +65,12 @@ export function DayCard({
   weekStartDay,
   slots,
   memberTarget,
+  currentUserId,
+  slotSuggestions,
   onAssignSlot,
   onClearSlot,
   onSwapSlot,
+  onLogSlot,
 }: DayCardProps) {
   // Derive the actual calendar date for this day
   const weekStartDate = new Date(weekStart + 'T00:00:00Z')
@@ -86,6 +93,14 @@ export function DayCard({
   const filledSlots = slots.filter(s => s.meals !== null)
   const dayTotal = calcDayNutrition(filledSlots.map(s => slotNutrition(s)))
 
+  function getSuggestedServings(slotName: string): number | undefined {
+    if (!currentUserId || !slotSuggestions) return undefined
+    const result = slotSuggestions.get(slotName)
+    if (!result) return undefined
+    const suggestion = result.suggestions.find(s => s.memberId === currentUserId)
+    return suggestion?.servings
+  }
+
   return (
     <div className="rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4 font-sans">
       {/* Day header */}
@@ -101,19 +116,26 @@ export function DayCard({
 
       {/* Slots */}
       <div className="flex flex-col gap-2">
-        {DEFAULT_SLOTS.map((slotName, idx) => (
-          <SlotCard
-            key={slotName}
-            slotName={slotName}
-            slot={slotMap.get(slotName) ?? null}
-            onAssign={() => onAssignSlot(slotName)}
-            onClear={() => {
-              const s = slotMap.get(slotName)
-              if (s) onClearSlot(s.id)
-            }}
-            onSwap={() => onSwapSlot(slotName)}
-          />
-        ))}
+        {DEFAULT_SLOTS.map((slotName) => {
+          const s = slotMap.get(slotName) ?? null
+          return (
+            <SlotCard
+              key={slotName}
+              slotName={slotName}
+              slot={s}
+              suggestions={slotSuggestions?.get(slotName) ?? null}
+              currentUserId={currentUserId}
+              onAssign={() => onAssignSlot(slotName)}
+              onClear={() => {
+                if (s) onClearSlot(s.id)
+              }}
+              onSwap={() => onSwapSlot(slotName)}
+              onLog={s?.meals && onLogSlot
+                ? () => onLogSlot(s, getSuggestedServings(slotName))
+                : undefined}
+            />
+          )
+        })}
 
         {/* Custom slots */}
         {customSlots.map(s => (
@@ -121,9 +143,14 @@ export function DayCard({
             key={s.id}
             slotName={s.slot_name}
             slot={s}
+            suggestions={slotSuggestions?.get(s.slot_name) ?? null}
+            currentUserId={currentUserId}
             onAssign={() => onAssignSlot(s.slot_name)}
             onClear={() => onClearSlot(s.id)}
             onSwap={() => onSwapSlot(s.slot_name)}
+            onLog={s.meals && onLogSlot
+              ? () => onLogSlot(s, getSuggestedServings(s.slot_name))
+              : undefined}
           />
         ))}
       </div>
