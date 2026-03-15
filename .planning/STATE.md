@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 11-nutrition-calculation-fixes-01-PLAN.md
-last_updated: "2026-03-15T21:56:40.548Z"
+stopped_at: Completed 11-nutrition-calculation-fixes-02-PLAN.md
+last_updated: "2026-03-15T22:00:35.769Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 14
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 43
-  completed_plans: 42
+  completed_plans: 43
   percent: 0
 ---
 
@@ -91,6 +91,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 09-dead-code-removal-theme-token-cleanup P01 | 2 | 2 tasks | 5 files |
 | Phase 10-requirements-documentation-formalization P01 | 2 | 2 tasks | 2 files |
 | Phase 11-nutrition-calculation-fixes P01 | 2 | 2 tasks | 7 files |
+| Phase 11-nutrition-calculation-fixes P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,8 @@ Recent decisions affecting current work:
 - [Phase 10-requirements-documentation-formalization]: POLISH-01 Phase 9 gap closure row retained alongside Phase 8 traceability row — documents remediation separately from original feature build
 - [Phase 11-nutrition-calculation-fixes]: FreeformLogModal now logs servings_logged=quantity with per-unit macro values, fixing double-multiplication in EditLogModal
 - [Phase 11-nutrition-calculation-fixes]: serving_unit column is nullable; null means legacy entry; display fallback is 'serving'
+- [Phase 11-nutrition-calculation-fixes]: useEffect hydration deps array includes only [ingredients] not foodDataMap — including foodDataMap would cause infinite re-fetch loop since setFoodDataMap triggers re-render
+- [Phase 11-nutrition-calculation-fixes]: Standalone NutrientBreakdown on HomePage replaced with integrated expandable version inside micronutrient summary card to avoid duplicate sections
 
 ### Roadmap Evolution
 
@@ -216,6 +219,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T21:56:40.541Z
-Stopped at: Completed 11-nutrition-calculation-fixes-01-PLAN.md
+Last session: 2026-03-15T22:00:35.762Z
+Stopped at: Completed 11-nutrition-calculation-fixes-02-PLAN.md
 Resume file: None

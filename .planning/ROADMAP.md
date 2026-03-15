@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Meal Planning & Targets** - Full meal hierarchy, household-shared plans, and per-person nutrition targets
 - [ ] **Phase 4: Daily Logging & Summary** - Portion logging, daily nutrition summary, offline PWA
 - [ ] **Phase 5: Portion Suggestions & Polish** - Per-person portion suggestions, micronutrients, weekly templates, PWA audit
-- [ ] **Phase 11: Nutrition & Calculation Fixes** - Fix calorie/macro scaling, micronutrient goal updates, specific serving measurements
+- [x] **Phase 11: Nutrition & Calculation Fixes** - Fix calorie/macro scaling, micronutrient goal updates, specific serving measurements (completed 2026-03-15)
 - [ ] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down
 - [ ] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management
 - [ ] **Phase 14: How-To Manual** - In-app guide explaining how to use all features
@@ -220,7 +220,7 @@ Plans:
   1. Changing ingredient quantity (e.g. 50g vs 770g egg white) shows proportionally different calories and macros
   2. Logging a food updates the user's daily micronutrient goal progress
   3. Serving sizes display specific measurements (grams, cups, tbsp, etc.) instead of generic "1 serving"
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — DB migration (serving_unit), FreeformLogModal fix, LogMealModal micros, LogEntryItem display, hook expansion
