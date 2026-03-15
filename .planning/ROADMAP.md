@@ -111,10 +111,27 @@ Plans:
 - [ ] 05-04-PLAN.md — Portion suggestion UI on meal plan and LogMealModal pre-fill
 - [ ] 05-05-PLAN.md — PWA audit fixes and human verification
 
+### Phase 6: Launch on gregok.ca
+**Goal**: Deploy NourishPlan as a production PWA at nourishplan.gregok.ca with launch polish, invite-only auth, and a portfolio project card
+**Depends on**: Phase 5
+**Requirements**: LAUNCH-01, LAUNCH-02, LAUNCH-03, LAUNCH-04, LAUNCH-05, LAUNCH-06, LAUNCH-07, LAUNCH-08, LAUNCH-09, LAUNCH-10
+**Success Criteria** (what must be TRUE):
+  1. NourishPlan is live at https://nourishplan.gregok.ca with all SPA routes working
+  2. Branded splash screen appears while the app loads
+  3. Social sharing shows OG preview with title, description, and image
+  4. Unknown routes show a branded 404 page
+  5. Portfolio site at gregok.ca has a NourishPlan project card linking to the app
+  6. New signups are blocked (invite-only) while existing users can log in
+**Plans**: 3 plans
+Plans:
+- [ ] 06-01-PLAN.md — Vercel config, splash screen, OG tags, 404 page, and offline page
+- [ ] 06-02-PLAN.md — Portfolio site NourishPlan project card
+- [ ] 06-03-PLAN.md — GitHub repo, Vercel deploy, DNS, and Supabase auth setup
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -123,13 +140,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Meal Planning & Targets | 5/6 | In Progress|  |
 | 4. Daily Logging & Summary | 3/5 | In Progress|  |
 | 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
-
-### Phase 6: Launch on gregok.ca
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 5
-**Plans:** 2/5 plans executed
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+| 6. Launch on gregok.ca | 0/3 | Not Started |  |
