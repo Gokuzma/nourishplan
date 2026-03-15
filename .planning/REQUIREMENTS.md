@@ -66,6 +66,24 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PLAT-03**: PWA installable to home screen on mobile devices
 - [x] **PLAT-04**: Core features work offline with sync when reconnected
 
+### Launch & Deployment
+
+- [x] **LAUNCH-01**: App is deployed at https://nourishplan.gregok.ca with all SPA routes returning correct responses
+- [x] **LAUNCH-02**: App shows a branded splash screen while loading
+- [x] **LAUNCH-03**: Social sharing renders an OG preview with title, description, and image
+- [x] **LAUNCH-04**: Unknown routes display a branded 404 page
+- [x] **LAUNCH-05**: Portfolio site at gregok.ca includes a NourishPlan project card linking to the live app
+- [x] **LAUNCH-06**: New user signups are blocked (invite-only); existing users can log in normally
+
+### UI Polish
+
+- [x] **POLISH-01**: App renders all components correctly in dark mode with visible ring colours and proper contrast
+- [x] **POLISH-02**: Each meal plan slot card shows mini nutrition rings indicating contribution to daily targets
+- [x] **POLISH-03**: Food logging displays household measurement units (cups, tbsp, pieces) when source data provides them
+- [x] **POLISH-04**: Mobile tab bar has a "More" button that opens a slide-out drawer for overflow navigation
+- [x] **POLISH-05**: Settings page allows editing display name, avatar, and household name (admin only)
+- [x] **POLISH-06**: Nutrition targets form supports entering macros as percentages of total calories with P+C+F=100% validation
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -141,10 +159,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLAT-02 | Phase 1 | Complete |
 | PLAT-03 | Phase 4 | Complete |
 | PLAT-04 | Phase 4 | Complete |
+| LAUNCH-01 | Phase 6 | Complete |
+| LAUNCH-02 | Phase 6 | Complete |
+| LAUNCH-03 | Phase 6 | Complete |
+| LAUNCH-04 | Phase 6 | Complete |
+| LAUNCH-05 | Phase 6 | Complete |
+| LAUNCH-06 | Phase 6 | Complete |
+| POLISH-01 | Phase 8 | Complete |
+| POLISH-02 | Phase 8 | Complete |
+| POLISH-03 | Phase 8 | Complete |
+| POLISH-04 | Phase 8 | Complete |
+| POLISH-05 | Phase 8 | Complete |
+| POLISH-06 | Phase 8 | Complete |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38
+- v1 requirements: 50 total
+- Mapped to phases: 50
 - Unmapped: 0 ✓
 
 **Gap Closure Phases (v1.1 audit):**
@@ -154,9 +184,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRCK-05 | Phase 9 (dead code cleanup) | Complete |
 | PLAT-03 | Phase 9 (theme token fix) | Complete |
 | POLISH-01 | Phase 9 (theme token fix) | Complete |
-| LAUNCH-01–10 | Phase 10 (documentation) | Pending |
-| POLISH-01–10 | Phase 10 (documentation) | Pending |
+| LAUNCH-01–06 | Phase 6 | Complete |
+| POLISH-01–06 | Phase 8 | Complete |
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-15 after gap closure phase creation*
+*Last updated: 2026-03-15 after Phase 10 requirements formalization*
