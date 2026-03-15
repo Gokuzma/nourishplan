@@ -30,7 +30,7 @@ export function DailyLogList({
   if (!hasContent) {
     return (
       <div className="text-center py-10 text-text/40 text-sm">
-        No meals logged yet. Tap &quot;+&quot; to add food or log a planned meal below.
+        No meals logged yet. Use the search bar above to log food.
       </div>
     )
   }
