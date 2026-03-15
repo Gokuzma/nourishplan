@@ -26,5 +26,8 @@
     --color-text: #E8E5E0;
     --color-background: #1A1D1A;
     --color-surface: #252825;
+    --color-primary: #B8D4B0;   /* sage, lightened for dark bg */
+    --color-secondary: #2A2E2A; /* dark neutral, replaces warm cream */
+    --color-accent: #F0C4B2;    /* peach, lightened for dark bg */
   }
 }
