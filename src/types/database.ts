@@ -55,6 +55,7 @@ export interface CustomFood {
   sugar_per_100g: number | null
   sodium_per_100g: number | null
   micronutrients: Record<string, number>
+  portions: { description: string; grams: number }[]
   deleted_at: string | null
   created_at: string
   updated_at: string
@@ -153,6 +154,7 @@ export interface NutritionTarget {
   fat_g: number | null
   micronutrients: Record<string, number>
   custom_goals: Record<string, number>
+  macro_mode: 'grams' | 'percent'
   created_at: string
   updated_at: string
 }
