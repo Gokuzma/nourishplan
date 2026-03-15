@@ -15,6 +15,17 @@ interface CnfNutrientAmount {
   nutrient_value: number;
 }
 
+interface CnfServingSize {
+  serving_description?: string;
+  // Field names vary — defensive access below
+  [key: string]: unknown;
+}
+
+interface PortionEntry {
+  description: string;
+  grams: number;
+}
+
 interface NormalizedFood {
   id: string;
   name: string;
@@ -31,6 +42,7 @@ interface NormalizedFood {
   vitamin_c?: number;
   vitamin_a?: number;
   micronutrients: Record<string, number>;
+  portions: PortionEntry[];
 }
 
 // CNF nutrient ID mappings (per 100g)
@@ -96,7 +108,48 @@ function buildMicronutrients(amounts: CnfNutrientAmount[]): Record<string, numbe
   return micros;
 }
 
-function normalizeFood(food: CnfFood, amounts: CnfNutrientAmount[]): NormalizedFood {
+async function fetchServingSizes(foodCode: number): Promise<PortionEntry[]> {
+  try {
+    const response = await fetch(
+      `https://food-nutrition.canada.ca/api/canadian-nutrient-file/servingsize/?id=${foodCode}&lang=en&type=json`,
+    );
+    if (!response.ok) return [];
+
+    const data: unknown = await response.json();
+    if (!Array.isArray(data) || data.length === 0) return [];
+
+    // Log the first entry shape for debugging unexpected API responses
+    console.log(`CNF servingsize first entry for food ${foodCode}:`, JSON.stringify(data[0]));
+
+    const portions: PortionEntry[] = [];
+    for (const item of data) {
+      if (typeof item !== "object" || item === null) continue;
+      const entry = item as Record<string, unknown>;
+
+      // The CNF API may use different field names — try common candidates
+      const description =
+        (entry["serving_description"] as string | undefined) ??
+        (entry["servingDescription"] as string | undefined) ??
+        (entry["description"] as string | undefined) ??
+        String(entry["serving_description_f"] ?? "");
+
+      const grams =
+        (entry["conversion_factor_value"] as number | undefined) ??
+        (entry["gram_weight"] as number | undefined) ??
+        (entry["grams"] as number | undefined) ??
+        0;
+
+      if (description && grams > 0) {
+        portions.push({ description, grams });
+      }
+    }
+    return portions;
+  } catch {
+    return [];
+  }
+}
+
+function normalizeFood(food: CnfFood, amounts: CnfNutrientAmount[], portions: PortionEntry[]): NormalizedFood {
   return {
     id: `cnf-${food.food_code}`,
     name: food.food_description,
@@ -106,6 +159,7 @@ function normalizeFood(food: CnfFood, amounts: CnfNutrientAmount[]): NormalizedF
     fat: getNutrientValue(amounts, "fat"),
     carbs: getNutrientValue(amounts, "carbs"),
     micronutrients: buildMicronutrients(amounts),
+    portions,
   };
 }
 
@@ -146,16 +200,21 @@ serve(async (req) => {
 
   let results: NormalizedFood[];
   try {
-    const nutrientResponses = await Promise.all(
-      matches.map((food) =>
-        fetch(
-          `https://food-nutrition.canada.ca/api/canadian-nutrient-file/nutrientamount/?id=${food.food_code}&lang=en&type=json`,
-        ).then((r) => (r.ok ? r.json() : Promise.resolve([])))
+    const [nutrientResponses, servingSizeResponses] = await Promise.all([
+      Promise.all(
+        matches.map((food) =>
+          fetch(
+            `https://food-nutrition.canada.ca/api/canadian-nutrient-file/nutrientamount/?id=${food.food_code}&lang=en&type=json`,
+          ).then((r) => (r.ok ? r.json() : Promise.resolve([])))
+        ),
       ),
-    );
+      Promise.all(
+        matches.map((food) => fetchServingSizes(food.food_code)),
+      ),
+    ]);
 
     results = matches.map((food, i) =>
-      normalizeFood(food, nutrientResponses[i] as CnfNutrientAmount[])
+      normalizeFood(food, nutrientResponses[i] as CnfNutrientAmount[], servingSizeResponses[i])
     );
   } catch {
     return new Response(
