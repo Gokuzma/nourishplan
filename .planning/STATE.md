@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Phase 8 context gathered
-last_updated: "2026-03-15T17:08:42.393Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-15T17:48:31.271Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 8
   completed_phases: 7
-  total_plans: 33
-  completed_plans: 33
+  total_plans: 39
+  completed_plans: 35
   percent: 0
 ---
 
@@ -82,6 +82,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-launch-on-gregok-ca P01 | 3 | 2 tasks | 6 files |
 | Phase 06-launch-on-gregok-ca P03 | 60 | 2 tasks | 2 files |
 | Phase 07-fix-auth-household-gaps P01 | 15 | 2 tasks | 4 files |
+| Phase 08-v1-1-ui-polish-and-usability-improvements P01 | 1 | 2 tasks | 2 files |
+| Phase 08-v1-1-ui-polish-and-usability-improvements P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -167,6 +169,11 @@ Recent decisions affecting current work:
 - [Phase 07-fix-auth-household-gaps]: ResetPasswordPage placed outside AuthGuard and GuestGuard — temporary session token from email link would be rejected by guards
 - [Phase 07-fix-auth-household-gaps]: week_start_day: 0 added to useCreateHousehold return to satisfy Household interface (Sunday DB default)
 - [Phase 07-fix-auth-household-gaps]: 10-second timeout on PASSWORD_RECOVERY wait shows expiry message with /auth link to avoid infinite spinner
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: DROP POLICY IF EXISTS before recreating profiles UPDATE policy — prevents duplicate error since 001_foundation.sql defines it; keeps migration 014 idempotent
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: macro_mode CHECK constraint (grams|percent) enforced at DB level in migration 014 — downstream code can trust value without extra validation
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: portions column defaults to '[]'::jsonb — existing custom foods unaffected, no backfill needed
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: bgColor defaults to currentColor for ProgressRing background - inherits text color, adapts to light/dark without explicit logic
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: Dark secondary token set to #2A2E2A dark neutral - warm cream #F5EDE3 is invisible on dark backgrounds
 
 ### Roadmap Evolution
 
@@ -185,6 +192,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T17:08:42.388Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-v1-1-ui-polish-and-usability-improvements/08-CONTEXT.md
+Last session: 2026-03-15T17:48:31.267Z
+Stopped at: Completed 08-02-PLAN.md
+Resume file: None
