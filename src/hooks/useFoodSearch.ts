@@ -36,10 +36,15 @@ export function useFoodSearch(query: string) {
     },
     enabled: query.length >= 2,
     staleTime: 5 * 60 * 1000,
+    retry: 1,
   })
 
-  const isLoading = usdaQuery.isLoading || cnfQuery.isLoading
-  const error = usdaQuery.error ?? cnfQuery.error ?? null
+  // Show results progressively: loading only while both are still fetching
+  // and neither has returned data yet
+  const hasAnyData = (usdaQuery.data && usdaQuery.data.length > 0) || (cnfQuery.data && cnfQuery.data.length > 0)
+  const isLoading = (usdaQuery.isLoading || cnfQuery.isLoading) && !hasAnyData
+  // Only report error if both sources failed
+  const error = (usdaQuery.error && cnfQuery.error) ? usdaQuery.error : null
 
   // Merge results: CNF first, skip USDA items whose lowercase name already appears in CNF
   const data: NormalizedFoodResult[] = (() => {
