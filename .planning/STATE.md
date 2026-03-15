@@ -196,6 +196,10 @@ Recent decisions affecting current work:
 
 - Phase 6 added: Launch on gregok.ca
 - Phase 8 added: v1.1 UI polish and usability improvements (dark mode ring colours, meal plan nutrition rings, realistic measurement units, mobile sidebar settings, edit household/profile, macro % scaling with calories)
+- Phase 11 added: Nutrition & Calculation Fixes (calorie/macro scaling, micronutrient goals, serving measurements)
+- Phase 12 added: Home Page & Food Search Redesign (remove Food tab, home page logging, search sorting, meal drill-down)
+- Phase 13 added: Recipe, Meal Plan & Account Management (recipe UX, notes/dates, meal plan start date, print, deletions, account management)
+- Phase 14 added: How-To Manual (in-app usage guide)
 
 ### Pending Todos
 

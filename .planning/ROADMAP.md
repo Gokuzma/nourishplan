@@ -17,6 +17,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Meal Planning & Targets** - Full meal hierarchy, household-shared plans, and per-person nutrition targets
 - [ ] **Phase 4: Daily Logging & Summary** - Portion logging, daily nutrition summary, offline PWA
 - [ ] **Phase 5: Portion Suggestions & Polish** - Per-person portion suggestions, micronutrients, weekly templates, PWA audit
+- [ ] **Phase 11: Nutrition & Calculation Fixes** - Fix calorie/macro scaling, micronutrient goal updates, specific serving measurements
+- [ ] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down
+- [ ] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management
+- [ ] **Phase 14: How-To Manual** - In-app guide explaining how to use all features
 
 ## Phase Details
 
@@ -206,3 +210,62 @@ Plans:
 **Plans:** 1/1 plans complete
 Plans:
 - [ ] 10-01-PLAN.md — Add LAUNCH and POLISH requirement definitions, traceability rows, and ROADMAP reference corrections
+
+### Phase 11: Nutrition & Calculation Fixes
+
+**Goal:** Fix calorie/macro scaling with quantity changes, ensure logged foods update micronutrient goals, and show specific measurement units for serving sizes
+**Depends on:** Phase 10
+**Requirements**: CALC-01, CALC-02, CALC-03
+**Success Criteria** (what must be TRUE):
+  1. Changing ingredient quantity (e.g. 50g vs 770g egg white) shows proportionally different calories and macros
+  2. Logging a food updates the user's daily micronutrient goal progress
+  3. Serving sizes display specific measurements (grams, cups, tbsp, etc.) instead of generic "1 serving"
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 11 to break down)
+
+### Phase 12: Home Page & Food Search Redesign
+
+**Goal:** Remove the Food tab and integrate food search/logging directly on the home page with improved search relevance and meal-level micronutrient drill-down
+**Depends on:** Phase 11
+**Requirements**: UXLOG-01, UXLOG-02, UXLOG-03, UXLOG-04
+**Success Criteria** (what must be TRUE):
+  1. Food tab is removed from navigation; food logging is accessible directly from the home page via a search bar or "Log food" action
+  2. Food search prioritizes simplest matching ingredients over CNF-prefixed results (basic items appear first)
+  3. User can drill into each logged meal to see per-food micronutrient breakdown
+  4. Home page + button is replaced with a contextual "Log food" UI element following UX best practices
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
+
+### Phase 13: Recipe, Meal Plan & Account Management
+
+**Goal:** Fix recipe builder navigation, add recipe notes and dates, enable meal plan start date selection, add print meal plan, enable deletion of meals/recipes/foods, and add account deletion with household management
+**Depends on:** Phase 12
+**Requirements**: RCPUX-01, RCPUX-02, RCPUX-03, MPLAN-01, MPLAN-02, DELMG-01, DELMG-02, ACCTM-01
+**Success Criteria** (what must be TRUE):
+  1. Clicking away from an ingredient in the recipe builder returns to the search view, not the recipe page
+  2. Recipes have an optional notes/variations subtitle field and a date created tag
+  3. User can choose the start date for a meal plan
+  4. User can print a meal plan via a print button
+  5. User can delete meals, recipes, and foods they created
+  6. User can delete their account with option to delete the household or transfer admin rights to the next member
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13 to break down)
+
+### Phase 14: How-To Manual
+
+**Goal:** Provide an in-app how-to guide that explains how to use all features of NourishPlan
+**Depends on:** Phase 13
+**Requirements**: DOCS-01
+**Success Criteria** (what must be TRUE):
+  1. An in-app how-to manual is accessible from the UI explaining how to use all major features (food logging, recipes, meal planning, nutrition targets, household management)
+  2. Manual content is accurate and matches the current state of the app
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 14 to break down)
