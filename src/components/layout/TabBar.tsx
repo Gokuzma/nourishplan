@@ -4,7 +4,6 @@ import { MobileDrawer } from './MobileDrawer'
 
 const tabs = [
   { label: 'Home', to: '/', icon: '🏠' },
-  { label: 'Foods', to: '/foods', icon: '🥦' },
   { label: 'Recipes', to: '/recipes', icon: '📖' },
   { label: 'Plan', to: '/plan', icon: '📋' },
 ]

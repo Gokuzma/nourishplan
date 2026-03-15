@@ -8,7 +8,7 @@ import {
   useRemoveMealItem,
 } from '../../hooks/useMeals'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
-import { FoodSearch } from '../food/FoodSearch'
+import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from '../recipe/NutritionBar'
 import { MealItemRow } from './MealItemRow'
 import type { NormalizedFoodResult, MealItem, MacroSummary } from '../../types/database'
@@ -309,12 +309,16 @@ export function MealBuilder({ mealId }: MealBuilderProps) {
           )}
         </div>
 
-        {/* Add food button */}
+        {/* Search food trigger */}
         <button
           onClick={() => setShowFoodSearch(true)}
-          className="w-full rounded-[--radius-btn] border border-primary/40 text-primary hover:bg-primary/5 py-2.5 text-sm font-medium transition-colors"
+          className="w-full rounded-[--radius-card] bg-surface border border-secondary px-4 py-3 flex items-center gap-2 text-left hover:border-primary/40 transition-colors"
         >
-          + Add Food
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text/40 shrink-0">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span className="text-sm text-text/40">Search ingredients</span>
         </button>
       </div>
 
@@ -323,21 +327,13 @@ export function MealBuilder({ mealId }: MealBuilderProps) {
 
       {/* Food search overlay */}
       {showFoodSearch && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-background">
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-secondary/60">
-            <button
-              onClick={() => setShowFoodSearch(false)}
-              className="text-text/60 hover:text-text transition-colors p-1"
-              aria-label="Close search"
-            >
-              ←
-            </button>
-            <h2 className="font-semibold text-text">Add Food</h2>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            <FoodSearch mode="select" onSelect={handleFoodSelected} />
-          </div>
-        </div>
+        <FoodSearchOverlay
+          mode="select"
+          onSelect={(food) => {
+            handleFoodSelected(food)
+          }}
+          onClose={() => setShowFoodSearch(false)}
+        />
       )}
 
       {/* Quantity modal after food selection */}

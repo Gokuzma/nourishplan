@@ -7,7 +7,6 @@ import { AuthPage } from './pages/AuthPage'
 import { HouseholdSetup } from './pages/HouseholdSetup'
 import { HouseholdPage } from './pages/HouseholdPage'
 import { HomePage } from './pages/HomePage'
-import { FoodsPage } from './pages/FoodsPage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipePage } from './pages/RecipePage'
 import { MealsPage } from './pages/MealsPage'
@@ -74,19 +73,25 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
  */
 function GuestGuard({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
+  const location = useLocation()
   if (loading) return null
-  if (session) return <Navigate to="/" replace />
+  if (session) {
+    const from = (location.state as { from?: Location })?.from
+    const redirectTo = from ? `${from.pathname}${from.search}` : '/'
+    return <Navigate to={redirectTo} replace />
+  }
   return <>{children}</>
 }
 
 function JoinPage() {
   const navigate = useNavigate()
+  const token = new URLSearchParams(window.location.search).get('invite') ?? undefined
   return (
     <div className="min-h-screen bg-background px-4 py-12 font-sans">
       <div className="mx-auto max-w-lg">
         <h1 className="mb-6 text-3xl font-bold text-primary">Join a Household</h1>
         <div className="rounded-card border border-accent/30 bg-surface p-6 shadow-sm">
-          <JoinHousehold onSuccess={() => navigate('/')} />
+          <JoinHousehold initialToken={token} onSuccess={() => navigate('/')} />
         </div>
       </div>
     </div>
@@ -144,7 +149,6 @@ function AppRoutes() {
         }
       >
         <Route path="/" element={<HomePage />} />
-        <Route path="/foods" element={<FoodsPage />} />
         <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/recipes/:id" element={<RecipePage />} />
         <Route path="/meals" element={<MealsPage />} />

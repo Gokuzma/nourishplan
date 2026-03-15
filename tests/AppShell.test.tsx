@@ -25,7 +25,7 @@ vi.mock('../src/hooks/useHousehold', () => ({
 }))
 
 describe('AppShell', () => {
-  it('renders 5 navigation tabs: Home, Foods, Recipes, Meals, Plan', async () => {
+  it('renders navigation tabs: Home, Recipes, Plan, and More', async () => {
     const { TabBar } = await import('../src/components/layout/TabBar')
 
     render(
@@ -34,11 +34,11 @@ describe('AppShell', () => {
       )
     )
 
-    expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('Foods')).toBeInTheDocument()
-    expect(screen.getByText('Recipes')).toBeInTheDocument()
-    expect(screen.getByText('Meals')).toBeInTheDocument()
-    expect(screen.getByText('Plan')).toBeInTheDocument()
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Recipes').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Plan').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('More').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Foods')).toBeNull()
   })
 
   it('Sidebar renders 7 navigation items including Meals and functional Plan', async () => {

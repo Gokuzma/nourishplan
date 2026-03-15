@@ -16,7 +16,7 @@ import {
   YIELD_FACTORS,
 } from '../../utils/nutrition'
 import { supabase } from '../../lib/supabase'
-import { FoodSearch } from '../food/FoodSearch'
+import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from './NutritionBar'
 import { IngredientRow } from './IngredientRow'
 import { MicronutrientPanel } from '../plan/MicronutrientPanel'
@@ -249,6 +249,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
   const [localName, setLocalName] = useState<string | null>(null)
   const [localServings, setLocalServings] = useState<string | null>(null)
+  const [ingredientSearchOpen, setIngredientSearchOpen] = useState(false)
   const [showFoodSearch, setShowFoodSearch] = useState(false)
   const [searchTab, setSearchTab] = useState<'food' | 'recipe'>('food')
   const [pendingFood, setPendingFood] = useState<NormalizedFoodResult | null>(null)
@@ -322,6 +323,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   }
 
   function handleFoodSelected(food: NormalizedFoodResult) {
+    setIngredientSearchOpen(false)
     setShowFoodSearch(false)
     setPendingFood(food)
   }
@@ -478,6 +480,12 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   function handleOpenFoodSearch() {
     setSearchTab('food')
     setCycleError(null)
+    setIngredientSearchOpen(true)
+  }
+
+  function handleOpenRecipeSearch() {
+    setSearchTab('recipe')
+    setCycleError(null)
     setShowFoodSearch(true)
   }
 
@@ -566,12 +574,24 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           )}
         </div>
 
-        {/* Add ingredient button */}
+        {/* Search ingredients trigger */}
         <button
           onClick={handleOpenFoodSearch}
+          className="w-full rounded-[--radius-card] bg-surface border border-secondary px-4 py-3 flex items-center gap-2 text-left hover:border-primary/40 transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text/40 shrink-0">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span className="text-sm text-text/40">Search ingredients</span>
+        </button>
+
+        {/* Add recipe ingredient button */}
+        <button
+          onClick={handleOpenRecipeSearch}
           className="w-full rounded-[--radius-btn] border border-primary/40 text-primary hover:bg-primary/5 py-2.5 text-sm font-medium transition-colors"
         >
-          + Add Ingredient
+          + Add Recipe as Ingredient
         </button>
       </div>
 
@@ -585,7 +605,18 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
         </div>
       )}
 
-      {/* Food/Recipe search overlay */}
+      {/* Food search overlay (food ingredients) */}
+      {ingredientSearchOpen && (
+        <FoodSearchOverlay
+          mode="select"
+          onSelect={(food) => {
+            handleFoodSelected(food)
+          }}
+          onClose={() => setIngredientSearchOpen(false)}
+        />
+      )}
+
+      {/* Recipe picker panel (recipe-as-ingredient) */}
       {showFoodSearch && (
         <div className="fixed inset-0 z-40 flex flex-col bg-background">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-secondary/60">
@@ -596,52 +627,22 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             >
               ←
             </button>
-            <h2 className="font-semibold text-text">Add Ingredient</h2>
-          </div>
-
-          {/* Food / Recipe tabs */}
-          <div className="flex border-b border-secondary/60 px-4">
-            <button
-              onClick={() => { setSearchTab('food'); setCycleError(null) }}
-              className={`py-2 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                searchTab === 'food'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text/50 hover:text-text'
-              }`}
-            >
-              Food
-            </button>
-            <button
-              onClick={() => { setSearchTab('recipe'); setCycleError(null) }}
-              className={`py-2 px-4 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                searchTab === 'recipe'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text/50 hover:text-text'
-              }`}
-            >
-              Recipe
-            </button>
+            <h2 className="font-semibold text-text">Add Recipe as Ingredient</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-4">
-            {searchTab === 'food' ? (
-              <FoodSearch mode="select" onSelect={handleFoodSelected} />
-            ) : (
-              <div>
-                <p className="text-xs text-text/50 mb-3">
-                  Add an existing recipe as an ingredient. Circular references are prevented.
-                </p>
-                {cycleCheckInProgress && (
-                  <p className="text-sm text-text/50 mb-2">Checking for circular references…</p>
-                )}
-                <RecipePicker
-                  currentRecipeId={recipeId}
-                  recipes={allRecipes ?? []}
-                  onSelect={handleRecipeSelected}
-                  cycleError={cycleError}
-                />
-              </div>
+            <p className="text-xs text-text/50 mb-3">
+              Add an existing recipe as an ingredient. Circular references are prevented.
+            </p>
+            {cycleCheckInProgress && (
+              <p className="text-sm text-text/50 mb-2">Checking for circular references…</p>
             )}
+            <RecipePicker
+              currentRecipeId={recipeId}
+              recipes={allRecipes ?? []}
+              onSelect={handleRecipeSelected}
+              cycleError={cycleError}
+            />
           </div>
         </div>
       )}
