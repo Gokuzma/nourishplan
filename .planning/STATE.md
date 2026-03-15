@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 05-portion-suggestions-polish-04-PLAN.md
-last_updated: "2026-03-15T02:41:52.365Z"
+stopped_at: Completed 05-portion-suggestions-polish-05-PLAN.md
+last_updated: "2026-03-15T03:04:25.714Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 29
-  completed_plans: 28
+  completed_plans: 29
   percent: 0
 ---
 
@@ -77,6 +77,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-portion-suggestions-polish P02 | 12 | 2 tasks | 2 files |
 | Phase 05-portion-suggestions-polish P03 | 4 | 2 tasks | 6 files |
 | Phase 05-portion-suggestions-polish P04 | 4 | 2 tasks | 8 files |
+| Phase 05-portion-suggestions-polish P05 | 30 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -150,6 +151,8 @@ Recent decisions affecting current work:
 - [Phase 05-portion-suggestions-polish]: MicronutrientPanel hidden entirely when no micronutrient data present; FoodDataEntry extended with micronutrients field
 - [Phase 05-portion-suggestions-polish]: useHouseholdDayLogs fetches all logs for household+date in one query — avoids N hook calls for N slots which would violate React hooks rules
 - [Phase 05-portion-suggestions-polish]: Suggestions computed in PlanGrid useMemo using calcPortionSuggestions directly — fetch-once-distribute pattern keeps cache key alignment with TanStack Query invalidation
+- [Phase 05-portion-suggestions-polish]: navigateFallback added to workbox config — primary fix for Lighthouse 'responds with 200 offline' failure on SPAs
+- [Phase 05-portion-suggestions-polish]: Icon purpose set to 'any maskable' — solid sage green square has no edge detail, safe without a separate maskable asset
 
 ### Roadmap Evolution
 
@@ -167,6 +170,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T02:41:52.361Z
-Stopped at: Completed 05-portion-suggestions-polish-04-PLAN.md
+Last session: 2026-03-15T03:04:25.708Z
+Stopped at: Completed 05-portion-suggestions-polish-05-PLAN.md
 Resume file: None
