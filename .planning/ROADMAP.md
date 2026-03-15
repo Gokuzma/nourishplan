@@ -128,10 +128,22 @@ Plans:
 - [ ] 06-02-PLAN.md — Portfolio site NourishPlan project card
 - [ ] 06-03-PLAN.md — GitHub repo, Vercel deploy, DNS, and Supabase auth setup
 
+### Phase 7: Fix Auth & Household Integration Gaps
+**Goal**: Close the two integration gaps found by the v1.0 milestone audit — fix the broken password reset flow and the useCreateHousehold type mismatch
+**Depends on**: Phase 1
+**Requirements**: AUTH-04, HSHD-01
+**Gap Closure:** Closes gaps from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. User clicks password reset email link → lands on a working reset page (not 404) → can set a new password
+  2. useCreateHousehold return type includes week_start_day — no TypeScript errors
+  3. Password Reset E2E flow completes without errors
+Plans:
+- [ ] 07-01-PLAN.md — Password reset route, reset page component, and useCreateHousehold type fix
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -141,3 +153,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Daily Logging & Summary | 3/5 | In Progress|  |
 | 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
 | 6. Launch on gregok.ca | 3/3 | Complete   | 2026-03-15 |
+| 7. Fix Auth & Household Integration Gaps | 0/1 | Pending | |
