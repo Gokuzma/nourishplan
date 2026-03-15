@@ -16,6 +16,48 @@ export const USDA_NUTRIENT_IDS = {
   vitamin_a: 318,
 } as const;
 
+// Canadian Nutrient File nutrient ID mappings (per 100g)
+// Differs from USDA only in vitamin_a: CNF uses 319, USDA uses 318
+export const CNF_NUTRIENT_IDS = {
+  energy: 208,
+  protein: 203,
+  fat: 204,
+  carbs: 205,
+  fiber: 291,
+  sugar: 269,
+  sodium: 307,
+  calcium: 301,
+  iron: 303,
+  potassium: 306,
+  vitamin_c: 401,
+  vitamin_a: 319,
+} as const;
+
+// Display order for micronutrients: fiber > sodium > minerals > vitamins
+export const MICRONUTRIENT_DISPLAY_ORDER = [
+  'fiber', 'sodium', 'calcium', 'iron', 'potassium', 'vitamin_c', 'vitamin_a',
+] as const;
+
+export const MICRONUTRIENT_LABELS: Record<string, string> = {
+  fiber: 'Fiber',
+  sodium: 'Sodium',
+  calcium: 'Calcium',
+  iron: 'Iron',
+  potassium: 'Potassium',
+  vitamin_c: 'Vitamin C',
+  vitamin_a: 'Vitamin A',
+};
+
+export const MICRONUTRIENT_UNITS: Record<string, string> = {
+  fiber: 'g',
+  sodium: 'mg',
+  calcium: 'mg',
+  iron: 'mg',
+  potassium: 'mg',
+  vitamin_c: 'mg',
+  vitamin_a: 'mcg',
+};
+
 // Yield factors: ratio of cooked weight to raw weight.
 // e.g. meat: 0.75 means 100g raw becomes ~75g cooked.
 // To convert cooked grams back to raw equivalent: grams / yieldFactor.

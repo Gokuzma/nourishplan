@@ -190,7 +190,7 @@ export interface MacroSummary {
 export interface NormalizedFoodResult {
   id: string
   name: string
-  source: 'usda' | 'off' | 'custom'
+  source: 'usda' | 'cnf' | 'custom'
   calories: number
   protein: number
   fat: number
