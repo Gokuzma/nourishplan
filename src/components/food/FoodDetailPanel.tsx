@@ -47,7 +47,7 @@ export function FoodDetailPanel({ food, onClose, onAdd }: FoodDetailPanelProps) 
         <div className="flex items-start justify-between p-4 border-b border-secondary/40">
           <div>
             <h2 className="font-bold text-lg text-primary leading-tight pr-4">{food.name}</h2>
-            <span className="text-xs text-text/50 capitalize">{food.source === 'usda' ? 'USDA' : food.source === 'off' ? 'Open Food Facts' : 'My Foods'}</span>
+            <span className="text-xs text-text/50 capitalize">{food.source === 'usda' ? 'USDA' : food.source === 'cnf' ? 'Canadian Nutrient File' : 'My Foods'}</span>
           </div>
           <button
             onClick={onClose}

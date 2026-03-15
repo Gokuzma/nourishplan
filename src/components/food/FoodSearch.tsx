@@ -8,7 +8,7 @@ import { FoodDetailPanel } from './FoodDetailPanel'
 import { CustomFoodForm } from './CustomFoodForm'
 import type { NormalizedFoodResult, CustomFood } from '../../types/database'
 
-type ActiveTab = 'usda' | 'off' | 'custom'
+type ActiveTab = 'search' | 'custom'
 
 interface FoodSearchProps {
   onSelect?: (food: NormalizedFoodResult) => void
@@ -47,6 +47,15 @@ function MacroText({ food }: { food: NormalizedFoodResult }) {
   )
 }
 
+function SourceBadge({ source }: { source: NormalizedFoodResult['source'] }) {
+  if (source === 'custom') return null
+  return (
+    <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary/60 text-text/50 leading-none">
+      {source === 'cnf' ? 'CNF' : 'USDA'}
+    </span>
+  )
+}
+
 function LoadingSkeleton() {
   return (
     <div className="flex flex-col gap-2">
@@ -79,6 +88,7 @@ function ResultRow({ food, mode, onSelect, onViewDetails, canEdit, onEdit, onDel
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-text truncate block">{food.name}</span>
+          <SourceBadge source={food.source} />
           {/* AI verification badges */}
           {verification?.verified && !verification.warning && (
             <div className="relative shrink-0">
@@ -185,14 +195,13 @@ async function verifyFoodResults(
   return results
 }
 
-function ApiTab({ tab, query, mode, onSelect, onViewDetails }: {
-  tab: 'usda' | 'off'
+function SearchTab({ query, mode, onSelect, onViewDetails }: {
   query: string
   mode: 'browse' | 'select'
   onSelect?: (food: NormalizedFoodResult) => void
   onViewDetails: (food: NormalizedFoodResult) => void
 }) {
-  const { data, isLoading, isError } = useFoodSearch(tab, query)
+  const { data, isLoading, error } = useFoodSearch(query)
   const [verificationMap, setVerificationMap] = useState<Record<string, VerificationResult>>({})
 
   // Run AI verification in the background after results load
@@ -211,7 +220,7 @@ function ApiTab({ tab, query, mode, onSelect, onViewDetails }: {
     return <p className="text-sm text-text/50 text-center py-6">Type at least 2 characters to search.</p>
   }
   if (isLoading) return <LoadingSkeleton />
-  if (isError) return <p className="text-sm text-red-500 text-center py-4">Search failed. Please try again.</p>
+  if (error) return <p className="text-sm text-red-500 text-center py-4">Search failed. Please try again.</p>
   if (!data || data.length === 0) return <p className="text-sm text-text/50 text-center py-6">No results found.</p>
 
   return (
@@ -231,7 +240,7 @@ function ApiTab({ tab, query, mode, onSelect, onViewDetails }: {
 }
 
 export function FoodSearch({ onSelect, mode = 'browse' }: FoodSearchProps) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('usda')
+  const [activeTab, setActiveTab] = useState<ActiveTab>('search')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [detailFood, setDetailFood] = useState<NormalizedFoodResult | null>(null)
@@ -257,8 +266,7 @@ export function FoodSearch({ onSelect, mode = 'browse' }: FoodSearchProps) {
   )
 
   const tabs: { key: ActiveTab; label: string }[] = [
-    { key: 'usda', label: 'USDA' },
-    { key: 'off', label: 'Open Food Facts' },
+    { key: 'search', label: 'Search' },
     { key: 'custom', label: 'My Foods' },
   ]
 
@@ -305,19 +313,8 @@ export function FoodSearch({ onSelect, mode = 'browse' }: FoodSearchProps) {
 
       {/* Tab content */}
       <div className="min-h-[120px]">
-        {activeTab === 'usda' && (
-          <ApiTab
-            tab="usda"
-            query={debouncedQuery}
-            mode={mode}
-            onSelect={onSelect}
-            onViewDetails={setDetailFood}
-          />
-        )}
-
-        {activeTab === 'off' && (
-          <ApiTab
-            tab="off"
+        {activeTab === 'search' && (
+          <SearchTab
             query={debouncedQuery}
             mode={mode}
             onSelect={onSelect}

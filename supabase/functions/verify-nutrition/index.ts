@@ -15,7 +15,7 @@ interface MacroValues {
 interface VerifyRequest {
   foodName: string;
   usdaValues?: MacroValues;
-  offValues?: MacroValues;
+  cnfValues?: MacroValues;
 }
 
 interface VerifyResponse {
@@ -53,7 +53,7 @@ function buildOutlierWarnings(values: MacroValues, source: string): string[] {
 function buildPrompt(
   foodName: string,
   usdaValues?: MacroValues,
-  offValues?: MacroValues,
+  cnfValues?: MacroValues,
 ): string {
   const lines: string[] = [
     `Check the nutrition values per 100g for "${foodName}".`,
@@ -66,9 +66,9 @@ function buildPrompt(
     );
   }
 
-  if (offValues) {
+  if (cnfValues) {
     lines.push(
-      `Open Food Facts values: calories=${offValues.calories} kcal, protein=${offValues.protein}g, fat=${offValues.fat}g, carbs=${offValues.carbs}g`,
+      `Canadian Nutrient File values: calories=${cnfValues.calories} kcal, protein=${cnfValues.protein}g, fat=${cnfValues.fat}g, carbs=${cnfValues.carbs}g`,
     );
   }
 
@@ -109,14 +109,14 @@ serve(async (req) => {
     );
   }
 
-  const { foodName, usdaValues, offValues } = body;
+  const { foodName, usdaValues, cnfValues } = body;
 
   // Run outlier detection locally (independent of AI call)
   const localWarnings: string[] = [];
   if (usdaValues) localWarnings.push(...buildOutlierWarnings(usdaValues, "USDA"));
-  if (offValues) localWarnings.push(...buildOutlierWarnings(offValues, "OFF"));
+  if (cnfValues) localWarnings.push(...buildOutlierWarnings(cnfValues, "CNF"));
 
-  const prompt = buildPrompt(foodName, usdaValues, offValues);
+  const prompt = buildPrompt(foodName, usdaValues, cnfValues);
 
   let aiResult: { verified: boolean; recommended?: MacroValues; reason: string; warnings: string[] };
   try {
