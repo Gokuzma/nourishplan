@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   useRecipe,
   useRecipeIngredients,
@@ -255,6 +255,48 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const [pendingRecipe, setPendingRecipe] = useState<Recipe | null>(null)
   const [editingIngredient, setEditingIngredient] = useState<RecipeIngredient | null>(null)
   const [foodDataMap, setFoodDataMap] = useState<Record<string, FoodDataEntry>>({})
+
+  // Hydrate foodDataMap from custom_foods on mount so nutrition shows after page reload
+  useEffect(() => {
+    if (!ingredients || ingredients.length === 0) return
+
+    // Find ingredient_ids that are NOT already in foodDataMap
+    const missingIds = ingredients
+      .filter(ing => ing.ingredient_type === 'food' && !foodDataMap[ing.ingredient_id])
+      .map(ing => ing.ingredient_id)
+
+    if (missingIds.length === 0) return
+
+    // Batch-fetch custom food macros for missing ingredients
+    async function hydrate() {
+      const { data: customFoods } = await supabase
+        .from('custom_foods')
+        .select('id, name, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g, micronutrients')
+        .in('id', missingIds)
+
+      if (!customFoods || customFoods.length === 0) return
+
+      const newEntries: Record<string, FoodDataEntry> = {}
+      for (const f of customFoods) {
+        newEntries[f.id] = {
+          name: f.name,
+          macros: {
+            calories: f.calories_per_100g,
+            protein: f.protein_per_100g,
+            fat: f.fat_per_100g,
+            carbs: f.carbs_per_100g,
+          },
+          micronutrients: f.micronutrients ?? null,
+        }
+      }
+
+      setFoodDataMap(prev => ({ ...prev, ...newEntries }))
+    }
+
+    hydrate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ingredients])
+
   const [cycleError, setCycleError] = useState<string | null>(null)
   const [cycleCheckInProgress, setCycleCheckInProgress] = useState(false)
 
