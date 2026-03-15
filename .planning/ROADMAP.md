@@ -155,6 +155,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 6. Launch on gregok.ca | 3/3 | Complete   | 2008-03-15 |
 | 7. Fix Auth & Household Integration Gaps | 1/1 | Complete   | 2008-03-15 |
 | 8. v1.1 UI Polish | 6/6 | Complete   | 2026-03-15 |
+| 9. Dead Code Removal & Theme Token Cleanup | 0/0 | Pending |  |
+| 10. Requirements Documentation Formalization | 0/0 | Pending |  |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -177,3 +179,26 @@ Plans:
 - [ ] 08-04-PLAN.md — CNF serving sizes and PortionStepper unit selector
 - [ ] 08-05-PLAN.md — Mobile "More" drawer, Settings expansion, profile/avatar editing
 - [ ] 08-06-PLAN.md — Macro percentage scaling toggle on NutritionTargetsForm
+
+### Phase 9: Dead Code Removal & Theme Token Cleanup
+**Goal:** Remove dead code identified by the v1.1 milestone audit and fix OfflineBanner to use theme tokens for dark mode compatibility
+**Depends on:** Phase 8
+**Requirements:** TRCK-05, PLAT-03, POLISH-01
+**Gap Closure:** Closes integration gaps INT-01, INT-02, INT-03 from v1.1 audit
+**Success Criteria** (what must be TRUE):
+  1. `usePortionSuggestions` hook is either removed or PlanGrid is refactored to use it (no dead code)
+  2. `applyStoredTheme` export is removed from theme.ts (no orphaned exports)
+  3. OfflineBanner renders correctly in dark mode using theme tokens instead of hardcoded amber classes
+  4. `comingSoon` dead code branch is removed from Sidebar.tsx
+Plans: TBD
+
+### Phase 10: Requirements Documentation Formalization
+**Goal:** Add LAUNCH and POLISH requirement definitions to REQUIREMENTS.md so all implemented features have formal requirement entries
+**Depends on:** Phase 8
+**Requirements:** LAUNCH-01–LAUNCH-10, POLISH-01–POLISH-10
+**Gap Closure:** Closes documentation gaps from v1.1 audit
+**Success Criteria** (what must be TRUE):
+  1. LAUNCH-01 through LAUNCH-10 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
+  2. POLISH-01 through POLISH-10 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
+  3. Traceability table includes all 20 new requirements mapped to their phases
+Plans: TBD

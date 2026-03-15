@@ -147,6 +147,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Mapped to phases: 38
 - Unmapped: 0 ✓
 
+**Gap Closure Phases (v1.1 audit):**
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| TRCK-05 | Phase 9 (dead code cleanup) | Pending |
+| PLAT-03 | Phase 9 (theme token fix) | Pending |
+| POLISH-01 | Phase 9 (theme token fix) | Pending |
+| LAUNCH-01–10 | Phase 10 (documentation) | Pending |
+| POLISH-01–10 | Phase 10 (documentation) | Pending |
+
 ---
 *Requirements defined: 2026-03-12*
 *Last updated: 2026-03-15 after gap closure phase creation*
