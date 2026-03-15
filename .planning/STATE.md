@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
+milestone: v1.1
+milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 07-fix-auth-household-gaps-01-PLAN.md
-last_updated: "2026-03-15T15:51:00.490Z"
+stopped_at: Phase 8 context gathered
+last_updated: "2026-03-15T17:08:42.393Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 7
   total_plans: 33
   completed_plans: 33
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation & Auth)
+Phase: 1 of -1 (Foundation & Auth)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
 Last activity: 2026-03-12 — Roadmap created from requirements and research
@@ -171,6 +171,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 6 added: Launch on gregok.ca
+- Phase 8 added: v1.1 UI polish and usability improvements (dark mode ring colours, meal plan nutrition rings, realistic measurement units, mobile sidebar settings, edit household/profile, macro % scaling with calories)
 
 ### Pending Todos
 
@@ -184,6 +185,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T15:48:50.932Z
-Stopped at: Completed 07-fix-auth-household-gaps-01-PLAN.md
-Resume file: None
+Last session: 2026-03-15T17:08:42.388Z
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-v1-1-ui-polish-and-usability-improvements/08-CONTEXT.md
