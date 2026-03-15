@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 05-portion-suggestions-polish-02-PLAN.md
-last_updated: "2026-03-15T02:35:15.956Z"
+stopped_at: Completed 05-portion-suggestions-polish-04-PLAN.md
+last_updated: "2026-03-15T02:41:52.365Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 29
-  completed_plans: 26
+  completed_plans: 28
   percent: 0
 ---
 
@@ -75,6 +75,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-daily-logging-summary P04 | 4 | 2 tasks | 5 files |
 | Phase 05-portion-suggestions-polish P01 | 12 | 2 tasks | 4 files |
 | Phase 05-portion-suggestions-polish P02 | 12 | 2 tasks | 2 files |
+| Phase 05-portion-suggestions-polish P03 | 4 | 2 tasks | 6 files |
+| Phase 05-portion-suggestions-polish P04 | 4 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -143,6 +145,11 @@ Recent decisions affecting current work:
 - [Phase 05-portion-suggestions-polish]: OFF barcode IDs not reliably distinguishable from USDA IDs in recipe_ingredients — only food_logs with item_type='off' deleted
 - [Phase 05-portion-suggestions-polish]: calcPortionSuggestions uses remaining-calorie proportional split; members with null target receive 1.0 serving and null percentage
 - [Phase 05-portion-suggestions-polish]: hasMacroWarning checks (logged + portion) against target * 1.2 (over) and target * 0.8 (under) for protein, carbs, fat independently
+- [Phase 05-portion-suggestions-polish]: useFoodSearch fires two parallel queries (search-usda, search-cnf); CNF results go first, USDA items with matching name dropped
+- [Phase 05-portion-suggestions-polish]: FoodSearch.tsx collapsed to Search/My Foods two tabs with source badge pill showing USDA or CNF on each result row
+- [Phase 05-portion-suggestions-polish]: MicronutrientPanel hidden entirely when no micronutrient data present; FoodDataEntry extended with micronutrients field
+- [Phase 05-portion-suggestions-polish]: useHouseholdDayLogs fetches all logs for household+date in one query — avoids N hook calls for N slots which would violate React hooks rules
+- [Phase 05-portion-suggestions-polish]: Suggestions computed in PlanGrid useMemo using calcPortionSuggestions directly — fetch-once-distribute pattern keeps cache key alignment with TanStack Query invalidation
 
 ### Roadmap Evolution
 
@@ -160,6 +167,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T02:35:15.950Z
-Stopped at: Completed 05-portion-suggestions-polish-02-PLAN.md
+Last session: 2026-03-15T02:41:52.361Z
+Stopped at: Completed 05-portion-suggestions-polish-04-PLAN.md
 Resume file: None
