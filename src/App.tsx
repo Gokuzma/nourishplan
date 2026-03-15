@@ -17,6 +17,7 @@ import { MemberTargetsPage } from './pages/MemberTargetsPage'
 import { PlanPage } from './pages/PlanPage'
 import NotFoundPage from './pages/NotFoundPage'
 import OfflinePage from './pages/OfflinePage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
 import { InstallPrompt } from './components/log/InstallPrompt'
@@ -156,6 +157,7 @@ function AppRoutes() {
 
       {/* Public utility routes */}
       <Route path="/offline" element={<OfflinePage />} />
+      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
       {/* Catch-all */}
       <Route path="*" element={<NotFoundPage />} />
