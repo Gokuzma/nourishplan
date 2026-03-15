@@ -44,7 +44,7 @@ Declared values (must be multiples of 4):
 Exceptions:
 - Tab bar touch target: 44px minimum height per tab (mobile accessibility)
 - Inline portion picker expanded area: `pt-2 mt-2` (8px each) with `border-t` visual separator
-- Search input: autofocus, `px-4 py-3` (16px / 12px) for comfortable mobile tap
+- Search input: autofocus, `px-4 py-4` (16px vertical) for comfortable mobile tap
 
 ---
 
@@ -57,16 +57,19 @@ Exceptions:
 | Heading | 16px | 600 (semibold) | 1.3 |
 | Display | 20px | 600 (semibold) | 1.2 |
 
-> Source: Existing codebase conventions observed in `LogEntryItem.tsx` (`text-sm` = 14px body, `text-xs` = 12px labels, `font-medium`/`font-semibold` for emphasis). Nunito Variable from `--font-sans`.
+Scale in use for this phase: 12px, 14px, 16px, 20px (4 sizes — within maximum).
+Weights in use: 400 (regular) and 600 (semibold) — 2 weights — within maximum.
+
+> Source: Existing codebase conventions observed in `LogEntryItem.tsx` (`text-sm` = 14px body, `text-xs` = 12px labels, `font-semibold` for emphasis). Nunito Variable from `--font-sans`.
 
 Specific applications for this phase:
-- Search result food name: 14px / weight 500 (`text-sm font-medium`)
+- Search result food name: 14px / weight 400 (`text-sm text-text`)
 - Search result macro line: 12px / weight 400 (`text-xs text-text/50`)
 - Overlay header title ("Add Food"): 16px / weight 600 (`text-base font-semibold`)
-- Micronutrient drill-down section heading: 10px / weight 600 uppercase (`text-[10px] font-semibold uppercase tracking-wider text-text/50`)
+- Micronutrient drill-down section heading: 12px / weight 600 uppercase (`text-xs font-semibold uppercase tracking-wider text-text/50`)
 - Micronutrient key/value rows: 12px / weight 400 (`text-xs`)
-- Source badge (USDA, CNF): 10px / weight 500 (`text-[10px] font-medium`)
-- "Log" button label: 14px / weight 600 (`text-sm font-semibold`)
+- Source badge (USDA, CNF): 12px / weight 400 (`text-xs`)
+- "Log Food" button label: 14px / weight 600 (`text-sm font-semibold`)
 
 ---
 
@@ -77,7 +80,7 @@ Specific applications for this phase:
 | Dominant (60%) | `--color-background` #FAFAF7 / dark #1A1D1A | Page background, overlay background |
 | Secondary (30%) | `--color-secondary` #F5EDE3 / dark #2A2E2A | Cards (`bg-surface`), log entry rows, tab bar, overlay header |
 | Accent (10%) | `--color-accent` #E8B4A2 / dark #F0C4B2 | Reserved list below |
-| Primary | `--color-primary` #A8C5A0 / dark #B8D4B0 | Active navigation, calorie display in log rows, "Log" button background |
+| Primary | `--color-primary` #A8C5A0 / dark #B8D4B0 | Active navigation, calorie display in log rows, "Log Food" button background |
 | Destructive | red-400 (`#f87171`) | Delete icon hover state only |
 
 > Source: `src/styles/global.css` `@theme` block and dark mode overrides. "Primary" is used as the interactive affirmative color (not "accent") — consistent with existing usage in `LogEntryItem.tsx` (`text-primary` for kcal display).
@@ -89,8 +92,8 @@ Accent (`--color-accent` peach) reserved for:
 Primary (`--color-primary` sage green) reserved for:
 - Active tab indicator in tab bar
 - Calorie value in log entry rows
-- "Log" button background in inline portion picker
-- "Add" button in select mode
+- "Log Food" button background in inline portion picker
+- "Add to Recipe" button in select mode
 - Active tab underline in Search / My Foods tabs inside overlay
 
 Destructive (red-400) reserved for:
@@ -105,6 +108,8 @@ Destructive (red-400) reserved for:
 
 ### New: `FoodSearchOverlay` (`src/components/food/FoodSearchOverlay.tsx`)
 
+Primary focal point: the search input bar at the top of the overlay is the primary visual anchor. It receives autofocus on open and carries the highest visual weight through full-width placement and border contrast against the overlay background.
+
 Structure:
 ```
 fixed inset-0 z-50 bg-background flex flex-col
@@ -112,7 +117,7 @@ fixed inset-0 z-50 bg-background flex flex-col
 │   ├── back arrow button (inline SVG, 24px, text-text/60 → text-text hover)
 │   ├── title "Add Food" (text-base font-semibold text-text)
 │   └── [select mode only] cancel/close button (text-sm text-text/60)
-├── search input (px-4 py-3, bg-surface border-b border-secondary, autofocus)
+├── search input (px-4 py-4, bg-surface border-b border-secondary, autofocus)
 │   └── placeholder "Search foods…"
 ├── tab bar (Search | My Foods)
 │   ├── tab button: text-sm, active = text-primary border-b-2 border-primary, inactive = text-text/50
@@ -124,8 +129,12 @@ fixed inset-0 z-50 bg-background flex flex-col
 Overlay entry animation: CSS opacity transition `opacity-0 → opacity-100` over 150ms. No slide animation. Applied via Tailwind `transition-opacity duration-150`.
 
 Overlay modes:
-- `log` mode: "Log" button in expanded row, overlay stays open after log action
+- `log` mode: "Log Food" button in expanded row, overlay stays open after log action
 - `select` mode: tapping row calls `onSelect(food)` then `onClose()` immediately
+
+### Home page focal point
+
+The search bar trigger on `HomePage` is the primary visual anchor for the home page primary screen. It is the first actionable element below the macro summary rings and is styled to draw the eye with full-width placement, a border, and a search icon + muted placeholder text.
 
 ### ResultRow (inside FoodSearchOverlay)
 
@@ -133,8 +142,8 @@ Collapsed state:
 ```
 bg-surface rounded-[--radius-card] px-3 py-2.5 border border-secondary
 flex items-center gap-2 cursor-pointer hover:border-primary/40 transition-colors
-├── food name (text-sm font-medium text-text, flex-1 truncate)
-├── source badge (SourceBadge — USDA/CNF pill, text-[10px], bg-secondary/60)
+├── food name (text-sm text-text, flex-1 truncate)
+├── source badge (SourceBadge — USDA/CNF pill, text-xs, bg-secondary/60)
 ├── verification indicator (⚠ amber or ✓ — existing pattern from FoodSearch.tsx)
 └── macro summary (text-xs text-text/50: "280 kcal · P 6g · C 32g · F 14g")
 ```
@@ -143,7 +152,7 @@ Expanded state (appended below collapsed row, no separate modal):
 ```
 mt-2 pt-2 border-t border-secondary/40 flex flex-col gap-2
 ├── PortionStepper (reuse existing component)
-└── "Log" button (log mode) OR "Add" button (select mode)
+└── "Log Food" button (log mode) OR "Add to Recipe" button (select mode)
     └── w-full rounded-[--radius-btn] bg-primary text-surface py-2 text-sm font-semibold
 ```
 
@@ -164,7 +173,7 @@ div (onClick → toggle expanded)
 ├── [existing] delete button
 └── [new, conditional] expanded micronutrient section
     └── div (col-span-full mt-2 pt-2 border-t border-secondary/30)
-        ├── section label: "Micronutrients" (text-[10px] font-semibold uppercase tracking-wider text-text/40)
+        ├── section label: "Micronutrients" (text-xs font-semibold uppercase tracking-wider text-text/40)
         └── per-nutrient rows (flex justify-between text-xs text-text/60)
             └── fallback when empty: "No micronutrient data for this entry" (text-xs text-text/40 italic)
 ```
@@ -189,7 +198,7 @@ Visual treatment:
 ```
 button (onClick → open FoodSearchOverlay in log mode)
   className="w-full rounded-[--radius-card] bg-surface border border-secondary
-             px-4 py-3 flex items-center gap-2 text-left
+             px-4 py-4 flex items-center gap-2 text-left
              hover:border-primary/40 transition-colors"
   ├── search icon (inline SVG, 16px, text-text/40)
   └── placeholder text "Log food…" (text-sm text-text/40)
@@ -203,14 +212,14 @@ Positioned immediately below the macro rings / micronutrient summary section, wh
 
 | Element | Copy |
 |---------|------|
-| Primary CTA (log mode "Log" button) | "Log" |
-| Primary CTA (select mode "Add" button) | "Add" |
+| Primary CTA (log mode button) | "Log Food" |
+| Primary CTA (select mode button) | "Add to Recipe" |
 | Overlay header title | "Add Food" |
 | Search input placeholder | "Search foods…" |
 | Home page search bar trigger text | "Log food…" |
 | Search tab label | "Search" |
 | My Foods tab label | "My Foods" |
-| Empty search state heading | "No results" |
+| Empty search state heading | "No foods found" |
 | Empty search state body | "Try a different spelling. No typo correction is available." |
 | Empty My Foods state heading | "No custom foods yet" |
 | Empty My Foods state body | "Add your own foods with custom nutrition data." |
@@ -233,11 +242,11 @@ Positioned immediately below the macro rings / micronutrient summary section, wh
 |-------|--------|
 | Loading (search in progress) | 3 skeleton rows — `h-12 rounded-[--radius-btn] bg-secondary/50 animate-pulse` (existing LoadingSkeleton pattern) |
 | Loaded, results present | Result rows rendered |
-| Loaded, no results | Empty state with "No results" heading + body text |
+| Loaded, no results | Empty state with "No foods found" heading + body text |
 | Row collapsed | Default result row |
 | Row expanded | Inline portion picker appended below row, row border highlights to `border-primary/40` |
 | Log success (log mode) | Row expansion collapses, brief opacity flash on row (optional — Claude's discretion), overlay stays open |
-| Log error | Inline error text below "Log" button: "Could not save. Try again." (text-xs text-red-400) |
+| Log error | Inline error text below "Log Food" button: "Could not save. Try again." (text-xs text-red-400) |
 
 ### LogEntryItem drill-down
 | State | Visual |
