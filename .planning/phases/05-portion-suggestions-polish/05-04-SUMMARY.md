@@ -46,7 +46,7 @@ key-files:
 key-decisions:
   - "useHouseholdDayLogs fetches all logs for household+date in one query — avoids calling useFoodLogs N times which would violate React hooks rules for dynamic counts"
   - "Suggestions computed in PlanGrid useMemo (not per-slot hooks) using calcPortionSuggestions directly — single fetch, synchronous computation, correct TanStack Query cache key alignment"
-  - "MicronutrientPanel integration deferred — Plan 03 (the source of that component) has not been executed yet; will be added when 05-03 runs"
+  - "MicronutrientPanel integration deferred — MealItem has no micronutrient columns, so panel would always render null; blocked on DB schema, not code"
   - "SlotCard always collapses suggestions on mount; expanded state is local per-card, not shared"
 
 # Metrics
@@ -104,11 +104,11 @@ completed: 2026-03-15
 
 ### Deferred Items
 
-**1. MicronutrientPanel integration in DayCard**
-- **Reason:** Plan 03 (05-03) which creates MicronutrientPanel has not been executed yet; the component does not exist in the codebase
+**1. MicronutrientPanel integration in SlotCard**
+- **Reason:** MealItem does not store micronutrient columns (only per-100g macro snapshot: calories, protein, fat, carbs). No micronutrient data is available from meal_items at render time, so MicronutrientPanel would always render null.
 - **Plan reference:** Task 2 step 2 — "Also add the MicronutrientPanel from Plan 03 on each slot"
-- **Action:** Deferred to after Plan 03 executes; logged to deferred-items.md
-- **Impact:** No functional regression — Plan 03 integration is additive
+- **Action:** Deferred until meal_items table stores micronutrient snapshots or meals aggregate micronutrient data at save time
+- **Impact:** No functional regression — the panel renders nothing without data; all other plan deliverables are complete
 
 ### Architecture Note
 
