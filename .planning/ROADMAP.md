@@ -220,10 +220,11 @@ Plans:
   1. Changing ingredient quantity (e.g. 50g vs 770g egg white) shows proportionally different calories and macros
   2. Logging a food updates the user's daily micronutrient goal progress
   3. Serving sizes display specific measurements (grams, cups, tbsp, etc.) instead of generic "1 serving"
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 11 to break down)
+- [ ] 11-01-PLAN.md — DB migration (serving_unit), FreeformLogModal fix, LogMealModal micros, LogEntryItem display, hook expansion
+- [ ] 11-02-PLAN.md — RecipeBuilder foodDataMap hydration and HomePage micronutrient summary
 
 ### Phase 12: Home Page & Food Search Redesign
 
