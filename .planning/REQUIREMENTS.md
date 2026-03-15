@@ -151,9 +151,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRCK-05 | Phase 9 (dead code cleanup) | Pending |
-| PLAT-03 | Phase 9 (theme token fix) | Pending |
-| POLISH-01 | Phase 9 (theme token fix) | Pending |
+| TRCK-05 | Phase 9 (dead code cleanup) | Complete |
+| PLAT-03 | Phase 9 (theme token fix) | Complete |
+| POLISH-01 | Phase 9 (theme token fix) | Complete |
 | LAUNCH-01–10 | Phase 10 (documentation) | Pending |
 | POLISH-01–10 | Phase 10 (documentation) | Pending |
 
