@@ -12,8 +12,8 @@ NourishPlan is built in five phases that follow the strict dependency chain the 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: Foundation & Auth** - Schema, household system, auth, and PWA scaffold (completed 2026-03-13)
-- [x] **Phase 2: Food Data & Recipe Builder** - USDA search, custom foods, and recipe builder with live nutrition (gap closure in progress) (completed 2026-03-13)
+- [x] **Phase 1: Foundation & Auth** - Schema, household system, auth, and PWA scaffold (completed 2008-03-13)
+- [x] **Phase 2: Food Data & Recipe Builder** - USDA search, custom foods, and recipe builder with live nutrition (gap closure in progress) (completed 2008-03-13)
 - [ ] **Phase 3: Meal Planning & Targets** - Full meal hierarchy, household-shared plans, and per-person nutrition targets
 - [ ] **Phase 4: Daily Logging & Summary** - Portion logging, daily nutrition summary, offline PWA
 - [ ] **Phase 5: Portion Suggestions & Polish** - Per-person portion suggestions, micronutrients, weekly templates, PWA audit
@@ -143,14 +143,37 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 5/5 | Complete   | 2026-03-13 |
-| 2. Food Data & Recipe Builder | 8/8 | Complete   | 2026-03-13 |
+| 1. Foundation & Auth | 5/5 | Complete   | 2008-03-13 |
+| 2. Food Data & Recipe Builder | 8/8 | Complete   | 2008-03-13 |
 | 3. Meal Planning & Targets | 5/6 | In Progress|  |
 | 4. Daily Logging & Summary | 3/5 | In Progress|  |
 | 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
-| 6. Launch on gregok.ca | 3/3 | Complete   | 2026-03-15 |
-| 7. Fix Auth & Household Integration Gaps | 1/1 | Complete   | 2026-03-15 |
+| 6. Launch on gregok.ca | 3/3 | Complete   | 2008-03-15 |
+| 7. Fix Auth & Household Integration Gaps | 1/1 | Complete   | 2008-03-15 |
+| 8. v1.1 UI Polish | 0/6 | Planning   |  |
+
+### Phase 8: v1.1 UI polish and usability improvements
+
+**Goal:** Polish existing features with dark mode completeness, meal plan nutrition rings, realistic measurement units, mobile drawer navigation, expanded Settings with profile/household editing, and macro percentage scaling on nutrition targets
+**Requirements**: POLISH-01, POLISH-02, POLISH-03, POLISH-04, POLISH-05, POLISH-06, POLISH-07, POLISH-08, POLISH-09, POLISH-10
+**Depends on:** Phase 7
+**Success Criteria** (what must be TRUE):
+  1. All components render correctly in dark mode with visible ring colors and proper contrast
+  2. Each meal plan slot shows mini nutrition rings indicating contribution to daily targets
+  3. Food logging shows household measurement units (cups, tbsp, pieces) when source data provides them
+  4. Mobile tab bar has a "More" button opening a slide-out drawer with overflow navigation
+  5. Settings page allows editing display name, avatar, and household name (admin only)
+  6. Nutrition targets form supports entering macros as percentages of calories with P+C+F=100% validation
+**Plans:** 6 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — DB migrations (custom food portions, macro_mode, RLS policies) and type updates
+- [ ] 08-02-PLAN.md — Dark mode audit and ProgressRing theme-aware background
+- [ ] 08-03-PLAN.md — Per-slot mini nutrition rings on meal plan SlotCards
+- [ ] 08-04-PLAN.md — CNF serving sizes and PortionStepper unit selector
+- [ ] 08-05-PLAN.md — Mobile "More" drawer, Settings expansion, profile/avatar editing
+- [ ] 08-06-PLAN.md — Macro percentage scaling toggle on NutritionTargetsForm
