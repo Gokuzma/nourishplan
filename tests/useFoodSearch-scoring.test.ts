@@ -18,7 +18,8 @@ describe('scoreFood', () => {
   })
 
   it('returns 0.5 for contains match', () => {
-    expect(scoreFood('plantain banana-like', 'ban')).toBe(0.5)
+    // 'turban' contains 'ban' but does not start with 'ban' at any word boundary
+    expect(scoreFood('turban squash', 'ban')).toBe(0.5)
   })
 
   it('returns 0.3 for no match', () => {

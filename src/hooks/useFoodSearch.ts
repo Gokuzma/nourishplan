@@ -4,6 +4,22 @@ import { supabase } from '../lib/supabase'
 import type { NormalizedFoodResult } from '../types/database'
 
 /**
+ * Scores a food name against a query using five relevance tiers:
+ * exact match (1.0), starts-with (0.9), word boundary (0.7), contains (0.5), no match (0.3).
+ * Returns 0.5 for empty queries (neutral).
+ */
+export function scoreFood(name: string, query: string): number {
+  const n = name.toLowerCase()
+  const q = query.toLowerCase().trim()
+  if (!q) return 0.5
+  if (n === q) return 1.0
+  if (n.startsWith(q)) return 0.9
+  if (n.split(/\s+/).some(word => word.startsWith(q))) return 0.7
+  if (n.includes(q)) return 0.5
+  return 0.3
+}
+
+/**
  * Searches USDA and CNF simultaneously via Supabase Edge Functions.
  * Results are merged with CNF priority: when both sources return a food
  * with the same name, the CNF result is used and the USDA duplicate is dropped.
@@ -67,8 +83,13 @@ export function useFoodSearch(query: string) {
       }
     }
 
-    return merged
-  }, [cnfQuery.data, usdaQuery.data])
+    const scored = merged.map(food => ({ food, score: scoreFood(food.name, query) }))
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score
+      return a.food.name.length - b.food.name.length
+    })
+    return scored.map(s => s.food)
+  }, [cnfQuery.data, usdaQuery.data, query])
 
   return { data, isLoading, error }
 }
