@@ -165,6 +165,31 @@ export function useDeleteFoodLog() {
 }
 
 /**
+ * Returns all food log entries for the given household and date, across all members.
+ * Used by usePortionSuggestions to gather per-member logs without N hook calls.
+ */
+export function useHouseholdDayLogs(
+  householdId: string | undefined,
+  logDate: string | undefined,
+) {
+  return useQuery({
+    queryKey: ['food-logs', householdId, logDate],
+    queryFn: async (): Promise<FoodLog[]> => {
+      const { data, error } = await supabase
+        .from('food_logs')
+        .select('*')
+        .eq('household_id', householdId!)
+        .eq('log_date', logDate!)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      return data ?? []
+    },
+    enabled: !!householdId && !!logDate,
+  })
+}
+
+/**
  * Inserts multiple food log entries in a single batch (for "Log all as planned").
  */
 export function useBulkInsertFoodLogs() {
