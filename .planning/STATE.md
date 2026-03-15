@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-03-15T17:48:31.271Z"
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-03-15T17:52:03.581Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 39
-  completed_plans: 35
+  completed_plans: 36
   percent: 0
 ---
 
@@ -84,6 +84,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-fix-auth-household-gaps P01 | 15 | 2 tasks | 4 files |
 | Phase 08-v1-1-ui-polish-and-usability-improvements P01 | 1 | 2 tasks | 2 files |
 | Phase 08-v1-1-ui-polish-and-usability-improvements P02 | 2 | 2 tasks | 2 files |
+| Phase 08-v1-1-ui-polish-and-usability-improvements P03 | 2 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -174,6 +175,7 @@ Recent decisions affecting current work:
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: portions column defaults to '[]'::jsonb — existing custom foods unaffected, no backfill needed
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: bgColor defaults to currentColor for ProgressRing background - inherits text color, adapts to light/dark without explicit logic
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: Dark secondary token set to #2A2E2A dark neutral - warm cream #F5EDE3 is invisible on dark backgrounds
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: calcSlotCalories replaced by calcSlotNutrition returning full macro breakdown - avoids double computation when both calories and mini rings are needed in SlotCard
 
 ### Roadmap Evolution
 
@@ -192,6 +194,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T17:48:31.267Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-03-15T17:52:03.578Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
