@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 12-home-page-food-search-redesign-01-PLAN.md
-last_updated: "2026-03-15T23:13:28.967Z"
+stopped_at: Completed 12-home-page-food-search-redesign-02-PLAN.md
+last_updated: "2026-03-15T23:23:35.563Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 14
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 45
-  completed_plans: 44
+  completed_plans: 45
   percent: 98
 ---
 
@@ -109,6 +109,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 11-nutrition-calculation-fixes P01 | 2 | 2 tasks | 7 files |
 | Phase 11-nutrition-calculation-fixes P02 | 2 | 2 tasks | 2 files |
 | Phase 12-home-page-food-search-redesign P01 | 6 | 3 tasks | 3 files |
+| Phase 12-home-page-food-search-redesign P02 | 7 | 4 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -216,6 +217,9 @@ Recent decisions affecting current work:
 - [Phase 11-nutrition-calculation-fixes]: Standalone NutrientBreakdown on HomePage replaced with integrated expandable version inside micronutrient summary card to avoid duplicate sections
 - [Phase 12-home-page-food-search-redesign]: Contains-tier test fixture corrected: banana-like scores 0.7 (word boundary), not 0.5; use turban squash for true contains-only example
 - [Phase 12-home-page-food-search-redesign]: FoodSearchOverlay select mode: row tap immediately calls onSelect+onClose with no expansion; Add to Recipe label shown inline on each row
+- [Phase 12-home-page-food-search-redesign]: LogEntryItem row click toggles expand (not onEdit); explicit Edit button with stopPropagation for edit action
+- [Phase 12-home-page-food-search-redesign]: RecipeBuilder keeps separate recipe-picker panel for sub-recipe selection; food search uses FoodSearchOverlay overlay
+- [Phase 12-home-page-food-search-redesign]: FreeformLogModal deleted (dead code — no longer imported anywhere after HomePage migration)
 
 ### Roadmap Evolution
 
@@ -238,6 +242,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T23:13:28.962Z
-Stopped at: Completed 12-home-page-food-search-redesign-01-PLAN.md
+Last session: 2026-03-15T23:23:35.557Z
+Stopped at: Completed 12-home-page-food-search-redesign-02-PLAN.md
 Resume file: None

@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Daily Logging & Summary** - Portion logging, daily nutrition summary, offline PWA
 - [ ] **Phase 5: Portion Suggestions & Polish** - Per-person portion suggestions, micronutrients, weekly templates, PWA audit
 - [x] **Phase 11: Nutrition & Calculation Fixes** - Fix calorie/macro scaling, micronutrient goal updates, specific serving measurements (completed 2026-03-15)
-- [ ] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down
+- [x] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down (completed 2026-03-15)
 - [ ] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management
 - [ ] **Phase 14: How-To Manual** - In-app guide explaining how to use all features
 
@@ -236,7 +236,7 @@ Plans:
   2. Food search prioritizes simplest matching ingredients over CNF-prefixed results (basic items appear first)
   3. User can drill into each logged meal to see per-food micronutrient breakdown
   4. Home page + button is replaced with a contextual "Log food" UI element following UX best practices
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 
 - [ ] 12-01-PLAN.md — Fuzzy search scoring and FoodSearchOverlay component
