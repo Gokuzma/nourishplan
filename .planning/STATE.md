@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 06-launch-on-gregok-ca-03-PLAN.md
-last_updated: "2026-03-15T15:05:17.452Z"
+stopped_at: Completed 07-fix-auth-household-gaps-01-PLAN.md
+last_updated: "2026-03-15T15:48:50.937Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 32
-  completed_plans: 32
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 33
+  completed_plans: 33
   percent: 0
 ---
 
@@ -81,6 +81,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-launch-on-gregok-ca P02 | 5 | 1 tasks | 1 files |
 | Phase 06-launch-on-gregok-ca P01 | 3 | 2 tasks | 6 files |
 | Phase 06-launch-on-gregok-ca P03 | 60 | 2 tasks | 2 files |
+| Phase 07-fix-auth-household-gaps P01 | 15 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -163,6 +164,9 @@ Recent decisions affecting current work:
 - [Phase 06-launch-on-gregok-ca]: .npmrc with legacy-peer-deps=true added to resolve peer dependency conflicts during Vercel npm install
 - [Phase 06-launch-on-gregok-ca]: vercel.json buildCommand set to 'vite build' (skipping tsc) — pre-existing TS errors would block every deploy
 - [Phase 06-launch-on-gregok-ca]: Supabase disable_signup and auth URLs configured via Management API — fully automated without manual dashboard steps
+- [Phase 07-fix-auth-household-gaps]: ResetPasswordPage placed outside AuthGuard and GuestGuard — temporary session token from email link would be rejected by guards
+- [Phase 07-fix-auth-household-gaps]: week_start_day: 0 added to useCreateHousehold return to satisfy Household interface (Sunday DB default)
+- [Phase 07-fix-auth-household-gaps]: 10-second timeout on PASSWORD_RECOVERY wait shows expiry message with /auth link to avoid infinite spinner
 
 ### Roadmap Evolution
 
@@ -180,6 +184,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T14:54:01.706Z
-Stopped at: Completed 06-launch-on-gregok-ca-03-PLAN.md
+Last session: 2026-03-15T15:48:50.932Z
+Stopped at: Completed 07-fix-auth-household-gaps-01-PLAN.md
 Resume file: None
