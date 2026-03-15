@@ -90,7 +90,7 @@ export function useCreateHousehold() {
 
       if (memberError) throw memberError
 
-      return { id: householdId, name, created_at: new Date().toISOString() }
+      return { id: householdId, name, week_start_day: 0, created_at: new Date().toISOString() }
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['household'] })
