@@ -10,7 +10,7 @@ import { MemberSelector } from '../components/plan/MemberSelector'
 import { DailyLogList } from '../components/log/DailyLogList'
 import { NutrientBreakdown } from '../components/log/NutrientBreakdown'
 import { LogMealModal } from '../components/log/LogMealModal'
-import { FreeformLogModal } from '../components/log/FreeformLogModal'
+import { FoodSearchOverlay } from '../components/food/FoodSearchOverlay'
 import { PortionStepper } from '../components/log/PortionStepper'
 import { calcLogEntryNutrition, calcDayNutrition, MICRONUTRIENT_DISPLAY_ORDER, MICRONUTRIENT_LABELS } from '../utils/nutrition'
 import { getWeekStart } from '../utils/mealPlan'
@@ -184,7 +184,7 @@ export function HomePage() {
 
   const [logMealSlot, setLogMealSlot] = useState<SlotWithMeal | null>(null)
   const [editLog, setEditLog] = useState<FoodLog | null>(null)
-  const [freeformOpen, setFreeformOpen] = useState(false)
+  const [searchOverlayOpen, setSearchOverlayOpen] = useState(false)
 
   const weekStart = getWeekStart(new Date(`${selectedDate}T00:00:00Z`), weekStartDay)
 
@@ -398,28 +398,30 @@ export function HomePage() {
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleLogAll}
-          disabled={!isOnline || unloggedSlots.length === 0 || bulkInsert.isPending}
-          title={!isOnline ? 'Available when online' : undefined}
-          className="flex-1 rounded-[--radius-btn] border border-primary/40 py-2.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {bulkInsert.isPending
-            ? 'Logging...'
-            : unloggedSlots.length > 0
-              ? `Log all (${unloggedSlots.length} remaining)`
-              : 'Log all as planned'}
-        </button>
+      <div className="flex flex-col gap-2">
+        {unloggedSlots.length > 0 && (
+          <button
+            onClick={handleLogAll}
+            disabled={!isOnline || bulkInsert.isPending}
+            title={!isOnline ? 'Available when online' : undefined}
+            className="w-full rounded-[--radius-btn] border border-primary/40 py-2.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {bulkInsert.isPending ? 'Logging...' : `Log all (${unloggedSlots.length} remaining)`}
+          </button>
+        )}
 
+        {/* Search bar trigger */}
         <button
-          onClick={() => setFreeformOpen(true)}
+          onClick={() => setSearchOverlayOpen(true)}
           disabled={!isOnline}
           title={!isOnline ? 'Available when online' : undefined}
-          className="rounded-[--radius-btn] bg-primary text-white px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          aria-label="Add food"
+          className="w-full rounded-[--radius-card] bg-surface border border-secondary px-4 py-4 flex items-center gap-2 text-left hover:border-primary/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          +
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text/40 shrink-0">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span className="text-sm text-text/40">Log food...</span>
         </button>
       </div>
 
@@ -445,14 +447,16 @@ export function HomePage() {
         />
       )}
 
-      {/* Freeform log modal */}
-      <FreeformLogModal
-        isOpen={freeformOpen}
-        onClose={() => setFreeformOpen(false)}
-        logDate={selectedDate}
-        memberId={selectedMemberId}
-        memberType={selectedMemberType}
-      />
+      {/* Food search overlay */}
+      {searchOverlayOpen && (
+        <FoodSearchOverlay
+          mode="log"
+          logDate={selectedDate}
+          memberId={selectedMemberId}
+          memberType={selectedMemberType}
+          onClose={() => setSearchOverlayOpen(false)}
+        />
+      )}
 
       {/* Edit log modal */}
       {editLog && (
