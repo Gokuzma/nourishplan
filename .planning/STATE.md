@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-03-15T03:39:16.790Z"
+stopped_at: Completed 06-launch-on-gregok-ca-01-PLAN.md
+last_updated: "2026-03-15T03:42:04.492Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
   percent: 0
 ---
 
@@ -79,6 +79,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-portion-suggestions-polish P04 | 4 | 2 tasks | 8 files |
 | Phase 05-portion-suggestions-polish P05 | 30 | 2 tasks | 1 files |
 | Phase 06-launch-on-gregok-ca P02 | 5 | 1 tasks | 1 files |
+| Phase 06-launch-on-gregok-ca P01 | 3 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,9 @@ Recent decisions affecting current work:
 - [Phase 05-portion-suggestions-polish]: navigateFallback added to workbox config — primary fix for Lighthouse 'responds with 200 offline' failure on SPAs
 - [Phase 05-portion-suggestions-polish]: Icon purpose set to 'any maskable' — solid sage green square has no edge detail, safe without a separate maskable asset
 - [Phase 06-launch-on-gregok-ca]: Sage green accent rgba(168, 197, 160, 0.1) used for NourishPlan portfolio card — matches app brand color at 10% opacity
+- [Phase 06-launch-on-gregok-ca]: vercel.json SPA rewrite uses POSIX regex /(.*) source pattern — Vercel JSON uses POSIX regex not glob syntax
+- [Phase 06-launch-on-gregok-ca]: Splash dismissed via transitionend listener after adding .hidden class — smooth fade without blocking React hydration
+- [Phase 06-launch-on-gregok-ca]: C:/Program Files/Git/offline route placed outside AppShell layout route — renders without auth requirements
 
 ### Roadmap Evolution
 
@@ -172,6 +176,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T03:39:16.787Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-03-15T03:42:04.487Z
+Stopped at: Completed 06-launch-on-gregok-ca-01-PLAN.md
 Resume file: None

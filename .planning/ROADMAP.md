@@ -140,4 +140,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Meal Planning & Targets | 5/6 | In Progress|  |
 | 4. Daily Logging & Summary | 3/5 | In Progress|  |
 | 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
-| 6. Launch on gregok.ca | 1/3 | In Progress|  |
+| 6. Launch on gregok.ca | 2/3 | In Progress|  |
