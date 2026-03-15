@@ -15,6 +15,8 @@ import { MealPage } from './pages/MealPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { MemberTargetsPage } from './pages/MemberTargetsPage'
 import { PlanPage } from './pages/PlanPage'
+import NotFoundPage from './pages/NotFoundPage'
+import OfflinePage from './pages/OfflinePage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
 import { InstallPrompt } from './components/log/InstallPrompt'
@@ -152,8 +154,11 @@ function AppRoutes() {
         <Route path="/members/:id/targets" element={<MemberTargetsPage />} />
       </Route>
 
+      {/* Public utility routes */}
+      <Route path="/offline" element={<OfflinePage />} />
+
       {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
