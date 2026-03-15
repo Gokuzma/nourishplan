@@ -44,9 +44,7 @@ export function LogEntryItem({ log, onEdit, onDelete }: LogEntryItemProps) {
             <span className="text-xs text-text/30">&middot;</span>
           )}
           <span className="text-xs text-text/50">
-            {log.servings_logged === 1
-              ? '1 serving'
-              : `${log.servings_logged} servings`}
+            {`${log.servings_logged} ${log.serving_unit ?? 'serving'}`}
           </span>
         </div>
       </div>

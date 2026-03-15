@@ -73,12 +73,11 @@ export function FreeformLogModal({
   async function handleLog() {
     if (!selectedFood) return
 
-    const grams = totalGrams()
-    // Store per-serving macros as the macro values for the total amount logged (1 serving = grams logged)
-    const caloriesPerServing = (grams / 100) * selectedFood.calories
-    const proteinPerServing = (grams / 100) * selectedFood.protein
-    const fatPerServing = (grams / 100) * selectedFood.fat
-    const carbsPerServing = (grams / 100) * selectedFood.carbs
+    // Per-unit macros: calories for one unit of the selected portion (e.g. 1 cup)
+    const caloriesPerServing = (selectedUnit.grams / 100) * selectedFood.calories
+    const proteinPerServing = (selectedUnit.grams / 100) * selectedFood.protein
+    const fatPerServing = (selectedUnit.grams / 100) * selectedFood.fat
+    const carbsPerServing = (selectedUnit.grams / 100) * selectedFood.carbs
 
     // item_type: custom foods use 'food', external sources use their source string
     const itemType = selectedFood.source === 'custom' ? 'food' : selectedFood.source
@@ -94,12 +93,17 @@ export function FreeformLogModal({
         item_type: itemType,
         item_id: selectedFood.id,
         item_name: selectedFood.name,
-        servings_logged: 1,
+        servings_logged: quantity,
         calories_per_serving: caloriesPerServing,
         protein_per_serving: proteinPerServing,
         fat_per_serving: fatPerServing,
         carbs_per_serving: carbsPerServing,
-        micronutrients: selectedFood.micronutrients ?? {},
+        micronutrients: Object.fromEntries(
+          Object.entries(selectedFood.micronutrients ?? {}).map(
+            ([key, val]) => [key, (selectedUnit.grams / 100) * val]
+          )
+        ),
+        serving_unit: selectedUnit.description,
         is_private: isPrivate,
       })
       onClose()

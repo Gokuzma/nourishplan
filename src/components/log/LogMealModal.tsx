@@ -83,6 +83,7 @@ export function LogMealModal({
         fat_per_serving: macros.fat,
         carbs_per_serving: macros.carbs,
         micronutrients: {},
+        serving_unit: 'serving',
         is_private: isPrivate,
       })
       onClose()

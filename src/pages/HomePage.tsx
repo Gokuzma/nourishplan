@@ -223,6 +223,7 @@ export function HomePage() {
           fat_per_serving: totalFat,
           carbs_per_serving: totalCarb,
           micronutrients: {},
+          serving_unit: 'serving',
           is_private: false,
         }
       })
