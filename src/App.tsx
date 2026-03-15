@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -158,6 +159,14 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    const splash = document.getElementById('splash')
+    if (!splash) return
+    splash.classList.add('hidden')
+    const onTransitionEnd = () => splash.remove()
+    splash.addEventListener('transitionend', onTransitionEnd, { once: true })
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
