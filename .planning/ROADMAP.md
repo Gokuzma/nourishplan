@@ -203,6 +203,4 @@ Plans:
   1. LAUNCH-01 through LAUNCH-10 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
   2. POLISH-01 through POLISH-10 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
   3. Traceability table includes all 20 new requirements mapped to their phases
-**Plans:** 1 plan
-Plans:
-- [ ] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme token fix
+Plans: TBD
