@@ -125,6 +125,7 @@ export function DayCard({
               slot={s}
               suggestions={slotSuggestions?.get(slotName) ?? null}
               currentUserId={currentUserId}
+              memberTarget={memberTarget}
               onAssign={() => onAssignSlot(slotName)}
               onClear={() => {
                 if (s) onClearSlot(s.id)
@@ -145,6 +146,7 @@ export function DayCard({
             slot={s}
             suggestions={slotSuggestions?.get(s.slot_name) ?? null}
             currentUserId={currentUserId}
+            memberTarget={memberTarget}
             onAssign={() => onAssignSlot(s.slot_name)}
             onClear={() => onClearSlot(s.id)}
             onSwap={() => onSwapSlot(s.slot_name)}

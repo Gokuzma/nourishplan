@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
+import { ProgressRing } from './ProgressRing'
 import { PortionSuggestionRow } from './PortionSuggestionRow'
-import type { MealPlanSlot, Meal, MealItem } from '../../types/database'
+import type { MealPlanSlot, Meal, MealItem, NutritionTarget } from '../../types/database'
 import type { PortionResult } from '../../utils/portionSuggestions'
 
 export type SlotWithMeal = MealPlanSlot & {
@@ -17,10 +18,11 @@ interface SlotCardProps {
   onLog?: () => void
   suggestions?: PortionResult | null
   currentUserId?: string
+  memberTarget?: NutritionTarget | null
 }
 
-function calcSlotCalories(meal: (Meal & { meal_items: MealItem[] }) | null): number {
-  if (!meal || !meal.meal_items.length) return 0
+function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
+  if (!meal || !meal.meal_items.length) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
   const items = meal.meal_items.map(item => ({
     nutrition: calcIngredientNutrition(
       {
@@ -32,7 +34,7 @@ function calcSlotCalories(meal: (Meal & { meal_items: MealItem[] }) | null): num
       item.quantity_grams,
     ),
   }))
-  return calcMealNutrition(items).calories
+  return calcMealNutrition(items)
 }
 
 /**
@@ -40,10 +42,11 @@ function calcSlotCalories(meal: (Meal & { meal_items: MealItem[] }) | null): num
  * When suggestions are provided, shows the current user's portion inline with an
  * expandable section to see all household members' suggestions.
  */
-export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId }: SlotCardProps) {
+export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget }: SlotCardProps) {
   const [expanded, setExpanded] = useState(false)
   const meal = slot?.meals ?? null
-  const calories = calcSlotCalories(meal)
+  const nutrition = calcSlotNutrition(meal)
+  const calories = nutrition.calories
 
   if (!meal) {
     return (
@@ -82,6 +85,14 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
               </span>
             )}
           </div>
+          {memberTarget && (
+            <div className="flex items-center gap-1.5 mt-1">
+              <ProgressRing value={nutrition.calories} target={memberTarget.calories ?? 0} size={20} strokeWidth={2} color="#A8C5A0" />
+              <ProgressRing value={nutrition.protein} target={memberTarget.protein_g ?? 0} size={20} strokeWidth={2} color="#93C5FD" />
+              <ProgressRing value={nutrition.carbs} target={memberTarget.carbs_g ?? 0} size={20} strokeWidth={2} color="#FCD34D" />
+              <ProgressRing value={nutrition.fat} target={memberTarget.fat_g ?? 0} size={20} strokeWidth={2} color="#F9A8D4" />
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-1 ml-2 shrink-0">
           {hasExpandableSuggestions && (
