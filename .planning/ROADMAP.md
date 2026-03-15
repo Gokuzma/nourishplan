@@ -236,10 +236,11 @@ Plans:
   2. Food search prioritizes simplest matching ingredients over CNF-prefixed results (basic items appear first)
   3. User can drill into each logged meal to see per-food micronutrient breakdown
   4. Home page + button is replaced with a contextual "Log food" UI element following UX best practices
-**Plans:** 0 plans
-
+**Plans:** 2 plans
 Plans:
-- [ ] TBD (run /gsd:plan-phase 12 to break down)
+
+- [ ] 12-01-PLAN.md — Fuzzy search scoring and FoodSearchOverlay component
+- [ ] 12-02-PLAN.md — HomePage integration, LogEntryItem drill-down, nav cleanup, RecipeBuilder wiring
 
 ### Phase 13: Recipe, Meal Plan & Account Management
 
