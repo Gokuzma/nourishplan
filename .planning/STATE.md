@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-03-15T17:52:03.581Z"
+stopped_at: Completed 08-04-PLAN.md
+last_updated: "2026-03-15T17:53:33.627Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 8
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 39
-  completed_plans: 36
+  completed_plans: 39
   percent: 0
 ---
 
@@ -85,6 +85,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-v1-1-ui-polish-and-usability-improvements P01 | 1 | 2 tasks | 2 files |
 | Phase 08-v1-1-ui-polish-and-usability-improvements P02 | 2 | 2 tasks | 2 files |
 | Phase 08-v1-1-ui-polish-and-usability-improvements P03 | 2 | 1 tasks | 2 files |
+| Phase 08-v1-1-ui-polish-and-usability-improvements P04 | 153 | 2 tasks | 3 files |
+| Phase 08-v1-1-ui-polish-and-usability-improvements P05 | 20 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -176,6 +178,11 @@ Recent decisions affecting current work:
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: bgColor defaults to currentColor for ProgressRing background - inherits text color, adapts to light/dark without explicit logic
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: Dark secondary token set to #2A2E2A dark neutral - warm cream #F5EDE3 is invisible on dark backgrounds
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: calcSlotCalories replaced by calcSlotNutrition returning full macro breakdown - avoids double computation when both calories and mini rings are needed in SlotCard
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: CNF servingsize API response parsed defensively with multiple field name candidates — exact shape logged on first call for debugging
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: FreeformLogModal logs servings_logged=1 with per-serving macros = totalGrams/100 * per100g when unit-based logging is used
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: Drawer state kept in TabBar (not AppShell) — z-50 fixed positioning makes it render above all content without needing to lift state
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: Avatar upload validates MIME type (jpg/png/webp) and 2MB max in uploadAvatar before calling Supabase Storage
+- [Phase 08-v1-1-ui-polish-and-usability-improvements]: Non-admin users see household name as read-only text label in SettingsPage — no disabled input
 
 ### Roadmap Evolution
 
@@ -194,6 +201,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T17:52:03.578Z
-Stopped at: Completed 08-03-PLAN.md
+Last session: 2026-03-15T17:53:22.097Z
+Stopped at: Completed 08-04-PLAN.md
 Resume file: None

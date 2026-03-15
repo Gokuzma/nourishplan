@@ -154,7 +154,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
 | 6. Launch on gregok.ca | 3/3 | Complete   | 2008-03-15 |
 | 7. Fix Auth & Household Integration Gaps | 1/1 | Complete   | 2008-03-15 |
-| 8. v1.1 UI Polish | 3/6 | In Progress|  |
+| 8. v1.1 UI Polish | 5/6 | In Progress|  |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -168,7 +168,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
   4. Mobile tab bar has a "More" button opening a slide-out drawer with overflow navigation
   5. Settings page allows editing display name, avatar, and household name (admin only)
   6. Nutrition targets form supports entering macros as percentages of calories with P+C+F=100% validation
-**Plans:** 3/6 plans executed
+**Plans:** 5/6 plans executed
 
 Plans:
 - [ ] 08-01-PLAN.md — DB migrations (custom food portions, macro_mode, RLS policies) and type updates
