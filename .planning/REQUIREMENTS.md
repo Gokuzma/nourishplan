@@ -12,7 +12,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AUTH-01**: User can create an account with email and password
 - [x] **AUTH-02**: User can log in and stay logged in across browser sessions
 - [x] **AUTH-03**: User can log out from any page
-- [ ] **AUTH-04**: User can reset password via email link
+- [x] **AUTH-04**: User can reset password via email link
 
 ### Household
 
@@ -106,7 +106,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
-| AUTH-04 | Phase 7 | Pending |
+| AUTH-04 | Phase 7 | Complete |
 | HSHD-01 | Phase 1 | Complete |
 | HSHD-02 | Phase 1 | Complete |
 | HSHD-03 | Phase 1 | Complete |
