@@ -50,12 +50,12 @@ Exceptions: `pb-24` on HomePage root div preserves tab bar clearance — do not 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 | 1.5 |
-| Label | 12px (text-xs) | 400–500 | 1.4 |
+| Label | 12px (text-xs) | 400 | 1.4 |
 | Section heading | 12px (text-xs) uppercase tracking-wide | 600 (font-semibold) | 1.4 |
 | Card value | 14px (text-sm) | 600 (font-semibold) | 1.25 |
-| Modal heading | 18px (text-lg) | 700 (font-bold) | 1.25 |
+| Modal heading | 18px (text-lg) | 600 (font-semibold) | 1.25 |
 
-Typography is defined by Tailwind utility classes only. No new type scale values are needed for this phase. All new text elements must match the existing pattern: `text-xs text-text/50` for labels, `text-sm font-medium text-text/70` for secondary text, `text-sm font-semibold text-text` for values.
+Typography is defined by Tailwind utility classes only. No new type scale values are needed for this phase. All new text elements must match the existing pattern: `text-xs text-text/50` for labels, `text-sm text-text/70` for secondary text, `text-sm font-semibold text-text` for values.
 
 ---
 
