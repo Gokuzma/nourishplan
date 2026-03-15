@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Phase 11 context gathered
-last_updated: "2026-03-15T21:22:54.920Z"
+stopped_at: Completed 11-nutrition-calculation-fixes-01-PLAN.md
+last_updated: "2026-03-15T21:56:40.548Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 14
   completed_phases: 10
-  total_plans: 41
-  completed_plans: 41
+  total_plans: 43
+  completed_plans: 42
   percent: 0
 ---
 
@@ -90,6 +90,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-v1-1-ui-polish-and-usability-improvements P06 | 10 | 2 tasks | 4 files |
 | Phase 09-dead-code-removal-theme-token-cleanup P01 | 2 | 2 tasks | 5 files |
 | Phase 10-requirements-documentation-formalization P01 | 2 | 2 tasks | 2 files |
+| Phase 11-nutrition-calculation-fixes P01 | 2 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -191,6 +192,8 @@ Recent decisions affecting current work:
 - [Phase 09-dead-code-removal-theme-token-cleanup]: Existing amber warning indicators in FoodSearch and plan components are out of scope — intentional warning-color uses, not theme bypasses
 - [Phase 10-requirements-documentation-formalization]: LAUNCH and POLISH requirements derived 1:1 from Phase 6 and Phase 8 success criteria — 6 per category (no padding to 10)
 - [Phase 10-requirements-documentation-formalization]: POLISH-01 Phase 9 gap closure row retained alongside Phase 8 traceability row — documents remediation separately from original feature build
+- [Phase 11-nutrition-calculation-fixes]: FreeformLogModal now logs servings_logged=quantity with per-unit macro values, fixing double-multiplication in EditLogModal
+- [Phase 11-nutrition-calculation-fixes]: serving_unit column is nullable; null means legacy entry; display fallback is 'serving'
 
 ### Roadmap Evolution
 
@@ -213,6 +216,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T21:22:54.914Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-nutrition-calculation-fixes/11-CONTEXT.md
+Last session: 2026-03-15T21:56:40.541Z
+Stopped at: Completed 11-nutrition-calculation-fixes-01-PLAN.md
+Resume file: None
