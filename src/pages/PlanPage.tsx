@@ -42,6 +42,9 @@ export function PlanPage() {
   const [selectedMemberId, setSelectedMemberId] = useState(session?.user.id ?? '')
   const [selectedMemberType, setSelectedMemberType] = useState<'user' | 'profile'>('user')
 
+  // Overflow menu state
+  const [showOverflow, setShowOverflow] = useState(false)
+
   const householdId = membership?.household_id
 
   const { data: plan, isPending: planPending } = useMealPlan(weekStart)
@@ -63,11 +66,15 @@ export function PlanPage() {
     setSelectedMemberType(type)
   }
 
-  async function handleNewWeekChoice(choice: 'fresh' | 'repeat' | 'template', templateId?: string) {
-    const newPlan = await createPlan.mutateAsync(weekStart)
+  async function handleNewWeekChoice(choice: 'fresh' | 'repeat' | 'template', templateId?: string, planStart?: string) {
+    const targetWeekStart = planStart ?? weekStart
+    if (planStart && planStart !== weekStart) {
+      setWeekStart(planStart)
+    }
+    const newPlan = await createPlan.mutateAsync(targetWeekStart)
 
     if (choice === 'repeat') {
-      const previousWeekStart = addDays(weekStart, -7)
+      const previousWeekStart = addDays(targetWeekStart, -7)
       await repeatLastWeek.mutateAsync({ currentPlanId: newPlan.id, previousWeekStart })
     } else if (choice === 'template' && templateId) {
       await loadTemplate.mutateAsync({ templateId, planId: newPlan.id })
@@ -86,23 +93,51 @@ export function PlanPage() {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={handlePrevWeek}
-          className="p-2 rounded-full text-text/50 hover:text-text hover:bg-accent/10 transition-colors"
+          className="no-print p-2 rounded-full text-text/50 hover:text-text hover:bg-accent/10 transition-colors"
           aria-label="Previous week"
         >
           &larr;
         </button>
         <span className="text-sm font-medium text-text font-sans">{formatWeekRange(weekStart)}</span>
-        <button
-          onClick={handleNextWeek}
-          className="p-2 rounded-full text-text/50 hover:text-text hover:bg-accent/10 transition-colors"
-          aria-label="Next week"
-        >
-          &rarr;
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleNextWeek}
+            className="no-print p-2 rounded-full text-text/50 hover:text-text hover:bg-accent/10 transition-colors"
+            aria-label="Next week"
+          >
+            &rarr;
+          </button>
+          {/* Overflow menu - ⋮ button */}
+          <div className="relative no-print">
+            <button
+              onClick={() => setShowOverflow(prev => !prev)}
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-accent/10 transition-colors text-text/50 hover:text-text"
+              aria-label="More options"
+              title="More options"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
+              </svg>
+            </button>
+            {showOverflow && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowOverflow(false)} />
+                <div className="absolute right-0 top-full mt-1 z-20 bg-surface border border-secondary rounded-[--radius-card] shadow-lg py-1 min-w-[180px]">
+                  <button
+                    onClick={() => { window.print(); setShowOverflow(false) }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-text hover:bg-accent/10 transition-colors flex items-center gap-2"
+                  >
+                    Print meal plan
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Member selector */}
-      <div className="mb-6">
+      <div className="mb-6 no-print">
         <MemberSelector selectedMemberId={selectedMemberId} onSelect={handleMemberSelect} />
       </div>
 
@@ -117,7 +152,9 @@ export function PlanPage() {
         <NewWeekPrompt weekStart={weekStart} onChoice={handleNewWeekChoice} />
       ) : (
         <>
-          <TemplateManager planId={plan.id} />
+          <div className="no-print">
+            <TemplateManager planId={plan.id} />
+          </div>
           <PlanGrid
             planId={plan.id}
             weekStart={weekStart}
@@ -128,6 +165,9 @@ export function PlanPage() {
             selectedMemberId={selectedMemberId}
             selectedMemberType={selectedMemberType}
           />
+          <div className="print-only mt-4">
+            <p className="text-xs font-semibold">Meal plan for week of {formatWeekRange(weekStart)}</p>
+          </div>
         </>
       )}
     </div>

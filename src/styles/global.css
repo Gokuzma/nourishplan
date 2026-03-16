@@ -31,3 +31,65 @@
     --color-accent: #F0C4B2;    /* peach, lightened for dark bg */
   }
 }
+
+/* Print styles for meal plan */
+@media print {
+  /* Hide app chrome */
+  .no-print,
+  nav,
+  [role="tabbar"],
+  [role="navigation"],
+  button {
+    display: none !important;
+  }
+
+  /* Force B&W */
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: system-ui, sans-serif !important;
+    font-size: 11px !important;
+  }
+
+  /* Reset layout */
+  * {
+    color: black !important;
+    background: white !important;
+    border-color: #000 !important;
+    box-shadow: none !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1cm;
+  }
+
+  /* Make plan grid visible and table-like */
+  .plan-grid {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Day cards as table cells */
+  .day-card {
+    border: 1px solid #000 !important;
+    padding: 4px 6px !important;
+    page-break-inside: avoid;
+  }
+
+  /* Headings */
+  h1, h2, h3 {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* Hide print-only elements on screen */
+.print-only {
+  display: none;
+}
