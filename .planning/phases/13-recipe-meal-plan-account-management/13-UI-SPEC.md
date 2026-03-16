@@ -43,7 +43,7 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Inline delete confirmation text: renders in-place within existing list row padding (inherits row padding, no extra spacing token).
-- Touch targets for delete/confirm buttons: minimum 44px height on mobile (p-2.5 at 16px base = 44px tap area).
+- Touch targets for delete/confirm buttons: minimum 44px height on mobile via `min-h-[44px] p-2` (8px padding + min-height constraint). Padding stays on-grid; height enforced via explicit min-height.
 - Danger Zone section: 32px top margin (`mt-8`) to visually separate from other settings content.
 
 Source: existing component patterns in `LogEntryItem.tsx`, `MealCard.tsx`, `SettingsPage.tsx`.
