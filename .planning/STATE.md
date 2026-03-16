@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 13-03-PLAN.md
-last_updated: "2026-03-16T01:09:20.970Z"
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-03-16T01:12:03.727Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 14
   completed_phases: 12
   total_plans: 49
-  completed_plans: 47
+  completed_plans: 48
   percent: 98
 ---
 
@@ -113,6 +113,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 12-home-page-food-search-redesign PP02 | 45 | 4 tasks | 9 files |
 | Phase 13-recipe-meal-plan-account-management P00 | 3 | 1 tasks | 4 files |
 | Phase 13-recipe-meal-plan-account-management P03 | 334 | 2 tasks | 2 files |
+| Phase 13-recipe-meal-plan-account-management P01 | 10 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -228,6 +229,9 @@ Recent decisions affecting current work:
 - [Phase 12-home-page-food-search-redesign]: RecipeBuilder keeps separate recipe-picker panel for sub-recipe selection; food search uses FoodSearchOverlay overlay
 - [Phase 13-recipe-meal-plan-account-management]: User ID always extracted from JWT via adminClient.auth.getUser(), never from request body — prevents privilege escalation
 - [Phase 13-recipe-meal-plan-account-management]: Household deleted before auth user to ensure FK cascade order is correct (child data cleaned before user row)
+- [Phase 13-recipe-meal-plan-account-management]: Inline delete pattern: confirmation row renders below the card row using -mt offset and border-t-0, not as a fixed overlay
+- [Phase 13-recipe-meal-plan-account-management]: relativeTime duplicated in RecipeBuilder and RecipesPage — only two callsites, premature abstraction avoided
+- [Phase 13-recipe-meal-plan-account-management]: localNotes initialized to null so useEffect hydration only runs on first load, preventing reset during typing
 
 ### Roadmap Evolution
 
@@ -250,6 +254,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T01:09:20.965Z
-Stopped at: Completed 13-03-PLAN.md
+Last session: 2026-03-16T01:12:03.721Z
+Stopped at: Completed 13-01-PLAN.md
 Resume file: None
