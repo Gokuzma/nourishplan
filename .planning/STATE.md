@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-03-16T01:12:03.727Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-03-16T01:13:44.450Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 14
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 49
-  completed_plans: 48
+  completed_plans: 49
   percent: 98
 ---
 
@@ -114,6 +114,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13-recipe-meal-plan-account-management P00 | 3 | 1 tasks | 4 files |
 | Phase 13-recipe-meal-plan-account-management P03 | 334 | 2 tasks | 2 files |
 | Phase 13-recipe-meal-plan-account-management P01 | 10 | 3 tasks | 7 files |
+| Phase 13-recipe-meal-plan-account-management P02 | 15 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -232,6 +233,9 @@ Recent decisions affecting current work:
 - [Phase 13-recipe-meal-plan-account-management]: Inline delete pattern: confirmation row renders below the card row using -mt offset and border-t-0, not as a fixed overlay
 - [Phase 13-recipe-meal-plan-account-management]: relativeTime duplicated in RecipeBuilder and RecipesPage — only two callsites, premature abstraction avoided
 - [Phase 13-recipe-meal-plan-account-management]: localNotes initialized to null so useEffect hydration only runs on first load, preventing reset during typing
+- [Phase 13-recipe-meal-plan-account-management]: MealCard inline delete uses canDelete/isConfirming props — parent (MealsPage) owns all state to keep card stateless
+- [Phase 13-recipe-meal-plan-account-management]: Deleted meal detection: slot.meal_id \!= null && \!meal (RLS soft-delete filter) shows '(Deleted)' with replace/clear options
+- [Phase 13-recipe-meal-plan-account-management]: Print button in overflow/three-dot menu per user decision; calls window.print() directly; no-print class hides chrome in @media print
 
 ### Roadmap Evolution
 
@@ -254,6 +258,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T01:12:03.721Z
-Stopped at: Completed 13-01-PLAN.md
+Last session: 2026-03-16T01:13:44.444Z
+Stopped at: Completed 13-02-PLAN.md
 Resume file: None
