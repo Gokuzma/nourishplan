@@ -4,6 +4,16 @@ import { useAuth } from '../hooks/useAuth'
 import { useHousehold } from '../hooks/useHousehold'
 import { useRecipes, useCreateRecipe, useDeleteRecipe } from '../hooks/useRecipes'
 
+function relativeTime(isoString: string): string {
+  const diffMs = Date.now() - new Date(isoString).getTime()
+  const days = Math.floor(diffMs / 86400000)
+  if (days === 0) return 'today'
+  if (days === 1) return '1 day ago'
+  if (days < 30) return `${days} days ago`
+  const months = Math.floor(days / 30)
+  return months === 1 ? '1 month ago' : `${months} months ago`
+}
+
 export function RecipesPage() {
   const navigate = useNavigate()
   const { session } = useAuth()
@@ -58,58 +68,48 @@ export function RecipesPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {recipes.map(recipe => (
-            <div
-              key={recipe.id}
-              className="flex items-center gap-3 px-4 py-3 rounded-[--radius-card] border border-secondary/50 bg-surface hover:border-accent/40 transition-colors cursor-pointer"
-              onClick={() => navigate(`/recipes/${recipe.id}`)}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-text truncate">{recipe.name}</p>
-                <p className="text-xs text-text/50 mt-0.5">
-                  {recipe.servings} serving{recipe.servings !== 1 ? 's' : ''} ·{' '}
-                  {new Date(recipe.created_at).toLocaleDateString()}
-                </p>
+            <div key={recipe.id}>
+              <div
+                className="flex items-center gap-3 px-4 py-3 rounded-[--radius-card] border border-secondary/50 bg-surface hover:border-accent/40 transition-colors cursor-pointer"
+                onClick={() => navigate(`/recipes/${recipe.id}`)}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text truncate">{recipe.name}</p>
+                  {recipe.notes && (
+                    <p className="text-xs text-text/40 truncate">{recipe.notes}</p>
+                  )}
+                  <p className="text-xs text-text/50 mt-0.5">
+                    {recipe.servings} serving{recipe.servings !== 1 ? 's' : ''} ·{' '}
+                    <span title={new Date(recipe.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}>
+                      Created {relativeTime(recipe.created_at)}
+                    </span>
+                  </p>
+                </div>
+                {canDelete(recipe.created_by) && (
+                  <button
+                    onClick={e => { e.stopPropagation(); setDeleteConfirm(recipe.id) }}
+                    className="shrink-0 text-text/30 hover:text-red-500 transition-colors p-1.5"
+                    title="Delete recipe"
+                    aria-label="Delete recipe"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
-              {canDelete(recipe.created_by) && (
-                <button
-                  onClick={e => { e.stopPropagation(); setDeleteConfirm(recipe.id) }}
-                  className="shrink-0 text-text/30 hover:text-red-500 transition-colors p-1.5"
-                  title="Delete recipe"
-                  aria-label="Delete recipe"
-                >
-                  ×
-                </button>
+              {deleteConfirm === recipe.id && (
+                <div className="flex items-center gap-2 text-xs px-4 py-1.5 bg-surface rounded-b-[--radius-card] border border-t-0 border-secondary/50 -mt-2">
+                  <span className="text-text/60 flex-1">Delete {recipe.name.slice(0, 30)}?</span>
+                  <button onClick={e => { e.stopPropagation(); handleDelete(recipe.id) }} disabled={deleteRecipe.isPending} className="text-red-500 font-semibold min-h-[44px] px-2">
+                    {deleteRecipe.isPending ? 'Deleting...' : 'Yes, delete'}
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); setDeleteConfirm(null) }} className="text-primary min-h-[44px] px-2">Keep it</button>
+                </div>
               )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Delete confirmation modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-surface rounded-2xl shadow-xl w-full max-w-sm p-5 mx-4">
-            <h3 className="font-semibold text-text mb-2">Delete recipe?</h3>
-            <p className="text-sm text-text/60 mb-4">This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                disabled={deleteRecipe.isPending}
-                className="flex-1 rounded-[--radius-btn] bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
-              >
-                {deleteRecipe.isPending ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

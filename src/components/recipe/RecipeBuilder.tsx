@@ -25,6 +25,16 @@ import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } fro
 // Default yield factor when ingredient category is unknown (general cooking loss ~15%)
 const DEFAULT_YIELD_FACTOR = YIELD_FACTORS['vegetables'] // 0.85
 
+function relativeTime(isoString: string): string {
+  const diffMs = Date.now() - new Date(isoString).getTime()
+  const days = Math.floor(diffMs / 86400000)
+  if (days === 0) return 'today'
+  if (days === 1) return '1 day ago'
+  if (days < 30) return `${days} days ago`
+  const months = Math.floor(days / 30)
+  return months === 1 ? '1 month ago' : `${months} months ago`
+}
+
 interface RecipeBuilderProps {
   recipeId: string
 }
@@ -249,6 +259,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
   const [localName, setLocalName] = useState<string | null>(null)
   const [localServings, setLocalServings] = useState<string | null>(null)
+  const [localNotes, setLocalNotes] = useState<string | null>(null)
   const [ingredientSearchOpen, setIngredientSearchOpen] = useState(false)
   const [showFoodSearch, setShowFoodSearch] = useState(false)
   const [searchTab, setSearchTab] = useState<'food' | 'recipe'>('food')
@@ -297,6 +308,14 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     hydrate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ingredients])
+
+  // Sync notes from server on first load
+  useEffect(() => {
+    if (recipe?.notes !== undefined && localNotes === null) {
+      setLocalNotes(recipe.notes ?? '')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipe?.notes])
 
   const [cycleError, setCycleError] = useState<string | null>(null)
   const [cycleCheckInProgress, setCycleCheckInProgress] = useState(false)
@@ -531,6 +550,32 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             placeholder="Recipe name"
             className="text-2xl font-bold text-primary bg-transparent border-b border-secondary focus:border-primary focus:outline-none py-1 w-full"
           />
+          <textarea
+            value={localNotes ?? recipe?.notes ?? ''}
+            onChange={e => setLocalNotes(e.target.value)}
+            onInput={e => {
+              const el = e.currentTarget
+              el.style.height = 'auto'
+              el.style.height = el.scrollHeight + 'px'
+            }}
+            onBlur={() => {
+              if (localNotes !== null && localNotes !== (recipe?.notes ?? '')) {
+                updateRecipe.mutate({ id: recipeId, updates: { notes: localNotes || null } })
+              }
+              setLocalNotes(null)
+            }}
+            placeholder="Add notes or variations..."
+            className="w-full text-sm text-text/50 bg-transparent border-none focus:outline-none resize-none overflow-hidden"
+            rows={1}
+          />
+          {recipe?.created_at && (
+            <span
+              className="text-xs text-text/40"
+              title={new Date(recipe.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
+            >
+              Created {relativeTime(recipe.created_at)}
+            </span>
+          )}
           <div className="flex items-center gap-2">
             <label className="text-sm text-text/60 shrink-0">Servings:</label>
             <input
