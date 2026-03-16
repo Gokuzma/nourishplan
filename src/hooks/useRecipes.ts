@@ -110,7 +110,7 @@ export function useUpdateRecipe() {
       updates,
     }: {
       id: string
-      updates: { name?: string; servings?: number }
+      updates: { name?: string; servings?: number; notes?: string | null }
     }): Promise<Recipe> => {
       const { data, error } = await supabase
         .from('recipes')
