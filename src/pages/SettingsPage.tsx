@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
-import { useHousehold } from '../hooks/useHousehold'
+import { useHousehold, useHouseholdMembers } from '../hooks/useHousehold'
 import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile'
 import { supabase } from '../lib/supabase'
 import { toggleTheme } from '../utils/theme'
@@ -111,6 +111,35 @@ export function SettingsPage() {
       setHouseholdError(err instanceof Error ? err.message : 'Failed to save household name.')
     } finally {
       setHouseholdSaving(false)
+    }
+  }
+
+  // Danger Zone state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [selectedNewAdmin, setSelectedNewAdmin] = useState<string | null>(null)
+  const [deleteStep, setDeleteStep] = useState<'transfer' | 'confirm'>('transfer')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const { data: members } = useHouseholdMembers()
+  const otherMembers = (members ?? []).filter(m => m.user_id !== session?.user.id)
+  const isLastMember = otherMembers.length === 0
+  const householdDisplayName = membership?.households?.name ?? 'this household'
+
+  async function handleDeleteAccount() {
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      const { error } = await supabase.functions.invoke('delete-account', {
+        body: { newAdminUserId: selectedNewAdmin },
+      })
+      if (error) throw error
+      // Account deleted — sign out and redirect
+      await signOut()
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Account deletion failed. Please try again or contact support.')
+      setIsDeleting(false)
     }
   }
 
@@ -249,6 +278,130 @@ export function SettingsPage() {
           Log Out
         </button>
       </section>
+
+      {/* Danger Zone */}
+      <section className="bg-surface rounded-[--radius-card] p-5 border border-red-200 dark:border-red-900/30 shadow-sm mt-8">
+        <h2 className="font-semibold text-red-600 mb-1">Danger Zone</h2>
+        <p className="text-xs text-text/50 mb-4">These actions are permanent and cannot be undone.</p>
+        <button
+          onClick={() => {
+            setShowDeleteModal(true)
+            setDeleteStep(isAdmin && !isLastMember ? 'transfer' : 'confirm')
+            setDeleteConfirmText('')
+            setSelectedNewAdmin(null)
+            setDeleteError(null)
+          }}
+          className="rounded-[--radius-btn] border border-red-300 text-red-600 font-semibold py-2 px-4 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm"
+        >
+          Delete my account
+        </button>
+      </section>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !isDeleting && setShowDeleteModal(false)} />
+          <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5 mx-0 sm:mx-4">
+
+            {/* Step 1: Admin transfer (admin with other members only) */}
+            {deleteStep === 'transfer' && isAdmin && !isLastMember && (
+              <>
+                <h3 className="font-semibold text-text mb-1">Transfer admin before leaving</h3>
+                <p className="text-sm text-text/60 mb-4">Choose a new household admin. They will have full control over the household.</p>
+                <div className="flex flex-col gap-2 mb-4">
+                  {otherMembers.map(member => (
+                    <button
+                      key={member.user_id}
+                      onClick={() => setSelectedNewAdmin(member.user_id)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-[--radius-btn] border transition-colors text-left ${
+                        selectedNewAdmin === member.user_id
+                          ? 'border-primary bg-primary/10'
+                          : 'border-secondary hover:border-primary/40'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary flex-shrink-0">
+                        {(member.profiles?.display_name ?? member.profiles?.id ?? '?').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-text truncate">{member.profiles?.display_name ?? 'Member'}</p>
+                        <p className="text-xs text-text/40">{member.role}</p>
+                      </div>
+                      {selectedNewAdmin === member.user_id && (
+                        <span className="text-primary text-sm">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => setDeleteStep('confirm')}
+                    disabled={!selectedNewAdmin}
+                    className="flex-1 rounded-[--radius-btn] bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                  >
+                    Transfer admin &amp; continue
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step 2: Typed confirmation (all paths converge here) */}
+            {deleteStep === 'confirm' && (
+              <>
+                <h3 className="font-semibold text-text mb-1">Delete account</h3>
+                <p className="text-sm text-text/60 mb-4">
+                  {isLastMember
+                    ? `You are the only member. Deleting your account will permanently delete the ${householdDisplayName} household and all its data.`
+                    : isAdmin
+                      ? 'This will permanently delete your account. The household and all data will remain.'
+                      : 'This will permanently delete your account. The household and all its data will remain.'}
+                </p>
+                <div className="mb-4">
+                  <label className="block text-sm text-text/60 mb-1">Type DELETE to confirm</label>
+                  <input
+                    type="text"
+                    value={deleteConfirmText}
+                    onChange={e => setDeleteConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                    className={`w-full px-3 py-2 rounded-[--radius-btn] border text-sm bg-background text-text focus:outline-none ${
+                      deleteConfirmText === 'DELETE' ? 'border-red-500 focus:border-red-500' : 'border-secondary focus:border-primary'
+                    }`}
+                    autoComplete="off"
+                  />
+                </div>
+                {deleteError && <p className="text-xs text-red-500 mb-3">{deleteError}</p>}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      if (isAdmin && !isLastMember) {
+                        setDeleteStep('transfer')
+                      } else {
+                        setShowDeleteModal(false)
+                      }
+                      setDeleteConfirmText('')
+                    }}
+                    disabled={isDeleting}
+                    className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
+                  >
+                    {isAdmin && !isLastMember ? 'Back' : 'Cancel'}
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                    className="flex-1 rounded-[--radius-btn] bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                  >
+                    {isDeleting ? 'Deleting...' : isLastMember ? 'Delete household and account' : 'Delete my account'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
