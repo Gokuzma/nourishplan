@@ -52,20 +52,22 @@ Source: existing component patterns in `LogEntryItem.tsx`, `MealCard.tsx`, `Sett
 
 ## Typography
 
+Two weights only: 400 (regular) and 600 (semibold). No 500/medium — replace any `font-medium` with `font-normal` (body/label) or `font-semibold` (heading/display).
+
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 (regular) | 1.5 |
 | Label | 12px | 400 (regular) | 1.4 |
-| Heading | 16px | 500 (medium) | 1.25 |
+| Heading | 16px | 600 (semibold) | 1.25 |
 | Display | 20px | 600 (semibold) | 1.2 |
 
 Notes:
-- Body (14px/400) is the dominant type size — `text-sm font-medium` for item names, `text-xs text-text/50` for metadata. Source: `LogEntryItem.tsx:43–44`, `MealCard.tsx:28–29`.
+- Body (14px/400) is the dominant type size — `text-sm font-normal` for item names, `text-xs text-text/50` for metadata. Source: `LogEntryItem.tsx:43–44`, `MealCard.tsx:28–29`.
 - Recipe notes subtitle: 14px/400, `text-text/50` — renders below recipe name as a muted subtitle.
 - Date created tag: 12px/400, `text-text/40` — inline with recipe servings info on list cards.
 - "Created 3 days ago" text uses `text-xs text-text/40`; full date shown on hover via `title` attribute (no tooltip library).
-- Print output: 12px body, 14px heading, black (#000), no theme font — browser default system font in print context.
-- Danger Zone heading: 16px/500 `text-red-600` to signal destructive context.
+- Danger Zone heading: 16px/600 `text-red-600` to signal destructive context.
+- Print sizes (11px body, 13px heading) apply only in `@media print` browser context and are not part of the main type scale above. Print uses browser default system font; Nunito is not loaded in print.
 
 ---
 
@@ -76,7 +78,7 @@ Notes:
 | Dominant (60%) | #FAFAF7 (light) / #1A1D1A (dark) | Page backgrounds, form areas |
 | Secondary (30%) | #F5EDE3 (light) / #2A2E2A (dark) | Cards, list rows, settings sections |
 | Accent (10%) | #E8B4A2 (light) / #F0C4B2 (dark) | Reserved for specific elements listed below |
-| Destructive | #EF4444 (red-500) | Danger Zone section heading, delete confirmation copy, "Delete" button in inline confirmation |
+| Destructive | #EF4444 (red-500) | Danger Zone section heading, delete confirmation copy, "Yes, delete" button in inline confirmation |
 
 Accent (`--color-accent`) reserved for:
 - "Add food" and "Log food" primary action buttons (consistent with existing log CTA pattern).
@@ -89,7 +91,8 @@ Destructive (`red-500` / `hover:red-600`) reserved for:
 - "DELETE" text confirmation input border on focus when value matches.
 
 Primary (`--color-primary`, sage green #A8C5A0) reserved for:
-- Neutral action buttons (Cancel in inline delete, Close in Danger Zone confirmation).
+- "Keep it" button in inline delete confirmation.
+- "Close" in Danger Zone confirmation.
 
 Source: `src/styles/global.css` @theme tokens; `MealCard.tsx:34` `hover:text-red-500`; `LogEntryItem.tsx` `hover:text-red-400` existing delete pattern.
 
@@ -105,7 +108,7 @@ Components used or created in this phase:
 | `RecipeBuilder` | Modify | Add auto-expanding notes textarea beneath recipe name; show date created tag |
 | `RecipeCard` (RecipesPage list) | Modify | Add date created line alongside servings info |
 | `MealCard` | Modify | Wrap existing `onDelete` with inline confirmation state |
-| Inline delete confirmation | New pattern | Rendered in-place within existing list row; "Delete [name]? Yes / Cancel" replaces delete button on first click |
+| Inline delete confirmation | New pattern | Rendered in-place within existing list row; "Delete [name]? [Yes, delete] [Keep it]" replaces delete button on first click |
 | `SettingsPage` | Modify | Add Danger Zone section at bottom |
 | Account deletion flow | New | Danger Zone section with: member picker (admin transfer), "DELETE" typed confirmation, final destructive button |
 | Print layout | New | `@media print` CSS class applied to PlanGrid — hides app chrome, forces B&W |
@@ -114,15 +117,28 @@ Components used or created in this phase:
 
 ---
 
+## Focal Points
+
+Declared focal point for each modified primary screen:
+
+| Screen | Focal Point |
+|--------|-------------|
+| `RecipesPage` | Recipe name — `text-sm font-semibold` in `RecipeCard`, anchored left; eye enters recipe list at the name, then reads servings + date created right-to-left |
+| `PlanPage` | Meal grid day columns — 7-column layout; focal entry is the current day column (highlighted with secondary background); print button is secondary and lives in ⋮ overflow menu |
+| `SettingsPage` | Section headings — each settings group heading is 16px/600; Danger Zone heading is 16px/600 `text-red-600` and acts as a visual stop at page bottom |
+
+---
+
 ## Interaction Contracts
 
 ### Inline Delete Confirmation
 
 1. User taps delete icon (×) on a meal, recipe, or custom food row.
-2. Delete icon is replaced in-place with: `Delete [item name]?  [Yes]  [Cancel]`
-3. Tapping "Yes" triggers `useMutation` delete; tapping "Cancel" restores the delete icon.
-4. No modal overlay. No separate confirmation page. Confirmation text is 12px, destructive red for "Yes", primary muted for "Cancel".
-5. State: `deleteConfirmId: string | null` in the parent list component — existing pattern in `FoodSearchOverlay.tsx`.
+2. The × icon has `aria-label="Delete [item name]"` (e.g. `aria-label="Delete Chicken Stir Fry"`).
+3. Delete icon is replaced in-place with: `Delete [item name]?  [Yes, delete]  [Keep it]`
+4. Tapping "Yes, delete" triggers `useMutation` delete; tapping "Keep it" restores the delete icon.
+5. No modal overlay. No separate confirmation page. Confirmation text is 12px, destructive red for "Yes, delete", primary muted for "Keep it".
+6. State: `deleteConfirmId: string | null` in the parent list component — existing pattern in `FoodSearchOverlay.tsx`.
 
 ### Account Deletion — Admin with Other Members
 
@@ -170,7 +186,7 @@ Components used or created in this phase:
 2. On click: calls `window.print()`.
 3. Print CSS (`@media print`): hides TabBar, Sidebar, OfflineBanner, all buttons, app chrome. Shows only: 7-column meal grid (days × meal slots) + a daily totals row (cal / P / C / F).
 4. Colors: all background colors forced to white; all text forced to black. Borders: `1px solid #000` on grid cells. No color accents.
-5. Font in print: browser default (system font), 11px body, 13px headings.
+5. Font in print: browser default system font, 11px body, 13px headings. These sizes apply only within `@media print` and are separate from the main type scale.
 
 ---
 
@@ -178,12 +194,12 @@ Components used or created in this phase:
 
 | Element | Copy |
 |---------|------|
-| Primary CTA — delete item | "Delete [item name]?" then "Yes" / "Cancel" |
+| Primary CTA — delete item | "Delete [item name]?" then "Yes, delete" / "Keep it" |
 | Primary CTA — account deletion | "Delete my account" |
 | Primary CTA — print | "Print meal plan" |
 | Recipe notes placeholder | "Add notes or variations..." |
 | Date created label | "Created [relative time]" (e.g. "Created 3 days ago") |
-| Inline delete confirmation | "Delete [name]? [Yes] [Cancel]" — name truncated at 30 chars with ellipsis |
+| Inline delete confirmation | "Delete [name]? [Yes, delete] [Keep it]" — name truncated at 30 chars with ellipsis |
 | Danger Zone heading | "Danger Zone" |
 | Danger Zone subtext | "These actions are permanent and cannot be undone." |
 | Admin transfer heading | "Transfer admin before leaving" |
