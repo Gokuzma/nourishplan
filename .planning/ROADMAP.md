@@ -254,10 +254,12 @@ Plans:
   4. User can print a meal plan via a print button
   5. User can delete meals, recipes, and foods they created
   6. User can delete their account with option to delete the household or transfer admin rights to the next member
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13 to break down)
+- [ ] 13-01-PLAN.md — Recipe notes migration, FoodSearchOverlay nav fix, RecipeBuilder notes/date, RecipesPage inline delete
+- [ ] 13-02-PLAN.md — Meal inline delete, deleted meal placeholder, start date picker, print meal plan
+- [ ] 13-03-PLAN.md — Account deletion edge function and SettingsPage danger zone
 
 ### Phase 14: How-To Manual
 
