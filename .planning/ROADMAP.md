@@ -254,7 +254,7 @@ Plans:
   4. User can print a meal plan via a print button
   5. User can delete meals, recipes, and foods they created
   6. User can delete their account with option to delete the household or transfer admin rights to the next member
-**Plans:** 3 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] 13-01-PLAN.md — Recipe notes migration, FoodSearchOverlay nav fix, RecipeBuilder notes/date, RecipesPage inline delete
