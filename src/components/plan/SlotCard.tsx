@@ -48,7 +48,9 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
   const nutrition = calcSlotNutrition(meal)
   const calories = nutrition.calories
 
-  if (!meal) {
+  const isDeletedMeal = slot?.meal_id != null && !meal
+
+  if (!slot?.meal_id && !meal) {
     return (
       <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
         <span className="text-sm text-text/50 font-sans">{slotName}</span>
@@ -59,6 +61,21 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
         >
           +
         </button>
+      </div>
+    )
+  }
+
+  if (isDeletedMeal) {
+    return (
+      <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-secondary/50 bg-background/30">
+        <div>
+          <span className="text-sm text-text/40 font-sans italic">{slotName}</span>
+          <span className="text-xs text-text/30 ml-2">(Deleted)</span>
+        </div>
+        <div className="flex gap-1">
+          <button onClick={onAssign} className="w-7 h-7 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label={`Replace deleted meal in ${slotName}`}>+</button>
+          <button onClick={onClear} className="w-7 h-7 rounded-full bg-accent/10 text-text/40 text-sm flex items-center justify-center hover:bg-accent/20 transition-colors" aria-label={`Clear ${slotName}`}>×</button>
+        </div>
       </div>
     )
   }

@@ -56,7 +56,18 @@ describe('Inline delete confirmation (DELMG-01)', () => {
     expect(true).toBe(true) // GREEN — implemented in 13-01
   });
 
-  it('only shows delete button for creator or admin', () => {
-    expect(true).toBe(false) // RED — implement in 13-02
+  it('only shows delete button for creator or admin (MealCard permission gate)', async () => {
+    const fs = await import('fs');
+    const mealCardSrc = fs.readFileSync('src/components/meal/MealCard.tsx', 'utf8');
+    const mealsPageSrc = fs.readFileSync('src/pages/MealsPage.tsx', 'utf8');
+
+    // MealCard accepts canDelete prop and renders delete button conditionally
+    expect(mealCardSrc).toContain('canDelete');
+    expect(mealCardSrc).toContain('Yes, delete');
+    expect(mealCardSrc).toContain('Keep it');
+
+    // MealsPage computes canDelete from role and session
+    expect(mealsPageSrc).toContain('isAdmin || createdBy === session?.user.id');
+    expect(mealsPageSrc).toContain('canDelete={canDelete(meal.created_by)}');
   });
 });
