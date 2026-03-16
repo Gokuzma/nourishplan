@@ -38,3 +38,17 @@ describe('getWeekStart', () => {
     expect(result).toBe('2026-03-16');
   });
 });
+
+// MPLAN-01: Meal plan start date selection
+describe('Meal plan start date (MPLAN-01)', () => {
+  it('NewWeekPrompt passes selected planStart date to onChoice callback', () => {
+    expect(true).toBe(false) // RED — implement in 13-02
+  });
+});
+
+// DELMG-02: Deleted meal placeholder in plan slots
+describe('Deleted meal placeholder (DELMG-02)', () => {
+  it('shows "(Deleted)" when slot.meal_id is set but meals join returns null', () => {
+    expect(true).toBe(false) // RED — implement in 13-02
+  });
+});
