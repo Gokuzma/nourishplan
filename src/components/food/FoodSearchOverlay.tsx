@@ -443,7 +443,7 @@ export function FoodSearchOverlay({
       {/* Header */}
       <div className="bg-surface border-b border-secondary px-4 py-3 flex items-center gap-3">
         <button
-          onClick={onClose}
+          onClick={detailFood ? () => setDetailFood(null) : onClose}
           className="text-text/60 hover:text-text transition-colors"
           aria-label="Back to home"
         >
@@ -538,27 +538,35 @@ export function FoodSearchOverlay({
                 {filteredCustomFoods.map(food => {
                   const normalized = customFoodToNormalized(food)
                   return (
-                    <ResultRow
-                      key={food.id}
-                      food={normalized}
-                      mode={mode}
-                      isExpanded={expandedId === food.id}
-                      onRowClick={() => {
-                        if (mode === 'select') {
-                          onSelect?.(normalized)
-                          onClose()
-                        } else {
-                          handleRowToggle(food.id)
-                        }
-                      }}
-                      onViewDetails={setDetailFood}
-                      onLog={handleLog}
-                      isLogging={loggingId === food.id}
-                      logError={logErrorId === food.id}
-                      canEdit={canEditFood(food)}
-                      onEdit={() => setEditingFood(food)}
-                      onDelete={() => setDeleteConfirm(food.id)}
-                    />
+                    <div key={food.id}>
+                      <ResultRow
+                        food={normalized}
+                        mode={mode}
+                        isExpanded={expandedId === food.id}
+                        onRowClick={() => {
+                          if (mode === 'select') {
+                            onSelect?.(normalized)
+                            onClose()
+                          } else {
+                            handleRowToggle(food.id)
+                          }
+                        }}
+                        onViewDetails={setDetailFood}
+                        onLog={handleLog}
+                        isLogging={loggingId === food.id}
+                        logError={logErrorId === food.id}
+                        canEdit={canEditFood(food)}
+                        onEdit={() => setEditingFood(food)}
+                        onDelete={() => setDeleteConfirm(food.id)}
+                      />
+                      {deleteConfirm === food.id && (
+                        <div className="flex items-center gap-2 text-xs px-3 py-1.5 bg-surface rounded-b-[--radius-card] border border-t-0 border-secondary -mt-1">
+                          <span className="text-text/60 flex-1">Delete {food.name.slice(0, 30)}?</span>
+                          <button onClick={() => handleDeleteCustomFood(food.id)} className="text-red-500 font-semibold min-h-[44px] px-2">Yes, delete</button>
+                          <button onClick={() => setDeleteConfirm(null)} className="text-primary min-h-[44px] px-2">Keep it</button>
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
               </div>
@@ -605,32 +613,6 @@ export function FoodSearchOverlay({
         </div>
       )}
 
-      {/* Delete confirmation */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-surface rounded-2xl shadow-xl w-full max-w-sm p-5 mx-4">
-            <h3 className="font-semibold text-text mb-2">
-              Delete {customFoods?.find(f => f.id === deleteConfirm)?.name ?? 'custom food'}? This cannot be undone.
-            </h3>
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDeleteCustomFood(deleteConfirm)}
-                disabled={deleteFood.isPending}
-                className="flex-1 rounded-[--radius-btn] bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
-              >
-                {deleteFood.isPending ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
