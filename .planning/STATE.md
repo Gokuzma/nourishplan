@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: planning
-stopped_at: Phase 14 UI-SPEC approved
-last_updated: "2026-03-17T22:44:15.131Z"
+stopped_at: Completed 14-how-to-manual-14-01-PLAN.md
+last_updated: "2026-03-17T23:01:16.557Z"
 last_activity: 2026-03-12 — Roadmap created from requirements and research
 progress:
   total_phases: 14
-  completed_phases: 13
-  total_plans: 49
-  completed_plans: 49
+  completed_phases: 14
+  total_plans: 50
+  completed_plans: 50
   percent: 98
 ---
 
@@ -115,6 +115,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13-recipe-meal-plan-account-management P03 | 334 | 2 tasks | 2 files |
 | Phase 13-recipe-meal-plan-account-management P01 | 10 | 3 tasks | 7 files |
 | Phase 13-recipe-meal-plan-account-management P02 | 15 | 2 tasks | 8 files |
+| Phase 14-how-to-manual PP01 | 155 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -236,6 +237,8 @@ Recent decisions affecting current work:
 - [Phase 13-recipe-meal-plan-account-management]: MealCard inline delete uses canDelete/isConfirming props — parent (MealsPage) owns all state to keep card stateless
 - [Phase 13-recipe-meal-plan-account-management]: Deleted meal detection: slot.meal_id \!= null && \!meal (RLS soft-delete filter) shows '(Deleted)' with replace/clear options
 - [Phase 13-recipe-meal-plan-account-management]: Print button in overflow/three-dot menu per user decision; calls window.print() directly; no-print class hides chrome in @media print
+- [Phase 14-how-to-manual]: Accordion uses single-open pattern (one section at a time) for guide scannability
+- [Phase 14-how-to-manual]: User Guide placed last in both nav arrays (after Settings) as lower-priority nav item
 
 ### Roadmap Evolution
 
@@ -258,6 +261,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:44:15.126Z
-Stopped at: Phase 14 UI-SPEC approved
-Resume file: .planning/phases/14-how-to-manual/14-UI-SPEC.md
+Last session: 2026-03-17T23:01:16.552Z
+Stopped at: Completed 14-how-to-manual-14-01-PLAN.md
+Resume file: None
