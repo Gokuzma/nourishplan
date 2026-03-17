@@ -34,15 +34,14 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Icon gaps, inline padding |
-| sm | 8px | Compact element spacing, step list gaps, tip callout vertical padding (`py-2`) |
-| md-sm | 12px | Accordion section gap (`gap-3`), tip callout horizontal padding (`px-3`), accordion header vertical padding (`py-3`) |
-| md | 16px | Default element spacing, accordion body padding (`p-4`), page horizontal padding (`px-4`), quick-start card padding (`p-4`) |
+| sm | 8px | Compact element spacing, step list gaps, tip callout vertical padding (`py-2`), accordion section gap (`gap-2`), accordion header vertical padding (`py-2`) |
+| md | 16px | Default element spacing, accordion body padding (`p-4`), page horizontal padding (`px-4`), quick-start card padding (`p-4`), tip callout horizontal padding (`px-4`) |
 | lg | 24px | Section padding, gap between major blocks |
 | xl | 32px | Layout gaps, page top/bottom padding (`py-8`) |
 | 2xl | 48px | Major section breaks |
 | 3xl | 64px | Page-level spacing (not used in this phase) |
 
-Exceptions: Content container is `max-w-lg mx-auto` matching SettingsPage and HouseholdPage. Accordion section list uses `gap-3` (12px).
+Exceptions: Content container is `max-w-lg mx-auto` matching SettingsPage and HouseholdPage.
 
 **Source:** `src/pages/SettingsPage.tsx:153` confirms `min-h-screen bg-background px-4 py-8 font-sans` page wrapper pattern.
 
@@ -142,16 +141,16 @@ min-h-screen bg-background px-4 py-8 font-sans
         ├── Quick-start card           — bg-surface rounded-[--radius-card] p-4 shadow-sm
         │     ├── Card heading "Get started in 5 steps"
         │     └── Ordered list of 5 steps (text-sm, gap-2)
-        └── Accordion sections (×6)    — flex flex-col gap-3
+        └── Accordion sections (×6)    — flex flex-col gap-2
               └── Each section:
                     ├── <button> header — w-full flex justify-between items-center
-                    │     py-3 px-4 bg-surface rounded-[--radius-card] text-left
+                    │     py-2 px-4 bg-surface rounded-[--radius-card] text-left
                     │     font-bold text-text
                     └── <div> body (hidden when closed)
-                          p-4 flex flex-col gap-3
+                          p-4 flex flex-col gap-2
                           ├── Intro paragraph (text-sm text-text/80)
                           ├── Numbered step list (text-sm gap-2)
-                          └── Tip callouts (bg-accent/20 rounded-[--radius-btn] px-3 py-2 text-sm font-bold text-text)
+                          └── Tip callouts (bg-accent/20 rounded-[--radius-btn] px-4 py-2 text-sm font-bold text-text)
 ```
 
 **Source:** RESEARCH.md Pattern 4 (page layout), Pattern 5 (tip callout). `src/pages/SettingsPage.tsx:153` (page wrapper). `src/pages/HouseholdPage.tsx` (max-w-lg container pattern).
