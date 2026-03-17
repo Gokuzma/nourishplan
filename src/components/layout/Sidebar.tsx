@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Plan', to: '/plan', icon: '📋' },
   { label: 'Household', to: '/household', icon: '👨‍👩‍👧' },
   { label: 'Settings', to: '/settings', icon: '⚙️' },
+  { label: 'User Guide', to: '/guide', icon: '📘' },
 ]
 
 export function Sidebar() {

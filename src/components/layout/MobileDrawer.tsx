@@ -5,6 +5,7 @@ const drawerItems = [
   { label: 'Meals', to: '/meals', icon: '🍽️' },
   { label: 'Household', to: '/household', icon: '👨‍👩‍👧' },
   { label: 'Settings', to: '/settings', icon: '⚙️' },
+  { label: 'User Guide', to: '/guide', icon: '📘' },
 ]
 
 interface MobileDrawerProps {
