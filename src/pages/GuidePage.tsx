@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
 interface GuideSection {
   id: string
@@ -117,17 +118,18 @@ const GUIDE_SECTIONS: GuideSection[] = [
 ]
 
 export function GuidePage() {
+  const location = useLocation()
   const [openSection, setOpenSection] = useState<string | null>(null)
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1)
+    const hash = location.hash.slice(1)
     if (hash) {
       setOpenSection(hash)
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
+      })
     }
-  }, [])
+  }, [location.hash])
 
   const toggle = (id: string) => setOpenSection(prev => prev === id ? null : id)
 
