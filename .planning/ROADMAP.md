@@ -269,7 +269,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. An in-app how-to manual is accessible from the UI explaining how to use all major features (food logging, recipes, meal planning, nutrition targets, household management)
   2. Manual content is accurate and matches the current state of the app
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 14 to break down)
+- [ ] 14-01-PLAN.md — GuidePage with accordion sections, navigation links, and source-check tests
