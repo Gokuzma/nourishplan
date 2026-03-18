@@ -165,7 +165,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 12. Home Page & Food Search Redesign | 2/2 | Complete | 2026-03-15 |
 | 13. Recipe, Meal Plan & Account Mgmt | 4/4 | Complete | 2026-03-16 |
 | 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
-| 15. v1.1 Audit Gap Closure | 1/1 | Complete   | 2026-03-18 |
+| 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
