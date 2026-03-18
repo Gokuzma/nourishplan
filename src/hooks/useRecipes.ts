@@ -146,6 +146,8 @@ export function useDeleteRecipe() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      queryClient.invalidateQueries({ queryKey: ['meals'] })
+      queryClient.invalidateQueries({ queryKey: ['meal-plan-slots'] })
     },
   })
 }
