@@ -130,7 +130,7 @@ export function useUpdateRecipe() {
 }
 
 /**
- * Soft-deletes a recipe by setting deleted_at.
+ * Deletes a recipe by id.
  */
 export function useDeleteRecipe() {
   const queryClient = useQueryClient()
@@ -139,7 +139,7 @@ export function useDeleteRecipe() {
     mutationFn: async (id: string): Promise<void> => {
       const { error } = await supabase
         .from('recipes')
-        .update({ deleted_at: new Date().toISOString() })
+        .delete()
         .eq('id', id)
 
       if (error) throw error
@@ -164,6 +164,12 @@ export function useAddIngredient() {
       quantity_grams,
       weight_state = 'raw',
       sort_order = 0,
+      ingredient_name,
+      calories_per_100g,
+      protein_per_100g,
+      fat_per_100g,
+      carbs_per_100g,
+      micronutrients,
     }: {
       recipe_id: string
       ingredient_type: 'food' | 'recipe'
@@ -171,10 +177,29 @@ export function useAddIngredient() {
       quantity_grams: number
       weight_state?: 'raw' | 'cooked'
       sort_order?: number
+      ingredient_name?: string
+      calories_per_100g?: number
+      protein_per_100g?: number
+      fat_per_100g?: number
+      carbs_per_100g?: number
+      micronutrients?: Record<string, number> | null
     }): Promise<RecipeIngredient> => {
       const { data, error } = await supabase
         .from('recipe_ingredients')
-        .insert({ recipe_id, ingredient_type, ingredient_id, quantity_grams, weight_state, sort_order })
+        .insert({
+          recipe_id,
+          ingredient_type,
+          ingredient_id,
+          quantity_grams,
+          weight_state,
+          sort_order,
+          ingredient_name: ingredient_name ?? null,
+          calories_per_100g: calories_per_100g ?? null,
+          protein_per_100g: protein_per_100g ?? null,
+          fat_per_100g: fat_per_100g ?? null,
+          carbs_per_100g: carbs_per_100g ?? null,
+          micronutrients: micronutrients ?? null,
+        } as never)
         .select()
         .single()
 

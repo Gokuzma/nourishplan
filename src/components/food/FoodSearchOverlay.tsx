@@ -43,6 +43,9 @@ function customFoodToNormalized(food: CustomFood): NormalizedFoodResult {
     sugar: food.sugar_per_100g ?? undefined,
     sodium: food.sodium_per_100g ?? undefined,
     micronutrients: food.micronutrients,
+    portions: food.portions && food.portions.length > 0
+      ? food.portions.map(p => ({ description: p.description, grams: p.grams }))
+      : undefined,
   }
 }
 

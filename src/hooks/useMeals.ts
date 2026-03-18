@@ -113,7 +113,7 @@ export function useUpdateMeal() {
 }
 
 /**
- * Soft-deletes a meal by setting deleted_at.
+ * Deletes a meal by id.
  */
 export function useDeleteMeal() {
   const queryClient = useQueryClient()
@@ -123,7 +123,7 @@ export function useDeleteMeal() {
     mutationFn: async (id: string): Promise<void> => {
       const { error } = await supabase
         .from('meals')
-        .update({ deleted_at: new Date().toISOString() })
+        .delete()
         .eq('id', id)
 
       if (error) throw error

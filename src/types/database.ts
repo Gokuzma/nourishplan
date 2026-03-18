@@ -81,6 +81,12 @@ export interface RecipeIngredient {
   quantity_grams: number
   weight_state: 'raw' | 'cooked'
   sort_order: number
+  ingredient_name?: string | null
+  calories_per_100g?: number | null
+  protein_per_100g?: number | null
+  fat_per_100g?: number | null
+  carbs_per_100g?: number | null
+  micronutrients?: Record<string, number> | null
   created_at: string
 }
 

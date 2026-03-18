@@ -109,7 +109,7 @@ export function useUpdateCustomFood() {
 }
 
 /**
- * Soft-deletes a custom food by setting deleted_at to now.
+ * Deletes a custom food by id.
  */
 export function useDeleteCustomFood() {
   const queryClient = useQueryClient()
@@ -118,7 +118,7 @@ export function useDeleteCustomFood() {
     mutationFn: async (id: string): Promise<void> => {
       const { error } = await supabase
         .from('custom_foods')
-        .update({ deleted_at: new Date().toISOString() })
+        .delete()
         .eq('id', id)
 
       if (error) throw error

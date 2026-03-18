@@ -268,18 +268,40 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const [editingIngredient, setEditingIngredient] = useState<RecipeIngredient | null>(null)
   const [foodDataMap, setFoodDataMap] = useState<Record<string, FoodDataEntry>>({})
 
-  // Hydrate foodDataMap from custom_foods on mount so nutrition shows after page reload
+  // Hydrate foodDataMap from ingredient snapshot columns, falling back to custom_foods for legacy rows
   useEffect(() => {
     if (!ingredients || ingredients.length === 0) return
 
-    // Find ingredient_ids that are NOT already in foodDataMap
-    const missingIds = ingredients
-      .filter(ing => ing.ingredient_type === 'food' && !foodDataMap[ing.ingredient_id])
-      .map(ing => ing.ingredient_id)
+    const newEntries: Record<string, FoodDataEntry> = {}
+    const missingIds: string[] = []
+
+    for (const ing of ingredients) {
+      if (foodDataMap[ing.ingredient_id]) continue
+
+      // Use snapshot columns if available
+      if (ing.calories_per_100g != null && ing.ingredient_name) {
+        newEntries[ing.ingredient_id] = {
+          name: ing.ingredient_name,
+          macros: {
+            calories: ing.calories_per_100g,
+            protein: ing.protein_per_100g ?? 0,
+            fat: ing.fat_per_100g ?? 0,
+            carbs: ing.carbs_per_100g ?? 0,
+          },
+          micronutrients: ing.micronutrients ?? null,
+        }
+      } else if (ing.ingredient_type === 'food') {
+        missingIds.push(ing.ingredient_id)
+      }
+    }
+
+    if (Object.keys(newEntries).length > 0) {
+      setFoodDataMap(prev => ({ ...prev, ...newEntries }))
+    }
 
     if (missingIds.length === 0) return
 
-    // Batch-fetch custom food macros for missing ingredients
+    // Fallback: fetch from custom_foods for legacy ingredients without snapshots
     async function hydrate() {
       const { data: customFoods } = await supabase
         .from('custom_foods')
@@ -288,9 +310,9 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
       if (!customFoods || customFoods.length === 0) return
 
-      const newEntries: Record<string, FoodDataEntry> = {}
+      const fetched: Record<string, FoodDataEntry> = {}
       for (const f of customFoods) {
-        newEntries[f.id] = {
+        fetched[f.id] = {
           name: f.name,
           macros: {
             calories: f.calories_per_100g,
@@ -302,7 +324,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
         }
       }
 
-      setFoodDataMap(prev => ({ ...prev, ...newEntries }))
+      setFoodDataMap(prev => ({ ...prev, ...fetched }))
     }
 
     hydrate()
@@ -371,6 +393,12 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       quantity_grams: grams,
       weight_state: 'raw',
       sort_order: nextOrder,
+      ingredient_name: food.name,
+      calories_per_100g: food.calories,
+      protein_per_100g: food.protein,
+      fat_per_100g: food.fat,
+      carbs_per_100g: food.carbs,
+      micronutrients: food.micronutrients ?? null,
     })
 
     setPendingFood(null)
@@ -415,6 +443,11 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       quantity_grams: grams,
       weight_state: 'raw',
       sort_order: nextOrder,
+      ingredient_name: selectedRecipe.name,
+      calories_per_100g: subNutrition.per100g.calories,
+      protein_per_100g: subNutrition.per100g.protein,
+      fat_per_100g: subNutrition.per100g.fat,
+      carbs_per_100g: subNutrition.per100g.carbs,
     })
 
     setPendingRecipe(null)
