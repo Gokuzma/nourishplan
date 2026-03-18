@@ -165,7 +165,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 12. Home Page & Food Search Redesign | 2/2 | Complete | 2026-03-15 |
 | 13. Recipe, Meal Plan & Account Mgmt | 4/4 | Complete | 2026-03-16 |
 | 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
-| 15. v1.1 Audit Gap Closure | 0/1 | Pending | |
+| 15. v1.1 Audit Gap Closure | 1/1 | Complete   | 2026-03-18 |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -290,7 +290,7 @@ Plans:
   2. ComingSoonPage dead code is removed from App.tsx
   3. All test stubs in tests/settings.test.tsx have real assertions matching implementation
   4. CALC-01–03, UXLOG-01–04, RCPUX-01–03, MPLAN-01–02, DELMG-01–02, ACCTM-01, DOCS-01 are formally defined in REQUIREMENTS.md
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 15-01-PLAN.md — Fix recipe deletion cache invalidation and remove ComingSoonPage dead code
