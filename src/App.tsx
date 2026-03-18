@@ -99,17 +99,6 @@ function JoinPage() {
   )
 }
 
-function ComingSoonPage() {
-  return (
-    <div className="min-h-screen bg-background px-4 py-8 font-sans flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-primary mb-2">Coming Soon</h1>
-        <p className="text-text/60">This feature is not available yet.</p>
-      </div>
-    </div>
-  )
-}
-
 function AppRoutes() {
   return (
     <Routes>
