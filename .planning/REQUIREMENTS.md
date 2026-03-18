@@ -84,6 +84,43 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **POLISH-05**: Settings page allows editing display name, avatar, and household name (admin only)
 - [x] **POLISH-06**: Nutrition targets form supports entering macros as percentages of total calories with P+C+F=100% validation
 
+### Nutrition Calculations (v1.1 Enhancement)
+
+- [x] **CALC-01**: Changing ingredient quantity shows proportionally different calories and macros
+- [x] **CALC-02**: Logging a food updates the user's daily micronutrient goal progress
+- [x] **CALC-03**: Serving sizes display specific measurements (grams, cups, tbsp) instead of generic "1 serving"
+
+### UX Logging (v1.1 Enhancement)
+
+- [x] **UXLOG-01**: Food tab removed; food logging accessible directly from home page
+- [x] **UXLOG-02**: Food search prioritizes simplest matching ingredients over CNF-prefixed results
+- [x] **UXLOG-03**: User can drill into each logged meal to see per-food micronutrient breakdown
+- [x] **UXLOG-04**: Home page uses contextual "Log food" UI element following UX best practices
+
+### Recipe UX (v1.1 Enhancement)
+
+- [x] **RCPUX-01**: Clicking away from ingredient in recipe builder returns to search view, not recipe page
+- [x] **RCPUX-02**: Recipes have optional notes/variations subtitle field and date created tag
+- [x] **RCPUX-03**: User can choose the start date for a meal plan
+
+### Meal Plan Management (v1.1 Enhancement)
+
+- [x] **MPLAN-01**: User can print a meal plan via a print button
+- [x] **MPLAN-02**: Meal plan start date is selectable
+
+### Deletion Management (v1.1 Enhancement)
+
+- [x] **DELMG-01**: User can delete meals, recipes, and foods they created
+- [x] **DELMG-02**: Deleting a recipe shows placeholder in meal plan slots that referenced it
+
+### Account Management (v1.1 Enhancement)
+
+- [x] **ACCTM-01**: User can delete their account with option to delete household or transfer admin rights
+
+### Documentation (v1.1 Enhancement)
+
+- [x] **DOCS-01**: In-app how-to manual accessible from UI explaining all major features
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -174,7 +211,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **Coverage:**
 - v1 requirements: 50 total
-- Mapped to phases: 50
+- v1.1 enhancement requirements: 16 total
+- Mapped to phases: 66
 - Unmapped: 0 ✓
 
 **Gap Closure Phases (v1.1 audit):**
@@ -186,6 +224,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POLISH-01 | Phase 9 (theme token fix) | Complete |
 | LAUNCH-01–06 | Phase 6 | Complete |
 | POLISH-01–06 | Phase 8 | Complete |
+
+**v1.1 Enhancement Requirements Traceability:**
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CALC-01 | Phase 11 | Complete |
+| CALC-02 | Phase 11 | Complete |
+| CALC-03 | Phase 11 | Complete |
+| UXLOG-01 | Phase 12 | Complete |
+| UXLOG-02 | Phase 12 | Complete |
+| UXLOG-03 | Phase 12 | Complete |
+| UXLOG-04 | Phase 12 | Complete |
+| RCPUX-01 | Phase 13 | Complete |
+| RCPUX-02 | Phase 13 | Complete |
+| RCPUX-03 | Phase 13 | Complete |
+| MPLAN-01 | Phase 13 | Complete |
+| MPLAN-02 | Phase 13 | Complete |
+| DELMG-01 | Phase 13 | Complete |
+| DELMG-02 | Phase 13 | Complete |
+| ACCTM-01 | Phase 13 | Complete |
+| DOCS-01 | Phase 14 | Complete |
 
 ---
 *Requirements defined: 2026-03-12*
