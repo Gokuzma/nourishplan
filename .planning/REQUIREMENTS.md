@@ -273,45 +273,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 **Coverage:**
 - v1.0 requirements: 50 total (all complete)
 - v1.1 enhancement requirements: 16 total (all complete)
-- v2.0 requirements: 28 total
-- Mapped to phases: 66 (v1) + 0 (v2.0 — pending roadmap)
-- Unmapped v2.0: 28 ⚠️ (awaiting roadmap creation)
+- v2.0 requirements: 31 total
+- Mapped to phases: 66 (v1) + 31 (v2.0)
+- Unmapped v2.0: 0 (roadmap complete)
 
 **v2.0 Traceability:**
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUDG-01 | TBD | Pending |
-| BUDG-02 | TBD | Pending |
-| BUDG-03 | TBD | Pending |
-| BUDG-04 | TBD | Pending |
-| INVT-01 | TBD | Pending |
-| INVT-02 | TBD | Pending |
-| INVT-03 | TBD | Pending |
-| INVT-04 | TBD | Pending |
-| INVT-05 | TBD | Pending |
-| INVT-06 | TBD | Pending |
-| GROC-01 | TBD | Pending |
-| GROC-02 | TBD | Pending |
-| GROC-03 | TBD | Pending |
-| GROC-04 | TBD | Pending |
-| GROC-05 | TBD | Pending |
-| PLAN-01 | TBD | Pending |
-| PLAN-02 | TBD | Pending |
-| PLAN-03 | TBD | Pending |
-| PLAN-04 | TBD | Pending |
-| PLAN-05 | TBD | Pending |
-| FEED-01 | TBD | Pending |
-| FEED-02 | TBD | Pending |
-| FEED-03 | TBD | Pending |
-| FEED-04 | TBD | Pending |
-| SCHED-01 | TBD | Pending |
-| SCHED-02 | TBD | Pending |
-| PREP-01 | TBD | Pending |
-| PREP-02 | TBD | Pending |
-| PREP-03 | TBD | Pending |
-| PORT-01 | TBD | Pending |
-| PORT-02 | TBD | Pending |
+| BUDG-01 | Phase 16 | Pending |
+| BUDG-02 | Phase 16 | Pending |
+| BUDG-03 | Phase 16 | Pending |
+| BUDG-04 | Phase 16 | Pending |
+| INVT-01 | Phase 17 | Pending |
+| INVT-02 | Phase 17 | Pending |
+| INVT-03 | Phase 17 | Pending |
+| INVT-04 | Phase 17 | Pending |
+| INVT-05 | Phase 17 | Pending |
+| INVT-06 | Phase 17 | Pending |
+| GROC-01 | Phase 18 | Pending |
+| GROC-02 | Phase 18 | Pending |
+| GROC-03 | Phase 18 | Pending |
+| GROC-04 | Phase 18 | Pending |
+| GROC-05 | Phase 18 | Pending |
+| PLAN-01 | Phase 19 | Pending |
+| PLAN-02 | Phase 22 | Pending |
+| PLAN-03 | Phase 19 | Pending |
+| PLAN-04 | Phase 22 | Pending |
+| PLAN-05 | Phase 22 | Pending |
+| FEED-01 | Phase 20 | Pending |
+| FEED-02 | Phase 20 | Pending |
+| FEED-03 | Phase 20 | Pending |
+| FEED-04 | Phase 20 | Pending |
+| SCHED-01 | Phase 21 | Pending |
+| SCHED-02 | Phase 21 | Pending |
+| PREP-01 | Phase 23 | Pending |
+| PREP-02 | Phase 23 | Pending |
+| PREP-03 | Phase 23 | Pending |
+| PORT-01 | Phase 24 | Pending |
+| PORT-02 | Phase 24 | Pending |
 
 **v1.0/v1.1 Traceability (archived — all complete):**
 
@@ -319,4 +319,4 @@ All 66 v1.0/v1.1 requirements mapped and complete. See git history for detailed 
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-25 after v2.0 milestone requirements definition*
+*Last updated: 2026-03-25 after v2.0 roadmap creation (Phases 16–24)*

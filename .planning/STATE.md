@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Adaptive Meal Planning System (AMPS)
 status: planning
-stopped_at: Defining requirements
+stopped_at: Roadmap created — ready to plan Phase 16
 last_updated: "2026-03-25T00:00:00.000Z"
-last_activity: 2026-03-25 — Milestone v2.0 started
+last_activity: 2026-03-25 — v2.0 roadmap created (Phases 16–24)
 progress:
-  total_phases: 0
+  total_phases: 9
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-12)
+See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** v2.0 AMPS — Defining requirements
+**Current focus:** v2.0 AMPS — Phase 16: Budget Engine & Query Foundation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 16 — Budget Engine & Query Foundation
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-25 — Milestone v2.0 started
+Status: Not started
+Last activity: 2026-03-25 — v2.0 roadmap created (Phases 16–24)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -226,6 +226,17 @@ Recent decisions affecting current work:
 - [Phase 14-how-to-manual]: User Guide placed last in both nav arrays (after Settings) as lower-priority nav item
 - [Phase 15-v1-1-audit-gap-closure]: TanStack Query partial key matching used for meals and meal-plan-slots invalidation
 
+### v2.0 Decisions
+
+- [v2.0 roadmap]: Budget stored at ingredient level (cost_per_100g on recipe_ingredients) — recipe-level cost is always computed, never stored; prevents grocery cost calculation from becoming impossible
+- [v2.0 roadmap]: Inventory built as ledger of events (purchase/used/expired/adjusted) — mutable quantity_grams column blocks consumption history and reorder logic
+- [v2.0 roadmap]: Planning Engine uses async job pattern — Edge Function returns job ID immediately, solver runs asynchronously, client polls status; synchronous solver would timeout on mobile
+- [v2.0 roadmap]: Feedback rows snapshot recipe attributes at rating time — prevents edits to live recipe records from corrupting historical planning signal
+- [v2.0 roadmap]: queryKeys.ts centralised before any v2.0 feature queries — prevents cache incoherence across 6+ interdependent query families
+- [v2.0 roadmap]: Locked slot flag on meal_plan_slots — designed in Phase 19 (DnD) so both DnD and Planning Engine (Phase 22) share the same mechanism
+- [v2.0 roadmap]: @dnd-kit/core + @dnd-kit/sortable chosen for drag-and-drop — React 19 compatible, touch-friendly, actively maintained
+- [v2.0 roadmap]: INVT-04 (barcode scanning) included in Phase 17 despite being previously out of scope — added to v2.0 requirements per current REQUIREMENTS.md
+
 ### Roadmap Evolution
 
 - Phase 6 added: Launch on gregok.ca
@@ -234,6 +245,7 @@ Recent decisions affecting current work:
 - Phase 12 added: Home Page & Food Search Redesign (remove Food tab, home page logging, search sorting, meal drill-down)
 - Phase 13 added: Recipe, Meal Plan & Account Management (recipe UX, notes/dates, meal plan start date, print, deletions, account management)
 - Phase 14 added: How-To Manual (in-app usage guide)
+- Phases 16–24 added: v2.0 AMPS milestone (Budget, Inventory, Grocery, DnD Planner, Feedback/Dietary, Schedule, Planning Engine, Prep, Dynamic Portioning)
 
 ### Pending Todos
 
@@ -244,9 +256,11 @@ None yet.
 - vite-plugin-pwa@1.2.0 Vite 7 compatibility not confirmed — validate in Phase 1 scaffolding
 - iOS Safari background sync is restricted — confirm fallback strategy before Phase 4 architecture is locked
 - USDA FDC deduplication (Foundation > SR Legacy > Branded ranking) needs validation against live API responses in Phase 2
+- Planning Engine (Phase 22) needs a defined wall-clock solve time budget and iteration cap before Phase 22 planning begins
+- Ingredient identity normalisation for grocery aggregation (same food under different IDs across recipes) needs a focused design decision before Phase 18 coding begins
 
 ## Session Continuity
 
-Last session: 2026-03-18T10:02:30.345Z
-Stopped at: Completed 15-v1-1-audit-gap-closure-15-01-PLAN.md
+Last session: 2026-03-25T00:00:00.000Z
+Stopped at: v2.0 roadmap created — ready for /gsd:plan-phase 16
 Resume file: None

@@ -4,6 +4,8 @@
 
 NourishPlan is built in five phases that follow the strict dependency chain the food hierarchy imposes. Phase 1 establishes the schema and auth foundation that every feature depends on. Phase 2 builds the food data and recipe engine — the nutrition calculation layer that sits under everything else. Phase 3 delivers meal planning with per-person targets, the core user-facing promise. Phase 4 closes the feedback loop with daily logging and the nutrition summary. Phase 5 delivers the app's primary differentiator — per-person portion suggestions — and brings the PWA to production quality.
 
+v2.0 (AMPS) adds a constraint-solving layer on top. Phases 16–24 transform NourishPlan from a tracking app into a planning engine. Budget and Inventory come first because their data model decisions are irreversible. Grocery, Drag-and-Drop, Feedback, and Schedule follow — delivering visible wins and accumulating signal data. The Planning Engine (Phase 22) ships last, once it has real data to work with. Prep Optimization and Dynamic Portioning close out the milestone.
+
 ## Phases
 
 **Phase Numbering:**
@@ -21,6 +23,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down (completed 2026-03-15)
 - [x] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management (completed 2026-03-16)
 - [x] **Phase 14: How-To Manual** - In-app guide explaining how to use all features (completed 2026-03-17)
+- [ ] **Phase 16: Budget Engine & Query Foundation** - Centralised query keys, ingredient-level cost entry, recipe cost display, and weekly budget tracking
+- [ ] **Phase 17: Inventory Engine** - Pantry/fridge/freezer tracking with ledger-based quantities, expiry priority, barcode scanning, and plan-deduction
+- [ ] **Phase 18: Grocery List Generation** - Auto-generated grocery list from active meal plan, categorised by store aisle, with pantry subtraction and household sharing
+- [ ] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
+- [ ] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods
+- [ ] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints
+- [ ] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting
+- [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
+- [ ] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns
 
 ## Phase Details
 
@@ -166,6 +177,15 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 13. Recipe, Meal Plan & Account Mgmt | 4/4 | Complete | 2026-03-16 |
 | 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
 | 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
+| 16. Budget Engine & Query Foundation | 0/TBD | Not started | - |
+| 17. Inventory Engine | 0/TBD | Not started | - |
+| 18. Grocery List Generation | 0/TBD | Not started | - |
+| 19. Drag-and-Drop Planner | 0/TBD | Not started | - |
+| 20. Feedback Engine & Dietary Restrictions | 0/TBD | Not started | - |
+| 21. Schedule Model | 0/TBD | Not started | - |
+| 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
+| 23. Prep Optimisation | 0/TBD | Not started | - |
+| 24. Dynamic Portioning | 0/TBD | Not started | - |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -294,3 +314,112 @@ Plans:
 
 Plans:
 - [ ] 15-01-PLAN.md — Fix recipe deletion cache invalidation and remove ComingSoonPage dead code
+
+---
+
+## v2.0 AMPS — Phase Details
+
+### Phase 16: Budget Engine & Query Foundation
+**Goal**: Households can track ingredient costs, see cost per recipe serving, and monitor weekly spend against a household budget — and all v2.0 queries share a centralised key hierarchy preventing cache incoherence
+**Depends on**: Phase 15
+**Requirements**: BUDG-01, BUDG-02, BUDG-03, BUDG-04
+**Success Criteria** (what must be TRUE):
+  1. User can enter a cost per unit or weight on each recipe ingredient and see the per-serving cost computed automatically
+  2. User can set a weekly household food budget and see the current week's spend vs remaining balance on the Plan page
+  3. Recipe cards and the recipe detail view display the computed cost per serving
+  4. `src/lib/queryKeys.ts` exists with a full key hierarchy for all v2.0 query families; all v2.0 mutations invalidate keys via this centralised map
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 17: Inventory Engine
+**Goal**: Household members can maintain a pantry/fridge/freezer inventory with quantities, units, expiry dates, and storage locations — and the inventory updates automatically when a meal plan is finalised or leftovers are logged
+**Depends on**: Phase 16
+**Requirements**: INVT-01, INVT-02, INVT-03, INVT-04, INVT-05, INVT-06
+**Success Criteria** (what must be TRUE):
+  1. User can add an item to inventory by scanning a barcode or searching by name, specifying quantity, unit, storage location (pantry/fridge/freezer), and optional expiry date
+  2. Inventory list is sorted so items expiring soonest appear first, and past-expiry items are visually flagged
+  3. Finalising a meal plan automatically deducts the ingredient quantities used from matching inventory items
+  4. Uneaten portions of a recipe can be saved as leftover inventory items with an estimated expiry date
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 18: Grocery List Generation
+**Goal**: The app auto-generates a categorised grocery list from the active meal plan, subtracts what the household already has in inventory, and lets household members check off items while shopping
+**Depends on**: Phase 17
+**Requirements**: GROC-01, GROC-02, GROC-03, GROC-04, GROC-05
+**Success Criteria** (what must be TRUE):
+  1. Grocery list is generated automatically from the active week's meal plan ingredients, aggregated across all recipes and meals
+  2. Items already in inventory are shown as "already have" and excluded from the "need to buy" list
+  3. Grocery list items are grouped by store category (produce, dairy, meat, pantry, etc.)
+  4. Household member can check off items in-store and the list persists the checked state across page reloads
+  5. The grocery list is visible to all household members without manual sharing
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 19: Drag-and-Drop Planner
+**Goal**: Users can rearrange meals on the weekly plan grid by dragging and dropping, and manually placed meals are locked so auto-generation cannot overwrite them
+**Depends on**: Phase 16
+**Requirements**: PLAN-01, PLAN-03
+**Success Criteria** (what must be TRUE):
+  1. User can drag a meal from one plan slot and drop it onto any other slot on the weekly grid — the swap persists after page reload
+  2. Drag-and-drop works on both desktop (mouse) and mobile (touch) without accidental triggers during scroll
+  3. A slot that has been manually filled is visually marked as locked; the locked state persists in the database
+  4. Locked slots cannot be overwritten by auto-generation (Phase 22) — they are skipped and the generated plan fills only unlocked slots
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 20: Feedback Engine & Dietary Restrictions
+**Goal**: Household members can rate recipes after eating them, flag satiety, set dietary restrictions, and list foods they won't eat — and the system warns when the plan becomes monotonous
+**Depends on**: Phase 16
+**Requirements**: FEED-01, FEED-02, FEED-03, FEED-04
+**Success Criteria** (what must be TRUE):
+  1. After logging a meal, user is prompted to rate the recipe (1–5 stars) and indicate satiety (still hungry / satisfied / too much)
+  2. Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.) on their profile
+  3. Each household member can maintain a list of foods they won't eat, and recipes containing those ingredients are flagged
+  4. Plan page warns when the same recipe appears more than twice in a rolling two-week window
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 21: Schedule Model
+**Goal**: Each household member can set their daily availability for meal prep and eating, and these windows are stored as structured constraints ready to feed the Planning Engine
+**Depends on**: Phase 16
+**Requirements**: SCHED-01, SCHED-02
+**Success Criteria** (what must be TRUE):
+  1. Each household member can configure availability windows per day of the week (prep available / quick meal only / away) from their profile or settings
+  2. The schedule is stored as structured per-day constraint records and is consumed by the Planning Engine in Phase 22 — no free-text fields
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 22: Constraint-Based Planning Engine
+**Goal**: The app can generate a complete weekly meal plan optimised across nutrition targets, household budget, member schedules, dietary restrictions, and recipe preference signals — without blocking the UI
+**Depends on**: Phase 17, Phase 19, Phase 20, Phase 21
+**Requirements**: PLAN-02, PLAN-04, PLAN-05
+**Success Criteria** (what must be TRUE):
+  1. User triggers plan generation; the UI returns immediately with a status indicator while the plan is generated asynchronously
+  2. Generated plan respects all household dietary restrictions and won't-eat lists — no flagged ingredients appear in any slot
+  3. Generated plan skips locked slots (Phase 19) and only fills unlocked slots
+  4. Plan page highlights nutrition gaps per member after generation and offers swap suggestions to close them
+  5. Recipes already in inventory are weighted higher in recipe selection — ingredients the household has are preferred
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 23: Prep Optimisation
+**Goal**: Users can see a batch prep schedule for the week and a day-of task sequence for any meal, so cooking time is used efficiently
+**Depends on**: Phase 22
+**Requirements**: PREP-01, PREP-02, PREP-03
+**Success Criteria** (what must be TRUE):
+  1. Plan page shows a weekly batch prep summary — which recipes can be prepped ahead, grouped by shared ingredients or equipment
+  2. User can view a day-of task sequence for any meal showing steps in longest-first order to minimise total cooking time
+  3. Recipes that freeze well are visually flagged in the plan view and batch prep suggestions as make-ahead candidates
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 24: Dynamic Portioning
+**Goal**: Portion suggestions adapt over time based on each member's satiety feedback and consumption history, moving beyond static calorie-target splits
+**Depends on**: Phase 20
+**Requirements**: PORT-01, PORT-02
+**Success Criteria** (what must be TRUE):
+  1. Per-member portion suggestions use each member's calorie target as the primary driver — members with higher targets receive proportionally larger suggested portions
+  2. When a member has logged a recipe multiple times and consistently adjusts the suggested portion, the system adapts future suggestions for that recipe toward the observed amount
+**Plans**: TBD
+**UI hint**: yes
