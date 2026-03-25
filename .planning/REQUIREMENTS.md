@@ -1,7 +1,7 @@
 # Requirements: NourishPlan
 
-**Defined:** 2026-03-12
-**Core Value:** Families can share one meal plan while each person gets personalized portion suggestions based on their individual nutritional targets.
+**Defined:** 2026-03-12 | **Updated:** 2026-03-25
+**Core Value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
 
 ## v1 Requirements
 
@@ -121,14 +121,68 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **DOCS-01**: In-app how-to manual accessible from UI explaining all major features
 
-## v2 Requirements
+## v2.0 Requirements
+
+Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps to roadmap phases.
+
+### Budget
+
+- [ ] **BUDG-01**: User can set a weekly household food budget
+- [ ] **BUDG-02**: Each recipe displays a computed cost per serving based on ingredient costs
+- [ ] **BUDG-03**: Plan page shows weekly spend vs budget with remaining balance
+- [ ] **BUDG-04**: User can enter cost per unit/weight on recipe ingredients
+
+### Inventory
+
+- [ ] **INVT-01**: User can add items to inventory with storage location (pantry, fridge, freezer)
+- [ ] **INVT-02**: Each inventory item tracks quantity and unit (grams, units, ml)
+- [ ] **INVT-03**: Each inventory item has an optional expiry date with priority sorting
+- [ ] **INVT-04**: User can scan a barcode to add an item to inventory
+- [ ] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
+- [ ] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
+
+### Grocery
+
+- [ ] **GROC-01**: Grocery list is auto-generated from the active meal plan's ingredients
+- [ ] **GROC-02**: Grocery list subtracts items already in inventory ("have" vs "need to buy")
+- [ ] **GROC-03**: Grocery list items are grouped by store category (produce, dairy, etc.)
+- [ ] **GROC-04**: User can check off grocery items in-store
+- [ ] **GROC-05**: Grocery list can be shared with household members
+
+### Planning
+
+- [ ] **PLAN-01**: User can drag and drop meals between slots on the weekly plan grid
+- [ ] **PLAN-02**: User can auto-generate a meal plan optimized for nutrition, cost, schedule, and preferences
+- [ ] **PLAN-03**: Manually placed meals are locked and preserved during auto-generation
+- [ ] **PLAN-04**: Generated plan highlights nutrition gaps per member with swap suggestions
+- [ ] **PLAN-05**: Recipe selection can prioritize using ingredients already in inventory
+
+### Feedback & Preferences
+
+- [ ] **FEED-01**: User can rate a recipe (1-5 stars) after eating it
+- [ ] **FEED-02**: Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.)
+- [ ] **FEED-03**: Each household member can set "won't eat" tags for selective eaters
+- [ ] **FEED-04**: System tracks recipe repeat rate and warns when plan becomes monotonous
+
+### Schedule
+
+- [ ] **SCHED-01**: Each household member can set availability windows per day (prep available, quick meal only, away)
+- [ ] **SCHED-02**: Plan generation respects member schedule constraints
+
+### Prep
+
+- [ ] **PREP-01**: User can view batch prep suggestions for the week's meal plan
+- [ ] **PREP-02**: User can view day-of task sequencing for a meal
+- [ ] **PREP-03**: Freezer-friendly recipes are flagged for make-ahead prep
+
+### Portioning
+
+- [ ] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
+- [ ] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
+
+## v3 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
-
-### Grocery & Convenience
-
-- **GROC-01**: Grocery list auto-generated from meal plan ingredients
-- **GROC-02**: Leftovers tracking with partial consumption and date tracking
 
 ### Reports & Insights
 
@@ -136,21 +190,28 @@ Deferred to future release. Tracked but not in current roadmap.
 - **REPT-02**: Nutrition trend charts over time
 - **REPT-03**: Household-level nutrition overview
 
-### Extended Data
+### AI & Learning
 
-- **DATA-01**: Barcode scanning to look up food items
-- **DATA-02**: AI-suggested recipes based on preferences and history
+- **AILR-01**: AI-driven adaptive meal plan optimization based on accumulated feedback
+- **AILR-02**: Cost-aware ingredient substitution suggestions
+- **AILR-03**: Smart prep automation with equipment-aware scheduling
+- **AILR-04**: Learning system personalization based on consumption patterns
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Native iOS/Android apps | Mobile-first PWA is sufficient for v1; no app store gatekeeping |
-| Social/public recipe sharing | v1 is household-only; public content creates moderation burden |
+| Native iOS/Android apps | Mobile-first PWA is sufficient; no app store gatekeeping |
+| Social/public recipe sharing | Household-only; public content creates moderation burden |
 | Real-time collaborative editing | Last-write-wins is sufficient; families rarely edit simultaneously |
 | TDEE auto-calculation | Users set their own targets; avoids liability and misinterpretation |
 | Weight/body tracking | Outside core value — nutrition data is the product |
-| AI meal plan generation | Requires preference signal accumulation; not useful on day one |
+| AI-driven adaptive optimization | Requires months of accumulated feedback signal; deferred to v3 |
+| Grocery delivery integration | External API dependency; out of scope for self-hosted PWA |
+| Cost-aware ingredient substitutions | Future enhancement after budget engine is stable |
+| Smart prep automation | Future enhancement after prep optimization is stable |
+| Grocery price API | Recipe costs are user-entered; no real-time price feeds in v2.0 |
+| Receipt scanning | Complex OCR; barcode scanning covers the inventory entry use case |
 
 ## Traceability
 
@@ -210,42 +271,52 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POLISH-06 | Phase 8 | Complete |
 
 **Coverage:**
-- v1 requirements: 50 total
-- v1.1 enhancement requirements: 16 total
-- Mapped to phases: 66
-- Unmapped: 0 ✓
+- v1.0 requirements: 50 total (all complete)
+- v1.1 enhancement requirements: 16 total (all complete)
+- v2.0 requirements: 28 total
+- Mapped to phases: 66 (v1) + 0 (v2.0 — pending roadmap)
+- Unmapped v2.0: 28 ⚠️ (awaiting roadmap creation)
 
-**Gap Closure Phases (v1.1 audit):**
-
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| TRCK-05 | Phase 9 (dead code cleanup) | Complete |
-| PLAT-03 | Phase 9 (theme token fix) | Complete |
-| POLISH-01 | Phase 9 (theme token fix) | Complete |
-| LAUNCH-01–06 | Phase 6 | Complete |
-| POLISH-01–06 | Phase 8 | Complete |
-
-**v1.1 Enhancement Requirements Traceability:**
+**v2.0 Traceability:**
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CALC-01 | Phase 11 | Complete |
-| CALC-02 | Phase 11 | Complete |
-| CALC-03 | Phase 11 | Complete |
-| UXLOG-01 | Phase 12 | Complete |
-| UXLOG-02 | Phase 12 | Complete |
-| UXLOG-03 | Phase 12 | Complete |
-| UXLOG-04 | Phase 12 | Complete |
-| RCPUX-01 | Phase 13 | Complete |
-| RCPUX-02 | Phase 13 | Complete |
-| RCPUX-03 | Phase 13 | Complete |
-| MPLAN-01 | Phase 13 | Complete |
-| MPLAN-02 | Phase 13 | Complete |
-| DELMG-01 | Phase 13 | Complete |
-| DELMG-02 | Phase 13 | Complete |
-| ACCTM-01 | Phase 13 | Complete |
-| DOCS-01 | Phase 14 | Complete |
+| BUDG-01 | TBD | Pending |
+| BUDG-02 | TBD | Pending |
+| BUDG-03 | TBD | Pending |
+| BUDG-04 | TBD | Pending |
+| INVT-01 | TBD | Pending |
+| INVT-02 | TBD | Pending |
+| INVT-03 | TBD | Pending |
+| INVT-04 | TBD | Pending |
+| INVT-05 | TBD | Pending |
+| INVT-06 | TBD | Pending |
+| GROC-01 | TBD | Pending |
+| GROC-02 | TBD | Pending |
+| GROC-03 | TBD | Pending |
+| GROC-04 | TBD | Pending |
+| GROC-05 | TBD | Pending |
+| PLAN-01 | TBD | Pending |
+| PLAN-02 | TBD | Pending |
+| PLAN-03 | TBD | Pending |
+| PLAN-04 | TBD | Pending |
+| PLAN-05 | TBD | Pending |
+| FEED-01 | TBD | Pending |
+| FEED-02 | TBD | Pending |
+| FEED-03 | TBD | Pending |
+| FEED-04 | TBD | Pending |
+| SCHED-01 | TBD | Pending |
+| SCHED-02 | TBD | Pending |
+| PREP-01 | TBD | Pending |
+| PREP-02 | TBD | Pending |
+| PREP-03 | TBD | Pending |
+| PORT-01 | TBD | Pending |
+| PORT-02 | TBD | Pending |
+
+**v1.0/v1.1 Traceability (archived — all complete):**
+
+All 66 v1.0/v1.1 requirements mapped and complete. See git history for detailed traceability.
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-15 after Phase 10 requirements formalization*
+*Last updated: 2026-03-25 after v2.0 milestone requirements definition*
