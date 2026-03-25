@@ -1,8 +1,10 @@
 # Feature Research
 
-**Domain:** Family meal planning / calorie and nutrition tracking PWA
-**Researched:** 2026-03-12
-**Confidence:** HIGH (competitive analysis from live apps, USDA API confirmed, nutrition tracking patterns well-established)
+**Domain:** Household meal planning platform — constraint-solving / AMPS features (v2.0)
+**Researched:** 2026-03-25
+**Confidence:** MEDIUM — WebSearch verified against multiple current sources (2025–2026); competitor app analysis; academic constraint-optimization literature. No single authoritative spec exists for this combined feature set.
+
+> Note: v1.0 features (food search, recipe builder, household sharing, daily logging, nutrition targets, etc.) are fully built and validated. This document covers only the new v2.0 AMPS features.
 
 ---
 
@@ -10,119 +12,143 @@
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist. Missing these = product feels incomplete.
+Features users assume exist in any serious meal planning app in 2026. Missing these makes the product feel incomplete relative to Mealime, Plan to Eat, Eat This Much, and Ollie.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Food database search | Every calorie app has it; typing individual nutrients manually is a non-starter | MEDIUM | USDA FoodData Central is the free standard (380k+ foods, USDA-validated); 1,000 req/hr rate limit per IP — cache aggressively |
-| Manual custom food entry | USDA misses local, branded, and home-cooked edge cases | LOW | Needs name, unit, and per-100g or per-serving macros at minimum |
-| Calorie + macro display (P/C/F) | Users comparing apps expect this as the baseline nutritional view | LOW | Calories, protein, carbs, fat — must be visible without clicking through |
-| Recipe builder (ingredients → nutrition) | Cooking from scratch is the norm in family households | MEDIUM | Compute nutrition by summing ingredients; scale to servings; this is the engine everything else sits on |
-| Daily nutrition log per person | Core interaction loop — users open the app to log what they ate | MEDIUM | Each household member logs independently against their own targets |
-| Personal calorie/macro targets | Without targets, tracking has no meaning | LOW | Per-person targets stored on profile; used to contextualize daily totals |
-| Daily summary view | Users want to see at a glance how they're tracking for the day | LOW | Calories remaining, macros consumed vs target; the "dashboard" screen |
-| Weekly meal plan view | Meal planning is the core promise; must be visible at a week level | MEDIUM | Calendar grid with breakfast/lunch/dinner slots; meals assigned to slots |
-| Edit and delete entries | Basic data hygiene — users make mistakes | LOW | Required for foods, recipes, meals, and log entries |
-| Mobile-friendly layout | Primary use is in the kitchen or at the table on a phone | MEDIUM | Mobile-first responsive; touch targets; readable font sizes; no hover-only interactions |
+| Cost per recipe / per serving display | Budget-conscious users treat cost as a core planning input; Eat This Much has budget limits; users explicitly seek "budget meal planning apps" | LOW | User-entered ingredient costs; no live price API in MVP. Display alongside nutrition on recipe cards and meal plan slots. |
+| Weekly budget total with remaining balance | Users mentally budget groceries weekly; a running total is the minimum useful feedback | LOW | Sum of (cost-per-serving × servings planned) for the week. Visual warning when over budget. |
+| Pantry / fridge / freezer item list with quantities | Knowing what is on-hand before generating a grocery list is expected in any pantry-aware app (Cooklist, KitchenPal set this expectation) | MEDIUM | Manual entry only (no barcode scanning). Storage location categories (pantry / fridge / freezer) are table stakes; expiry tracking is a differentiator. |
+| Grocery list auto-generated from the meal plan | Core meal planner feature — manually building a list from a plan is a regression | MEDIUM | Aggregate ingredients across all planned meals for the week. Deduplicate and sum quantities by unit. |
+| Grocery list grouped by store category | Users shop by aisle; ungrouped lists cause unnecessary back-and-forth in the store | LOW | Standard grouping: produce / dairy / meat / pantry staples / frozen / other. |
+| Grocery list marks "already have" vs "need to buy" | Pantry-aware lists are now baseline in 2026 — Cooklist and Samsung Food both do this | MEDIUM | Subtract on-hand inventory quantities from required quantities before showing the list. Requires inventory engine. |
+| Recipe star rating (1–5) | The minimal feedback primitive every user expects to be able to provide; Ollie has 5-star ratings | LOW | Stored per household member. Powers repeat-rate tracking and future adaptive suggestions. |
+| Drag-and-drop weekly calendar | Plan to Eat, mealplanner.app, and Ollie all use DnD as the primary planning gesture; users who have used any of these expect it | HIGH | dnd-kit recommended (lighter than react-beautiful-dnd, actively maintained). Desktop-quality interaction; mobile fallback to tap-to-move or long-press-to-pick-up. |
+| Per-member dietary restriction / allergy flags | Families with allergies or intolerances consider this non-negotiable | LOW | Tag system per member: gluten-free, nut allergy, dairy-free, vegetarian, vegan, halal, kosher, etc. Applied as hard filter during plan generation and flagged on recipe cards. |
+| Per-person portion scaling that flows to grocery quantities | Eat This Much scales recipes for up to 9 people and propagates to grocery lists; users expect quantities to be correct for their household size | MEDIUM | Extend existing v1.0 per-person portion suggestions so grocery list quantities reflect each member's planned portions, not just "1 serving." |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set the product apart. Not required by category norms, but directly serve NourishPlan's core value.
+Features that go beyond what any current consumer meal planning app offers, and directly serve the AMPS core value: optimize nutrition, cost, time, and satisfaction under real-world household constraints.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Household / family sharing | Most trackers are single-user; family sharing with a shared meal plan is the core differentiator | HIGH | Household model: one meal plan, multiple members each with independent logs and targets |
-| Per-person portion suggestions | Solves the real family problem: the same meal feeds different people different amounts | HIGH | Given a recipe's nutrition per serving, compute "X should eat Y servings to hit Z% of their target" — requires personal targets + recipe nutrition to both be solid first |
-| Nested recipes (recipe-as-ingredient) | Enables realistic home cooking (e.g., a sauce recipe used inside a main recipe) | HIGH | Requires recursive nutrition calculation; most consumer apps don't support this; prevents workarounds like duplicating sub-recipes |
-| Full food hierarchy (Foods → Recipes → Meals → Meal Plans) | Clean data model that makes all other features correct and composable | HIGH | This is architecture-level but user-visible: users can reuse a recipe across multiple meals and see consistent nutrition data |
-| Manual portion override at log time | Acknowledges real eating behavior (ate 1.5 servings, not 1) | LOW | Simple multiplier on log entry; important for honesty in tracking |
-| Micronutrient tracking | Cronometer differentiates on 84+ nutrients; basic apps only show macros | MEDIUM | USDA FoodData Central includes micronutrient data; expose vitamins and minerals progressively — not on the main screen, but accessible |
+| Constraint-based plan generation | Generates a valid weekly plan simultaneously optimizing nutrition + cost + time + satisfaction — no consumer app does this | HIGH | Combinatorial constraint satisfaction over the household's recipe pool. Rule-based (not AI) for MVP: hard constraints (allergy, budget ceiling, schedule availability) plus soft constraints (prefer higher-rated, avoid recently repeated). LP or greedy assignment is sufficient at household scale. |
+| Schedule-aware planning (cook availability as planning constraint) | Work schedules and meal timing as first-class inputs — no consumer app supports this | HIGH | User marks days / time slots as "unavailable to cook" or "low time" vs "available." Planner avoids assigning high-prep meals to constrained slots. Direct differentiator vs all competitors. |
+| Prep schedule with task sequencing | Most apps show what to cook but not when to prep. Sequenced prep tasks reduce weekday friction and are a concrete, tangible output users can act on | HIGH | Model prep tasks as a directed acyclic graph (e.g., marinate before bake, chop before sauté). Assign to available time windows. Detect batch opportunities (e.g., same vegetable used in 3 recipes this week — chop once). |
+| Expiry-priority ingredient weighting | Planner weights recipes that use near-expiry inventory items — directly reduces food waste | MEDIUM | Sort inventory items by expiry date. When selecting recipes for the generated plan, prefer recipes whose main ingredients include items expiring within N days. Surface "use-it-up" suggestions separately. |
+| Satiety feedback (too little / right / too much) | Tracks whether planned portions were actually satisfying — informs future portion adjustments | MEDIUM | 3-point scale attached to each log entry. Accumulated signal adjusts default portion suggestions per person per recipe over time. Differentiates from simple star rating. |
+| Batch cooking efficiency scoring | Surface which recipe combinations this week minimize total prep time through shared ingredients and equipment | MEDIUM | Compute ingredient overlap and equipment overlap across the week's planned recipes. Display "prep efficiency" score or highlight batch opportunities. Pairs with prep schedule output. |
+| Child / selective eater support — per-member avoided foods list | Families with picky children need meal plans that account for accepted foods beyond binary dietary restrictions; no competitor supports this at the individual item level | MEDIUM | Each member has an "avoid" list at the ingredient level (not just category). Planner flags or excludes recipes containing avoided items for that member. Optionally suggests a simple substitution note (e.g., "serve without mushrooms for [child]"). |
+| Repeat rate tracking and diversity warning | Flags recipes planned too frequently so plans feel varied — families report "we eat the same 5 meals on rotation" fatigue | LOW | Count how many times each recipe has appeared in plans over the last N weeks. Surface a "planned 3 times recently" warning in the planner and down-weight in auto-generation. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| AI-generated meal plans | Feels modern; users see it in competitors | Requires training data on user preferences, dietary restrictions, cultural foods — hard to get right; low-value when wrong; creates dependency on model quality | Let users build and save their own templates; add recipe suggestions from saved recipes after v1 is validated |
-| Barcode scanning | Common in MyFitnessPal, expected by power users | Requires camera access, third-party barcode database (Open Food Facts or commercial), significant dev overhead; mobile camera quality varies | USDA search covers branded products; manual entry covers gaps; defer to v2 |
-| Grocery list generation | Obvious extension of meal planning | Requires ingredient quantity → purchase unit mapping (e.g., "2 tbsp butter" → "buy 1 stick"); pantry state tracking adds more complexity; easy to build badly | Defer to v2; meal plan is the core; grocery list is a convenience layer |
-| Social / public recipe sharing | Familiar from other apps; feels like a community feature | Moderation burden; spam; nutritional accuracy of user-submitted data degrades quickly (MyFitnessPal's public DB has many inaccurate entries); not the family-private use case | Keep household-only in v1; user-generated public content is a separate product problem |
-| Calorie goal auto-calculation (TDEE) | Users expect the app to set their targets for them | TDEE formulas (Mifflin-St Jeor, etc.) require activity level, age, weight inputs and produce estimates users often misinterpret as precise; also creates liability surface | Let users set their own targets explicitly; provide a help tooltip linking to an external TDEE calculator |
-| Progress / weight tracking | MyFitnessPal includes it; users expect holistic health tracking | Outside NourishPlan's core value proposition; weight tracking data is sensitive and requires careful handling; adds scope without strengthening the family meal planning use case | Out of scope v1; nutrition data is the product |
-| Real-time collaborative editing | Two family members editing the same meal plan simultaneously | WebSocket infrastructure for a use case that rarely occurs; families don't typically need concurrent editing | Optimistic UI with last-write-wins is sufficient; conflicts are rare in household use |
+| Real-time grocery prices / price comparison | Users want accurate cost data without manual entry | Requires live grocery API (Instacart, Kroger, Walmart) with regional price variation, API rate limits, ToS risk, and frequent data staleness. Brittle external dependency for MVP. | User-entered ingredient costs per recipe. Accurate enough for relative budget comparisons; zero external dependency. |
+| Barcode scanning for inventory entry | Reduces friction — scan items as you unpack groceries | Requires camera access + UPC barcode database + lookup API. High implementation cost; unreliable on mobile web (PWA camera constraints). Out of scope per PROJECT.md. | Manual search using existing USDA/CNF food database for inventory entry. Same nutritional data; no hardware dependency. |
+| AI-generated recipe suggestions from pantry | "Use what you have" is compelling | Requires LLM API (cost, latency, hallucination risk). Not useful until feedback engine has accumulated signal. Hallucinated recipes with plausible-sounding but incorrect instructions are a support burden. | Rule-based inventory matching: if 3+ main ingredients of a saved recipe are in inventory, surface it as a "you can make this" suggestion. Deterministic, fast, and reliable. |
+| Automated grocery ordering / delivery integration | Closes the loop from plan to delivered food | Deep integration with Instacart / Walmart / etc. APIs is high-maintenance, regionally limited, creates dependency on third-party ToS, and builds nothing proprietary. Out of scope per PROJECT.md. | Generate a clean, printable / shareable (text/clipboard) grocery list. Users handle the actual purchase channel. |
+| Social recipe sharing / public community | Recipe discovery from other families | Public content requires moderation, trust systems, spam prevention, and nutritional accuracy auditing (MyFitnessPal's public database quality is the cautionary tale). Household-only scope is a feature, not a limitation. | Admin-maintained seed recipe library as optional starter content. Future: import from a recipe URL (structured data scraping). |
+| Voice input for logging / planning | Feels modern; hands-free in the kitchen | PWA speech recognition is inconsistent across browsers (Chrome-only in many cases). High UX complexity for marginal gain when autocomplete search already handles fast input. | Fast text search with autocomplete (already built in v1.0). |
+| Weight / progress tracking alongside meal planning | Users expect a holistic health app | Outside AMPS core value; weight data is sensitive; adds scope without strengthening the constraint-solving or planning use case. | Out of scope. Nutrition plan adherence (via daily log) is the product's output metric. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[USDA Food Database]
-    └──enables──> [Food Search]
-                      └──feeds──> [Recipe Builder]
-                                      └──requires──> [Serving / Unit handling]
-                                      └──enables──> [Nested Recipes]
-                                      └──produces──> [Recipe Nutrition]
-                                                         └──feeds──> [Meal Nutrition]
-                                                                         └──feeds──> [Meal Plan]
+[Budget Engine: cost per recipe / ingredient]
+    └──required by──> [Weekly budget total + remaining]
+    └──required by──> [Grocery list with cost totals]
+    └──required by──> [Constraint-based planning engine] (cost as optimization constraint)
 
-[Personal Nutrition Targets]
-    └──required by──> [Daily Summary]
-    └──required by──> [Per-Person Portion Suggestions]
+[Inventory Engine: pantry items + quantities + expiry]
+    └──required by──> [Grocery list "already have" subtraction]
+    └──required by──> [Expiry-priority ingredient weighting]
+    └──enhances──>    [Constraint-based planning engine] (use-what-you-have weighting)
 
-[Household / Family Sharing]
-    └──requires──> [User Accounts + Auth]
-    └──enables──> [Shared Meal Plan view]
-    └──enables──> [Per-Person Portion Suggestions]
+[Grocery List Aggregation]
+    └──requires──>  [Meal plan slots with portions]         ← built v1.0
+    └──requires──>  [Recipe ingredient lists with quantities] ← built v1.0
+    └──requires──>  [Dynamic portioning per member]          (for correct quantities)
+    └──enhanced by──> [Inventory Engine]                    (subtract on-hand)
 
-[Meal Plan]
-    └──requires──> [Meals]
-                       └──requires──> [Recipes or Foods]
+[Per-member dietary tags + avoided foods list]
+    └──required by──> [Constraint-based planning engine]    (hard constraint)
+    └──enhances──>    [Meal plan display]                    (per-member flags)
 
-[Daily Nutrition Log]
-    └──requires──> [User Account]
-    └──requires──> [Recipes or Foods (to log)]
-    └──produces──> [Daily Summary]
+[Schedule Model: availability windows per member / day]
+    └──required by──> [Constraint-based planning engine]    (slot availability constraint)
+    └──required by──> [Prep optimization: task assignment]  (assign tasks to available windows)
+
+[Feedback Engine: star rating + satiety signal]
+    └──required by──> [Repeat rate tracking]
+    └──enhances──>    [Constraint-based planning engine]    (prefer high-rated, avoid repeated)
+    └──enhances──>    [Dynamic portioning]                  (satiety signal adjusts future portions)
+
+[Constraint-based planning engine]
+    └──requires──>    [Budget Engine]
+    └──requires──>    [Schedule Model]
+    └──requires──>    [Per-member dietary tags + avoided foods]
+    └──enhanced by──> [Inventory Engine]
+    └──enhanced by──> [Feedback Engine]
+    └──enhanced by──> [Dynamic portioning]
+
+[Dynamic portioning: per-person portion optimization]
+    └──requires──>    [Per-person calorie / macro targets]  ← built v1.0
+    └──enhanced by──> [Feedback Engine: satiety signal]
+    └──feeds into──>  [Grocery list quantities]
+
+[Drag-and-drop planner]
+    └──requires──>    [Existing meal plan slot structure]   ← built v1.0
+    └──conflicts with──> [Constraint-based auto-generation] (manual edits must survive regeneration — needs "locked slot" mechanism)
+
+[Prep optimization: task sequencing + batch detection]
+    └──requires──>    [Recipe prep step data]               (new data model — recipes need a "steps" field)
+    └──requires──>    [Schedule Model]
+    └──enhances──>    [Batch cooking efficiency scoring]
 ```
 
 ### Dependency Notes
 
-- **Recipe Builder requires Food Search:** You cannot build a recipe without food entries to add as ingredients. Food database integration must ship before recipe builder is useful.
-- **Nested Recipes require Recipe Builder:** Sub-recipe support is an extension of the recipe model. The base recipe builder must be solid before nesting is layered in.
-- **Per-Person Portion Suggestions require both Personal Targets and Recipe Nutrition:** Neither alone is sufficient. Targets without recipe nutrition means no calculation. Recipe nutrition without targets means no personalization.
-- **Household Sharing requires User Accounts:** Multi-member households imply multiple accounts with a shared household entity. Auth and household membership are gating infrastructure.
-- **Daily Summary requires Personal Targets:** The summary view shows progress toward a goal. Without a goal, it is only a raw total — less useful and less motivating.
-- **Meal Plan requires Meals, which require Recipes:** The hierarchy flows strictly top-down. Meal Plan → Meal → Recipe → Food. Each level must exist before the level above is buildable.
+- **Budget Engine is a prerequisite for the constraint-based planner.** The planner cannot optimize against cost without cost data on recipes. Budget Engine must ship in an earlier phase.
+- **Inventory Engine and Grocery Aggregation are tightly coupled.** A grocery list without pantry subtraction is useful but incomplete. Ship them in the same phase for a coherent user experience.
+- **Schedule Model must precede Prep Optimization.** Prep task assignment requires knowing which time windows are available per day.
+- **Drag-and-drop conflicts with auto-generated plans.** If the constraint engine regenerates a plan, it will overwrite manual DnD edits. Requires a "lock this slot" mechanism or explicit "regenerate from scratch" vs "fill empty slots only" modes. Design this before implementing either feature.
+- **Feedback Engine data must accumulate before meaningful adaptation.** Build the data collection layer early so signal starts accumulating, even if the adaptation logic ships later.
+- **Prep Optimization requires recipe step data** that does not currently exist in the data model. A migration to add a recipe `steps` array is a prerequisite for any prep schedule feature.
 
 ---
 
 ## MVP Definition
 
-### Launch With (v1)
+This is a subsequent milestone (v2.0 AMPS) on an existing validated product. "MVP" here means the minimum set of AMPS features that delivers the constraint-solving value proposition.
 
-Minimum viable product to validate the family meal planning use case.
+### Launch With (v2.0 Core)
 
-- [ ] User accounts + household model — without this, sharing is impossible; it is the structural foundation
-- [ ] USDA food search + manual custom food entry — the data layer everything else builds on
-- [ ] Recipe builder (ingredients, servings, auto-calculated nutrition) — enables meaningful meal content
-- [ ] Meal and meal plan creation (Foods/Recipes → Meals → Meal Plans) — the core planning workflow
-- [ ] Per-person nutrition targets (calories + P/C/F macros) — makes the app personalized, not generic
-- [ ] Daily nutrition log per person with manual portion override — completes the track → review loop
-- [ ] Daily summary view per person — closes the feedback loop; without this, logging feels pointless
-- [ ] Mobile-first responsive PWA — the product is used on phones; desktop layout is secondary
+- [ ] **Budget Engine** — cost per ingredient + recipe + weekly total — without cost data, the constraint solver has no budget input; users cannot do budget-aware planning
+- [ ] **Inventory Engine** — manual pantry/fridge/freezer entry with quantities and expiry date — foundational for grocery subtraction and expiry-priority planning
+- [ ] **Grocery List Aggregation** — auto-generated from meal plan, categorized, with pantry subtraction — closes the planning-to-shopping loop; high visibility win
+- [ ] **Per-member dietary tags and avoided foods list** — required for child/selective eater support and constraint planning; low implementation cost
+- [ ] **Drag-and-drop weekly planner** — UX upgrade that makes the existing plan editing usable enough to drive engagement; table stakes among competitors
+- [ ] **Recipe rating (1–5 stars) + satiety feedback** — starts accumulating the signal the learning and adaptation engines need
 
-### Add After Validation (v1.x)
+### Add After Validation (v2.x)
 
-- [ ] Nested recipes — high complexity; validate that users actually build multi-component recipes before investing in recursive nutrition calculation
-- [ ] Per-person portion suggestions — requires portion math on top of a solid data model; add once the food hierarchy is stable and populated
-- [ ] Micronutrient display — expose after core macro tracking is proven useful; add as a progressive disclosure layer
-- [ ] Weekly meal plan templates (save and reuse a plan) — once families have built plans, they will want to repeat them; implement after the first creation flow is tested
+- [ ] **Schedule Model** — availability windows as planning constraints — after core planning loop is working and users are engaged
+- [ ] **Repeat rate tracking and diversity warning** — after feedback engine has enough rating history (2–4 weeks of use)
+- [ ] **Prep optimization** — task sequencing and batch detection — after schedule model is in place and recipe step data model is migrated
+- [ ] **Constraint-based plan generation** — after Budget Engine, Schedule Model, dietary tags, and Feedback Engine have data to work with
+- [ ] **Dynamic portioning with satiety adaptation** — after feedback engine has accumulated signal (requires several weeks of satiety data per person)
 
-### Future Consideration (v2+)
+### Future Consideration (v3+)
 
-- [ ] Grocery list generation — convenient but architecturally complex (unit mapping); defer until v1 data model is mature
-- [ ] Barcode scanning — third-party dependency, camera API complexity; high cost for a feature USDA search mostly covers
-- [ ] Leftovers tracking — nuanced UX (partial consumption, date tracking); defer until core logging is validated
-- [ ] Weekly nutrition reports / history charts — useful after users have enough logged data to make reports meaningful (at least 2–4 weeks)
-- [ ] AI recipe suggestions — requires preference signal accumulation; not useful on day one
+- [ ] **Adaptive plan personalization (learning system)** — requires months of feedback data per PROJECT.md; deferred explicitly
+- [ ] **Barcode scanning** — deferred per PROJECT.md
+- [ ] **Grocery delivery integration** — deferred per PROJECT.md
+- [ ] **AI recipe suggestions** — deferred per PROJECT.md; not useful until preference signal accumulates
 
 ---
 
@@ -130,61 +156,65 @@ Minimum viable product to validate the family meal planning use case.
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| USDA food search | HIGH | MEDIUM | P1 |
-| Manual custom food entry | HIGH | LOW | P1 |
-| Recipe builder | HIGH | MEDIUM | P1 |
-| Meal + meal plan creation | HIGH | MEDIUM | P1 |
-| Personal nutrition targets | HIGH | LOW | P1 |
-| Daily nutrition log | HIGH | MEDIUM | P1 |
-| Daily summary view | HIGH | LOW | P1 |
-| Household / family sharing | HIGH | HIGH | P1 |
-| Mobile-first PWA layout | HIGH | MEDIUM | P1 |
-| Per-person portion suggestions | HIGH | MEDIUM | P2 |
-| Nested recipes | MEDIUM | HIGH | P2 |
-| Micronutrient tracking | MEDIUM | MEDIUM | P2 |
-| Weekly plan templates (save/reuse) | MEDIUM | LOW | P2 |
-| Grocery list generation | MEDIUM | HIGH | P3 |
-| Barcode scanning | MEDIUM | HIGH | P3 |
-| Weekly nutrition reports | MEDIUM | MEDIUM | P3 |
-| AI meal plan generation | LOW | HIGH | P3 |
+| Budget tracking (cost per recipe + weekly total) | HIGH | LOW | P1 |
+| Grocery list aggregation (categorized) | HIGH | MEDIUM | P1 |
+| Grocery list pantry subtraction | HIGH | MEDIUM | P1 |
+| Inventory management (manual entry + expiry) | HIGH | MEDIUM | P1 |
+| Drag-and-drop planner | HIGH | HIGH | P1 |
+| Per-member dietary tags + avoided foods | HIGH | LOW | P1 |
+| Recipe star rating (1–5) | MEDIUM | LOW | P1 |
+| Satiety feedback (3-point) | MEDIUM | LOW | P1 |
+| Expiry-priority ingredient weighting | MEDIUM | MEDIUM | P2 |
+| Repeat rate tracking and diversity warning | LOW | LOW | P2 |
+| Schedule model (availability windows) | HIGH | MEDIUM | P2 |
+| Prep optimization (task sequencing) | HIGH | HIGH | P2 |
+| Batch cooking efficiency scoring | MEDIUM | MEDIUM | P2 |
+| Constraint-based plan generation | HIGH | HIGH | P2 |
+| Dynamic portioning with satiety adaptation | MEDIUM | HIGH | P3 |
+| Adaptive future plans (learning system) | HIGH | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
+- P1: Must have for v2.0 launch
+- P2: Should have, add when core is validated
 - P3: Nice to have, future consideration
 
 ---
 
 ## Competitor Feature Analysis
 
-| Feature | MyFitnessPal | Cronometer | Mealime / Plan to Eat | NourishPlan approach |
-|---------|--------------|------------|----------------------|----------------------|
-| Food database | 11M+ foods (user-submitted, some inaccurate) | 1M+ (USDA-verified, accurate) | Recipe-focused, limited raw ingredient search | USDA FoodData Central (380k+, validated) + manual custom |
-| Recipe builder | Yes (basic) | Yes (basic) | Yes (primary feature) | Yes, core feature with nested recipe support |
-| Household sharing | No (individual only) | No (individual only) | Limited (Mealime: 2 people; Plan to Eat: family accounts) | First-class household model — core differentiator |
-| Per-person portions | No | No | No | Core differentiator — auto-suggests per person |
-| Nutrient depth | Macros + basic micros | 84+ micronutrients | Macros only | Macros at launch, micros in v1.x |
-| Meal planning calendar | Basic | No | Yes (primary feature) | Yes — weekly view, shared across household |
-| Nested recipes | No | No | No | Yes — enables realistic home cooking |
-| PWA / offline | No | No | No | Yes — installable, mobile-first |
-| Grocery list | Yes | No | Yes | Deferred to v2 |
-| Barcode scanning | Yes | Yes | No | Deferred to v2 |
+| Feature | Plan to Eat | Eat This Much | Ollie | Cooklist | NourishPlan AMPS approach |
+|---------|-------------|---------------|-------|----------|--------------------------|
+| Budget tracking | None | Weekly budget limit (premium) | None | Ingredient price comparison | Per-recipe cost entry + weekly total; feeds constraint engine |
+| Pantry / inventory | None | None | Pantry photo (AI, beta) | Yes — pantry + fridge + freezer | Manual entry, expiry date, storage location |
+| Grocery list | Auto-aggregated, categorized | Auto-aggregated | Auto-aggregated, by aisle | Auto-aggregated, pantry-aware | Auto-aggregated, categorized, pantry-subtracted, per-person quantities |
+| Plan generation | Manual only | Fully automated (calorie-based) | AI-assisted | None | Constraint-based generation as option; DnD as primary manual path |
+| Drag-and-drop | Yes (core UX) | No (auto-generated) | Yes | No | Yes — primary editing interaction |
+| Multi-member portioning | Scale servings only | Up to 9 people (uniform) | Per-person macros | No | Per-person targets with satiety adaptation |
+| Child / picky eater support | None | None | None | None | Per-member avoided food list as planning constraint |
+| Feedback / rating | None | Thumbs up/down | 5-star rating | None | 5-star + satiety signal feeding constraint engine |
+| Schedule constraints | None | None | None | None | Availability windows as planner input (differentiator) |
+| Prep optimization | None | None | None | None | Task sequencing + batch detection (differentiator) |
+| Constraint-based planner | None | Calorie-only | None | None | Multi-factor: nutrition + cost + time + preference (differentiator) |
 
 ---
 
 ## Sources
 
-- [USDA FoodData Central API Guide](https://fdc.nal.usda.gov/api-guide/) — confirmed API capabilities, rate limits (1,000 req/hr), free public domain data
-- [Garage Gym Reviews: Best Calorie Counter Apps 2026](https://www.garagegymreviews.com/best-calorie-counter-apps) — competitor feature baseline
-- [Cronometer vs MyFitnessPal comparison — Gemma Sampson](https://www.gemmasampson.com/blog/cronometer-vs-myfitnesspal) — nutrient depth analysis
-- [Cal AI: MyFitnessPal vs Cronometer](https://www.calai.app/blog/myfitnesspal-vs-cronometer/) — database accuracy comparison
-- [Best Meal Planning Apps for Families 2026 — Ollie](https://ollie.ai/2025/10/29/best-meal-planning-apps-2025/) — family sharing feature landscape
-- [FoodiePrep: Meal Planning Apps 2026 — Features That Matter](https://www.foodieprep.ai/blog/meal-planning-apps-in-2026-which-tools-actually-simplify-your-kitchen) — table stakes discovery
-- [Designli: What is Feature Creep](https://designli.co/blog/what-is-feature-creep-and-how-to-avoid-it) — scope discipline rationale
-- [PMC: Mobile Apps to Support Healthy Family Food Provision](https://pmc.ncbi.nlm.nih.gov/articles/PMC6320405/) — family app pitfalls (disconnected pantry/grocery, individual-only calorie models)
-- [Top Nutrition APIs for Developers 2026 — SpikeAPI](https://www.spikeapi.com/blog/top-nutrition-apis-for-developers-2026) — USDA vs alternatives
+- [Top Meal Planning Apps for Smarter Budgets 2026 | Fitia](https://fitia.app/learn/article/top-meal-planning-apps-smarter-budgets-2026/)
+- [The Best Meal Planning Apps for Families in 2026 | Ollie](https://ollie.ai/2025/10/29/best-meal-planning-apps-2025/)
+- [Eat This Much — Family / Couple Meal Planning Help](https://help.eatthismuch.com/help/how-does-the-family-meal-planning-work)
+- [Plan to Eat — Large Households Meal Planning](https://www.plantoeat.com/blog/2023/11/how-to-meal-plan-series-large-households/)
+- [Getting Started: The Meal Planner (Plan to Eat website)](https://learn.plantoeat.com/help/getting-started-using-the-meal-planner)
+- [Meal Planner App Features](https://www.mealplanner.app/features)
+- [Best Meal Planning App in 2026: 8 Apps Compared | Mealift](https://www.mealift.app/blog/best-meal-planning-app)
+- [KitchenPal: Pantry Inventory App](https://kitchenpalapp.com/en/)
+- [Delighting Palates with AI: Reinforcement Learning in Meal Plans | PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC10857145/)
+- [Personalized Flexible Meal Planning for Diet-Related Health Concerns | PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC10436119/)
+- [A Review of Linear Programming to Optimize Diets | Frontiers in Nutrition](https://www.frontiersin.org/journals/nutrition/articles/10.3389/fnut.2018.00048/full)
+- [Towards Automatically Generating Meal Plans Based on Genetic Algorithm | Springer](https://link.springer.com/article/10.1007/s00500-023-09556-0)
+- [Top Meal Planning Apps of 2025: Simplify Your Meal Prep | MealFlow Blog](https://www.mealflow.ai/blog/top-meal-planning-apps-of-2025-simplify-your-meal-prep)
 
 ---
 
-*Feature research for: Family meal planning / calorie tracking PWA (NourishPlan)*
-*Researched: 2026-03-12*
+*Feature research for: NourishPlan v2.0 AMPS — constraint-solving household meal planning platform*
+*Researched: 2026-03-25*

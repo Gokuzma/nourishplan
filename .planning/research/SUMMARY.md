@@ -1,195 +1,226 @@
 # Project Research Summary
 
-**Project:** NourishPlan
-**Domain:** Family meal planning / calorie and nutrition tracking PWA
-**Researched:** 2026-03-12
-**Confidence:** HIGH (stack and features), MEDIUM (architecture)
+**Project:** NourishPlan v2.0 AMPS (Adaptive Meal Planning System)
+**Domain:** Constraint-solving household meal planning PWA — adding budget, inventory, grocery, prep, feedback, and planning engine to an existing validated product
+**Researched:** 2026-03-25
+**Confidence:** HIGH (existing codebase analysed directly; stack locked; pitfalls verified against current code)
 
 ## Executive Summary
 
-NourishPlan is a mobile-first family meal planning and nutrition tracking PWA. The core technical challenge is not building a calorie tracker — that is well-solved — but building one with a household model where a shared meal plan serves multiple people with different nutrition targets and portion needs. No major competitor (MyFitnessPal, Cronometer, Mealime) solves this. The recommended approach is a Vite + React 19 SPA backed by Supabase (Postgres), with TanStack Query handling server state and a server-side USDA FoodData Central proxy handling external data. The full food hierarchy (Foods → Recipes → Meals → MealPlans) must be designed correctly from the first schema migration; retrofitting it post-launch is a rewrite.
+NourishPlan v2.0 extends a fully-built, production-deployed React + Supabase PWA with a constraint-solving meal planning layer (AMPS). The core value proposition is a planning engine that simultaneously optimises nutrition, cost, schedule availability, and household preference signals — something no current consumer competitor offers. The recommended approach is to build v2.0 as layered additions on top of the v1.0 architecture: standalone engines (Budget, Inventory, Schedule, Feedback, Drag-and-Drop) are built first in parallel, then a constraint-based planning engine is assembled on top of the accumulated signal data. This sequencing respects feature dependencies and ensures the planning engine has real data to work with before it ships.
 
-The most important architectural decision is the data model. Three patterns are non-negotiable and must be in place before any feature UI is built: (1) nutrition values normalized to per-100g at ingest, (2) recipe ingredients supporting both foods and sub-recipes with cycle detection, and (3) meal plan templates distinguished from meal plan instances so historical logs are never mutated. All three have HIGH recovery costs if skipped. The household scoping model — every domain entity carrying a `household_id`, enforced with Postgres Row-Level Security — is the fourth structural requirement and is also difficult to retrofit cleanly.
+The primary technical risks in this build are data model decisions made too early in the wrong shape. Three are non-negotiable: ingredient-level cost storage (not recipe-level), ledger-based inventory (not point-in-time quantities), and feedback records that snapshot recipe attributes at rating time. Getting any of these wrong requires an expensive data migration to recover. The secondary risk is the constraint solver architecture — it must run asynchronously via a Supabase Edge Function with job-status polling, not synchronously in a React hook or blocking API call. The UI pattern for plan generation is "submit, wait, accept/modify," not "click and render."
 
-The biggest risks are all in Phase 1. If the food hierarchy schema is built correctly, all subsequent features (recipe builder, meal planning, per-person portions, daily logs) become straightforward implementations of well-understood CRUD patterns. If it is not, each subsequent feature will require backfilling the foundational gaps under increasing pressure.
+The drag-and-drop planner and grocery list are the highest-visibility v2.0 wins and can ship early. The constraint-based planning engine is the deepest differentiator but requires Budget, Schedule, Dietary, and Feedback engines to have accumulated data before it can deliver meaningful results. The roadmap should front-load the data-collection infrastructure and ship the planning engine after those signals have had time to accumulate.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-A fully client-rendered SPA using Vite 7 + React 19 is the right choice. Next.js adds SSR complexity with no benefit for an app that lives entirely behind auth. React 19's Compiler eliminates manual memoization boilerplate, which matters for the recipe builder's live nutrition recalculation. Supabase provides Postgres (correct for the relational food hierarchy), auth, and real-time subscriptions in a single hosted service within free tier limits (500 MB DB, 50k MAUs). TanStack Query v5 handles all USDA API calls and Supabase data fetching with stale-while-revalidate and offline queue; Zustand holds UI-local state (active meal plan selection, portion drafts).
+The v1.0 stack (Vite + React 19, Supabase, TanStack Query, Tailwind CSS 4, Zustand, PWA via Workbox) is locked and not re-litigated. Net-new libraries for v2.0 are minimal and well-justified. See STACK.md for full rationale and alternatives considered.
 
-One version compatibility note: `vite-plugin-pwa@1.2.0` has not confirmed Vite 7 compatibility — test on upgrade.
+**Core new technologies:**
+- `@dnd-kit/core` + `@dnd-kit/sortable` (6.3.1 / 10.0.0) — drag-and-drop planner — actively maintained, works with React 19 via `--legacy-peer-deps`, touch-friendly for mobile-first PWA; do not use deprecated react-beautiful-dnd
+- `yalps` (0.6.3) — LP solver for constraint-based plan generation — pure ESM, browser-native (no WASM), handles household-scale optimisation in milliseconds; use only if full LP needed (greedy scoring handles v2.0 MVP)
+- `date-fns` (4.1.0) — schedule and week-boundary arithmetic — tree-shakeable, ESM-only, v4 adds timezone support
+- `react-hook-form` (7.72.0) + `zod` (4.x) + `@hookform/resolvers` (3.x) — complex multi-field forms for budget and inventory entry
 
-**Core technologies:**
-- React 19 + Vite 7: UI framework + build tool — fastest HMR, PWA integration via `vite-plugin-pwa`, Compiler removes manual memoization
-- TypeScript 5 + Zod 3: Type safety — one Zod schema validates both form input and API response shape
-- Tailwind CSS 4: Styling — CSS-first config, built-in container queries, 5x faster builds
-- Supabase (Postgres): Backend — relational data model required for food hierarchy; auth, RLS, and real-time included
-- TanStack Query 5: Server state — handles USDA caching, background refetch, offline queue automatically
-- React Hook Form 7: Form handling — uncontrolled components critical for large nested recipe ingredient forms
+No ML/AI libraries, no calendar components, no grocery price APIs, no barcode scanning — all explicitly out of scope per PROJECT.md.
 
 ### Expected Features
 
-The feature dependency chain is strict: Food database must ship before Recipe Builder, Recipe Builder before Meals, Meals before Meal Plans, and Household auth before any sharing. Per-person portion suggestions require both personal targets AND recipe nutrition to be working. Do not short-circuit this dependency chain.
+See FEATURES.md for full prioritisation matrix and competitor analysis.
 
-**Must have (table stakes):**
-- USDA food search + manual custom food entry — data layer everything else builds on
-- Recipe builder with auto-calculated nutrition — the engine all meal planning sits on
-- Meal and meal plan creation (full hierarchy) — core planning workflow
-- Per-person nutrition targets (calories + P/C/F) — makes the app personalized
-- Daily nutrition log per person with portion override — completes the track → review loop
-- Daily summary view per person — closes the feedback loop
-- Household / family sharing with member model — the primary differentiator; no competitor offers this
-- Mobile-first PWA (installable, offline-capable) — primary use is on phones in the kitchen
+**Must have — table stakes for v2.0 launch (P1):**
+- Budget tracking: cost per recipe and ingredient, weekly total with remaining balance
+- Inventory management: pantry/fridge/freezer entry with quantities and expiry date (manual only)
+- Grocery list: auto-generated from meal plan, categorised by store aisle, with pantry subtraction ("already have" vs "need to buy")
+- Per-member dietary tags and avoided foods list (allergen, gluten-free, vegetarian, etc.)
+- Drag-and-drop weekly planner — competitors (Plan to Eat, Ollie) make this a UX baseline
+- Recipe star rating (1–5) and satiety feedback (3-point) — starts accumulating planning signal
 
-**Should have (competitive differentiators):**
-- Per-person portion suggestions per dish — solves the real family problem; requires targets + recipe nutrition first
-- Nested recipes (recipe-as-ingredient) — enables realistic home cooking; most apps don't support this
-- Micronutrient display (progressive disclosure) — expose after core macro tracking is validated
-- Weekly meal plan templates (save and reuse) — add once families have built and used their first plan
+**Should have — competitive differentiators (P2):**
+- Schedule-aware planning: availability windows as planning inputs — no competitor supports this
+- Constraint-based plan generation: multi-factor optimisation (nutrition + cost + time + preference) — no consumer app does this
+- Prep optimisation: batch prep suggestions and day-of task sequencing (not minute-level Gantt charts)
+- Repeat rate tracking and diversity warnings
+- Expiry-priority ingredient weighting in plan generation
 
-**Defer (v2+):**
-- Grocery list generation — requires ingredient → purchase unit mapping; architecturally complex
-- Barcode scanning — camera API + third-party barcode DB; USDA search covers most cases
-- Weekly nutrition reports / history charts — only useful after 2-4 weeks of logged data
-- AI meal plan generation — requires preference accumulation; zero signal on day one
+**Defer to v3+:**
+- AI-driven adaptive plans — requires months of accumulated feedback signal per PROJECT.md
+- Barcode scanning, grocery delivery integration, social recipe sharing — all explicitly deferred per PROJECT.md
+
+Key dependency constraint: the constraint-based planning engine requires Budget, Schedule, Dietary, and Feedback engines to have accumulated data before it generates meaningful plans. These data-collection phases must ship early even if the planning engine ships later.
 
 ### Architecture Approach
 
-The architecture has three tiers: a Vite SPA client (feature modules colocated under `src/features/`), a Supabase backend (Postgres with RLS, Auth, real-time), and a server-side USDA FDC proxy (caches responses by FDC ID, keeps the API key off the client). The critical shared piece is the `src/shared/nutrition/` module — the recursive roll-up function that computes recipe nutrition from ingredients — which is consumed by the recipe builder, meal plan view, and daily summary. It must be extracted as pure computation from the start. Nutrition is computed at write time and cached on the recipe row; dashboard reads then become cheap aggregations.
+The architecture is additive: new features bolt onto the existing system via new Supabase tables, new TanStack Query hooks following the established `useHousehold()` pattern, and new page/component directories. The existing `recipes`, `meals`, `meal_plan_slots`, and `food_logs` tables are not changed (except `nutrition_targets` gets an additive `portion_mode` column). The constraint solver runs as a Supabase Edge Function (`generate-plan`) — it reads 6+ tables in a single CTE query and returns proposed slots; the client commits them via existing `useAssignSlot` mutations. Grocery list aggregation is client-side pure utility in `groceryList.ts` using already-cached query data.
 
-**Major components:**
-1. Food Search + Custom Entry — USDA proxy integration, deduplication, per-100g normalization at ingest
-2. Recipe Builder — ingredient editor, nested recipe support, live nutrition preview, raw/cooked weight toggle
-3. Meal Planner — weekly calendar grid, meal slot assignment, household-shared view
-4. Portion Logger — per-member log entry, portion override, optimistic UI, offline queue via service worker
-5. Nutrition Dashboard — per-person daily summary, calories + macros vs targets, progressive micronutrient disclosure
-6. Auth + Household System — household creation, member invites, roles (Admin/Member/Child), Postgres RLS enforcement
+**Major new components:**
+1. Budget Engine — `recipe_costs` + `household_budgets` tables; `BudgetBar` on PlanPage; `RecipeCostForm` on RecipeBuilder
+2. Inventory Engine — `inventory_items` (ledger-based) table; `InventoryPage` reusing `FoodSearchOverlay`
+3. Grocery Engine — `grocery_lists` + `grocery_list_items` tables; `groceryList.ts` pure utility; `GroceryPage`
+4. Schedule Model — `member_schedules` table; schedule UI in SettingsPage; feeds Planning Engine
+5. Feedback Engine — `recipe_feedback` table (with attribute snapshots); post-log rating prompt on HomePage
+6. Drag-and-Drop Planner — no DB changes; wraps existing `PlanPage` grid with dnd-kit
+7. Dietary Restrictions — `member_dietary_restrictions` table; section on MemberTargetsPage; feeds Planning Engine
+8. Constraint-Based Planning Engine — `generate-plan` Edge Function (async job pattern); `GeneratePlanModal`
+9. Prep Optimisation — `recipe_prep_tasks` + `prep_schedule_slots` tables; heuristic-only utilities
+10. Dynamic Portioning — additive `portion_mode` column on `nutrition_targets`; updated `portionSuggestion.ts`
 
 ### Critical Pitfalls
 
-1. **Nutrition not normalized to per-100g at ingest** — USDA returns per-serving for Branded Foods and per-100g for Foundation Foods; storing as-is produces silently wrong recipe math. Normalize to per-100g on ingest, convert to serving sizes in the presentation layer only. Recovery cost is HIGH.
+See PITFALLS.md for full pitfall descriptions, warning signs, recovery costs, and a phase-to-pitfall verification checklist.
 
-2. **Food hierarchy schema without nested recipe support** — designing `recipe_ingredients` with a direct FK to `foods` only forces a schema rewrite when nested recipes are added. Use a polymorphic ingredient table (`source_food_id | source_recipe_id`) with cycle detection from the first migration. Recovery cost is HIGH.
+1. **Budget stored at recipe level, not ingredient level** — Store `cost_per_100g` on `recipe_ingredients` from day one; recipe-level cost is always computed, never stored. If `cost_per_serving` lands on the `recipes` table, partial-inventory grocery cost calculation is impossible without a HIGH-cost migration.
 
-3. **Template/instance not distinguished in meal plans** — mutating a template corrupts historical log entries because logs reference meal nutrition that has changed. Snapshot templates into instances on assignment; logs store nutrient values at log time. Recovery cost is HIGH.
+2. **Inventory as point-in-time quantity** — Build inventory as a ledger of events (`purchase`, `used`, `expired`, `adjusted`). A mutable `quantity_grams` column loses consumption history, blocking consumption-rate forecasting and reorder logic. Recovery cost is HIGH.
 
-4. **Household isolation at application layer only** — a missing WHERE clause leaks personal health data across households. Enforce with Postgres RLS policies in addition to application-layer checks; use UUIDs for all public-facing IDs; scope custom foods to `household_id`. Recovery cost is MEDIUM but the privacy risk is HIGH.
+3. **Constraint solver blocking the UI** — Use async job pattern: client submits a generation request, Edge Function writes a `plan_generation_jobs` row and runs asynchronously, client polls for status. A synchronous Edge Function loop over 50+ recipes will time out at 10s and freeze mobile UI.
 
-5. **Cooked vs raw weight ambiguity in recipes** — USDA lists most meats raw; users measure cooked weight; calorie counts run 20-40% low for protein-heavy recipes. Add a `weight_state` (raw/cooked) field on recipe ingredients and prompt users to specify. Recovery cost is MEDIUM.
+4. **Feedback joined to live (mutable) recipe records** — Snapshot recipe attributes (cuisine tag, dominant macro, avg cost) into the `recipe_feedback` row at rating time. If the learning engine joins feedback to live recipe records, edits corrupt historical signals. Recovery cost is HIGH.
+
+5. **TanStack Query cache incoherence at v2.0 scale** — Centralise query key definitions and dependency mapping in `src/lib/queryKeys.ts` before adding any v2.0 queries. With 6+ interdependent query families, manually listing `invalidateQueries` per mutation handler will produce stale budget and grocery UI.
+
+6. **New tables missing RLS** — Every migration that creates a table must include `ENABLE ROW LEVEL SECURITY` + household isolation policy in the same file. Supabase disables RLS by default; with 6–10 new tables, any omission leaks household data cross-tenant.
+
+---
 
 ## Implications for Roadmap
 
-The research makes the phase ordering clear. The entire feature set is blocked on a correct data model. Build the foundation first, validate the hierarchy works, then layer features on top.
+Based on feature dependencies (FEATURES.md), architecture build order (ARCHITECTURE.md Phase A–J), and pitfall prevention timing (PITFALLS.md), the following phase structure is recommended.
 
-### Phase 1: Data Foundation and Auth
+### Phase 1: Infrastructure and Query Foundation
+**Rationale:** Before any v2.0 feature queries are added, centralise query key management to prevent cache incoherence (Pitfall 6 in PITFALLS.md). Also install `@dnd-kit` and `date-fns` now so they are available across all subsequent phases. Zero user-facing change; maximum future pain prevented.
+**Delivers:** `src/lib/queryKeys.ts` with full key hierarchy and dependency map; net-new library installs; no visible UI changes
+**Avoids:** TanStack Query cache incoherence (Pitfall 6) before it can be introduced by v2.0 feature queries
+**Research flag:** Standard patterns — skip research phase
 
-**Rationale:** Every feature in the app is blocked on the food hierarchy schema and household auth. These two pieces must be correct before any feature UI has value. Building them first also forces confrontation with the three HIGH-recovery pitfalls (per-100g normalization, nested recipe support, template/instance distinction) before any technical debt accumulates.
+### Phase 2: Budget Engine
+**Rationale:** Zero v2.0 dependencies; delivers immediate visible value (cost on recipe cards and plan page); provides the cost signal the planning engine needs. The data model decision — ingredient-level vs recipe-level cost — must be made correctly here before inventory arrives and makes the wrong model irreversible.
+**Delivers:** `recipe_costs` + `household_budgets` tables with RLS; `RecipeCostForm` on RecipeBuilder; `BudgetBar` on PlanPage showing weekly spend vs budget
+**Addresses:** Budget tracking (P1); cost-per-recipe display; weekly budget total with remaining balance
+**Avoids:** Pitfall 1 — store `cost_per_100g` on `recipe_ingredients`, never `cost_per_serving` on `recipes`; Pitfall 10 — RLS on every new table
+**Research flag:** Standard patterns — skip research phase
 
-**Delivers:** Working Supabase schema with all domain tables, Postgres RLS policies, household creation and member invite flow, USDA FDC proxy with per-100g normalization and FDC ID caching.
+### Phase 3: Inventory Engine
+**Rationale:** Zero v2.0 dependencies; foundational for Grocery List (Phase 4) and Planning Engine (Phase 8); the ledger vs snapshot decision must be made here before any reads are written against the table.
+**Delivers:** `inventory_items` (ledger-based) table with RLS; `InventoryPage` reusing existing `FoodSearchOverlay`; expiry date tracking; storage location categories (pantry/fridge/freezer)
+**Addresses:** Pantry/fridge/freezer tracking (P1); expiry priority data infrastructure
+**Avoids:** Pitfall 2 — ledger-based from day one; do not add a mutable `quantity_grams` column
+**Research flag:** Standard patterns — skip research phase
 
-**Addresses:** Household auth (table stakes), USDA food search foundation, custom food entry scaffolding.
+### Phase 4: Grocery List Generation
+**Rationale:** Depends on Budget (Phase 2) and Inventory (Phase 3); highest-visibility v2.0 feature for users; closes the planning-to-shopping loop. Requires an explicit design decision on ingredient identity normalisation before coding begins.
+**Delivers:** `grocery_lists` + `grocery_list_items` tables; `groceryList.ts` pure client-side utility; `GroceryPage` with categorised list and pantry subtraction; "already have" vs "need to buy" display
+**Addresses:** Grocery list aggregation (P1); pantry subtraction; store-aisle category grouping; per-person quantity scaling
+**Avoids:** Pitfall 3 — aggregate in grams internally by canonical food ID (not ingredient name string), convert to display units at render
+**Research flag:** Ingredient identity normalisation (merging the same food appearing under different IDs across recipes) needs a focused design pass before writing the aggregation utility
 
-**Avoids:** Flat user model without household scoping, nutrition not normalized to per-100g, template/instance mutation, household isolation at app layer only.
+### Phase 5: Drag-and-Drop Planner
+**Rationale:** No database dependencies; pure UX upgrade that makes plan editing competitive with Plan to Eat and Ollie; can be built independently in parallel with Phases 2–4. Must also resolve the "locked slot" conflict with auto-generation (Phase 8) — define the lock mechanism now so Phases 5 and 8 can be built without conflicting assumptions.
+**Delivers:** dnd-kit integration on `PlanPage`; draggable `SlotCard`; droppable `DayCard`; drop calls existing `useAssignSlot`; "locked slot" flag on `meal_plan_slots`; no other DB changes
+**Addresses:** Drag-and-drop weekly planner (P1)
+**Avoids:** iOS Safari / Android touch failure — pointer events only, not mouse events; `React.memo` on all slot components to prevent full-grid re-render on drag
+**Research flag:** Standard patterns — skip research phase; verify touch behaviour on iOS Safari before shipping
 
-### Phase 2: Food Search and Recipe Builder
+### Phase 6: Feedback Engine and Dietary Restrictions
+**Rationale:** Both are data-collection phases with zero v2.0 dependencies; can be built together since they are small and both feed the Planning Engine. Feedback signal must start accumulating early — the planning engine is only valuable once per-recipe rating and satiety data exist.
+**Delivers:** `recipe_feedback` table with attribute snapshots; `recipe_tags` migration (`allergen_tags`, `cuisine_tag`) on existing `recipes` table; post-log rating prompt on HomePage; `member_dietary_restrictions` table; dietary restriction UI on MemberTargetsPage
+**Addresses:** Recipe star rating + satiety feedback (P1); per-member dietary tags and avoided foods list (P1)
+**Avoids:** Pitfall 5 — snapshot cuisine tag, dominant macro, avg cost into `recipe_feedback` at rating time, not just `recipe_id`; Pitfall 8 — use structured `constraint_rules` evaluated against recipe tags, not ingredient traversal
+**Research flag:** Standard patterns — skip research phase; note that recipe tagging is a prerequisite for this phase (add `allergen_tags text[]` and `cuisine_tag text` to `recipes` in this migration)
 
-**Rationale:** The recipe builder is the engine everything else depends on. It cannot be built meaningfully without the data foundation from Phase 1. Nested recipe support must be included here — adding it after recipe creation is in production requires a schema migration.
+### Phase 7: Schedule Model
+**Rationale:** Independent of other v2.0 features; provides the availability windows the Planning Engine needs. Schema must be designed from the demand side — what the planner needs to consume — not from what is easiest to collect.
+**Delivers:** `member_schedules` table using polymorphic owner pattern (same as `nutrition_targets`); schedule entry in SettingsPage; `useMemberSchedules` hook
+**Addresses:** Schedule-aware planning (P2) data infrastructure
+**Avoids:** Pitfall 9 — store as structured `{day_index, availability_type: 'prep_available'|'quick_only'|'away', preferred_slot_duration_minutes}`; never a `text` or `varchar` schedule field
+**Research flag:** Standard patterns — skip research phase
 
-**Delivers:** USDA food search UI (with deduplication and data type filtering), custom food entry form, recipe builder with ingredient editor, nested recipe support, raw/cooked weight toggle, live nutrition calculation using shared `nutrition/` module.
+### Phase 8: Constraint-Based Planning Engine
+**Rationale:** The keystone differentiator; builds on Budget (Phase 2), Inventory (Phase 3), Feedback (Phase 6), Dietary (Phase 6), and Schedule (Phase 7) data. The async job architecture must be decided before the first line of solver code. Greedy scoring is sufficient for v2.0 MVP; `yalps` LP solver is an upgrade path only.
+**Delivers:** `generate-plan` Supabase Edge Function (async, job-pattern, returns immediately with job ID); `plan_generation_jobs` table; `GeneratePlanModal` with accept/modify/reject UI and constraint explanation messages; `useGeneratePlan` hook
+**Addresses:** Constraint-based plan generation (P2); schedule-aware planning; inventory-priority weighting; feedback-weighted suggestions; repeat avoidance
+**Avoids:** Pitfall 4 — Edge Function returns job ID immediately, solver runs asynchronously, client polls status, partial results returned on timeout with explanation of which constraint is most binding
+**Research flag:** Needs research phase — async job pattern in Supabase Edge Functions for long-running tasks; CTE query design for 6-table constraint read; greedy scoring algorithm design; constraint explanation message UX
 
-**Addresses:** Food database search, manual custom food entry, recipe builder with auto-calculated nutrition.
+### Phase 9: Prep Optimisation
+**Rationale:** Lowest urgency; no hard dependencies on other v2.0 features; scope must be locked to three specific outputs before building to avoid the overengineering trap.
+**Delivers:** `recipe_prep_tasks` table; prep task entry on RecipeBuilder; `prepSchedule.ts` pure heuristic utility (batch prep list, day-of sequence, freezer suggestions); Prep tab on PlanPage
+**Addresses:** Prep optimisation (P2)
+**Avoids:** Pitfall 7 — heuristics only: longest-cook-time first, shared-ingredient batching, freezer-friendly flagging; no equipment constraint modeling, no sub-15-minute scheduling, no external scheduling library
+**Research flag:** Standard patterns once scope is locked — skip research phase
 
-**Avoids:** Computing nutrition at read time, fetching full food objects for ingredient lists, nested recipe support deferred to after recipe UI ships, cooked vs raw weight ambiguity.
-
-### Phase 3: Meal Planning
-
-**Rationale:** Meal planning is the core user-facing promise but requires a working recipe library to populate it. Phase 2's recipe builder is the prerequisite.
-
-**Delivers:** Weekly meal plan calendar grid, meal slot assignment (Foods/Recipes → Meals → Meal Plans), household-shared meal plan view, personal nutrition targets (calories + P/C/F per member).
-
-**Addresses:** Weekly meal plan view, personal nutrition targets, meal + meal plan creation.
-
-**Avoids:** Meals without recipe dependency verified, meal plan template mutation.
-
-### Phase 4: Logging and Daily Summary
-
-**Rationale:** Logging closes the feedback loop but requires meal plans (Phase 3) to have something to log against. Per-person targets from Phase 3 are also required for the daily summary to show meaningful progress.
-
-**Delivers:** Per-member daily nutrition log with portion override, offline log queue via service worker + background sync, daily summary view (calories + macros vs targets), optimistic UI for log entries.
-
-**Addresses:** Daily nutrition log per person, portion override, daily summary view, mobile-first PWA installability.
-
-**Avoids:** Logging blocking on connectivity (service worker offline queue required), daily summary without personal targets.
-
-### Phase 5: Per-Person Portion Suggestions and PWA Polish
-
-**Rationale:** Portion suggestions require both personal targets (Phase 3) and recipe nutrition (Phase 2) to be production-stable before the suggestion math is trustworthy. PWA polish (Lighthouse audit, manifest, offline fallback) is the final step before any user-facing release.
-
-**Delivers:** Per-dish portion suggestions per household member, household role system (Admin/Member/Child access levels), Lighthouse PWA audit pass, micronutrient display (progressive disclosure), weekly plan templates (save and reuse).
-
-**Addresses:** Per-person portion suggestions, household roles, PWA installability audit.
-
-**Avoids:** Per-person portion operating at meal level instead of per-dish level, PWA installability not verified before launch.
+### Phase 10: Dynamic Portioning
+**Rationale:** Targeted enhancement to existing portioning logic; additive DB change only; slotted after feedback engine data model is stable so satiety signals can inform portion adjustments.
+**Delivers:** `portion_mode` column on `nutrition_targets`; `portionSuggestion.ts` utility update; `portion_mode` selector on MemberTargetsPage
+**Addresses:** Dynamic portioning with satiety adaptation (P3)
+**Research flag:** Standard patterns — skip research phase
 
 ### Phase Ordering Rationale
 
-- Schema work is front-loaded because the three HIGH-recovery pitfalls are all data model decisions that become painful to fix once UI and user data exist on top of them.
-- The USDA proxy is built in Phase 1 (data layer) not Phase 2 (UI layer) because per-100g normalization happens at ingest and the proxy owns that boundary.
-- Logging is placed after meal planning because the daily log references meal plan structure; building logging before planning produces orphaned log entries.
-- Portion suggestions are last because they are the most algorithmically complex feature and require the most stable underlying data to produce trustworthy output.
+- Phases 2–3 (Budget, Inventory) come first because their data model decisions are the most irreversible and they unblock the Grocery List.
+- Phase 4 (Grocery) delivers the highest user-visible win after its two prerequisites.
+- Phase 5 (Drag-and-Drop) is independent and can be built in parallel with Phases 2–4 if resources allow.
+- Phases 6–7 (Feedback, Dietary, Schedule) are data-collection infrastructure that must ship early so signal accumulates before the Planning Engine arrives.
+- Phase 8 (Planning Engine) is gated on Phases 2, 3, 6, and 7 having live data — do not ship it to users until those phases have had at least a few weeks of use.
+- Phases 9–10 (Prep, Dynamic Portioning) are the lowest urgency and can be deferred past the initial v2.0 milestone.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 1 (Data Foundation):** Supabase RLS policy design for the household model and the polymorphic `recipe_ingredients` schema both benefit from reviewing official Supabase RLS documentation before writing migrations.
-- **Phase 4 (Logging):** Service worker background sync with Workbox's `BackgroundSyncPlugin` has edge cases on iOS Safari (background sync is restricted); needs validation against current browser support tables before committing to the offline log queue pattern.
+- **Phase 8 (Planning Engine):** Async job pattern in Supabase Edge Functions is not well-documented for long-running tasks; CTE query design for 6+ table join with scoring; greedy vs LP scoring tradeoffs; GeneratePlanModal UX for partial results and constraint explanation messages
 
-Phases with standard patterns (skip research-phase):
-- **Phase 2 (Food Search / Recipe Builder):** CRUD forms with live calculation — well-documented React Hook Form + TanStack Query patterns apply directly.
-- **Phase 3 (Meal Planning):** Calendar grid and meal slot CRUD — no unusual patterns; standard relational data with React component composition.
-- **Phase 5 (PWA Polish):** Lighthouse audit requirements and `vite-plugin-pwa` configuration are well-documented; follow official Workbox recipes.
+Phases with standard, well-documented patterns (skip `/gsd:research-phase`):
+- **Phases 1–7, 9–10:** All follow established patterns (Supabase migrations + RLS, TanStack Query hooks, dnd-kit, React Hook Form + Zod, existing hook conventions). No novel integration points.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All packages verified via official release notes and npm; one compatibility note on vite-plugin-pwa + Vite 7 to validate |
-| Features | HIGH | Competitive analysis from live apps, USDA API confirmed, dependency chain verified |
-| Architecture | MEDIUM | Structural patterns are sound and cross-referenced; specific Supabase RLS policy syntax and Workbox background sync behavior on iOS need validation during implementation |
-| Pitfalls | HIGH | Critical pitfalls verified across multiple sources; recovery costs confirmed by community post-mortems |
+| Stack | HIGH | Existing locked stack; net-new libraries (dnd-kit, yalps, date-fns) verified against npm and GitHub; React 19 compatibility confirmed |
+| Features | MEDIUM | Competitor analysis from 2025–2026 sources; no single authoritative spec for this combined constraint-solving + inventory domain; table stakes well-established, P2 prioritisation is judgment-based |
+| Architecture | HIGH | Based on direct codebase analysis (`src/types/database.ts`, `supabase/migrations/`, existing hooks); integration points derived from code, not speculation; existing patterns are clear and well-suited to extension |
+| Pitfalls | HIGH | Critical pitfalls verified against existing code structure; confirmed against multiple sources for cache invalidation, RLS, and constraint solver timeout behaviour |
 
-**Overall confidence:** HIGH
+**Overall confidence:** HIGH for build order and architecture; MEDIUM for feature prioritisation (validated against competitors but user research would sharpen P1 vs P2 boundaries)
 
 ### Gaps to Address
 
-- **vite-plugin-pwa@1.2.0 + Vite 7 compatibility:** The plugin's latest release notes do not explicitly confirm Vite 7 support. Validate this in Phase 1 scaffolding before committing to the toolchain.
-- **iOS background sync limitations:** The service worker offline log queue pattern relies on the Background Sync API, which has restricted behavior in iOS Safari. Confirm current browser support and define a fallback (e.g., retry on app foreground) before Phase 4 architecture is locked.
-- **USDA FDC data type filtering in search results:** The deduplication strategy (Foundation > SR Legacy > Branded for generic foods; Branded for packaged items) needs implementation testing against live USDA search responses to confirm ranking is achievable with the current API's response structure.
+- **Ingredient identity normalisation for grocery aggregation:** The mechanism for resolving the same ingredient appearing under different IDs (USDA fdcId vs custom food UUID) across recipes needs explicit design before Phase 4 coding begins. The risk is known (Pitfall 3); the implementation approach needs a focused design decision.
+- **Constraint solver time budget:** The acceptable wall-clock solve time for `generate-plan` is not yet specified. The async job pattern mitigates the UX risk, but the Edge Function still needs a hard iteration cap. Define this (e.g., 30-second wall clock, 1000-iteration limit) before Phase 8.
+- **Recipe tagging prerequisite:** The dietary restrictions engine (Phase 6) requires recipes to have `allergen_tags` and `cuisine_tag` for the planning engine to evaluate constraints against tags rather than ingredient traversal. These columns do not exist on the current `recipes` table. Flag as a migration prerequisite in the Phase 6 plan.
+- **Locked slot mechanism:** When a user manually drags a meal into a slot and then runs plan generation, the generator must not overwrite manually-placed meals. Resolve the lock mechanism design (flag on `meal_plan_slots`) before Phases 5 and 8 are built, so they share the same assumption.
+
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- https://vite.dev/blog/announcing-vite7 — Vite 7 release
-- https://react.dev/blog/2025/10/01/react-19-2 — React 19.2 Compiler details
-- https://tailwindcss.com/blog/tailwindcss-v4 — Tailwind v4 CSS-first config
-- https://fdc.nal.usda.gov/api-guide/ — USDA FoodData Central API capabilities and rate limits
-- https://supabase.com/pricing — Supabase free tier confirmed
-- https://www.npmjs.com/package/@tanstack/react-query — TanStack Query v5.90.x
-- https://github.com/pmndrs/zustand/releases — Zustand v5.0.x
-- https://cheatsheetseries.owasp.org/cheatsheets/Multi_Tenant_Security_Cheat_Sheet.html — household isolation requirements
+- Existing codebase (`src/types/database.ts`, `src/hooks/`, `supabase/migrations/`) — architecture integration points, existing patterns, data model analysis
+- `@dnd-kit/core` npm + GitHub discussions/1842 — React 19 compatibility, touch sensor behaviour
+- `yalps` npm + GitHub (Ivordir/YALPS) — LP solver capabilities, bundle characteristics
+- `date-fns` v4 release blog — timezone support, ESM-only status
+- Zod v4 release notes — API changes, resolver compatibility
+- Supabase Edge Functions docs — async patterns, timeout limits
+- TanStack Query dependent queries guide — derived query patterns
 
 ### Secondary (MEDIUM confidence)
-- https://chankapure.medium.com/designing-a-database-schema-for-diet-services-a-guide-347637b3662f — food hierarchy schema patterns
-- https://medium.com/pgs-software/how-to-build-offline-first-progressive-web-apps-pwas-with-react-redux-7d58553e70 — offline-first PWA patterns
-- https://forums.cronometer.com/discussion/182/new-recipe-raw-ingredient-weight-versus-cooked-serving-weight — cooked vs raw weight user reports
-- https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Offline_and_background_operation — service worker background sync
+- Competitor app analysis: Plan to Eat, Eat This Much, Ollie, Cooklist, KitchenPal (2025–2026 feature reviews via Fitia, Mealift, Ollie blog)
+- Frontiers in Nutrition — linear programming for diet optimisation (academic basis for LP approach)
+- Supabase RLS best practices (leanware.co, designrevision.com)
+- TanStack Query cache invalidation patterns (dev.to — manual management anti-pattern)
+- Plan to Eat ingredient merging behaviour — grocery list aggregation precedent
 
-### Tertiary (LOW confidence — validate during implementation)
-- https://www.npmjs.com/package/vite-plugin-pwa — Vite 7 compatibility not yet confirmed in release notes
-- https://web.dev/learn/pwa/offline-data — iOS background sync behavior (may be outdated)
+### Tertiary (LOW confidence)
+- Prep schedule heuristics (healthhomeandhappiness.com) — home cooking batch prep patterns; directionally correct, needs user validation
+- Cold start problem in recommender systems (tredence.com) — feedback signal accumulation; overkill for the SQL-scoring approach used in v2.0, relevant for future v3 learning system
 
 ---
-*Research completed: 2026-03-12*
+*Research completed: 2026-03-25*
 *Ready for roadmap: yes*
