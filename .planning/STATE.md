@@ -1,32 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UI polish and usability improvements
+milestone: v2.0
+milestone_name: Adaptive Meal Planning System (AMPS)
 status: planning
-stopped_at: Completed 15-v1-1-audit-gap-closure-15-01-PLAN.md
-last_updated: "2026-03-18T10:04:49.262Z"
-last_activity: 2026-03-12 — Roadmap created from requirements and research
+stopped_at: Defining requirements
+last_updated: "2026-03-25T00:00:00.000Z"
+last_activity: 2026-03-25 — Milestone v2.0 started
 progress:
-  total_phases: 15
-  completed_phases: 15
-  total_plans: 51
-  completed_plans: 51
-  percent: 98
----
-
----
-gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UI polish and usability improvements
-status: planning
-stopped_at: Phase 12 plans verified
-last_updated: "2026-03-15T22:59:58.796Z"
-last_activity: 2026-03-12 — Roadmap created from requirements and research
-progress:
-  [██████████] 98%
-  completed_phases: 11
-  total_plans: 45
-  completed_plans: 43
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -36,15 +20,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-12)
 
-**Core value:** Families can share one meal plan while each person gets personalized portion suggestions based on their individual nutritional targets.
-**Current focus:** Phase 1 — Foundation & Auth
+**Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
+**Current focus:** v2.0 AMPS — Defining requirements
 
 ## Current Position
 
-Phase: 1 of -1 (Foundation & Auth)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-12 — Roadmap created from requirements and research
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-25 — Milestone v2.0 started
 
 Progress: [░░░░░░░░░░] 0%
 
