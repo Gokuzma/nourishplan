@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Recipes', to: '/recipes', icon: '📖' },
   { label: 'Meals', to: '/meals', icon: '🍽️' },
   { label: 'Plan', to: '/plan', icon: '📋' },
+  { label: 'Inventory', to: '/inventory', icon: '📦' },
   { label: 'Household', to: '/household', icon: '👨‍👩‍👧' },
   { label: 'Settings', to: '/settings', icon: '⚙️' },
   { label: 'User Guide', to: '/guide', icon: '📘' },
