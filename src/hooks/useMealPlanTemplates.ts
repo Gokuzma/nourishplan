@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
+import { queryKeys } from '../lib/queryKeys'
 import type { MealPlanTemplate, MealPlanTemplateSlot } from '../types/database'
 
 /**
@@ -12,7 +13,7 @@ export function useTemplates() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['meal-plan-templates', householdId],
+    queryKey: queryKeys.mealPlan.templates(householdId),
     queryFn: async (): Promise<MealPlanTemplate[]> => {
       const { data, error } = await supabase
         .from('meal_plan_templates')
@@ -81,7 +82,7 @@ export function useSaveAsTemplate() {
     },
     onSuccess: () => {
       const householdId = membership?.household_id
-      queryClient.invalidateQueries({ queryKey: ['meal-plan-templates', householdId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.templates(householdId) })
     },
   })
 }
@@ -122,7 +123,7 @@ export function useLoadTemplate() {
       if (upsertError) throw upsertError
     },
     onSuccess: (_, { planId }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plan-slots', planId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.slots(planId) })
     },
   })
 }
@@ -145,7 +146,7 @@ export function useDeleteTemplate() {
     },
     onSuccess: () => {
       const householdId = membership?.household_id
-      queryClient.invalidateQueries({ queryKey: ['meal-plan-templates', householdId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.templates(householdId) })
     },
   })
 }
@@ -206,7 +207,7 @@ export function useRepeatLastWeek() {
       if (upsertError) throw upsertError
     },
     onSuccess: (_, { currentPlanId }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plan-slots', currentPlanId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.slots(currentPlanId) })
     },
   })
 }

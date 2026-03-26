@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { queryKeys } from '../lib/queryKeys'
 import type { NutritionTarget } from '../types/database'
 import { buildTargetUpsertPayload } from '../utils/mealPlan'
 
@@ -8,7 +9,7 @@ import { buildTargetUpsertPayload } from '../utils/mealPlan'
  */
 export function useNutritionTargets(householdId: string | undefined) {
   return useQuery({
-    queryKey: ['nutrition-targets', householdId],
+    queryKey: queryKeys.nutritionTargets.list(householdId),
     queryFn: async (): Promise<NutritionTarget[]> => {
       const { data, error } = await supabase
         .from('nutrition_targets')
@@ -33,7 +34,7 @@ export function useNutritionTarget(
   memberType: 'user' | 'profile',
 ) {
   return useQuery({
-    queryKey: ['nutrition-target', householdId, memberId],
+    queryKey: queryKeys.nutritionTargets.detail(householdId, memberId),
     queryFn: async (): Promise<NutritionTarget | null> => {
       const column = memberType === 'user' ? 'user_id' : 'member_profile_id'
       const { data, error } = await supabase
@@ -88,8 +89,8 @@ export function useUpsertNutritionTargets() {
       return data
     },
     onSuccess: (_, params) => {
-      queryClient.invalidateQueries({ queryKey: ['nutrition-targets', params.householdId] })
-      queryClient.invalidateQueries({ queryKey: ['nutrition-target', params.householdId, params.memberId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.list(params.householdId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.detail(params.householdId, params.memberId) })
     },
   })
 }

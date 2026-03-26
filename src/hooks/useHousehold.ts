@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { queryKeys } from '../lib/queryKeys'
 import type { Household, HouseholdMember, HouseholdInvite, MemberProfile, Profile } from '../types/database'
 
 export interface HouseholdWithName extends Pick<HouseholdMember, 'id' | 'role'> {
@@ -20,7 +21,7 @@ export function useHousehold() {
   const { session } = useAuth()
 
   return useQuery({
-    queryKey: ['household', session?.user.id],
+    queryKey: queryKeys.household.root(session?.user.id),
     queryFn: async (): Promise<HouseholdWithName | null> => {
       if (!session?.user.id) return null
 
@@ -47,7 +48,7 @@ export function useHouseholdMembers() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['household', session?.user.id, 'members', householdId],
+    queryKey: queryKeys.household.members(session?.user.id, householdId),
     queryFn: async (): Promise<MemberWithProfile[]> => {
       const { data, error } = await supabase
         .from('household_members')
@@ -187,7 +188,7 @@ export function useMemberProfiles() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['household', session?.user.id, 'member_profiles', householdId],
+    queryKey: queryKeys.household.memberProfiles(session?.user.id, householdId),
     queryFn: async (): Promise<MemberProfile[]> => {
       const { data, error } = await supabase
         .from('member_profiles')

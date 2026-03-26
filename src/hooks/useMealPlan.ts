@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
+import { queryKeys } from '../lib/queryKeys'
 import type { MealPlan, MealPlanSlot, Meal, MealItem } from '../types/database'
 
 export type SlotWithMeal = MealPlanSlot & {
@@ -17,7 +18,7 @@ export function useMealPlan(weekStart: string) {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['meal-plan', householdId, weekStart],
+    queryKey: queryKeys.mealPlan.root(householdId, weekStart),
     queryFn: async (): Promise<MealPlan | null> => {
       const { data, error } = await supabase
         .from('meal_plans')
@@ -63,7 +64,7 @@ export function useCreateMealPlan() {
     },
     onSuccess: (data) => {
       const householdId = membership?.household_id
-      queryClient.invalidateQueries({ queryKey: ['meal-plan', householdId, data.week_start] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.root(householdId, data.week_start) })
     },
   })
 }
@@ -74,7 +75,7 @@ export function useCreateMealPlan() {
  */
 export function useMealPlanSlots(planId: string | undefined) {
   return useQuery({
-    queryKey: ['meal-plan-slots', planId],
+    queryKey: queryKeys.mealPlan.slots(planId),
     queryFn: async (): Promise<SlotWithMeal[]> => {
       const { data, error } = await supabase
         .from('meal_plan_slots')
@@ -133,7 +134,7 @@ export function useAssignSlot() {
       return data
     },
     onSuccess: (_, { planId }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plan-slots', planId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.slots(planId) })
     },
   })
 }
@@ -160,7 +161,7 @@ export function useClearSlot() {
       if (error) throw error
     },
     onSuccess: (_, { planId }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal-plan-slots', planId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.slots(planId) })
     },
   })
 }

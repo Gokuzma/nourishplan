@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
+import { queryKeys } from '../lib/queryKeys'
 import type { CustomFood } from '../types/database'
 
 interface CreateCustomFoodInput {
@@ -27,7 +28,7 @@ export function useCustomFoods() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['custom-foods', householdId],
+    queryKey: queryKeys.customFoods.list(householdId),
     queryFn: async (): Promise<CustomFood[]> => {
       const { data, error } = await supabase
         .from('custom_foods')

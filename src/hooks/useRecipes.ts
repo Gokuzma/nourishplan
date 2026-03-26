@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
+import { queryKeys } from '../lib/queryKeys'
 import type { Recipe, RecipeIngredient } from '../types/database'
 
 /**
@@ -12,7 +13,7 @@ export function useRecipes() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['recipes', householdId],
+    queryKey: queryKeys.recipes.list(householdId),
     queryFn: async (): Promise<Recipe[]> => {
       const { data, error } = await supabase
         .from('recipes')
@@ -33,7 +34,7 @@ export function useRecipes() {
  */
 export function useRecipe(id: string) {
   return useQuery({
-    queryKey: ['recipe', id],
+    queryKey: queryKeys.recipes.detail(id),
     queryFn: async (): Promise<Recipe | null> => {
       const { data, error } = await supabase
         .from('recipes')
@@ -53,7 +54,7 @@ export function useRecipe(id: string) {
  */
 export function useRecipeIngredients(recipeId: string) {
   return useQuery({
-    queryKey: ['recipe-ingredients', recipeId],
+    queryKey: queryKeys.recipes.ingredients(recipeId),
     queryFn: async (): Promise<RecipeIngredient[]> => {
       const { data, error } = await supabase
         .from('recipe_ingredients')
@@ -124,7 +125,7 @@ export function useUpdateRecipe() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] })
-      queryClient.invalidateQueries({ queryKey: ['recipe', id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.recipes.detail(id) })
     },
   })
 }
@@ -207,7 +208,7 @@ export function useAddIngredient() {
       return data
     },
     onSuccess: (_, { recipe_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['recipe-ingredients', recipe_id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.recipes.ingredients(recipe_id) })
     },
   })
 }
@@ -239,7 +240,7 @@ export function useUpdateIngredient() {
       return data
     },
     onSuccess: (_, { recipe_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['recipe-ingredients', recipe_id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.recipes.ingredients(recipe_id) })
     },
   })
 }
@@ -256,7 +257,7 @@ export function useRemoveIngredient() {
       if (error) throw error
     },
     onSuccess: (_, { recipe_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['recipe-ingredients', recipe_id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.recipes.ingredients(recipe_id) })
     },
   })
 }
