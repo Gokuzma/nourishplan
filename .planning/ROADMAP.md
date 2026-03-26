@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management (completed 2026-03-16)
 - [x] **Phase 14: How-To Manual** - In-app guide explaining how to use all features (completed 2026-03-17)
 - [x] **Phase 16: Budget Engine & Query Foundation** - Centralised query keys, ingredient-level cost entry, recipe cost display, and weekly budget tracking (completed 2026-03-26)
-- [ ] **Phase 17: Inventory Engine** - Pantry/fridge/freezer tracking with ledger-based quantities, expiry priority, barcode scanning, and plan-deduction
+- [x] **Phase 17: Inventory Engine** - Pantry/fridge/freezer tracking with ledger-based quantities, expiry priority, barcode scanning, and plan-deduction (completed 2026-03-26)
 - [ ] **Phase 18: Grocery List Generation** - Auto-generated grocery list from active meal plan, categorised by store aisle, with pantry subtraction and household sharing
 - [ ] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
 - [ ] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods
@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
 | 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
 | 16. Budget Engine & Query Foundation | 4/4 | Complete    | 2026-03-26 |
-| 17. Inventory Engine | 4/5 | In Progress|  |
+| 17. Inventory Engine | 4/5 | Complete    | 2026-03-26 |
 | 18. Grocery List Generation | 0/TBD | Not started | - |
 | 19. Drag-and-Drop Planner | 0/TBD | Not started | - |
 | 20. Feedback Engine & Dietary Restrictions | 0/TBD | Not started | - |
