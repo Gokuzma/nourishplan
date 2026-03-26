@@ -18,6 +18,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import OfflinePage from './pages/OfflinePage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { GuidePage } from './pages/GuidePage'
+import { InventoryPage } from './pages/InventoryPage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
 import { InstallPrompt } from './components/log/InstallPrompt'
@@ -147,6 +148,7 @@ function AppRoutes() {
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/guide" element={<GuidePage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/members/:id/targets" element={<MemberTargetsPage />} />
       </Route>
 
