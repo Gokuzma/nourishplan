@@ -15,6 +15,7 @@ import { PortionStepper } from '../components/log/PortionStepper'
 import { calcLogEntryNutrition, calcDayNutrition, MICRONUTRIENT_DISPLAY_ORDER, MICRONUTRIENT_LABELS } from '../utils/nutrition'
 import { getWeekStart } from '../utils/mealPlan'
 import { getUnloggedSlots } from '../utils/foodLogs'
+import { InventorySummaryWidget } from '../components/inventory/InventorySummaryWidget'
 import type { FoodLog } from '../types/database'
 import type { SlotWithMeal } from '../hooks/useMealPlan'
 
@@ -389,6 +390,9 @@ export function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Inventory summary widget */}
+      <InventorySummaryWidget />
 
       {/* Action buttons */}
       <div className="flex flex-col gap-2">

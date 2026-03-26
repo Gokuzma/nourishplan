@@ -18,11 +18,14 @@ import {
 import { useCreateSpendLog } from '../../hooks/useSpendLog'
 import { useFoodPrices, useSaveFoodPrice, getPriceForIngredient } from '../../hooks/useFoodPrices'
 import { normaliseToCostPer100g, computeRecipeCostPerServing, formatCost } from '../../utils/cost'
+import { useInventoryDeduct } from '../../hooks/useInventoryDeduct'
+import type { DeductionResult } from '../../hooks/useInventoryDeduct'
 import { supabase } from '../../lib/supabase'
 import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from './NutritionBar'
 import { IngredientRow } from './IngredientRow'
 import { MicronutrientPanel } from '../plan/MicronutrientPanel'
+import { CookDeductionReceipt } from '../inventory/CookDeductionReceipt'
 import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } from '../../types/database'
 
 // Default yield factor when ingredient category is unknown (general cooking loss ~15%)
@@ -263,8 +266,9 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const updateIngredient = useUpdateIngredient()
   const removeIngredient = useRemoveIngredient()
   const spendLog = useCreateSpendLog()
-  const { data: foodPrices } = useFoodPrices()
+  const inventoryDeduct = useInventoryDeduct()
   const [cookConfirmation, setCookConfirmation] = useState<string | null>(null)
+  const [deductionResult, setDeductionResult] = useState<DeductionResult | null>(null)
 
   const [localName, setLocalName] = useState<string | null>(null)
   const [localServings, setLocalServings] = useState<string | null>(null)
@@ -529,6 +533,16 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             : 'Cooked — spend recorded'
           setCookConfirmation(msg)
           setTimeout(() => setCookConfirmation(null), 2000)
+
+          // Trigger inventory deduction (non-blocking — failure does not prevent spend log)
+          const needs = (ingredients ?? []).map(ing => ({
+            food_id: ing.ingredient_id,
+            food_name: ing.ingredient_name,
+            quantity_grams: ing.quantity_grams,
+          }))
+          inventoryDeduct.mutateAsync(needs)
+            .then(result => setDeductionResult(result))
+            .catch(() => { /* deduction failure is non-blocking */ })
         },
       }
     )
@@ -849,6 +863,15 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           ingredient={editingIngredient}
           onConfirm={handleEditConfirm}
           onCancel={() => setEditingIngredient(null)}
+        />
+      )}
+
+      {/* Cook deduction receipt */}
+      {deductionResult && (
+        <CookDeductionReceipt
+          mealName={recipe?.name ?? 'Recipe'}
+          result={deductionResult}
+          onClose={() => setDeductionResult(null)}
         />
       )}
     </>

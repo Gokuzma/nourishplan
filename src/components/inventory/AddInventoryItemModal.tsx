@@ -8,6 +8,7 @@ interface AddInventoryItemModalProps {
   onClose: () => void
   editItem?: InventoryItem | null
   scanResult?: { product: BarcodeProduct | null; barcode: string } | null
+  leftoverDefaults?: { recipeName: string; recipeId: string } | null
 }
 
 const LOCATION_OPTIONS: { label: string; value: StorageLocation }[] = [
@@ -27,7 +28,7 @@ function defaultExpiryDate(item?: InventoryItem | null): string {
   return ''
 }
 
-export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }: AddInventoryItemModalProps) {
+export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, leftoverDefaults }: AddInventoryItemModalProps) {
   const addItem = useAddInventoryItem()
   const updateItem = useUpdateInventoryItem()
 
@@ -41,7 +42,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }:
   const [isStaple, setIsStaple] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Pre-fill from editItem
+  // Pre-fill from editItem, scanResult, or leftoverDefaults
   useEffect(() => {
     if (editItem) {
       setFoodName(editItem.food_name)
@@ -52,6 +53,18 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }:
       setExpiryDate(editItem.expires_at ?? defaultExpiryDate(editItem))
       setPurchasePrice(editItem.purchase_price ?? '')
       setIsStaple(editItem.is_staple)
+    } else if (leftoverDefaults) {
+      const d = new Date()
+      d.setUTCDate(d.getUTCDate() + 3)
+      const defaultExpiry = d.toISOString().slice(0, 10)
+      setFoodName(`Leftover: ${leftoverDefaults.recipeName}`)
+      setBrand('')
+      setQuantity('')
+      setUnit('units')
+      setLocation('fridge')
+      setExpiryDate(defaultExpiry)
+      setPurchasePrice('')
+      setIsStaple(false)
     } else if (scanResult?.product) {
       setFoodName(scanResult.product.food_name)
       setBrand(scanResult.product.brand)
@@ -72,7 +85,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }:
       setIsStaple(false)
     }
     setError(null)
-  }, [editItem, scanResult, isOpen])
+  }, [editItem, scanResult, leftoverDefaults, isOpen])
 
   if (!isOpen) return null
 
@@ -114,6 +127,8 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }:
           expires_at: expiryDate || null,
           purchase_price: purchasePrice === '' ? null : purchasePrice as number,
           is_staple: isStaple,
+          is_leftover: leftoverDefaults ? true : undefined,
+          leftover_from_recipe_id: leftoverDefaults ? leftoverDefaults.recipeId : undefined,
         })
       }
       onClose()
@@ -141,6 +156,13 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }:
           </h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Leftover origin label */}
+            {leftoverDefaults && (
+              <p className="text-xs text-text/50">
+                Leftover from: {leftoverDefaults.recipeName}
+              </p>
+            )}
+
             {/* Item name */}
             <div>
               <label className="block text-sm font-medium text-text/70 mb-1" htmlFor="inv-food-name">
