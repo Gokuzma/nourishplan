@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down (completed 2026-03-15)
 - [x] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management (completed 2026-03-16)
 - [x] **Phase 14: How-To Manual** - In-app guide explaining how to use all features (completed 2026-03-17)
-- [ ] **Phase 16: Budget Engine & Query Foundation** - Centralised query keys, ingredient-level cost entry, recipe cost display, and weekly budget tracking
+- [x] **Phase 16: Budget Engine & Query Foundation** - Centralised query keys, ingredient-level cost entry, recipe cost display, and weekly budget tracking (completed 2026-03-26)
 - [ ] **Phase 17: Inventory Engine** - Pantry/fridge/freezer tracking with ledger-based quantities, expiry priority, barcode scanning, and plan-deduction
 - [ ] **Phase 18: Grocery List Generation** - Auto-generated grocery list from active meal plan, categorised by store aisle, with pantry subtraction and household sharing
 - [ ] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
@@ -177,7 +177,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 13. Recipe, Meal Plan & Account Mgmt | 4/4 | Complete | 2026-03-16 |
 | 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
 | 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
-| 16. Budget Engine & Query Foundation | 0/TBD | Not started | - |
+| 16. Budget Engine & Query Foundation | 4/4 | Complete    | 2026-03-26 |
 | 17. Inventory Engine | 0/TBD | Not started | - |
 | 18. Grocery List Generation | 0/TBD | Not started | - |
 | 19. Drag-and-Drop Planner | 0/TBD | Not started | - |
@@ -331,10 +331,10 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
-- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
-- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
-- [ ] 16-04-PLAN.md — Human verification of all budget engine features
+- [x] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [x] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [x] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [x] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 17: Inventory Engine
 **Goal**: Household members can maintain a pantry/fridge/freezer inventory with quantities, units, expiry dates, and storage locations — and the inventory updates automatically when a meal plan is finalised or leftovers are logged
@@ -348,7 +348,7 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [x] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
 - [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
 - [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
 - [ ] 16-04-PLAN.md — Human verification of all budget engine features
@@ -366,7 +366,7 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [x] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
 - [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
 - [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
 - [ ] 16-04-PLAN.md — Human verification of all budget engine features
@@ -383,7 +383,7 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [x] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
 - [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
 - [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
 - [ ] 16-04-PLAN.md — Human verification of all budget engine features

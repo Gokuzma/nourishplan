@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Not started
-stopped_at: Phase 16 UI-SPEC approved
-last_updated: "2026-03-26T00:24:48.556Z"
-last_activity: 2026-03-25 — v2.0 roadmap created (Phases 16–24)
+status: Milestone complete
+stopped_at: Completed 16-budget-engine-query-foundation-16-03-PLAN.md
+last_updated: "2026-03-26T01:17:26.308Z"
 progress:
   total_phases: 14
   completed_phases: 14
   total_plans: 50
   completed_plans: 50
-  percent: 0
 ---
 
 # Project State
@@ -21,16 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** v2.0 AMPS — Phase 16: Budget Engine & Query Foundation
+**Current focus:** Phase 16 — budget-engine-query-foundation
 
 ## Current Position
 
-Phase: 16 — Budget Engine & Query Foundation
-Plan: —
-Status: Not started
-Last activity: 2026-03-25 — v2.0 roadmap created (Phases 16–24)
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 16
+Plan: Not started
 
 ## Performance Metrics
 
@@ -103,6 +97,9 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13-recipe-meal-plan-account-management P02 | 15 | 2 tasks | 8 files |
 | Phase 14-how-to-manual PP01 | 155 | 3 tasks | 5 files |
 | Phase 15-v1-1-audit-gap-closure P01 | 1 | 2 tasks | 2 files |
+| Phase 16-budget-engine-query-foundation P01 | 15 | 2 tasks | 13 files |
+| Phase 16-budget-engine-query-foundation P02 | 3 | 2 tasks | 5 files |
+| Phase 16-budget-engine-query-foundation P03 | 25 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -227,6 +224,13 @@ Recent decisions affecting current work:
 - [Phase 14-how-to-manual]: Accordion uses single-open pattern (one section at a time) for guide scannability
 - [Phase 14-how-to-manual]: User Guide placed last in both nav arrays (after Settings) as lower-priority nav item
 - [Phase 15-v1-1-audit-gap-closure]: TanStack Query partial key matching used for meals and meal-plan-slots invalidation
+- [Phase 16-budget-engine-query-foundation]: queryKeys.ts factory returns as const tuples; prefix invalidation stays as bare inline arrays for broad cache invalidation
+- [Phase 16-budget-engine-query-foundation]: food_prices.food_id is text (not uuid) to accommodate USDA numeric IDs, CNF IDs, and custom food UUIDs
+- [Phase 16-budget-engine-query-foundation]: spend_logs.source CHECK constraint enforces cook|food_log at DB level matching TypeScript union type
+- [Phase 16-budget-engine-query-foundation]: normaliseToCostPer100g centralises unit conversion (g/kg/ml/l) — callers pass raw user input, function handles all unit math
+- [Phase 16-budget-engine-query-foundation]: Cost badge on RecipesPage list cards omitted — list view does not load ingredient data; badge only in RecipeBuilder where ingredients are already loaded
+- [Phase 16-budget-engine-query-foundation]: cost.ts and useFoodPrices.ts created in 16-03 execution because 16-02 had not run yet; files match 16-02 spec exactly
+- [Phase 16-budget-engine-query-foundation]: BudgetSummarySection receives onEditBudget callback from parent; parent owns the supabase mutation — consistent with existing household update patterns
 
 ### v2.0 Decisions
 
@@ -263,6 +267,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T00:24:48.549Z
-Stopped at: Phase 16 UI-SPEC approved
-Resume file: .planning/phases/16-budget-engine-query-foundation/16-UI-SPEC.md
+Last session: 2026-03-26T00:59:17.858Z
+Stopped at: Completed 16-budget-engine-query-foundation-16-03-PLAN.md
+Resume file: None
