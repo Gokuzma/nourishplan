@@ -328,8 +328,13 @@ Plans:
   2. User can set a weekly household food budget and see the current week's spend vs remaining balance on the Plan page
   3. Recipe cards and the recipe detail view display the computed cost per serving
   4. `src/lib/queryKeys.ts` exists with a full key hierarchy for all v2.0 query families; all v2.0 mutations invalidate keys via this centralised map
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 17: Inventory Engine
 **Goal**: Household members can maintain a pantry/fridge/freezer inventory with quantities, units, expiry dates, and storage locations — and the inventory updates automatically when a meal plan is finalised or leftovers are logged
@@ -340,8 +345,13 @@ Plans:
   2. Inventory list is sorted so items expiring soonest appear first, and past-expiry items are visually flagged
   3. Finalising a meal plan automatically deducts the ingredient quantities used from matching inventory items
   4. Uneaten portions of a recipe can be saved as leftover inventory items with an estimated expiry date
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 18: Grocery List Generation
 **Goal**: The app auto-generates a categorised grocery list from the active meal plan, subtracts what the household already has in inventory, and lets household members check off items while shopping
@@ -353,8 +363,13 @@ Plans:
   3. Grocery list items are grouped by store category (produce, dairy, meat, pantry, etc.)
   4. Household member can check off items in-store and the list persists the checked state across page reloads
   5. The grocery list is visible to all household members without manual sharing
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 19: Drag-and-Drop Planner
 **Goal**: Users can rearrange meals on the weekly plan grid by dragging and dropping, and manually placed meals are locked so auto-generation cannot overwrite them
@@ -365,8 +380,13 @@ Plans:
   2. Drag-and-drop works on both desktop (mouse) and mobile (touch) without accidental triggers during scroll
   3. A slot that has been manually filled is visually marked as locked; the locked state persists in the database
   4. Locked slots cannot be overwritten by auto-generation (Phase 22) — they are skipped and the generated plan fills only unlocked slots
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 20: Feedback Engine & Dietary Restrictions
 **Goal**: Household members can rate recipes after eating them, flag satiety, set dietary restrictions, and list foods they won't eat — and the system warns when the plan becomes monotonous
@@ -377,8 +397,13 @@ Plans:
   2. Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.) on their profile
   3. Each household member can maintain a list of foods they won't eat, and recipes containing those ingredients are flagged
   4. Plan page warns when the same recipe appears more than twice in a rolling two-week window
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 21: Schedule Model
 **Goal**: Each household member can set their daily availability for meal prep and eating, and these windows are stored as structured constraints ready to feed the Planning Engine
@@ -387,8 +412,13 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Each household member can configure availability windows per day of the week (prep available / quick meal only / away) from their profile or settings
   2. The schedule is stored as structured per-day constraint records and is consumed by the Planning Engine in Phase 22 — no free-text fields
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 22: Constraint-Based Planning Engine
 **Goal**: The app can generate a complete weekly meal plan optimised across nutrition targets, household budget, member schedules, dietary restrictions, and recipe preference signals — without blocking the UI
@@ -400,8 +430,13 @@ Plans:
   3. Generated plan skips locked slots (Phase 19) and only fills unlocked slots
   4. Plan page highlights nutrition gaps per member after generation and offers swap suggestions to close them
   5. Recipes already in inventory are weighted higher in recipe selection — ingredients the household has are preferred
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 23: Prep Optimisation
 **Goal**: Users can see a batch prep schedule for the week and a day-of task sequence for any meal, so cooking time is used efficiently
@@ -411,8 +446,13 @@ Plans:
   1. Plan page shows a weekly batch prep summary — which recipes can be prepped ahead, grouped by shared ingredients or equipment
   2. User can view a day-of task sequence for any meal showing steps in longest-first order to minimise total cooking time
   3. Recipes that freeze well are visually flagged in the plan view and batch prep suggestions as make-ahead candidates
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
 
 ### Phase 24: Dynamic Portioning
 **Goal**: Portion suggestions adapt over time based on each member's satiety feedback and consumption history, moving beyond static calorie-target splits
@@ -421,5 +461,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Per-member portion suggestions use each member's calorie target as the primary driver — members with higher targets receive proportionally larger suggested portions
   2. When a member has logged a recipe multiple times and consistently adjusts the suggested portion, the system adapts future suggestions for that recipe toward the observed amount
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 16-01-PLAN.md — Query key centralisation and budget engine DB migration
+- [ ] 16-02-PLAN.md — Cost utilities, food price hooks, and recipe cost display
+- [ ] 16-03-PLAN.md — Budget setting, spend tracking, and Plan page budget section
+- [ ] 16-04-PLAN.md — Human verification of all budget engine features
