@@ -17,7 +17,7 @@ export function useMeals() {
     queryFn: async (): Promise<Meal[]> => {
       const { data, error } = await supabase
         .from('meals')
-        .select('*')
+        .select('*, meal_items(calories_per_100g, quantity_grams)')
         .eq('household_id', householdId!)
         .is('deleted_at', null)
         .order('name')
@@ -43,7 +43,7 @@ export function useMeal(id: string) {
         .single()
 
       if (error) throw error
-      return data as (Meal & { meal_items: MealItem[] }) | null
+      return data as unknown as (Meal & { meal_items: MealItem[] }) | null
     },
     enabled: !!id,
   })
@@ -147,6 +147,7 @@ export function useAddMealItem() {
       meal_id,
       item_type,
       item_id,
+      item_name,
       quantity_grams,
       calories_per_100g,
       protein_per_100g,
@@ -157,6 +158,7 @@ export function useAddMealItem() {
       meal_id: string
       item_type: 'food' | 'recipe'
       item_id: string
+      item_name: string
       quantity_grams: number
       calories_per_100g: number
       protein_per_100g: number
@@ -170,6 +172,7 @@ export function useAddMealItem() {
           meal_id,
           item_type,
           item_id,
+          item_name,
           quantity_grams,
           calories_per_100g,
           protein_per_100g,
@@ -198,7 +201,6 @@ export function useUpdateMealItem() {
   return useMutation({
     mutationFn: async ({
       id,
-      meal_id,
       quantity_grams,
     }: {
       id: string
@@ -228,7 +230,7 @@ export function useRemoveMealItem() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, meal_id }: { id: string; meal_id: string }): Promise<void> => {
+    mutationFn: async ({ id }: { id: string; meal_id: string }): Promise<void> => {
       const { error } = await supabase.from('meal_items').delete().eq('id', id)
       if (error) throw error
     },

@@ -28,7 +28,7 @@ export function MealItemRow({ item, onEdit, onRemove }: MealItemRowProps) {
           <span className="text-xs bg-accent/20 text-accent font-medium px-1.5 py-0.5 rounded shrink-0">
             {item.item_type === 'food' ? 'F' : 'R'}
           </span>
-          <p className="text-sm text-text/50 truncate">{item.item_id}</p>
+          <p className="text-sm text-text truncate">{item.item_name || item.item_id}</p>
         </div>
         <p className="text-xs text-text/50">
           {nutrition.calories.toFixed(1)} cal · {nutrition.protein.toFixed(1)}g P · {nutrition.carbs.toFixed(1)}g C · {nutrition.fat.toFixed(1)}g F

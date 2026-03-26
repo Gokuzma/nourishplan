@@ -8,23 +8,6 @@ import type { PortionResult } from '../../utils/portionSuggestions'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
-function slotCalories(slot: SlotWithMeal): number {
-  const meal = slot.meals
-  if (!meal || !meal.meal_items.length) return 0
-  const items = meal.meal_items.map(item => ({
-    nutrition: calcIngredientNutrition(
-      {
-        calories: item.calories_per_100g,
-        protein: item.protein_per_100g,
-        fat: item.fat_per_100g,
-        carbs: item.carbs_per_100g,
-      },
-      item.quantity_grams,
-    ),
-  }))
-  return calcMealNutrition(items).calories
-}
-
 function slotNutrition(slot: SlotWithMeal) {
   const meal = slot.meals
   if (!meal || !meal.meal_items.length) return { calories: 0, protein: 0, fat: 0, carbs: 0 }

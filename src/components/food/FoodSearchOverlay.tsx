@@ -109,13 +109,16 @@ async function verifyFoodResults(
 }
 
 const GRAMS_UNIT: PortionUnit = { description: 'grams', grams: 1 }
+const PER_100G_UNIT: PortionUnit = { description: '100g serving', grams: 100 }
 
 function buildUnits(food: NormalizedFoodResult): PortionUnit[] {
   if (!food.portions || food.portions.length === 0) return []
-  const units: PortionUnit[] = food.portions.map(p => ({
-    description: p.description,
-    grams: p.grams,
-  }))
+  const units: PortionUnit[] = food.portions
+    .filter(p => p.description && p.description !== 'Quantity not specified')
+    .map(p => ({
+      description: p.description,
+      grams: p.grams,
+    }))
   units.push(GRAMS_UNIT)
   return units
 }
@@ -152,7 +155,7 @@ function ResultRow({
   const units = buildUnits(food)
   const hasUnits = units.length > 0
   const [quantity, setQuantity] = useState(1.0)
-  const [selectedUnit, setSelectedUnit] = useState<PortionUnit>(hasUnits ? units[0] : GRAMS_UNIT)
+  const [selectedUnit, setSelectedUnit] = useState<PortionUnit>(hasUnits ? units[0] : PER_100G_UNIT)
   const [showVerifTooltip, setShowVerifTooltip] = useState(false)
 
   return (
@@ -250,7 +253,7 @@ function ResultRow({
             <p className="text-xs text-red-400">Could not save. Try again.</p>
           )}
           <button
-            onClick={() => onLog?.(food, quantity, hasUnits ? selectedUnit : GRAMS_UNIT)}
+            onClick={() => onLog?.(food, quantity, hasUnits ? selectedUnit : PER_100G_UNIT)}
             disabled={isLogging}
             className="w-full rounded-[--radius-btn] bg-primary text-surface py-2 text-sm font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity"
           >

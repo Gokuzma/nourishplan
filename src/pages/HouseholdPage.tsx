@@ -1,11 +1,9 @@
 import { useHousehold } from '../hooks/useHousehold'
-import { useAuth } from '../hooks/useAuth'
 import { MemberList } from '../components/household/MemberList'
 import { InviteLink } from '../components/household/InviteLink'
 import { MemberProfileForm } from '../components/household/MemberProfileForm'
 
 export function HouseholdPage() {
-  const { session } = useAuth()
   const { data: membership, isPending } = useHousehold()
 
   if (isPending) {
@@ -30,8 +28,6 @@ export function HouseholdPage() {
 
   const household = membership.households
   const isAdmin = membership.role === 'admin'
-  const userId = session?.user.id
-
   return (
     <div className="min-h-screen bg-background px-4 py-8 font-sans">
       <div className="mx-auto flex max-w-lg flex-col gap-8">

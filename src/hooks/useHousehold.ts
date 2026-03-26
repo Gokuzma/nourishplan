@@ -57,7 +57,7 @@ export function useHouseholdMembers() {
         .order('joined_at', { ascending: true })
 
       if (error) throw error
-      return (data ?? []) as MemberWithProfile[]
+      return (data ?? []) as unknown as MemberWithProfile[]
     },
     enabled: !!householdId,
   })
@@ -137,16 +137,14 @@ export function useJoinHousehold() {
       }
 
       const { error: updateError } = await supabase
-        .from('household_invites')
-        .update({ used_at: new Date().toISOString() })
-        .eq('id', invite.id)
+        .rpc('mark_invite_used' as never, { invite_id: invite.id } as never)
 
       if (updateError) throw updateError
 
       return invite
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['household'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }

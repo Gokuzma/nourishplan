@@ -1,6 +1,5 @@
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
 import { useAuth } from '../../hooks/useAuth'
-import { useHousehold } from '../../hooks/useHousehold'
 
 interface MemberSelectorProps {
   selectedMemberId: string
@@ -13,7 +12,6 @@ interface MemberSelectorProps {
  */
 export function MemberSelector({ selectedMemberId, onSelect }: MemberSelectorProps) {
   const { session } = useAuth()
-  const { data: membership } = useHousehold()
   const { data: members } = useHouseholdMembers()
   const { data: profiles } = useMemberProfiles()
 

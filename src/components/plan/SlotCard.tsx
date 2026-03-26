@@ -88,7 +88,7 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
       {/* Main row */}
       <div className="flex items-center justify-between py-2 px-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-text truncate font-sans">{meal.name}</p>
+          <p className="text-sm font-medium text-text truncate font-sans">{meal!.name}</p>
           <div className="flex items-center gap-2">
             <p className="text-xs text-text/50 font-sans">{Math.round(calories)} kcal</p>
             {currentUserSuggestion && (
@@ -144,30 +144,16 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
               </svg>
             </button>
           )}
-          {!slot?.is_override && (
-            <button
-              onClick={onSwap}
-              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
-              aria-label="Swap meal"
-              title="Swap meal"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M1 4h10M8 1l3 3-3 3M15 12H5M8 9l-3 3 3 3" />
-              </svg>
-            </button>
-          )}
-          {slot?.is_override && (
-            <button
-              onClick={onSwap}
-              className="p-1 rounded text-primary hover:bg-primary/10 transition-colors"
-              aria-label="Change meal"
-              title="Change meal"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M11 2l3 3-8 8H3v-3L11 2z" />
-              </svg>
-            </button>
-          )}
+          <button
+            onClick={onSwap}
+            className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
+            aria-label="Change meal"
+            title="Change meal"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M11 2l3 3-8 8H3v-3L11 2z" />
+            </svg>
+          </button>
           <button
             onClick={onClear}
             className="p-1 rounded text-text/30 hover:text-red-500 hover:bg-red-50 transition-colors"

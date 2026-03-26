@@ -32,14 +32,17 @@ export function useUpdateProfile() {
   const { session } = useAuth()
 
   return useMutation({
-    mutationFn: async (updates: { display_name?: string; avatar_url?: string }) => {
+    mutationFn: async (updates: { display_name?: string | null; avatar_url?: string | null }) => {
       const { error } = await supabase
         .from('profiles')
         .update(updates)
         .eq('id', session!.user.id)
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      queryClient.invalidateQueries({ queryKey: ['household-members'] })
+    },
   })
 }
 

@@ -3,27 +3,33 @@ import { useCreateInvite } from '../../hooks/useHousehold'
 
 export function InviteLink() {
   const createInvite = useCreateInvite()
-  const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   function handleGenerate() {
     createInvite.mutate(undefined, {
       onSuccess: (invite) => {
         const url = `${window.location.origin}/join?invite=${invite.token}`
-        setCopiedUrl(url)
+        setInviteUrl(url)
+        setCopied(false)
       },
     })
   }
 
   function handleCopy() {
-    if (!copiedUrl) return
-    navigator.clipboard.writeText(copiedUrl).catch(() => {
-      // Fallback for environments without clipboard API
+    if (!inviteUrl) return
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {
       const el = document.createElement('textarea')
-      el.value = copiedUrl
+      el.value = inviteUrl
       document.body.appendChild(el)
       el.select()
       document.execCommand('copy')
       document.body.removeChild(el)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     })
   }
 
@@ -41,16 +47,20 @@ export function InviteLink() {
         </p>
       )}
 
-      {copiedUrl ? (
+      {inviteUrl ? (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 rounded-card border border-accent/40 bg-secondary/50 px-3 py-2">
-            <p className="flex-1 break-all text-sm text-text">{copiedUrl}</p>
+            <p className="flex-1 break-all text-sm text-text">{inviteUrl}</p>
             <button
               type="button"
               onClick={handleCopy}
-              className="shrink-0 rounded-btn bg-primary px-3 py-1.5 text-xs font-semibold text-surface transition-opacity hover:opacity-90"
+              className={`shrink-0 rounded-btn px-3 py-1.5 text-xs font-semibold transition-opacity ${
+                copied
+                  ? 'bg-green-600 text-white'
+                  : 'bg-primary text-surface hover:opacity-90'
+              }`}
             >
-              Copy
+              {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
           <p className="text-xs text-text/40">Expires in 7 days · Single use</p>

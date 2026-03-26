@@ -1,9 +1,11 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { CreateHousehold } from '../components/household/CreateHousehold'
 import { JoinHousehold } from '../components/household/JoinHousehold'
 
 export function HouseholdSetup() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
   const [searchParams] = useSearchParams()
   const inviteToken = searchParams.get('invite') ?? undefined
 
@@ -18,6 +20,12 @@ export function HouseholdSetup() {
         <p className="mb-8 text-text/70">
           Get started by creating a new household or joining an existing one.
         </p>
+        <button
+          onClick={signOut}
+          className="mb-6 text-sm text-text/50 hover:text-text underline transition-colors"
+        >
+          Log out
+        </button>
 
         <div className="flex flex-col gap-6">
           {/* Create card */}

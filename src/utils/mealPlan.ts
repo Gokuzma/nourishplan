@@ -66,5 +66,6 @@ export function buildTargetUpsertPayload(params: {
     fat_g: fat_g ?? null,
     micronutrients: micronutrients ?? {},
     custom_goals: custom_goals ?? {},
+    macro_mode: 'grams' as const,
   };
 }

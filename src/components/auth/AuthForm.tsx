@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ResetModal } from './ResetModal'
 
 type Mode = 'login' | 'signup'
 
 export function AuthForm() {
+  const location = useLocation()
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -37,9 +39,11 @@ export function AuthForm() {
 
   async function handleGoogle() {
     setError(null)
+    const from = (location.state as { from?: Location })?.from
+    const redirectPath = from ? `${from.pathname}${from.search}` : '/'
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { redirectTo: `${window.location.origin}${redirectPath}` },
     })
     if (error) setError(error.message)
   }
@@ -63,6 +67,9 @@ export function AuthForm() {
           required
           className="rounded-[--radius-btn] border border-secondary px-4 py-2 bg-surface text-text focus:outline-none focus:ring-2 focus:ring-primary"
         />
+        {mode === 'signup' && (
+          <p className="text-xs text-text/50 -mt-2">Must be at least 6 characters</p>
+        )}
         {mode === 'signup' && (
           <input
             type="text"

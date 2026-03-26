@@ -21,7 +21,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // getSession() returns cached session from localStorage without server
+    // validation. Verify it's still valid by calling getUser() which hits
+    // the server. If the account was deleted, sign out to clear stale state.
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const { error } = await supabase.auth.getUser()
+        if (error) {
+          await supabase.auth.signOut()
+          queryClient.clear()
+          setSession(null)
+          setLoading(false)
+          return
+        }
+      }
       setSession(session)
       setLoading(false)
     })

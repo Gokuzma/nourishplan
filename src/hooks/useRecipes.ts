@@ -224,7 +224,6 @@ export function useUpdateIngredient() {
   return useMutation({
     mutationFn: async ({
       id,
-      recipe_id,
       updates,
     }: {
       id: string
@@ -254,7 +253,7 @@ export function useRemoveIngredient() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, recipe_id }: { id: string; recipe_id: string }): Promise<void> => {
+    mutationFn: async ({ id }: { id: string; recipe_id: string }): Promise<void> => {
       const { error } = await supabase.from('recipe_ingredients').delete().eq('id', id)
       if (error) throw error
     },

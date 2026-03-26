@@ -63,7 +63,7 @@ export function InstallPrompt() {
 
   if (showIOSPrompt) {
     return (
-      <div className="fixed bottom-0 inset-x-0 z-50 bg-surface border-t border-accent/30 px-4 py-3 flex items-center justify-between gap-3 shadow-md">
+      <div className="fixed bottom-16 md:bottom-0 inset-x-0 z-50 bg-surface border-t border-accent/30 px-4 py-3 flex items-center justify-between gap-3 shadow-md">
         <p className="text-sm text-text flex-1">
           Install NourishPlan: tap <strong>Share</strong> then <strong>Add to Home Screen</strong>.
         </p>
@@ -80,7 +80,7 @@ export function InstallPrompt() {
 
   if (visible && deferredPrompt) {
     return (
-      <div className="fixed bottom-0 inset-x-0 z-50 bg-surface border-t border-accent/30 px-4 py-3 flex items-center justify-between gap-3 shadow-md">
+      <div className="fixed bottom-16 md:bottom-0 inset-x-0 z-50 bg-surface border-t border-accent/30 px-4 py-3 flex items-center justify-between gap-3 shadow-md">
         <p className="text-sm text-text flex-1">
           Add NourishPlan to your home screen for the best experience.
         </p>

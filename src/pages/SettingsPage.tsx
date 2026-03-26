@@ -372,6 +372,19 @@ export function SettingsPage() {
         </section>
       )}
 
+      {/* Nutrition section */}
+      {session && (
+        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
+          <h2 className="font-semibold text-text mb-3">Nutrition</h2>
+          <a
+            href={`/members/${session.user.id}/targets`}
+            className="text-sm text-primary hover:underline"
+          >
+            Edit Nutrition Targets
+          </a>
+        </section>
+      )}
+
       {/* Appearance section */}
       <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
         <h2 className="font-semibold text-text mb-3">Appearance</h2>

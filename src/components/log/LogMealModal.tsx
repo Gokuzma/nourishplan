@@ -41,7 +41,7 @@ export function LogMealModal({
   suggestedServings,
 }: LogMealModalProps) {
   const [servings, setServings] = useState(
-    suggestedServings !== undefined ? Math.round(suggestedServings * 10) / 10 : 1.0
+    suggestedServings !== undefined ? Math.round(suggestedServings * 2) / 2 : 1.0
   )
   const [isPrivate, setIsPrivate] = useState(false)
   // Track whether user has manually adjusted the stepper
@@ -51,7 +51,7 @@ export function LogMealModal({
   // update the stepper only if the user hasn't touched it yet.
   useEffect(() => {
     if (suggestedServings !== undefined && !hasUserEdited.current) {
-      setServings(Math.round(suggestedServings * 10) / 10)
+      setServings(Math.round(suggestedServings * 2) / 2)
     }
   }, [suggestedServings])
 
@@ -136,7 +136,8 @@ export function LogMealModal({
 
         {/* Portion stepper */}
         <div className="mb-4">
-          <p className="text-sm font-medium text-text/70 mb-2">Servings</p>
+          <p className="text-sm font-medium text-text/70 mb-1">Servings</p>
+          <p className="text-xs text-text/40 mb-2">Suggested portion based on your targets</p>
           <PortionStepper value={servings} onChange={handleServingsChange} />
         </div>
 
