@@ -15,6 +15,8 @@ import {
   applyYieldFactor,
   YIELD_FACTORS,
 } from '../../utils/nutrition'
+import { useFoodPrices, useSaveFoodPrice, getPriceForIngredient } from '../../hooks/useFoodPrices'
+import { normaliseToCostPer100g, computeRecipeCostPerServing, formatCost } from '../../utils/cost'
 import { supabase } from '../../lib/supabase'
 import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from './NutritionBar'
@@ -251,6 +253,8 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const { data: recipe, isPending: recipePending } = useRecipe(recipeId)
   const { data: ingredients, isPending: ingredientsPending } = useRecipeIngredients(recipeId)
   const { data: allRecipes } = useRecipes()
+  const { data: foodPrices } = useFoodPrices()
+  const saveFoodPrice = useSaveFoodPrice()
 
   const updateRecipe = useUpdateRecipe()
   const addIngredient = useAddIngredient()
@@ -476,6 +480,23 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     })
   }
 
+  function handleSavePrice(
+    ingredient: RecipeIngredient,
+    amount: number,
+    quantityValue: number,
+    unit: 'g' | 'kg' | 'ml' | 'l',
+    store: string
+  ) {
+    const cost_per_100g = normaliseToCostPer100g(amount, quantityValue, unit)
+    const foodName = foodDataMap[ingredient.ingredient_id]?.name ?? ingredient.ingredient_name ?? ''
+    saveFoodPrice.mutate({
+      food_id: ingredient.ingredient_id,
+      food_name: foodName,
+      store,
+      cost_per_100g,
+    })
+  }
+
   const perServingNutrition = useMemo(() => {
     if (!ingredients || !recipe) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
 
@@ -621,6 +642,32 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
               className="w-20 rounded-[--radius-btn] border border-accent/30 bg-surface px-2 py-1 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
+
+          {/* Cost per serving badge — per D-02, D-03 */}
+          {(() => {
+            const ingredientsWithCost = (ingredients ?? []).map(ing => ({
+              quantity_grams: ing.quantity_grams,
+              cost_per_100g: getPriceForIngredient(foodPrices ?? [], ing.ingredient_id),
+            }))
+            const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(ingredientsWithCost, recipe.servings)
+            const isPartial = pricedCount < totalCount && pricedCount > 0
+            const hasAnyPrice = pricedCount > 0
+            if (!hasAnyPrice) return null
+            return (
+              <p className="text-xs text-text/50 font-sans">
+                {isPartial
+                  ? `${formatCost(costPerServing)}+/serving · (${pricedCount} of ${totalCount} priced)`
+                  : `${formatCost(costPerServing)}/serving · ${recipe.servings} servings`}
+              </p>
+            )
+          })()}
+
+          {/* Stores datalist for price entry autocomplete */}
+          <datalist id="stores-datalist">
+            {[...new Set((foodPrices ?? []).map(p => p.store).filter(Boolean))].map(store => (
+              <option key={store} value={store} />
+            ))}
+          </datalist>
         </div>
 
         {/* Ingredient list */}
@@ -646,6 +693,8 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
                   onEdit={() => setEditingIngredient(ing)}
                   onRemove={() => handleRemove(ing)}
                   onToggleWeightState={() => handleToggleWeightState(ing)}
+                  price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id)}
+                  onSavePrice={(amount, qty, unit, store) => handleSavePrice(ing, amount, qty, unit, store)}
                 />
               ))}
             </div>
