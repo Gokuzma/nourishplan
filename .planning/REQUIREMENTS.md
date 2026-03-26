@@ -138,8 +138,8 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 - [ ] **INVT-02**: Each inventory item tracks quantity and unit (grams, units, ml)
 - [ ] **INVT-03**: Each inventory item has an optional expiry date with priority sorting
 - [ ] **INVT-04**: User can scan a barcode to add an item to inventory
-- [ ] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
-- [ ] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
+- [x] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
+- [x] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
 
 ### Grocery
 
@@ -289,8 +289,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INVT-02 | Phase 17 | Pending |
 | INVT-03 | Phase 17 | Pending |
 | INVT-04 | Phase 17 | Pending |
-| INVT-05 | Phase 17 | Pending |
-| INVT-06 | Phase 17 | Pending |
+| INVT-05 | Phase 17 | Complete |
+| INVT-06 | Phase 17 | Complete |
 | GROC-01 | Phase 18 | Pending |
 | GROC-02 | Phase 18 | Pending |
 | GROC-03 | Phase 18 | Pending |

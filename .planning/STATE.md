@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Ready to execute
-stopped_at: Completed 17-inventory-engine-17-02-PLAN.md
-last_updated: "2026-03-26T03:16:21.410Z"
+stopped_at: Completed 17-inventory-engine-17-04-PLAN.md
+last_updated: "2026-03-26T03:27:55.877Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 17 (inventory-engine) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 
 ## Performance Metrics
 
@@ -102,6 +102,7 @@ Plan: 3 of 5
 | Phase 16-budget-engine-query-foundation P03 | 25 | 2 tasks | 8 files |
 | Phase 17-inventory-engine P01 | 4 | 2 tasks | 6 files |
 | Phase 17-inventory-engine P02 | 11 | 2 tasks | 8 files |
+| Phase 17-inventory-engine P04 | 7 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -238,6 +239,8 @@ Recent decisions affecting current work:
 - [Phase 17-inventory-engine]: convertToGrams returns null for units type — discrete counts cannot be compared by weight for FIFO
 - [Phase 17-inventory-engine]: useAddInventoryItem returns params from mutationFn so onSuccess can call saveFoodPrice without closure state
 - [Phase 17-inventory-engine]: InventoryUnit 'L' lowercased to 'l' before passing to normaliseToCostPer100g which expects lowercase
+- [Phase 17-inventory-engine]: Deduction failure is non-blocking: spendLog always fires first; deduction runs in onSuccess callback; errors caught silently; receipt shows error state if deduction failed
+- [Phase 17-inventory-engine]: leftoverDefaults pre-fill uses UTC date arithmetic (setUTCDate) consistent with getWeekStart/getDayIndex UTC pattern
 
 ### v2.0 Decisions
 
@@ -274,6 +277,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T03:16:16.062Z
-Stopped at: Completed 17-inventory-engine-17-02-PLAN.md
+Last session: 2026-03-26T03:27:55.870Z
+Stopped at: Completed 17-inventory-engine-17-04-PLAN.md
 Resume file: None
