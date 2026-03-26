@@ -347,9 +347,42 @@ export type Database = {
         Update: Partial<Omit<SpendLog, 'id' | 'created_at'>>
         Relationships: []
       }
+      inventory_items: {
+        Row: InventoryItem
+        Insert: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
+        Update: Partial<Omit<InventoryItem, 'id' | 'created_at'>>
+        Relationships: []
+      }
     }
     Enums: {
       household_role: 'admin' | 'member'
     }
   }
+}
+
+export type StorageLocation = 'pantry' | 'fridge' | 'freezer'
+export type InventoryUnit = 'g' | 'kg' | 'ml' | 'L' | 'units'
+export type RemovalReason = 'used' | 'discarded'
+
+export interface InventoryItem {
+  id: string
+  household_id: string
+  added_by: string
+  food_name: string
+  brand: string | null
+  food_id: string | null
+  quantity_remaining: number
+  unit: InventoryUnit
+  storage_location: StorageLocation
+  is_opened: boolean
+  is_staple: boolean
+  purchased_at: string
+  expires_at: string | null
+  purchase_price: number | null
+  removed_at: string | null
+  removed_reason: RemovalReason | null
+  is_leftover: boolean
+  leftover_from_recipe_id: string | null
+  created_at: string
+  updated_at: string
 }

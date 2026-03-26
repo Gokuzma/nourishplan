@@ -54,4 +54,12 @@ export const queryKeys = {
     byWeek: (householdId: string | undefined, weekStart: string) =>
       ['spend-logs', householdId, weekStart] as const,
   },
+  inventory: {
+    list: (householdId: string | undefined) =>
+      ['inventory', householdId] as const,
+    byLocation: (householdId: string | undefined, location: string) =>
+      ['inventory', householdId, location] as const,
+    expiringSoon: (householdId: string | undefined) =>
+      ['inventory', householdId, 'expiring-soon'] as const,
+  },
 } as const
