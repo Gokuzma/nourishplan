@@ -5,10 +5,13 @@ import { useMealPlan, useCreateMealPlan } from '../hooks/useMealPlan'
 import { useRepeatLastWeek, useLoadTemplate } from '../hooks/useMealPlanTemplates'
 import { useNutritionTarget } from '../hooks/useNutritionTargets'
 import { getWeekStart } from '../utils/mealPlan'
+import { supabase } from '../lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
 import { PlanGrid } from '../components/plan/PlanGrid'
 import { MemberSelector } from '../components/plan/MemberSelector'
 import { NewWeekPrompt } from '../components/plan/NewWeekPrompt'
 import { TemplateManager } from '../components/plan/TemplateManager'
+import { BudgetSummarySection } from '../components/plan/BudgetSummarySection'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00Z')
@@ -29,6 +32,7 @@ function formatWeekRange(weekStart: string): string {
  * /plan route — weekly meal plan grid with week navigation, member selector, and progress rings.
  */
 export function PlanPage() {
+  const queryClient = useQueryClient()
   const { session } = useAuth()
   const { data: membership } = useHousehold()
   const household = membership?.households
@@ -64,6 +68,13 @@ export function PlanPage() {
   function handleMemberSelect(id: string, type: 'user' | 'profile') {
     setSelectedMemberId(id)
     setSelectedMemberType(type)
+  }
+
+  async function handleEditBudget(newBudget: number | null) {
+    const householdId = membership?.household_id
+    if (!householdId) return
+    await supabase.from('households').update({ weekly_budget: newBudget }).eq('id', householdId)
+    queryClient.invalidateQueries({ queryKey: ['household'] })
   }
 
   async function handleNewWeekChoice(choice: 'fresh' | 'repeat' | 'template', templateId?: string, planStart?: string) {
@@ -164,6 +175,12 @@ export function PlanPage() {
             currentUserId={session?.user.id}
             selectedMemberId={selectedMemberId}
             selectedMemberType={selectedMemberType}
+          />
+          <BudgetSummarySection
+            weeklyBudget={household?.weekly_budget ?? null}
+            weekStart={weekStart}
+            householdId={householdId}
+            onEditBudget={handleEditBudget}
           />
           <div className="print-only mt-4">
             <p className="text-xs font-semibold">Meal plan for week of {formatWeekRange(weekStart)}</p>
