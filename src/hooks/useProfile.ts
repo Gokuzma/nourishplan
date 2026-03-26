@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { queryKeys } from '../lib/queryKeys'
 
 /**
  * Fetches the current user's profile from the profiles table.
@@ -9,7 +10,7 @@ export function useProfile() {
   const { session } = useAuth()
 
   return useQuery({
-    queryKey: ['profile', session?.user.id],
+    queryKey: queryKeys.profile.root(session?.user.id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')

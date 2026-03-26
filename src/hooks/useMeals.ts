@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
+import { queryKeys } from '../lib/queryKeys'
 import type { Meal, MealItem } from '../types/database'
 
 /**
@@ -12,7 +13,7 @@ export function useMeals() {
   const householdId = membership?.household_id
 
   return useQuery({
-    queryKey: ['meals', householdId],
+    queryKey: queryKeys.meals.list(householdId),
     queryFn: async (): Promise<Meal[]> => {
       const { data, error } = await supabase
         .from('meals')
@@ -33,7 +34,7 @@ export function useMeals() {
  */
 export function useMeal(id: string) {
   return useQuery({
-    queryKey: ['meal', id],
+    queryKey: queryKeys.meals.detail(id),
     queryFn: async (): Promise<(Meal & { meal_items: MealItem[] }) | null> => {
       const { data, error } = await supabase
         .from('meals')
@@ -74,7 +75,7 @@ export function useCreateMeal() {
     },
     onSuccess: () => {
       const householdId = membership?.household_id
-      queryClient.invalidateQueries({ queryKey: ['meals', householdId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.list(householdId) })
     },
   })
 }
@@ -106,8 +107,8 @@ export function useUpdateMeal() {
     },
     onSuccess: (_, { id }) => {
       const householdId = membership?.household_id
-      queryClient.invalidateQueries({ queryKey: ['meals', householdId] })
-      queryClient.invalidateQueries({ queryKey: ['meal', id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.list(householdId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(id) })
     },
   })
 }
@@ -130,7 +131,7 @@ export function useDeleteMeal() {
     },
     onSuccess: () => {
       const householdId = membership?.household_id
-      queryClient.invalidateQueries({ queryKey: ['meals', householdId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.list(householdId) })
     },
   })
 }
@@ -183,7 +184,7 @@ export function useAddMealItem() {
       return data
     },
     onSuccess: (_, { meal_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal', meal_id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(meal_id) })
     },
   })
 }
@@ -215,7 +216,7 @@ export function useUpdateMealItem() {
       return data
     },
     onSuccess: (_, { meal_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal', meal_id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(meal_id) })
     },
   })
 }
@@ -232,7 +233,7 @@ export function useRemoveMealItem() {
       if (error) throw error
     },
     onSuccess: (_, { meal_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['meal', meal_id] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(meal_id) })
     },
   })
 }

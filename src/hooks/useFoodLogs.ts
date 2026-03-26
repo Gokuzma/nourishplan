@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
+import { queryKeys } from '../lib/queryKeys'
 import type { FoodLog } from '../types/database'
 
 export interface InsertFoodLogParams {
@@ -34,7 +35,7 @@ export function useFoodLogs(
   memberType: 'user' | 'profile',
 ) {
   return useQuery({
-    queryKey: ['food-logs', householdId, logDate, memberId],
+    queryKey: queryKeys.foodLogs.byDate(householdId, logDate, memberId),
     queryFn: async (): Promise<FoodLog[]> => {
       let query = supabase
         .from('food_logs')
@@ -104,7 +105,7 @@ export function useInsertFoodLog() {
     onSuccess: (data) => {
       const householdId = membership?.household_id
       const memberId = data.member_user_id ?? data.member_profile_id ?? undefined
-      queryClient.invalidateQueries({ queryKey: ['food-logs', householdId, data.log_date, memberId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.foodLogs.byDate(householdId, data.log_date, memberId) })
     },
   })
 }
@@ -154,7 +155,7 @@ export function useUpdateFoodLog() {
     onSuccess: (data) => {
       const householdId = membership?.household_id
       const memberId = data.member_user_id ?? data.member_profile_id ?? undefined
-      queryClient.invalidateQueries({ queryKey: ['food-logs', householdId, data.log_date, memberId] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.foodLogs.byDate(householdId, data.log_date, memberId) })
     },
   })
 }
@@ -187,7 +188,7 @@ export function useHouseholdDayLogs(
   logDate: string | undefined,
 ) {
   return useQuery({
-    queryKey: ['food-logs', householdId, logDate],
+    queryKey: queryKeys.foodLogs.byHouseholdDate(householdId, logDate),
     queryFn: async (): Promise<FoodLog[]> => {
       const { data, error } = await supabase
         .from('food_logs')
@@ -254,7 +255,7 @@ export function useBulkInsertFoodLogs() {
       // Also invalidate per-date keys found in the inserted rows
       const dates = [...new Set(data.map(r => r.log_date))]
       for (const date of dates) {
-        queryClient.invalidateQueries({ queryKey: ['food-logs', householdId, date] })
+        queryClient.invalidateQueries({ queryKey: queryKeys.foodLogs.byHouseholdDate(householdId, date) })
       }
     },
   })

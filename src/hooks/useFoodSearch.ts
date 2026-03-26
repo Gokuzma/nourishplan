@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { queryKeys } from '../lib/queryKeys'
 import type { NormalizedFoodResult } from '../types/database'
 
 /**
@@ -28,7 +29,7 @@ export function scoreFood(name: string, query: string): number {
  */
 export function useFoodSearch(query: string) {
   const usdaQuery = useQuery({
-    queryKey: ['food-search', 'usda', query],
+    queryKey: queryKeys.foodSearch.usda(query),
     queryFn: async (): Promise<NormalizedFoodResult[]> => {
       if (query.length < 2) return []
       const { data, error } = await supabase.functions.invoke('search-usda', {
@@ -42,7 +43,7 @@ export function useFoodSearch(query: string) {
   })
 
   const cnfQuery = useQuery({
-    queryKey: ['food-search', 'cnf', query],
+    queryKey: queryKeys.foodSearch.cnf(query),
     queryFn: async (): Promise<NormalizedFoodResult[]> => {
       if (query.length < 2) return []
       const { data, error } = await supabase.functions.invoke('search-cnf', {
