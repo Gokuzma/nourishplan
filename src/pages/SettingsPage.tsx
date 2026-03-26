@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 import { useHousehold, useHouseholdMembers } from '../hooks/useHousehold'
 import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile'
+import { useFoodPrices, useDeleteFoodPrice } from '../hooks/useFoodPrices'
+import { formatCost } from '../utils/cost'
 import { supabase } from '../lib/supabase'
 import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
@@ -38,6 +40,17 @@ export function SettingsPage() {
   const [householdSaved, setHouseholdSaved] = useState(false)
   const [householdError, setHouseholdError] = useState<string | null>(null)
 
+  // Weekly budget state
+  const [weeklyBudget, setWeeklyBudget] = useState<string>('')
+  const [budgetSaving, setBudgetSaving] = useState(false)
+  const [budgetSaved, setBudgetSaved] = useState(false)
+  const [budgetError, setBudgetError] = useState<string | null>(null)
+
+  // Food prices state
+  const { data: foodPrices } = useFoodPrices()
+  const deleteFoodPrice = useDeleteFoodPrice()
+  const [confirmDeletePriceId, setConfirmDeletePriceId] = useState<string | null>(null)
+
   // Sync profile data into form state
   useEffect(() => {
     if (profile?.display_name != null) {
@@ -51,6 +64,14 @@ export function SettingsPage() {
       setHouseholdName(membership.households.name)
     }
   }, [membership?.households?.name])
+
+  // Sync weekly budget into form state
+  useEffect(() => {
+    const budget = membership?.households?.weekly_budget
+    if (budget != null) {
+      setWeeklyBudget(String(budget))
+    }
+  }, [membership?.households?.weekly_budget])
 
   useEffect(() => {
     toggleTheme(theme)
@@ -111,6 +132,29 @@ export function SettingsPage() {
       setHouseholdError(err instanceof Error ? err.message : 'Failed to save household name.')
     } finally {
       setHouseholdSaving(false)
+    }
+  }
+
+  async function handleSaveWeeklyBudget() {
+    const householdId = membership?.household_id
+    if (!householdId) return
+    setBudgetSaving(true)
+    setBudgetError(null)
+    setBudgetSaved(false)
+    try {
+      const parsed = weeklyBudget.trim() === '' ? null : parseFloat(weeklyBudget)
+      const { error } = await supabase
+        .from('households')
+        .update({ weekly_budget: parsed })
+        .eq('id', householdId)
+      if (error) throw error
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
+      setBudgetSaved(true)
+      setTimeout(() => setBudgetSaved(false), 2000)
+    } catch (err) {
+      setBudgetError(err instanceof Error ? err.message : 'Failed to save budget.')
+    } finally {
+      setBudgetSaving(false)
     }
   }
 
@@ -245,6 +289,86 @@ export function SettingsPage() {
               <p className="text-sm text-text">{membership.households?.name}</p>
             )}
           </div>
+
+          {isAdmin && (
+            <div className="mt-4">
+              <label className="block text-sm text-text/60 mb-1">Weekly Budget</label>
+              <div className="flex gap-2 items-center">
+                <span className="text-sm text-text/60">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={weeklyBudget}
+                  onChange={(e) => setWeeklyBudget(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-[--radius-btn] border border-secondary bg-background text-text text-sm focus:outline-none focus:border-primary"
+                />
+                <button
+                  onClick={handleSaveWeeklyBudget}
+                  disabled={budgetSaving}
+                  className="px-4 py-2 rounded-[--radius-btn] text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {budgetSaving ? 'Saving...' : budgetSaved ? 'Saved!' : 'Save'}
+                </button>
+              </div>
+              {budgetError && <p className="text-xs text-red-500 mt-1">{budgetError}</p>}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Food Prices section */}
+      {membership && (
+        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
+          <h2 className="text-base font-semibold text-text mb-3">Food Prices</h2>
+          {!foodPrices || foodPrices.length === 0 ? (
+            <p className="text-sm text-text/50">
+              No ingredient prices yet. Add prices in the recipe builder or manage them here.
+            </p>
+          ) : (
+            <div>
+              {foodPrices.map(price => (
+                <div key={price.id}>
+                  <div className="flex items-center justify-between py-3 border-b border-accent/10">
+                    <div>
+                      <span className="text-sm text-text">{price.food_name}</span>
+                      {price.store && (
+                        <span className="text-xs text-text/40 ml-1">{price.store}</span>
+                      )}
+                      <span className="text-xs text-text/50 ml-2">{formatCost(price.cost_per_100g)}/100g</span>
+                    </div>
+                    <button
+                      onClick={() => setConfirmDeletePriceId(price.id)}
+                      className="text-xs text-red-500 hover:text-red-700 transition-colors ml-4"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {confirmDeletePriceId === price.id && (
+                    <div className="flex items-center gap-3 py-2 px-3 bg-red-50 dark:bg-red-900/10 border-b border-accent/10">
+                      <span className="text-xs text-text/60 flex-1">Remove this price entry?</span>
+                      <button
+                        onClick={() => {
+                          deleteFoodPrice.mutate(price.id)
+                          setConfirmDeletePriceId(null)
+                        }}
+                        className="text-xs font-medium text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Remove
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeletePriceId(null)}
+                        className="text-xs text-text/40 hover:text-text transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
