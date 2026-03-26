@@ -15,6 +15,9 @@ import {
   applyYieldFactor,
   YIELD_FACTORS,
 } from '../../utils/nutrition'
+import { useCreateSpendLog } from '../../hooks/useSpendLog'
+import { useFoodPrices, getPriceForIngredient } from '../../hooks/useFoodPrices'
+import { computeRecipeCostPerServing, formatCost } from '../../utils/cost'
 import { supabase } from '../../lib/supabase'
 import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from './NutritionBar'
@@ -256,6 +259,9 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const addIngredient = useAddIngredient()
   const updateIngredient = useUpdateIngredient()
   const removeIngredient = useRemoveIngredient()
+  const spendLog = useCreateSpendLog()
+  const { data: foodPrices } = useFoodPrices()
+  const [cookConfirmation, setCookConfirmation] = useState<string | null>(null)
 
   const [localName, setLocalName] = useState<string | null>(null)
   const [localServings, setLocalServings] = useState<string | null>(null)
@@ -476,6 +482,38 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     })
   }
 
+  function handleMarkAsCooked() {
+    if (!recipe || !ingredients) return
+    const prices = foodPrices ?? []
+    const ingredientsWithCost = ingredients.map(ing => ({
+      quantity_grams: ing.quantity_grams,
+      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id),
+    }))
+    const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(
+      ingredientsWithCost,
+      recipe.servings > 0 ? recipe.servings : 1
+    )
+    const totalCost = costPerServing * (recipe.servings > 0 ? recipe.servings : 1)
+    const isPartial = pricedCount < totalCount
+
+    spendLog.mutate(
+      {
+        recipe_id: recipe.id,
+        amount: totalCost,
+        is_partial: isPartial,
+      },
+      {
+        onSuccess: () => {
+          const msg = isPartial
+            ? `Cooked — partial spend recorded (${formatCost(totalCost)} of estimated total)`
+            : 'Cooked — spend recorded'
+          setCookConfirmation(msg)
+          setTimeout(() => setCookConfirmation(null), 2000)
+        },
+      }
+    )
+  }
+
   const perServingNutrition = useMemo(() => {
     if (!ingredients || !recipe) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
 
@@ -620,6 +658,20 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
               onBlur={handleServingsBlur}
               className="w-20 rounded-[--radius-btn] border border-accent/30 bg-surface px-2 py-1 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
+          </div>
+
+          {/* Mark as Cooked button */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleMarkAsCooked}
+              disabled={spendLog.isPending}
+              className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {spendLog.isPending ? 'Recording...' : 'Mark as Cooked'}
+            </button>
+            {cookConfirmation && (
+              <span className="text-xs text-primary">{cookConfirmation}</span>
+            )}
           </div>
         </div>
 
