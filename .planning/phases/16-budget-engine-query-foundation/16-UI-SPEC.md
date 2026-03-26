@@ -99,11 +99,12 @@ New components introduced in this phase and their visual contracts:
 - Container: `rounded-xl border border-accent/20 bg-surface p-4`
 - Collapsible: chevron toggle button (14×14 SVG, inline pattern matching SlotCard expand button), `aria-label="Toggle budget section"`
 - Default state: expanded
+- Primary focal point: spend bar — color state drives immediate budget awareness.
 - Layout: two rows
   - Row 1: "Weekly Budget" label (text-sm text-text/60) + inline editable amount + "Edit Budget" link
   - Row 2: spend bar + "spent $X.XX of $Y.YY · $Z.ZZ remaining" (text-xs text-text/50)
 - Spend bar: full-width `h-2 rounded-full bg-secondary` track, `bg-primary` fill (healthy), `bg-amber-400` fill (warning), `bg-red-500` fill (over)
-- Per-day cost chips: `flex gap-2 flex-wrap mt-2`, each chip `text-xs px-2 py-0.5 rounded-full bg-background border border-accent/20`
+- Per-day cost chips: `flex gap-2 flex-wrap mt-2`, each chip `text-xs px-2 py-1 rounded-full bg-background border border-accent/20`
 
 ### CostBadge (recipe cards and recipe detail subtitle line)
 
@@ -126,7 +127,7 @@ New components introduced in this phase and their visual contracts:
 - List: rows with food name, price, store, edit/delete inline
 - Row: `flex items-center justify-between py-3 border-b border-accent/10`
 - Missing price indicator: amber dot `w-2 h-2 rounded-full bg-amber-400` before food name
-- "Add price" button: `text-sm px-3 py-1.5 rounded-lg bg-primary/10 text-primary`
+- "Add price" button: `text-sm px-3 py-1 rounded-lg bg-primary/10 text-primary`
 
 ### CookButton (recipe detail view)
 
