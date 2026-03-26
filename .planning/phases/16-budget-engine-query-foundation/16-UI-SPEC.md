@@ -97,10 +97,10 @@ New components introduced in this phase and their visual contracts:
 ### BudgetSummarySection (Plan page, below plan grid)
 
 - Container: `rounded-xl border border-accent/20 bg-surface p-4`
-- Collapsible: chevron toggle button (14×14 SVG, inline pattern matching SlotCard expand button)
+- Collapsible: chevron toggle button (14×14 SVG, inline pattern matching SlotCard expand button), `aria-label="Toggle budget section"`
 - Default state: expanded
 - Layout: two rows
-  - Row 1: "Weekly Budget" label (text-sm text-text/60) + inline editable amount + "Edit" link
+  - Row 1: "Weekly Budget" label (text-sm text-text/60) + inline editable amount + "Edit Budget" link
   - Row 2: spend bar + "spent $X.XX of $Y.YY · $Z.ZZ remaining" (text-xs text-text/50)
 - Spend bar: full-width `h-2 rounded-full bg-secondary` track, `bg-primary` fill (healthy), `bg-amber-400` fill (warning), `bg-red-500` fill (over)
 - Per-day cost chips: `flex gap-2 flex-wrap mt-2`, each chip `text-xs px-2 py-0.5 rounded-full bg-background border border-accent/20`
@@ -124,7 +124,7 @@ New components introduced in this phase and their visual contracts:
 
 - Section header: matches existing Settings section pattern — `text-base font-semibold text-text mb-3`
 - List: rows with food name, price, store, edit/delete inline
-- Row: `flex items-center justify-between py-2.5 border-b border-accent/10`
+- Row: `flex items-center justify-between py-3 border-b border-accent/10`
 - Missing price indicator: amber dot `w-2 h-2 rounded-full bg-amber-400` before food name
 - "Add price" button: `text-sm px-3 py-1.5 rounded-lg bg-primary/10 text-primary`
 
@@ -155,6 +155,7 @@ New components introduced in this phase and their visual contracts:
 | Destructive — delete price | "Remove Price": "Remove this price entry?" with inline confirm row (matching existing inline delete pattern from Phase 13) |
 | Budget over warning label | "Over budget" |
 | Budget warning label | "Near budget limit" |
+| Budget inline edit trigger | "Edit Budget" |
 
 *Source: CONTEXT.md D-01 through D-14 for feature scope. Copy style matches existing app tone (sentence case, plain English, no punctuation on short labels).*
 
@@ -164,7 +165,7 @@ New components introduced in this phase and their visual contracts:
 
 ### Budget Inline Edit (Plan page)
 
-- "Edit" link on the budget section triggers an inline amount input replacing the displayed value
+- "Edit Budget" link on the budget section triggers an inline amount input replacing the displayed value
 - Input: `type="number" min="0" step="0.01"` — CAD $ prefix label beside it
 - Save on blur or Enter key; cancel on Escape
 - No modal — matches inline editing pattern from household name in SettingsPage
