@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Milestone complete
-stopped_at: Phase 17 context gathered
-last_updated: "2026-03-26T01:57:20.777Z"
+status: Ready to execute
+stopped_at: Completed 17-inventory-engine-17-02-PLAN.md
+last_updated: "2026-03-26T03:16:21.410Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 16 — budget-engine-query-foundation
+**Current focus:** Phase 17 — inventory-engine
 
 ## Current Position
 
-Phase: 16
-Plan: Not started
+Phase: 17 (inventory-engine) — EXECUTING
+Plan: 3 of 5
 
 ## Performance Metrics
 
@@ -100,6 +100,8 @@ Plan: Not started
 | Phase 16-budget-engine-query-foundation P01 | 15 | 2 tasks | 13 files |
 | Phase 16-budget-engine-query-foundation P02 | 3 | 2 tasks | 5 files |
 | Phase 16-budget-engine-query-foundation P03 | 25 | 2 tasks | 8 files |
+| Phase 17-inventory-engine P01 | 4 | 2 tasks | 6 files |
+| Phase 17-inventory-engine P02 | 11 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -231,6 +233,11 @@ Recent decisions affecting current work:
 - [Phase 16-budget-engine-query-foundation]: Cost badge on RecipesPage list cards omitted — list view does not load ingredient data; badge only in RecipeBuilder where ingredients are already loaded
 - [Phase 16-budget-engine-query-foundation]: cost.ts and useFoodPrices.ts created in 16-03 execution because 16-02 had not run yet; files match 16-02 spec exactly
 - [Phase 16-budget-engine-query-foundation]: BudgetSummarySection receives onEditBudget callback from parent; parent owns the supabase mutation — consistent with existing household update patterns
+- [Phase 17-inventory-engine]: Simple quantity model (not ledger-based): quantity_remaining updated directly
+- [Phase 17-inventory-engine]: UPDATE RLS does not check added_by — any household member can update shared inventory items
+- [Phase 17-inventory-engine]: convertToGrams returns null for units type — discrete counts cannot be compared by weight for FIFO
+- [Phase 17-inventory-engine]: useAddInventoryItem returns params from mutationFn so onSuccess can call saveFoodPrice without closure state
+- [Phase 17-inventory-engine]: InventoryUnit 'L' lowercased to 'l' before passing to normaliseToCostPer100g which expects lowercase
 
 ### v2.0 Decisions
 
@@ -267,6 +274,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T01:57:20.771Z
-Stopped at: Phase 17 context gathered
-Resume file: .planning/phases/17-inventory-engine/17-CONTEXT.md
+Last session: 2026-03-26T03:16:16.062Z
+Stopped at: Completed 17-inventory-engine-17-02-PLAN.md
+Resume file: None

@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
 | 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
 | 16. Budget Engine & Query Foundation | 4/4 | Complete    | 2026-03-26 |
-| 17. Inventory Engine | 0/5 | Not started | - |
+| 17. Inventory Engine | 2/5 | In Progress|  |
 | 18. Grocery List Generation | 0/TBD | Not started | - |
 | 19. Drag-and-Drop Planner | 0/TBD | Not started | - |
 | 20. Feedback Engine & Dietary Restrictions | 0/TBD | Not started | - |
@@ -348,8 +348,8 @@ Plans:
 **Plans**: 5 plans
 **UI hint**: yes
 Plans:
-- [ ] 17-01-PLAN.md — DB migration, types, utility functions, query keys, tests
-- [ ] 17-02-PLAN.md — CRUD hooks, InventoryPage with tabs, add/edit/remove modal, navigation
+- [x] 17-01-PLAN.md — DB migration, types, utility functions, query keys, tests
+- [x] 17-02-PLAN.md — CRUD hooks, InventoryPage with tabs, add/edit/remove modal, navigation
 - [ ] 17-03-PLAN.md — Barcode scanning, QuickScanMode, Open Food Facts lookup
 - [ ] 17-04-PLAN.md — Cook deduction (FIFO), receipt, HomePage widget, leftover support
 - [ ] 17-05-PLAN.md — Human verification of all inventory features
