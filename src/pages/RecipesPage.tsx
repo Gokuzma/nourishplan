@@ -7,6 +7,7 @@ import { useRecipes, useCreateRecipe, useDeleteRecipe } from '../hooks/useRecipe
 function relativeTime(isoString: string): string {
   const diffMs = Date.now() - new Date(isoString).getTime()
   const days = Math.floor(diffMs / 86400000)
+  if (days < 0) return 'today'
   if (days === 0) return 'today'
   if (days === 1) return '1 day ago'
   if (days < 30) return `${days} days ago`

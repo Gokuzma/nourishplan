@@ -20,6 +20,7 @@ export function LogEntryItem({ log, onEdit, onDelete }: LogEntryItemProps) {
 
   function handleDeleteClick(e: React.MouseEvent) {
     e.stopPropagation()
+    if (!window.confirm('Delete this entry?')) return
     onDelete(log.id)
   }
 
@@ -55,7 +56,7 @@ export function LogEntryItem({ log, onEdit, onDelete }: LogEntryItemProps) {
               <span className="text-xs text-text/30">&middot;</span>
             )}
             <span className="text-xs text-text/50">
-              {`${log.servings_logged} ${log.serving_unit ?? 'serving'}`}
+              {`${parseFloat(log.servings_logged.toFixed(2))} ${log.serving_unit ?? 'serving'}`}
             </span>
           </div>
         </div>

@@ -9,15 +9,27 @@ import type { NormalizedFoodResult } from '../types/database'
  * exact match (1.0), starts-with (0.9), word boundary (0.7), contains (0.5), no match (0.3).
  * Returns 0.5 for empty queries (neutral).
  */
-export function scoreFood(name: string, query: string): number {
+export function scoreFood(name: string, query: string, dataType?: string): number {
   const n = name.toLowerCase()
   const q = query.toLowerCase().trim()
   if (!q) return 0.5
-  if (n === q) return 1.0
-  if (n.startsWith(q)) return 0.9
-  if (n.split(/\s+/).some(word => word.startsWith(q))) return 0.7
-  if (n.includes(q)) return 0.5
-  return 0.3
+  let score: number
+  if (n === q) score = 1.0
+  else if (n.startsWith(q)) score = 0.9
+  else if (n.split(/\s+/).some(word => word.startsWith(q))) score = 0.7
+  else if (n.includes(q)) score = 0.5
+  else score = 0.3
+
+  // Boost Foundation/SR Legacy data types
+  if (dataType === 'Foundation' || dataType === 'SR Legacy') score += 0.1
+  // Penalize ALL-CAPS names (branded products)
+  if (name === name.toUpperCase() && name.length > 3) score -= 0.1
+  // Penalize names with 2+ commas (obscure variants)
+  if ((name.match(/,/g) ?? []).length >= 2) score -= 0.05
+  // Boost whole foods containing ", raw"
+  if (n.includes(', raw')) score += 0.02
+
+  return score
 }
 
 /**
@@ -40,6 +52,8 @@ export function useFoodSearch(query: string) {
     },
     enabled: query.length >= 2,
     staleTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attempt) => attempt * 1500,
   })
 
   const cnfQuery = useQuery({
@@ -54,7 +68,8 @@ export function useFoodSearch(query: string) {
     },
     enabled: query.length >= 2,
     staleTime: 5 * 60 * 1000,
-    retry: 1,
+    retry: 2,
+    retryDelay: (attempt) => attempt * 1500,
   })
 
   // Show results progressively: loading only while both are still fetching
@@ -84,7 +99,7 @@ export function useFoodSearch(query: string) {
       }
     }
 
-    const scored = merged.map(food => ({ food, score: scoreFood(food.name, query) }))
+    const scored = merged.map(food => ({ food, score: scoreFood(food.name, query, food.dataType) }))
     scored.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score
       return a.food.name.length - b.food.name.length

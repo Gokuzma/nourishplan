@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import type { StorageLocation, InventoryItem, RemovalReason } from '../types/database'
+import type { BarcodeProduct } from '../utils/barcodeLookup'
 import { useInventoryItems, useRemoveInventoryItem } from '../hooks/useInventory'
 import { InventoryItemRow } from '../components/inventory/InventoryItemRow'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
+import { BarcodeScanner } from '../components/inventory/BarcodeScanner'
+import { QuickScanMode } from '../components/inventory/QuickScanMode'
 
 const TABS: { label: string; value: StorageLocation }[] = [
   { label: 'Pantry', value: 'pantry' },
@@ -14,12 +17,16 @@ export function InventoryPage() {
   const [activeTab, setActiveTab] = useState<StorageLocation>('fridge')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editItem, setEditItem] = useState<InventoryItem | null>(null)
+  const [showScanner, setShowScanner] = useState(false)
+  const [showQuickScan, setShowQuickScan] = useState(false)
+  const [scanResult, setScanResult] = useState<{ product: BarcodeProduct | null; barcode: string } | null>(null)
 
   const { data: items, isPending } = useInventoryItems(activeTab)
   const removeItem = useRemoveInventoryItem()
 
   function handleEdit(item: InventoryItem) {
     setEditItem(item)
+    setScanResult(null)
     setShowAddModal(true)
   }
 
@@ -30,6 +37,14 @@ export function InventoryPage() {
   function handleModalClose() {
     setShowAddModal(false)
     setEditItem(null)
+    setScanResult(null)
+  }
+
+  function handleBarcodeFound(product: BarcodeProduct | null, barcode: string) {
+    setShowScanner(false)
+    setScanResult({ product, barcode })
+    setEditItem(null)
+    setShowAddModal(true)
   }
 
   const activeTabId = `tab-${activeTab}`
@@ -47,14 +62,19 @@ export function InventoryPage() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            title="Coming soon"
-            disabled
-            className="rounded-[--radius-btn] border border-secondary px-3 py-2 text-sm text-text/40 opacity-50 pointer-events-none"
+            onClick={() => setShowScanner(true)}
+            className="rounded-[--radius-btn] border border-secondary px-3 py-2 text-sm text-text/70 hover:text-text transition-colors"
           >
             Scan
           </button>
           <button
-            onClick={() => { setEditItem(null); setShowAddModal(true) }}
+            onClick={() => setShowQuickScan(true)}
+            className="rounded-[--radius-btn] border border-secondary px-3 py-2 text-sm text-text/70 hover:text-text transition-colors"
+          >
+            Quick Scan
+          </button>
+          <button
+            onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
             className="rounded-[--radius-btn] bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
           >
             Add Item
@@ -123,6 +143,18 @@ export function InventoryPage() {
         isOpen={showAddModal}
         onClose={handleModalClose}
         editItem={editItem}
+        scanResult={scanResult}
+      />
+
+      <BarcodeScanner
+        isOpen={showScanner}
+        onClose={() => setShowScanner(false)}
+        onBarcodeFound={handleBarcodeFound}
+      />
+
+      <QuickScanMode
+        isOpen={showQuickScan}
+        onClose={() => setShowQuickScan(false)}
       />
     </div>
   )

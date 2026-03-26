@@ -31,6 +31,7 @@ const DEFAULT_YIELD_FACTOR = YIELD_FACTORS['vegetables'] // 0.85
 function relativeTime(isoString: string): string {
   const diffMs = Date.now() - new Date(isoString).getTime()
   const days = Math.floor(diffMs / 86400000)
+  if (days < 0) return 'today'
   if (days === 0) return 'today'
   if (days === 1) return '1 day ago'
   if (days < 30) return `${days} days ago`
@@ -270,7 +271,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const [localNotes, setLocalNotes] = useState<string | null>(null)
   const [ingredientSearchOpen, setIngredientSearchOpen] = useState(false)
   const [showFoodSearch, setShowFoodSearch] = useState(false)
-  const [searchTab, setSearchTab] = useState<'food' | 'recipe'>('food')
+  const [, setSearchTab] = useState<'food' | 'recipe'>('food')
   const [pendingFood, setPendingFood] = useState<NormalizedFoodResult | null>(null)
   const [pendingRecipe, setPendingRecipe] = useState<Recipe | null>(null)
   const [editingIngredient, setEditingIngredient] = useState<RecipeIngredient | null>(null)

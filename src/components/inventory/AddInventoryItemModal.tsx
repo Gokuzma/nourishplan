@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { InventoryItem, StorageLocation, InventoryUnit } from '../../types/database'
+import type { BarcodeProduct } from '../../utils/barcodeLookup'
 import { useAddInventoryItem, useUpdateInventoryItem } from '../../hooks/useInventory'
 
 interface AddInventoryItemModalProps {
   isOpen: boolean
   onClose: () => void
   editItem?: InventoryItem | null
+  scanResult?: { product: BarcodeProduct | null; barcode: string } | null
 }
 
 const LOCATION_OPTIONS: { label: string; value: StorageLocation }[] = [
@@ -25,7 +27,7 @@ function defaultExpiryDate(item?: InventoryItem | null): string {
   return ''
 }
 
-export function AddInventoryItemModal({ isOpen, onClose, editItem }: AddInventoryItemModalProps) {
+export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult }: AddInventoryItemModalProps) {
   const addItem = useAddInventoryItem()
   const updateItem = useUpdateInventoryItem()
 
@@ -50,6 +52,15 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem }: AddInventor
       setExpiryDate(editItem.expires_at ?? defaultExpiryDate(editItem))
       setPurchasePrice(editItem.purchase_price ?? '')
       setIsStaple(editItem.is_staple)
+    } else if (scanResult?.product) {
+      setFoodName(scanResult.product.food_name)
+      setBrand(scanResult.product.brand)
+      setQuantity(1)
+      setUnit('units')
+      setLocation('fridge')
+      setExpiryDate('')
+      setPurchasePrice('')
+      setIsStaple(false)
     } else {
       setFoodName('')
       setBrand('')
@@ -61,7 +72,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem }: AddInventor
       setIsStaple(false)
     }
     setError(null)
-  }, [editItem, isOpen])
+  }, [editItem, scanResult, isOpen])
 
   if (!isOpen) return null
 
@@ -96,6 +107,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem }: AddInventor
         await addItem.mutateAsync({
           food_name: foodName.trim(),
           brand: brand.trim() || undefined,
+          food_id: scanResult?.barcode || undefined,
           quantity_remaining: quantity as number,
           unit,
           storage_location: location,

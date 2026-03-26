@@ -130,7 +130,7 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 - [ ] **BUDG-01**: User can set a weekly household food budget
 - [ ] **BUDG-02**: Each recipe displays a computed cost per serving based on ingredient costs
 - [ ] **BUDG-03**: Plan page shows weekly spend vs budget with remaining balance
-- [ ] **BUDG-04**: User can enter cost per unit/weight on recipe ingredients
+- [x] **BUDG-04**: User can enter cost per unit/weight on recipe ingredients
 
 ### Inventory
 
@@ -284,7 +284,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUDG-01 | Phase 16 | Pending |
 | BUDG-02 | Phase 16 | Pending |
 | BUDG-03 | Phase 16 | Pending |
-| BUDG-04 | Phase 16 | Pending |
+| BUDG-04 | Phase 16 | Complete |
 | INVT-01 | Phase 17 | Pending |
 | INVT-02 | Phase 17 | Pending |
 | INVT-03 | Phase 17 | Pending |

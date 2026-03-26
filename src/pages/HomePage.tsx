@@ -27,13 +27,6 @@ function todayString(): string {
   return `${y}-${m}-${d}`
 }
 
-/** Format a YYYY-MM-DD string as a human-readable date without constructing a Date object. */
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-')
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`
-}
-
 /** Compute the day_index for a YYYY-MM-DD string relative to its week start. */
 function getDayIndex(dateStr: string, weekStart: string): number {
   const [dy, dm, dd] = dateStr.split('-').map(Number)
@@ -280,7 +273,7 @@ export function HomePage() {
             className="rounded-[--radius-btn] border border-accent/30 bg-surface px-3 py-1.5 text-sm text-text font-sans focus:outline-none focus:border-primary"
             aria-label="Select date"
           />
-          <span className="text-xs text-text/40 pl-1">{formatDate(selectedDate)}</span>
+          {/* date input already shows selected date */}
         </div>
         {session?.user.id && (
           <MemberSelector
@@ -292,7 +285,7 @@ export function HomePage() {
 
       {/* Progress rings */}
       <div className="bg-surface rounded-[--radius-card] border border-secondary p-4">
-        <div className="flex items-center justify-around gap-2">
+        <div className="flex items-center justify-around gap-2 overflow-x-auto">
           <div className="flex flex-col items-center gap-1.5">
             <ProgressRing
               value={totals.calories}

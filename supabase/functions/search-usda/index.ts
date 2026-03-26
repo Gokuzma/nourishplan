@@ -119,30 +119,47 @@ serve(async (req) => {
     pageSize: String(pageSize),
   });
 
-  let data: { foods?: UsdaFood[] };
-  try {
-    const response = await fetch(
-      `https://api.nal.usda.gov/fdc/v1/foods/search?${params.toString()}`,
-    );
+  const url = `https://api.nal.usda.gov/fdc/v1/foods/search?${params.toString()}`;
+  let data: { foods?: UsdaFood[] } | undefined;
 
-    if (!response.ok) {
-      throw new Error(`USDA API returned ${response.status}`);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new Error(`USDA API returned ${response.status}`);
+      }
+
+      data = await response.json();
+      break;
+    } catch {
+      if (attempt < 1) {
+        await new Promise((r) => setTimeout(r, 1000));
+        continue;
+      }
+      return new Response(
+        JSON.stringify({ error: "USDA search unavailable" }),
+        { status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
     }
-
-    data = await response.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ error: "USDA search unavailable" }),
-      { status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
   }
 
-  const foods = data.foods ?? [];
+  const foods = (data?.foods) ?? [];
   const deduplicated = deduplicateByDescription(foods);
   const normalized = deduplicated.map(normalizeFood);
 
+  // Filter out foods with impossible nutrition data (BUG-M04)
+  const filtered = normalized.filter((f) => {
+    if (f.protein < 0 || f.fat < 0 || f.carbs < 0 || f.calories < 0) return false;
+    if (f.calories === 0 && (f.protein + f.fat + f.carbs) > 0) return false;
+    return true;
+  });
+
   return new Response(
-    JSON.stringify(normalized),
+    JSON.stringify(filtered),
     { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
   );
 });

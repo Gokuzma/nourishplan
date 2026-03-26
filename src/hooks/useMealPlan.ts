@@ -85,7 +85,7 @@ export function useMealPlanSlots(planId: string | undefined) {
         .order('slot_order')
 
       if (error) throw error
-      return (data ?? []) as SlotWithMeal[]
+      return (data ?? []) as unknown as SlotWithMeal[]
     },
     enabled: !!planId,
   })
@@ -148,7 +148,6 @@ export function useClearSlot() {
   return useMutation({
     mutationFn: async ({
       slotId,
-      planId,
     }: {
       slotId: string
       planId: string

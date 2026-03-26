@@ -71,6 +71,7 @@ export function useCreateCustomFood() {
         .single()
 
       if (error) throw error
+      if (!data) throw new Error('Save failed — food was not created.')
       return data
     },
     onSuccess: () => {

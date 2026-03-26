@@ -206,6 +206,7 @@ export function MealBuilder({ mealId }: MealBuilderProps) {
       meal_id: mealId,
       item_type: food.source === 'custom' ? 'food' : 'food',
       item_id: food.id,
+      item_name: food.name,
       quantity_grams: grams,
       calories_per_100g: food.calories,
       protein_per_100g: food.protein,
