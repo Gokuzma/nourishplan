@@ -57,7 +57,7 @@ function makeResolvedSlot(overrides: {
   }[]
 } = {}) {
   return {
-    meal_id: overrides.meal_id ?? 'meal-1',
+    meal_id: 'meal_id' in overrides ? (overrides.meal_id ?? null) : 'meal-1',
     meal_items: overrides.meal_items ?? [],
   }
 }
