@@ -353,6 +353,18 @@ export type Database = {
         Update: Partial<Omit<InventoryItem, 'id' | 'created_at'>>
         Relationships: []
       }
+      grocery_lists: {
+        Row: GroceryList
+        Insert: Omit<GroceryList, 'id' | 'generated_at'> & { id?: string; generated_at?: string }
+        Update: Partial<Omit<GroceryList, 'id'>>
+        Relationships: []
+      }
+      grocery_items: {
+        Row: GroceryItem
+        Insert: Omit<GroceryItem, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
+        Update: Partial<Omit<GroceryItem, 'id' | 'created_at'>>
+        Relationships: []
+      }
     }
     Enums: {
       household_role: 'admin' | 'member'
@@ -383,6 +395,35 @@ export interface InventoryItem {
   removed_reason: RemovalReason | null
   is_leftover: boolean
   leftover_from_recipe_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface GroceryList {
+  id: string
+  household_id: string
+  week_start: string
+  generated_at: string
+  generated_by: string
+}
+
+export interface GroceryItem {
+  id: string
+  list_id: string
+  household_id: string
+  food_name: string
+  food_id: string | null
+  quantity: number | null
+  unit: string | null
+  category: string
+  category_source: 'auto' | 'user'
+  is_checked: boolean
+  checked_by: string | null
+  checked_at: string | null
+  is_manual: boolean
+  is_staple_restock: boolean
+  estimated_cost: number | null
+  notes: string | null
   created_at: string
   updated_at: string
 }
