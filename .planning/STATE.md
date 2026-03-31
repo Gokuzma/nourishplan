@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Milestone complete
-stopped_at: Phase 18 UI-SPEC approved
-last_updated: "2026-03-31T00:39:39.645Z"
+status: Ready to execute
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-03-31T01:15:29.185Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 17 — inventory-engine
+**Current focus:** Phase 18 — grocery-list-generation
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
+Phase: 18 (grocery-list-generation) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -103,6 +103,7 @@ Plan: Not started
 | Phase 17-inventory-engine P01 | 4 | 2 tasks | 6 files |
 | Phase 17-inventory-engine P02 | 11 | 2 tasks | 8 files |
 | Phase 17-inventory-engine P04 | 7 | 2 tasks | 6 files |
+| Phase 18-grocery-list-generation P01 | 324 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -241,6 +242,9 @@ Recent decisions affecting current work:
 - [Phase 17-inventory-engine]: InventoryUnit 'L' lowercased to 'l' before passing to normaliseToCostPer100g which expects lowercase
 - [Phase 17-inventory-engine]: Deduction failure is non-blocking: spendLog always fires first; deduction runs in onSuccess callback; errors caught silently; receipt shows error state if deduction failed
 - [Phase 17-inventory-engine]: leftoverDefaults pre-fill uses UTC date arithmetic (setUTCDate) consistent with getWeekStart/getDayIndex UTC pattern
+- [Phase 18-grocery-list-generation]: household_id denormalized on grocery_items for RLS efficiency — avoids join to grocery_lists on every row-level check
+- [Phase 18-grocery-list-generation]: aggregateIngredients accepts pre-resolved slot data — caller fetches nested recipe_ingredients before calling
+- [Phase 18-grocery-list-generation]: MAX_RECIPE_DEPTH=5 with console.warn at limit — prevents infinite recursion on circular recipe references
 
 ### v2.0 Decisions
 
@@ -277,6 +281,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T00:39:39.639Z
-Stopped at: Phase 18 UI-SPEC approved
-Resume file: .planning/phases/18-grocery-list-generation/18-UI-SPEC.md
+Last session: 2026-03-31T01:15:29.179Z
+Stopped at: Completed 18-01-PLAN.md
+Resume file: None

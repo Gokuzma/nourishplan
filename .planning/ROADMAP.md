@@ -179,7 +179,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
 | 16. Budget Engine & Query Foundation | 4/4 | Complete    | 2026-03-26 |
 | 17. Inventory Engine | 4/5 | Complete    | 2026-03-26 |
-| 18. Grocery List Generation | 0/3 | Not started | - |
+| 18. Grocery List Generation | 1/3 | In Progress|  |
 | 19. Drag-and-Drop Planner | 0/TBD | Not started | - |
 | 20. Feedback Engine & Dietary Restrictions | 0/TBD | Not started | - |
 | 21. Schedule Model | 0/TBD | Not started | - |
@@ -367,7 +367,7 @@ Plans:
 **Plans**: 3 plans
 **UI hint**: yes
 Plans:
-- [ ] 18-01-PLAN.md — DB migration, types, query keys, and grocery generation algorithm with tests
+- [x] 18-01-PLAN.md — DB migration, types, query keys, and grocery generation algorithm with tests
 - [ ] 18-02-PLAN.md — Hooks with Supabase realtime, GroceryPage UI, components, nav, and routing
 - [ ] 18-03-PLAN.md — Human verification of all grocery list features
 
