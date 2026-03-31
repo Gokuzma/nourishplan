@@ -34,7 +34,7 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Icon gaps, badge padding, inline pill spacing |
-| sm | 8px | Gap between adjacent badges, tight row spacing |
+| sm | 8px | Gap between adjacent badges, tight row spacing, category section header top padding |
 | md | 16px | Default horizontal page padding (px-4), row internal padding |
 | lg | 24px | Page top padding (py-6), between list sections |
 | xl | 32px | Between major UI blocks (header, category sections) |
@@ -43,7 +43,6 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Touch targets: minimum 44px height on all interactive buttons (tappable rows, check-off controls, manual add button) — matches existing `min-h-[44px]` convention in InventoryItemRow
-- Category section headers: 12px top padding within sections for visual grouping without full lg gap
 
 Source: `src/pages/InventoryPage.tsx`, `src/components/inventory/InventoryItemRow.tsx`, CLAUDE.md page spacing convention.
 
@@ -55,14 +54,14 @@ Source: `src/pages/InventoryPage.tsx`, `src/components/inventory/InventoryItemRo
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (regular) | 1.5 |
 | Label | 12px (text-xs) | 400 (regular) | 1.4 |
-| Heading (page) | 24px (text-2xl) | 700 (bold) | 1.2 |
+| Heading (page) | 24px (text-2xl) | 600 (semibold) | 1.2 |
 | Subheading (category) | 16px (text-base) | 600 (semibold) | 1.3 |
 
 Notes:
-- Item names use text-sm font-medium (500) — consistent with InventoryItemRow `font-medium` on food_name
-- Badge/pill text uses text-xs at weight 500 (font-medium) for readability at small size
+- Item names use text-sm at weight 400 (regular)
+- Badge/pill text uses text-xs at weight 400 (regular)
 - Estimated cost totals use text-sm font-semibold (600) to draw attention
-- Page heading pattern matches InventoryPage: `text-2xl font-bold text-text`
+- Page heading uses `text-2xl font-semibold text-text` — aligns with project's semibold-for-headings pattern
 
 Source: `src/components/inventory/InventoryItemRow.tsx`, `src/pages/InventoryPage.tsx`.
 
@@ -119,7 +118,7 @@ Existing components to reuse without modification:
 /grocery route
   px-4 py-6 font-sans pb-[64px]
   ├── Page header: "Grocery List" h1 + regenerate button (top-right)
-  ├── Cost summary bar: "Est. total: $X.XX" + over-budget warning if applicable
+  ├── Cost summary bar: "Est. total: $X.XX" + over-budget warning if applicable  ← PRIMARY FOCAL POINT when list exists
   ├── [Need to Buy] section — expanded by default
   │   ├── Category sections (Produce, Dairy, etc.) — always expanded
   │   │   └── GroceryItemRow × N (unchecked at top, checked at bottom)
@@ -128,6 +127,8 @@ Existing components to reuse without modification:
   │   └── GroceryItemRow × N (read-only, greyed out, no check interaction)
   └── Manual add input — fixed at bottom above TabBar, or inline at section bottom
 ```
+
+**Focal point — generated-list state:** The cost summary bar is the primary visual anchor when a list exists. It sits immediately below the page header, spans full width, uses `bg-surface border border-secondary rounded-[--radius-card] px-4 py-3`, and displays the estimated total in `text-sm font-semibold (600)`. The over-budget warning, if present, is appended directly below the bar. This placement draws the eye before the item list and communicates shopping progress at a glance.
 
 ### Check-off Interaction
 
@@ -140,21 +141,21 @@ Existing components to reuse without modification:
 ### GroceryItemRow Anatomy
 
 ```
-[ ] Checkbox  |  Item name (text-sm font-medium)  |  Qty + unit  |  $X.XX or "?"
+[ ] Checkbox  |  Item name (text-sm weight-400)  |  Qty + unit  |  $X.XX or "?"
               |  Restock badge (if is_staple low-stock)
               |  Merged from X recipes (text-xs text-text/50, shown on expand)
 ```
 
 - Checkbox: 20×20px styled square with `border-2 border-secondary`, checked state fills with `bg-primary`.
 - No expand/confirm flow needed — check is the primary action. Undo toast handles accidental taps.
-- Restock badge: `bg-accent/20 text-accent text-xs px-1.5 py-0.5 rounded-full font-medium` — "Restock" label.
+- Restock badge: `bg-accent/20 text-accent text-xs px-1.5 py-0.5 rounded-full` — "Restock" label.
 - Price missing: show `text-text/40` "?" in price column.
 
 ### Generate / Regenerate
 
 - "Generate Grocery List" button: shown when no list exists for the current week. Full-width, `bg-accent text-white rounded-[--radius-btn] min-h-[44px]`.
-- "Regenerate" button: shown when list exists — small secondary button top-right of page header. `text-sm text-text/60 border border-secondary rounded-[--radius-btn] px-3 py-1.5 min-h-[44px]`.
-- Regenerate triggers a confirmation: inline confirmation row (no modal) with "Regenerate — checked items will be reset" warning. Uses same inline confirm pattern as InventoryItemRow.
+- "Regenerate List" button: shown when list exists — small secondary button top-right of page header. `text-sm text-text/60 border border-secondary rounded-[--radius-btn] px-3 py-1.5 min-h-[44px]`.
+- Regenerate List triggers a confirmation: inline confirmation row (no modal) with "Regenerate List — checked items will be reset" warning. Uses same inline confirm pattern as InventoryItemRow.
 - Loading state: button disabled with `opacity-50` during generation. No spinner component — opacity is sufficient.
 
 ### Over-Budget Warning Banner
@@ -199,8 +200,8 @@ Inline at bottom of "Need to Buy" section:
 | Empty (no plan) | No active meal plan this week | Empty state: heading + body + Plan page link |
 | Empty (no ingredients) | Plan exists but has no ingredients | Empty state: heading + body copy |
 | Loading | Generation in progress | Button opacity-50, no spinner |
-| Generated | List exists | Full list UI |
-| Over budget | Total > weekly budget | Red warning banner |
+| Generated | List exists | Full list UI — cost summary bar is primary focal point |
+| Over budget | Total > weekly budget | Red warning banner below cost summary bar |
 | Item checked | User taps row | Strikethrough + opacity-40 + slides to bottom + Undo toast |
 | Realtime update | Another household member checks off | Optimistic update via Supabase realtime channel |
 
@@ -211,8 +212,8 @@ Inline at bottom of "Need to Buy" section:
 | Element | Copy |
 |---------|------|
 | Primary CTA (no list) | "Generate Grocery List" |
-| Regenerate button | "Regenerate" |
-| Regenerate confirmation | "Regenerate — checked items will be reset. Continue?" |
+| Regenerate button | "Regenerate List" |
+| Regenerate confirmation | "Regenerate List — checked items will be reset. Continue?" |
 | Empty state heading (no plan) | "No active meal plan" |
 | Empty state body (no plan) | "Create a meal plan for this week to generate your grocery list." |
 | Empty state CTA (no plan) | "Go to Plan" (links to /plan) |
