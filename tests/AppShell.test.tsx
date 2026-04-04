@@ -41,7 +41,7 @@ describe('AppShell', () => {
     expect(screen.queryByText('Foods')).toBeNull()
   })
 
-  it('Sidebar renders 8 navigation items including Meals, Inventory, and functional Plan', async () => {
+  it('Sidebar renders 9 navigation items including Meals, Inventory, Grocery, and functional Plan', async () => {
     const { Sidebar } = await import('../src/components/layout/Sidebar')
 
     render(
@@ -55,6 +55,7 @@ describe('AppShell', () => {
     expect(screen.getByText('Meals')).toBeInTheDocument()
     expect(screen.getByText('Plan')).toBeInTheDocument()
     expect(screen.getByText('Inventory')).toBeInTheDocument()
+    expect(screen.getByText('Grocery')).toBeInTheDocument()
     expect(screen.getByText('Household')).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
     expect(screen.getByText('User Guide')).toBeInTheDocument()
