@@ -1,0 +1,103 @@
+- generic [ref=e5]:
+  - main [ref=e41]:
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - heading "Grocery List" [level=1] [ref=e44]
+        - button "Regenerate List" [ref=e45]
+      - generic [ref=e46]:
+        - generic [ref=e47]: "Est. total: $0.00"
+        - generic [ref=e48]: 1 of 4 checked
+      - generic [ref=e49]:
+        - heading "Need to Buy" [level=2] [ref=e50]
+        - region "Meat & Seafood" [ref=e51]:
+          - heading "Meat & Seafood" [level=2] [ref=e52]
+          - button "CHICKEN — checked" [ref=e54] [cursor=pointer]:
+            - img [ref=e56]
+            - generic [ref=e58]:
+              - text: CHICKEN
+              - generic [ref=e59]: 350 g
+            - generic [ref=e60]:
+              - generic [ref=e61]: "?"
+              - link "Search for CHICKEN at a grocery store" [ref=e62]:
+                - /url: https://www.google.com/search?q=buy+CHICKEN+grocery
+                - text: 🔍
+        - region "Other" [ref=e63]:
+          - heading "Other" [level=2] [ref=e64]
+          - button "paper towels — unchecked" [ref=e66] [cursor=pointer]:
+            - generic [ref=e68]: paper towels
+            - generic [ref=e69]:
+              - generic [ref=e70]: "?"
+              - link "Search for paper towels at a grocery store" [ref=e71]:
+                - /url: https://www.google.com/search?q=buy+paper%20towels+grocery
+                - text: 🔍
+        - region "Pantry/Dry Goods" [ref=e72]:
+          - heading "Pantry/Dry Goods" [level=2] [ref=e73]
+          - button "RICE — unchecked" [ref=e75] [cursor=pointer]:
+            - generic [ref=e77]:
+              - text: RICE
+              - generic [ref=e78]: 150 g
+            - generic [ref=e79]:
+              - generic [ref=e80]: "?"
+              - link "Search for RICE at a grocery store" [ref=e81]:
+                - /url: https://www.google.com/search?q=buy+RICE+grocery
+                - text: 🔍
+        - region "Produce" [ref=e82]:
+          - heading "Produce" [level=2] [ref=e83]
+          - button "Broccoli raab, raw — unchecked" [ref=e85] [cursor=pointer]:
+            - generic [ref=e87]:
+              - text: Broccoli raab, raw
+              - generic [ref=e88]: 200 g
+            - generic [ref=e89]:
+              - generic [ref=e90]: "?"
+              - link "Search for Broccoli raab, raw at a grocery store" [ref=e91]:
+                - /url: https://www.google.com/search?q=buy+Broccoli%20raab%2C%20raw+grocery
+                - text: 🔍
+        - generic [ref=e92]:
+          - textbox "Add an item..." [ref=e93]
+          - button "Add" [ref=e94]
+  - navigation [ref=e120]:
+    - link "🏠 Home" [ref=e121] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e122]: 🏠
+      - generic [ref=e123]: Home
+    - link "📖 Recipes" [ref=e124] [cursor=pointer]:
+      - /url: /recipes
+      - generic [ref=e125]: 📖
+      - generic [ref=e126]: Recipes
+    - link "📋 Plan" [ref=e127] [cursor=pointer]:
+      - /url: /plan
+      - generic [ref=e128]: 📋
+      - generic [ref=e129]: Plan
+    - button "More navigation options" [ref=e130]:
+      - generic [ref=e131]: ☰
+      - generic [ref=e132]: More
+  - generic [ref=e95]:
+    - generic [ref=e96]: More
+    - navigation [ref=e97]:
+      - link "🍽️ Meals" [ref=e98] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e99]: 🍽️
+        - generic [ref=e100]: Meals
+      - link "📦 Inventory" [ref=e101] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e102]: 📦
+        - generic [ref=e103]: Inventory
+      - link "🛒 Grocery" [ref=e104] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e105]: 🛒
+        - generic [ref=e106]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e107] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e108]: 👨‍👩‍👧
+        - generic [ref=e109]: Household
+      - link "⚙️ Settings" [ref=e110] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e111]: ⚙️
+        - generic [ref=e112]: Settings
+      - link "📘 User Guide" [ref=e113] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e114]: 📘
+        - generic [ref=e115]: User Guide
+    - button "🚪 Log Out" [ref=e117]:
+      - generic [ref=e118]: 🚪
+      - generic [ref=e119]: Log Out

@@ -1,0 +1,404 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]:
+      - text: NourishPlan
+      - paragraph [ref=e8]: The Millers
+    - navigation [ref=e9]:
+      - link "🏠 Home" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]: 🏠
+        - generic [ref=e12]: Home
+      - link "📖 Recipes" [ref=e13] [cursor=pointer]:
+        - /url: /recipes
+        - generic [ref=e14]: 📖
+        - generic [ref=e15]: Recipes
+      - link "🍽️ Meals" [ref=e16] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e17]: 🍽️
+        - generic [ref=e18]: Meals
+      - link "📋 Plan" [ref=e19] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e20]: 📋
+        - generic [ref=e21]: Plan
+      - link "📦 Inventory" [ref=e22] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e23]: 📦
+        - generic [ref=e24]: Inventory
+      - link "🛒 Grocery" [ref=e25] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e26]: 🛒
+        - generic [ref=e27]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e28] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e29]: 👨‍👩‍👧
+        - generic [ref=e30]: Household
+      - link "⚙️ Settings" [ref=e31] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e32]: ⚙️
+        - generic [ref=e33]: Settings
+      - link "📘 User Guide" [ref=e34] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e35]: 📘
+        - generic [ref=e36]: User Guide
+    - button "🚪 Log Out" [ref=e38]:
+      - generic [ref=e39]: 🚪
+      - generic [ref=e40]: Log Out
+  - main [ref=e41]:
+    - generic [ref=e902]:
+      - button "← Meals" [ref=e903]
+      - textbox "Meal name" [ref=e905]: Chicken Broccoli Bowl
+      - generic [ref=e906]:
+        - heading "Items" [level=2] [ref=e907]
+        - generic [ref=e1299]:
+          - generic [ref=e1300]:
+            - generic [ref=e1301]:
+              - generic [ref=e1302]: F
+              - paragraph [ref=e1303]: CHICKEN
+            - paragraph [ref=e1304]: 160.5 cal · 32.1g P · 0.0g C · 2.7g F
+          - button "150g" [ref=e1305]
+          - button "Remove item" [ref=e1306]: ×
+      - button "Search ingredients" [ref=e909]:
+        - img [ref=e910]
+        - generic [ref=e913]: Search ingredients
+    - paragraph [ref=e915]:
+      - text: "Per serving: 160.5 cal |"
+      - generic [ref=e916]: 32.1g
+      - text: P |
+      - generic [ref=e917]: 0.0g
+      - text: C |
+      - generic [ref=e918]: 2.7g
+      - text: F
+    - dialog "Add Food" [ref=e1307]:
+      - generic [ref=e1308]:
+        - button "Back to home" [ref=e1309]:
+          - img [ref=e1310]
+        - generic [ref=e1312]: Add Food
+        - button "Cancel" [ref=e1313]
+      - searchbox "Search foods…" [active] [ref=e1315]: broccoli
+      - generic [ref=e1316]:
+        - button "Search" [ref=e1317]
+        - button "My Foods" [ref=e1318]
+      - generic [ref=e1321]:
+        - button "Broccoli raab, raw USDA AI verification info 22 kcal · P 3.2g · C 2.9g · F 0.5g Add to Recipe Details" [ref=e1620] [cursor=pointer]:
+          - generic [ref=e1324]: Broccoli raab, raw
+          - generic [ref=e1325]: USDA
+          - button "AI verification info" [ref=e1622]: ⓘ
+          - generic [ref=e1326]:
+            - text: 22 kcal
+            - generic [ref=e1327]: · P 3.2g · C 2.9g · F 0.5g
+          - generic [ref=e1328]: Add to Recipe
+          - button "Details" [ref=e1329]
+        - button "Broccoli raab, cooked USDA AI verification info 25 kcal · P 3.8g · C 3.1g · F 0.5g Add to Recipe Details" [ref=e1623] [cursor=pointer]:
+          - generic [ref=e1332]: Broccoli raab, cooked
+          - generic [ref=e1333]: USDA
+          - button "AI verification info" [ref=e1625]: ⓘ
+          - generic [ref=e1334]:
+            - text: 25 kcal
+            - generic [ref=e1335]: · P 3.8g · C 3.1g · F 0.5g
+          - generic [ref=e1336]: Add to Recipe
+          - button "Details" [ref=e1337]
+        - button "Broccoli, chinese, raw USDA AI verification info 26 kcal · P 1.2g · C 4.7g · F 0.8g Add to Recipe Details" [ref=e1626] [cursor=pointer]:
+          - generic [ref=e1340]: Broccoli, chinese, raw
+          - generic [ref=e1341]: USDA
+          - button "AI verification info" [ref=e1628]: ⓘ
+          - generic [ref=e1342]:
+            - text: 26 kcal
+            - generic [ref=e1343]: · P 1.2g · C 4.7g · F 0.8g
+          - generic [ref=e1344]: Add to Recipe
+          - button "Details" [ref=e1345]
+        - button "Broccoli, raw CNF AI verification info 34 kcal · P 2.8g · C 6.6g · F 0.4g Add to Recipe Details" [ref=e1347] [cursor=pointer]:
+          - generic [ref=e1348]: Broccoli, raw
+          - generic [ref=e1349]: CNF
+          - button "AI verification info" [ref=e1351]: ⓘ
+          - generic [ref=e1352]:
+            - text: 34 kcal
+            - generic [ref=e1353]: · P 2.8g · C 6.6g · F 0.4g
+          - generic [ref=e1354]: Add to Recipe
+          - button "Details" [ref=e1355]
+        - button "Broccoli raab (rapini), raw CNF AI verification info 22 kcal · P 3.2g · C 2.9g · F 0.5g Add to Recipe Details" [ref=e1357] [cursor=pointer]:
+          - generic [ref=e1358]: Broccoli raab (rapini), raw
+          - generic [ref=e1359]: CNF
+          - button "AI verification info" [ref=e1361]: ⓘ
+          - generic [ref=e1362]:
+            - text: 22 kcal
+            - generic [ref=e1363]: · P 3.2g · C 2.9g · F 0.5g
+          - generic [ref=e1364]: Add to Recipe
+          - button "Details" [ref=e1365]
+        - button "BROCCOLI USDA 24 kcal · P 2.4g · C 4.7g · F 0.0g Add to Recipe Details" [ref=e1367] [cursor=pointer]:
+          - generic [ref=e1368]: BROCCOLI
+          - generic [ref=e1369]: USDA
+          - generic [ref=e1370]:
+            - text: 24 kcal
+            - generic [ref=e1371]: · P 2.4g · C 4.7g · F 0.0g
+          - generic [ref=e1372]: Add to Recipe
+          - button "Details" [ref=e1373]
+        - button "Broccoli slaw salad USDA 123 kcal · P 2.0g · C 10.4g · F 8.1g Add to Recipe Details" [ref=e1375] [cursor=pointer]:
+          - generic [ref=e1376]: Broccoli slaw salad
+          - generic [ref=e1377]: USDA
+          - generic [ref=e1378]:
+            - text: 123 kcal
+            - generic [ref=e1379]: · P 2.0g · C 10.4g · F 8.1g
+          - generic [ref=e1380]: Add to Recipe
+          - button "Details" [ref=e1381]
+        - button "Broccoli casserole with rice USDA 107 kcal · P 4.1g · C 15.1g · F 3.6g Add to Recipe Details" [ref=e1383] [cursor=pointer]:
+          - generic [ref=e1384]: Broccoli casserole with rice
+          - generic [ref=e1385]: USDA
+          - generic [ref=e1386]:
+            - text: 107 kcal
+            - generic [ref=e1387]: · P 4.1g · C 15.1g · F 3.6g
+          - generic [ref=e1388]: Add to Recipe
+          - button "Details" [ref=e1389]
+        - button "Broccoli raab (rapini), cooked CNF 33 kcal · P 3.8g · C 3.1g · F 0.5g Add to Recipe Details" [ref=e1629] [cursor=pointer]:
+          - generic [ref=e1392]: Broccoli raab (rapini), cooked
+          - generic [ref=e1393]: CNF
+          - generic [ref=e1396]:
+            - text: 33 kcal
+            - generic [ref=e1397]: · P 3.8g · C 3.1g · F 0.5g
+          - generic [ref=e1398]: Add to Recipe
+          - button "Details" [ref=e1399]
+        - button "Broccoli casserole with noodles USDA 112 kcal · P 3.5g · C 15.9g · F 3.8g Add to Recipe Details" [ref=e1401] [cursor=pointer]:
+          - generic [ref=e1402]: Broccoli casserole with noodles
+          - generic [ref=e1403]: USDA
+          - generic [ref=e1404]:
+            - text: 112 kcal
+            - generic [ref=e1405]: · P 3.5g · C 15.9g · F 3.8g
+          - generic [ref=e1406]: Add to Recipe
+          - button "Details" [ref=e1407]
+        - button "Broccoli, stalks, raw CNF 28 kcal · P 3.0g · C 5.2g · F 0.3g Add to Recipe Details" [ref=e1630] [cursor=pointer]:
+          - generic [ref=e1410]: Broccoli, stalks, raw
+          - generic [ref=e1411]: CNF
+          - generic [ref=e1414]:
+            - text: 28 kcal
+            - generic [ref=e1415]: · P 3.0g · C 5.2g · F 0.3g
+          - generic [ref=e1416]: Add to Recipe
+          - button "Details" [ref=e1417]
+        - button "Broccoli, leaves, raw CNF 28 kcal · P 3.0g · C 5.2g · F 0.3g Add to Recipe Details" [ref=e1631] [cursor=pointer]:
+          - generic [ref=e1420]: Broccoli, leaves, raw
+          - generic [ref=e1421]: CNF
+          - generic [ref=e1424]:
+            - text: 28 kcal
+            - generic [ref=e1425]: · P 3.0g · C 5.2g · F 0.3g
+          - generic [ref=e1426]: Add to Recipe
+          - button "Details" [ref=e1427]
+        - button "Broccoli, flower clusters, raw CNF 28 kcal · P 3.0g · C 5.2g · F 0.3g Add to Recipe Details" [ref=e1429] [cursor=pointer]:
+          - generic [ref=e1430]: Broccoli, flower clusters, raw
+          - generic [ref=e1431]: CNF
+          - generic [ref=e1432]:
+            - text: 28 kcal
+            - generic [ref=e1433]: · P 3.0g · C 5.2g · F 0.3g
+          - generic [ref=e1434]: Add to Recipe
+          - button "Details" [ref=e1435]
+        - button "Broccoli, boiled, drained CNF 35 kcal · P 2.4g · C 7.2g · F 0.4g Add to Recipe Details" [ref=e1437] [cursor=pointer]:
+          - generic [ref=e1438]: Broccoli, boiled, drained
+          - generic [ref=e1439]: CNF
+          - generic [ref=e1440]:
+            - text: 35 kcal
+            - generic [ref=e1441]: · P 2.4g · C 7.2g · F 0.4g
+          - generic [ref=e1442]: Add to Recipe
+          - button "Details" [ref=e1443]
+        - button "Broccoli, chinese, cooked CNF 22 kcal · P 1.1g · C 3.8g · F 0.7g Add to Recipe Details" [ref=e1445] [cursor=pointer]:
+          - generic [ref=e1446]: Broccoli, chinese, cooked
+          - generic [ref=e1447]: CNF
+          - generic [ref=e1448]:
+            - text: 22 kcal
+            - generic [ref=e1449]: · P 1.1g · C 3.8g · F 0.7g
+          - generic [ref=e1450]: Add to Recipe
+          - button "Details" [ref=e1451]
+        - button "Broccoli, cooked, as ingredient USDA 41 kcal · P 2.7g · C 6.5g · F 0.3g Add to Recipe Details" [ref=e1453] [cursor=pointer]:
+          - generic [ref=e1454]: Broccoli, cooked, as ingredient
+          - generic [ref=e1455]: USDA
+          - generic [ref=e1456]:
+            - text: 41 kcal
+            - generic [ref=e1457]: · P 2.7g · C 6.5g · F 0.3g
+          - generic [ref=e1458]: Add to Recipe
+          - button "Details" [ref=e1459]
+        - button "Broccoli, frozen, spears, unprepared CNF 29 kcal · P 3.1g · C 5.3g · F 0.3g Add to Recipe Details" [ref=e1461] [cursor=pointer]:
+          - generic [ref=e1462]: Broccoli, frozen, spears, unprepared
+          - generic [ref=e1463]: CNF
+          - generic [ref=e1464]:
+            - text: 29 kcal
+            - generic [ref=e1465]: · P 3.1g · C 5.3g · F 0.3g
+          - generic [ref=e1466]: Add to Recipe
+          - button "Details" [ref=e1467]
+        - button "Broccoli, boiled, drained, with salt CNF 35 kcal · P 2.4g · C 7.2g · F 0.4g Add to Recipe Details" [ref=e1469] [cursor=pointer]:
+          - generic [ref=e1470]: Broccoli, boiled, drained, with salt
+          - generic [ref=e1471]: CNF
+          - generic [ref=e1472]:
+            - text: 35 kcal
+            - generic [ref=e1473]: · P 2.4g · C 7.2g · F 0.4g
+          - generic [ref=e1474]: Add to Recipe
+          - button "Details" [ref=e1475]
+        - button "Broccoli, frozen, chopped, unprepared CNF 26 kcal · P 2.8g · C 4.8g · F 0.3g Add to Recipe Details" [ref=e1477] [cursor=pointer]:
+          - generic [ref=e1478]: Broccoli, frozen, chopped, unprepared
+          - generic [ref=e1479]: CNF
+          - generic [ref=e1480]:
+            - text: 26 kcal
+            - generic [ref=e1481]: · P 2.8g · C 4.8g · F 0.3g
+          - generic [ref=e1482]: Add to Recipe
+          - button "Details" [ref=e1483]
+        - button "Broccoli, frozen, spears, boiled, drained CNF 28 kcal · P 3.1g · C 5.4g · F 0.1g Add to Recipe Details" [ref=e1485] [cursor=pointer]:
+          - generic [ref=e1486]: Broccoli, frozen, spears, boiled, drained
+          - generic [ref=e1487]: CNF
+          - generic [ref=e1488]:
+            - text: 28 kcal
+            - generic [ref=e1489]: · P 3.1g · C 5.4g · F 0.1g
+          - generic [ref=e1490]: Add to Recipe
+          - button "Details" [ref=e1491]
+        - button "Broccoli, frozen, chopped, boiled, drained CNF 28 kcal · P 3.1g · C 5.3g · F 0.1g Add to Recipe Details" [ref=e1493] [cursor=pointer]:
+          - generic [ref=e1494]: Broccoli, frozen, chopped, boiled, drained
+          - generic [ref=e1495]: CNF
+          - generic [ref=e1496]:
+            - text: 28 kcal
+            - generic [ref=e1497]: · P 3.1g · C 5.3g · F 0.1g
+          - generic [ref=e1498]: Add to Recipe
+          - button "Details" [ref=e1499]
+        - button "Broccoli, frozen, spears, boiled, drained, with salt CNF 28 kcal · P 3.1g · C 5.3g · F 0.1g Add to Recipe Details" [ref=e1501] [cursor=pointer]:
+          - generic [ref=e1502]: Broccoli, frozen, spears, boiled, drained, with salt
+          - generic [ref=e1503]: CNF
+          - generic [ref=e1504]:
+            - text: 28 kcal
+            - generic [ref=e1505]: · P 3.1g · C 5.3g · F 0.1g
+          - generic [ref=e1506]: Add to Recipe
+          - button "Details" [ref=e1507]
+        - button "Broccoli, frozen, chopped, boiled, drained, with salt CNF 28 kcal · P 3.1g · C 5.3g · F 0.1g Add to Recipe Details" [ref=e1509] [cursor=pointer]:
+          - generic [ref=e1510]: Broccoli, frozen, chopped, boiled, drained, with salt
+          - generic [ref=e1511]: CNF
+          - generic [ref=e1512]:
+            - text: 28 kcal
+            - generic [ref=e1513]: · P 3.1g · C 5.3g · F 0.1g
+          - generic [ref=e1514]: Add to Recipe
+          - button "Details" [ref=e1515]
+        - button "Fried broccoli USDA 223 kcal · P 4.3g · C 22.4g · F 12.9g Add to Recipe Details" [ref=e1517] [cursor=pointer]:
+          - generic [ref=e1518]: Fried broccoli
+          - generic [ref=e1519]: USDA
+          - generic [ref=e1520]:
+            - text: 223 kcal
+            - generic [ref=e1521]: · P 4.3g · C 22.4g · F 12.9g
+          - generic [ref=e1522]: Add to Recipe
+          - button "Details" [ref=e1523]
+        - button "Beef and broccoli USDA 160 kcal · P 10.4g · C 5.1g · F 10.6g Add to Recipe Details" [ref=e1525] [cursor=pointer]:
+          - generic [ref=e1526]: Beef and broccoli
+          - generic [ref=e1527]: USDA
+          - generic [ref=e1528]:
+            - text: 160 kcal
+            - generic [ref=e1529]: · P 10.4g · C 5.1g · F 10.6g
+          - generic [ref=e1530]: Add to Recipe
+          - button "Details" [ref=e1531]
+        - button "Soup, broccoli cheese USDA 82 kcal · P 4.3g · C 6.1g · F 4.5g Add to Recipe Details" [ref=e1533] [cursor=pointer]:
+          - generic [ref=e1534]: Soup, broccoli cheese
+          - generic [ref=e1535]: USDA
+          - generic [ref=e1536]:
+            - text: 82 kcal
+            - generic [ref=e1537]: · P 4.3g · C 6.1g · F 4.5g
+          - generic [ref=e1538]: Add to Recipe
+          - button "Details" [ref=e1539]
+        - button "Stir fry with beef and broccoli CNF 116 kcal · P 10.6g · C 3.8g · F 6.5g Add to Recipe Details" [ref=e1541] [cursor=pointer]:
+          - generic [ref=e1542]: Stir fry with beef and broccoli
+          - generic [ref=e1543]: CNF
+          - generic [ref=e1544]:
+            - text: 116 kcal
+            - generic [ref=e1545]: · P 10.6g · C 3.8g · F 6.5g
+          - generic [ref=e1546]: Add to Recipe
+          - button "Details" [ref=e1547]
+        - button "Chicken breast with broccoli and cheese stuffing, frozen CNF 155 kcal · P 12.4g · C 3.4g · F 10.2g Add to Recipe Details" [ref=e1549] [cursor=pointer]:
+          - generic [ref=e1550]: Chicken breast with broccoli and cheese stuffing, frozen
+          - generic [ref=e1551]: CNF
+          - generic [ref=e1552]:
+            - text: 155 kcal
+            - generic [ref=e1553]: · P 12.4g · C 3.4g · F 10.2g
+          - generic [ref=e1554]: Add to Recipe
+          - button "Details" [ref=e1555]
+        - button "Soup, broccoli cheese, canned, condensed CNF 87 kcal · P 2.1g · C 7.7g · F 5.3g Add to Recipe Details" [ref=e1557] [cursor=pointer]:
+          - generic [ref=e1558]: Soup, broccoli cheese, canned, condensed
+          - generic [ref=e1559]: CNF
+          - generic [ref=e1560]:
+            - text: 87 kcal
+            - generic [ref=e1561]: · P 2.1g · C 7.7g · F 5.3g
+          - generic [ref=e1562]: Add to Recipe
+          - button "Details" [ref=e1563]
+        - button "Soup, cream, broccoli, canned, condensed CNF 67 kcal · P 1.4g · C 7.8g · F 3.3g Add to Recipe Details" [ref=e1565] [cursor=pointer]:
+          - generic [ref=e1566]: Soup, cream, broccoli, canned, condensed
+          - generic [ref=e1567]: CNF
+          - generic [ref=e1568]:
+            - text: 67 kcal
+            - generic [ref=e1569]: · P 1.4g · C 7.8g · F 3.3g
+          - generic [ref=e1570]: Add to Recipe
+          - button "Details" [ref=e1571]
+        - button "Soup, broccoli cheese, canned, condensed, water added CNF 43 kcal · P 1.0g · C 3.8g · F 2.6g Add to Recipe Details" [ref=e1573] [cursor=pointer]:
+          - generic [ref=e1574]: Soup, broccoli cheese, canned, condensed, water added
+          - generic [ref=e1575]: CNF
+          - generic [ref=e1576]:
+            - text: 43 kcal
+            - generic [ref=e1577]: · P 1.0g · C 3.8g · F 2.6g
+          - generic [ref=e1578]: Add to Recipe
+          - button "Details" [ref=e1579]
+        - button "Soup, cream, broccoli, canned, condensed, water added CNF 34 kcal · P 0.7g · C 4.0g · F 1.7g Add to Recipe Details" [ref=e1581] [cursor=pointer]:
+          - generic [ref=e1582]: Soup, cream, broccoli, canned, condensed, water added
+          - generic [ref=e1583]: CNF
+          - generic [ref=e1584]:
+            - text: 34 kcal
+            - generic [ref=e1585]: · P 0.7g · C 4.0g · F 1.7g
+          - generic [ref=e1586]: Add to Recipe
+          - button "Details" [ref=e1587]
+        - button "Vegetables, broccoli and cauliflower, frozen, boiled, drained CNF 24 kcal · P 2.4g · C 4.6g · F 0.2g Add to Recipe Details" [ref=e1589] [cursor=pointer]:
+          - generic [ref=e1590]: Vegetables, broccoli and cauliflower, frozen, boiled, drained
+          - generic [ref=e1591]: CNF
+          - generic [ref=e1592]:
+            - text: 24 kcal
+            - generic [ref=e1593]: · P 2.4g · C 4.6g · F 0.2g
+          - generic [ref=e1594]: Add to Recipe
+          - button "Details" [ref=e1595]
+        - button "Babyfood, vegetables, jarred, broccoli and potato with cheese CNF 50 kcal · P 3.0g · C 7.9g · F 1.6g Add to Recipe Details" [ref=e1597] [cursor=pointer]:
+          - generic [ref=e1598]: Babyfood, vegetables, jarred, broccoli and potato with cheese
+          - generic [ref=e1599]: CNF
+          - generic [ref=e1600]:
+            - text: 50 kcal
+            - generic [ref=e1601]: · P 3.0g · C 7.9g · F 1.6g
+          - generic [ref=e1602]: Add to Recipe
+          - button "Details" [ref=e1603]
+        - button "Fast foods, side dish, potato, baked, topped with cheese sauce and broccoli CNF 133 kcal · P 4.0g · C 18.0g · F 6.3g Add to Recipe Details" [ref=e1605] [cursor=pointer]:
+          - generic [ref=e1606]: Fast foods, side dish, potato, baked, topped with cheese sauce and broccoli
+          - generic [ref=e1607]: CNF
+          - generic [ref=e1608]:
+            - text: 133 kcal
+            - generic [ref=e1609]: · P 4.0g · C 18.0g · F 6.3g
+          - generic [ref=e1610]: Add to Recipe
+          - button "Details" [ref=e1611]
+        - button "Vegetables, asian mix, frozen, boiled, drained (broccoli, green beans, mini corn, snow peas, red pepper) CNF 39 kcal · P 2.0g · C 8.4g · F 0.4g Add to Recipe Details" [ref=e1613] [cursor=pointer]:
+          - generic [ref=e1614]: Vegetables, asian mix, frozen, boiled, drained (broccoli, green beans, mini corn, snow peas, red pepper)
+          - generic [ref=e1615]: CNF
+          - generic [ref=e1616]:
+            - text: 39 kcal
+            - generic [ref=e1617]: · P 2.0g · C 8.4g · F 0.4g
+          - generic [ref=e1618]: Add to Recipe
+          - button "Details" [ref=e1619]
+  - generic [ref=e54]:
+    - generic [ref=e55]: More
+    - navigation [ref=e56]:
+      - link "🍽️ Meals" [ref=e57] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e58]: 🍽️
+        - generic [ref=e59]: Meals
+      - link "📦 Inventory" [ref=e60] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e61]: 📦
+        - generic [ref=e62]: Inventory
+      - link "🛒 Grocery" [ref=e63] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e64]: 🛒
+        - generic [ref=e65]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e66] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e67]: 👨‍👩‍👧
+        - generic [ref=e68]: Household
+      - link "⚙️ Settings" [ref=e69] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e70]: ⚙️
+        - generic [ref=e71]: Settings
+      - link "📘 User Guide" [ref=e72] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e73]: 📘
+        - generic [ref=e74]: User Guide
+    - button "🚪 Log Out" [ref=e76]:
+      - generic [ref=e77]: 🚪
+      - generic [ref=e78]: Log Out

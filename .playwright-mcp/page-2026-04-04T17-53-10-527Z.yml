@@ -1,0 +1,456 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]:
+      - text: NourishPlan
+      - paragraph [ref=e8]: The Millers
+    - navigation [ref=e9]:
+      - link "🏠 Home" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]: 🏠
+        - generic [ref=e12]: Home
+      - link "📖 Recipes" [ref=e13] [cursor=pointer]:
+        - /url: /recipes
+        - generic [ref=e14]: 📖
+        - generic [ref=e15]: Recipes
+      - link "🍽️ Meals" [ref=e16] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e17]: 🍽️
+        - generic [ref=e18]: Meals
+      - link "📋 Plan" [ref=e19] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e20]: 📋
+        - generic [ref=e21]: Plan
+      - link "📦 Inventory" [ref=e22] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e23]: 📦
+        - generic [ref=e24]: Inventory
+      - link "🛒 Grocery" [ref=e25] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e26]: 🛒
+        - generic [ref=e27]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e28] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e29]: 👨‍👩‍👧
+        - generic [ref=e30]: Household
+      - link "⚙️ Settings" [ref=e31] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e32]: ⚙️
+        - generic [ref=e33]: Settings
+      - link "📘 User Guide" [ref=e34] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e35]: 📘
+        - generic [ref=e36]: User Guide
+    - button "🚪 Log Out" [ref=e38]:
+      - generic [ref=e39]: 🚪
+      - generic [ref=e40]: Log Out
+  - main [ref=e41]:
+    - generic [ref=e902]:
+      - button "← Meals" [ref=e903]
+      - textbox "Meal name" [ref=e905]: Chicken Broccoli Bowl
+      - generic [ref=e906]:
+        - heading "Items" [level=2] [ref=e907]
+        - paragraph [ref=e908]: No items yet. Add one below.
+      - button "Search ingredients" [ref=e909]:
+        - img [ref=e910]
+        - generic [ref=e913]: Search ingredients
+    - paragraph [ref=e915]:
+      - text: "Per serving: 0.0 cal |"
+      - generic [ref=e916]: 0.0g
+      - text: P |
+      - generic [ref=e917]: 0.0g
+      - text: C |
+      - generic [ref=e918]: 0.0g
+      - text: F
+    - dialog "Add Food" [ref=e919]:
+      - generic [ref=e920]:
+        - button "Back to home" [ref=e921]:
+          - img [ref=e922]
+        - generic [ref=e924]: Add Food
+        - button "Cancel" [ref=e925]
+      - searchbox "Search foods…" [active] [ref=e927]: chicken
+      - generic [ref=e928]:
+        - button "Search" [ref=e929]
+        - button "My Foods" [ref=e930]
+      - generic [ref=e933]:
+        - button "Chicken spread USDA 158 kcal · P 18.0g · C 4.0g · F 17.6g Add to Recipe Details" [ref=e935] [cursor=pointer]:
+          - generic [ref=e936]: Chicken spread
+          - generic [ref=e937]: USDA
+          - generic [ref=e938]:
+            - text: 158 kcal
+            - generic [ref=e939]: · P 18.0g · C 4.0g · F 17.6g
+          - generic [ref=e940]: Add to Recipe
+          - button "Details" [ref=e941]
+        - button "Chicken, meatless USDA 224 kcal · P 23.6g · C 3.6g · F 12.7g Add to Recipe Details" [ref=e943] [cursor=pointer]:
+          - generic [ref=e944]: Chicken, meatless
+          - generic [ref=e945]: USDA
+          - generic [ref=e946]:
+            - text: 224 kcal
+            - generic [ref=e947]: · P 23.6g · C 3.6g · F 12.7g
+          - generic [ref=e948]: Add to Recipe
+          - button "Details" [ref=e949]
+        - button "CHICKEN USDA 107 kcal · P 21.4g · C 0.0g · F 1.8g Add to Recipe Details" [ref=e951] [cursor=pointer]:
+          - generic [ref=e952]: CHICKEN
+          - generic [ref=e953]: USDA
+          - generic [ref=e954]:
+            - text: 107 kcal
+            - generic [ref=e955]: · P 21.4g · C 0.0g · F 1.8g
+          - generic [ref=e956]: Add to Recipe
+          - button "Details" [ref=e957]
+        - button "Chicken feet USDA 215 kcal · P 19.4g · C 0.2g · F 14.6g Add to Recipe Details" [ref=e959] [cursor=pointer]:
+          - generic [ref=e960]: Chicken feet
+          - generic [ref=e961]: USDA
+          - generic [ref=e962]:
+            - text: 215 kcal
+            - generic [ref=e963]: · P 19.4g · C 0.2g · F 14.6g
+          - generic [ref=e964]: Add to Recipe
+          - button "Details" [ref=e965]
+        - button "Chicken skin USDA 450 kcal · P 20.2g · C 0.0g · F 40.3g Add to Recipe Details" [ref=e967] [cursor=pointer]:
+          - generic [ref=e968]: Chicken skin
+          - generic [ref=e969]: USDA
+          - generic [ref=e970]:
+            - text: 450 kcal
+            - generic [ref=e971]: · P 20.2g · C 0.0g · F 40.3g
+          - generic [ref=e972]: Add to Recipe
+          - button "Details" [ref=e973]
+        - button "Chicken kiev USDA 280 kcal · P 21.3g · C 5.5g · F 19.2g Add to Recipe Details" [ref=e975] [cursor=pointer]:
+          - generic [ref=e976]: Chicken kiev
+          - generic [ref=e977]: USDA
+          - generic [ref=e978]:
+            - text: 280 kcal
+            - generic [ref=e979]: · P 21.3g · C 5.5g · F 19.2g
+          - generic [ref=e980]: Add to Recipe
+          - button "Details" [ref=e981]
+        - button "Chicken, back USDA 298 kcal · P 25.7g · C 0.0g · F 20.8g Add to Recipe Details" [ref=e983] [cursor=pointer]:
+          - generic [ref=e984]: Chicken, back
+          - generic [ref=e985]: USDA
+          - generic [ref=e986]:
+            - text: 298 kcal
+            - generic [ref=e987]: · P 25.7g · C 0.0g · F 20.8g
+          - generic [ref=e988]: Add to Recipe
+          - button "Details" [ref=e989]
+        - button "Chicken, tail USDA 454 kcal · P 20.4g · C 0.0g · F 40.7g Add to Recipe Details" [ref=e991] [cursor=pointer]:
+          - generic [ref=e992]: Chicken, tail
+          - generic [ref=e993]: USDA
+          - generic [ref=e994]:
+            - text: 454 kcal
+            - generic [ref=e995]: · P 20.4g · C 0.0g · F 40.7g
+          - generic [ref=e996]: Add to Recipe
+          - button "Details" [ref=e997]
+        - button "Chicken curry USDA 107 kcal · P 6.5g · C 6.5g · F 6.5g Add to Recipe Details" [ref=e999] [cursor=pointer]:
+          - generic [ref=e1000]: Chicken curry
+          - generic [ref=e1001]: USDA
+          - generic [ref=e1002]:
+            - text: 107 kcal
+            - generic [ref=e1003]: · P 6.5g · C 6.5g · F 6.5g
+          - generic [ref=e1004]: Add to Recipe
+          - button "Details" [ref=e1005]
+        - button "Chicken, ground USDA 201 kcal · P 27.1g · C 0.0g · F 10.3g Add to Recipe Details" [ref=e1007] [cursor=pointer]:
+          - generic [ref=e1008]: Chicken, ground
+          - generic [ref=e1009]: USDA
+          - generic [ref=e1010]:
+            - text: 201 kcal
+            - generic [ref=e1011]: · P 27.1g · C 0.0g · F 10.3g
+          - generic [ref=e1012]: Add to Recipe
+          - button "Details" [ref=e1013]
+        - button "Chicken cornbread USDA 167 kcal · P 13.8g · C 9.4g · F 8.2g Add to Recipe Details" [ref=e1015] [cursor=pointer]:
+          - generic [ref=e1016]: Chicken cornbread
+          - generic [ref=e1017]: USDA
+          - generic [ref=e1018]:
+            - text: 167 kcal
+            - generic [ref=e1019]: · P 13.8g · C 9.4g · F 8.2g
+          - generic [ref=e1020]: Add to Recipe
+          - button "Details" [ref=e1021]
+        - button "Chicken with gravy USDA 129 kcal · P 18.9g · C 1.6g · F 5.2g Add to Recipe Details" [ref=e1023] [cursor=pointer]:
+          - generic [ref=e1024]: Chicken with gravy
+          - generic [ref=e1025]: USDA
+          - generic [ref=e1026]:
+            - text: 129 kcal
+            - generic [ref=e1027]: · P 18.9g · C 1.6g · F 5.2g
+          - generic [ref=e1028]: Add to Recipe
+          - button "Details" [ref=e1029]
+        - button "Chicken, broiler, heart, raw CNF 153 kcal · P 15.6g · C 0.7g · F 9.3g Add to Recipe Details" [ref=e1031] [cursor=pointer]:
+          - generic [ref=e1032]: Chicken, broiler, heart, raw
+          - generic [ref=e1033]: CNF
+          - generic [ref=e1034]:
+            - text: 153 kcal
+            - generic [ref=e1035]: · P 15.6g · C 0.7g · F 9.3g
+          - generic [ref=e1036]: Add to Recipe
+          - button "Details" [ref=e1037]
+        - button "Chicken, broiler, liver, raw CNF 119 kcal · P 16.9g · C 0.7g · F 4.8g Add to Recipe Details" [ref=e1039] [cursor=pointer]:
+          - generic [ref=e1040]: Chicken, broiler, liver, raw
+          - generic [ref=e1041]: CNF
+          - generic [ref=e1042]:
+            - text: 119 kcal
+            - generic [ref=e1043]: · P 16.9g · C 0.7g · F 4.8g
+          - generic [ref=e1044]: Add to Recipe
+          - button "Details" [ref=e1045]
+        - button "Chicken, broiler, giblets, raw CNF 124 kcal · P 17.9g · C 1.8g · F 4.5g Add to Recipe Details" [ref=e1047] [cursor=pointer]:
+          - generic [ref=e1048]: Chicken, broiler, giblets, raw
+          - generic [ref=e1049]: CNF
+          - generic [ref=e1050]:
+            - text: 124 kcal
+            - generic [ref=e1051]: · P 17.9g · C 1.8g · F 4.5g
+          - generic [ref=e1052]: Add to Recipe
+          - button "Details" [ref=e1053]
+        - button "Chicken, broiler, gizzard, raw CNF 94 kcal · P 17.7g · C 0.0g · F 2.1g Add to Recipe Details" [ref=e1055] [cursor=pointer]:
+          - generic [ref=e1056]: Chicken, broiler, gizzard, raw
+          - generic [ref=e1057]: CNF
+          - generic [ref=e1058]:
+            - text: 94 kcal
+            - generic [ref=e1059]: · P 17.7g · C 0.0g · F 2.1g
+          - generic [ref=e1060]: Add to Recipe
+          - button "Details" [ref=e1061]
+        - button "Chicken, broiler, dark meat, raw CNF 125 kcal · P 20.1g · C 0.0g · F 4.3g Add to Recipe Details" [ref=e1063] [cursor=pointer]:
+          - generic [ref=e1064]: Chicken, broiler, dark meat, raw
+          - generic [ref=e1065]: CNF
+          - generic [ref=e1066]:
+            - text: 125 kcal
+            - generic [ref=e1067]: · P 20.1g · C 0.0g · F 4.3g
+          - generic [ref=e1068]: Add to Recipe
+          - button "Details" [ref=e1069]
+        - button "Chicken, broiler, light meat, raw CNF 114 kcal · P 23.2g · C 0.0g · F 1.6g Add to Recipe Details" [ref=e1071] [cursor=pointer]:
+          - generic [ref=e1072]: Chicken, broiler, light meat, raw
+          - generic [ref=e1073]: CNF
+          - generic [ref=e1074]:
+            - text: 114 kcal
+            - generic [ref=e1075]: · P 23.2g · C 0.0g · F 1.6g
+          - generic [ref=e1076]: Add to Recipe
+          - button "Details" [ref=e1077]
+        - button "Chicken, broiler, dark meat and skin, raw CNF 237 kcal · P 16.7g · C 0.0g · F 18.3g Add to Recipe Details" [ref=e1079] [cursor=pointer]:
+          - generic [ref=e1080]: Chicken, broiler, dark meat and skin, raw
+          - generic [ref=e1081]: CNF
+          - generic [ref=e1082]:
+            - text: 237 kcal
+            - generic [ref=e1083]: · P 16.7g · C 0.0g · F 18.3g
+          - generic [ref=e1084]: Add to Recipe
+          - button "Details" [ref=e1085]
+        - button "Chicken, broiler, light meat and skin, raw CNF 186 kcal · P 20.3g · C 0.0g · F 11.1g Add to Recipe Details" [ref=e1087] [cursor=pointer]:
+          - generic [ref=e1088]: Chicken, broiler, light meat and skin, raw
+          - generic [ref=e1089]: CNF
+          - generic [ref=e1090]:
+            - text: 186 kcal
+            - generic [ref=e1091]: · P 20.3g · C 0.0g · F 11.1g
+          - generic [ref=e1092]: Add to Recipe
+          - button "Details" [ref=e1093]
+        - button "Chicken, chicken roll, roasted USDA 164 kcal · P 26.7g · C 0.0g · F 6.3g Add to Recipe Details" [ref=e1095] [cursor=pointer]:
+          - generic [ref=e1096]: Chicken, chicken roll, roasted
+          - generic [ref=e1097]: USDA
+          - generic [ref=e1098]:
+            - text: 164 kcal
+            - generic [ref=e1099]: · P 26.7g · C 0.0g · F 6.3g
+          - generic [ref=e1100]: Add to Recipe
+          - button "Details" [ref=e1101]
+        - button "Chicken, broiler, heart, simmered CNF 185 kcal · P 26.4g · C 0.1g · F 7.9g Add to Recipe Details" [ref=e1103] [cursor=pointer]:
+          - generic [ref=e1104]: Chicken, broiler, heart, simmered
+          - generic [ref=e1105]: CNF
+          - generic [ref=e1106]:
+            - text: 185 kcal
+            - generic [ref=e1107]: · P 26.4g · C 0.1g · F 7.9g
+          - generic [ref=e1108]: Add to Recipe
+          - button "Details" [ref=e1109]
+        - button "Chicken, broiler, liver, simmered CNF 167 kcal · P 24.5g · C 0.9g · F 6.5g Add to Recipe Details" [ref=e1111] [cursor=pointer]:
+          - generic [ref=e1112]: Chicken, broiler, liver, simmered
+          - generic [ref=e1113]: CNF
+          - generic [ref=e1114]:
+            - text: 167 kcal
+            - generic [ref=e1115]: · P 24.5g · C 0.9g · F 6.5g
+          - generic [ref=e1116]: Add to Recipe
+          - button "Details" [ref=e1117]
+        - button "Chicken, broiler, dark meat, fried CNF 239 kcal · P 29.0g · C 2.6g · F 11.6g Add to Recipe Details" [ref=e1119] [cursor=pointer]:
+          - generic [ref=e1120]: Chicken, broiler, dark meat, fried
+          - generic [ref=e1121]: CNF
+          - generic [ref=e1122]:
+            - text: 239 kcal
+            - generic [ref=e1123]: · P 29.0g · C 2.6g · F 11.6g
+          - generic [ref=e1124]: Add to Recipe
+          - button "Details" [ref=e1125]
+        - button "Chicken, broiler, giblets, simmered CNF 157 kcal · P 27.1g · C 0.0g · F 4.5g Add to Recipe Details" [ref=e1127] [cursor=pointer]:
+          - generic [ref=e1128]: Chicken, broiler, giblets, simmered
+          - generic [ref=e1129]: CNF
+          - generic [ref=e1130]:
+            - text: 157 kcal
+            - generic [ref=e1131]: · P 27.1g · C 0.0g · F 4.5g
+          - generic [ref=e1132]: Add to Recipe
+          - button "Details" [ref=e1133]
+        - button "Chicken, broiler, gizzard, simmered CNF 154 kcal · P 30.4g · C 0.0g · F 2.7g Add to Recipe Details" [ref=e1135] [cursor=pointer]:
+          - generic [ref=e1136]: Chicken, broiler, gizzard, simmered
+          - generic [ref=e1137]: CNF
+          - generic [ref=e1138]:
+            - text: 154 kcal
+            - generic [ref=e1139]: · P 30.4g · C 0.0g · F 2.7g
+          - generic [ref=e1140]: Add to Recipe
+          - button "Details" [ref=e1141]
+        - button "Chicken, broiler, light meat, fried CNF 192 kcal · P 32.8g · C 0.4g · F 5.5g Add to Recipe Details" [ref=e1143] [cursor=pointer]:
+          - generic [ref=e1144]: Chicken, broiler, light meat, fried
+          - generic [ref=e1145]: CNF
+          - generic [ref=e1146]:
+            - text: 192 kcal
+            - generic [ref=e1147]: · P 32.8g · C 0.4g · F 5.5g
+          - generic [ref=e1148]: Add to Recipe
+          - button "Details" [ref=e1149]
+        - button "Chicken, broiler, light meat, stewed CNF 159 kcal · P 28.9g · C 0.0g · F 4.0g Add to Recipe Details" [ref=e1151] [cursor=pointer]:
+          - generic [ref=e1152]: Chicken, broiler, light meat, stewed
+          - generic [ref=e1153]: CNF
+          - generic [ref=e1154]:
+            - text: 159 kcal
+            - generic [ref=e1155]: · P 28.9g · C 0.0g · F 4.0g
+          - generic [ref=e1156]: Add to Recipe
+          - button "Details" [ref=e1157]
+        - button "Chicken, broiler, light meat, roasted CNF 173 kcal · P 30.9g · C 0.0g · F 4.5g Add to Recipe Details" [ref=e1159] [cursor=pointer]:
+          - generic [ref=e1160]: Chicken, broiler, light meat, roasted
+          - generic [ref=e1161]: CNF
+          - generic [ref=e1162]:
+            - text: 173 kcal
+            - generic [ref=e1163]: · P 30.9g · C 0.0g · F 4.5g
+          - generic [ref=e1164]: Add to Recipe
+          - button "Details" [ref=e1165]
+        - button "Chicken, broiler, dark meat and skin, stewed CNF 233 kcal · P 23.5g · C 0.0g · F 14.7g Add to Recipe Details" [ref=e1167] [cursor=pointer]:
+          - generic [ref=e1168]: Chicken, broiler, dark meat and skin, stewed
+          - generic [ref=e1169]: CNF
+          - generic [ref=e1170]:
+            - text: 233 kcal
+            - generic [ref=e1171]: · P 23.5g · C 0.0g · F 14.7g
+          - generic [ref=e1172]: Add to Recipe
+          - button "Details" [ref=e1173]
+        - button "Chicken, broiler, light meat and skin, stewed CNF 201 kcal · P 26.1g · C 0.0g · F 10.0g Add to Recipe Details" [ref=e1175] [cursor=pointer]:
+          - generic [ref=e1176]: Chicken, broiler, light meat and skin, stewed
+          - generic [ref=e1177]: CNF
+          - generic [ref=e1178]:
+            - text: 201 kcal
+            - generic [ref=e1179]: · P 26.1g · C 0.0g · F 10.0g
+          - generic [ref=e1180]: Add to Recipe
+          - button "Details" [ref=e1181]
+        - button "Chicken, broiler, dark meat and skin, roasted CNF 253 kcal · P 26.0g · C 0.0g · F 15.8g Add to Recipe Details" [ref=e1183] [cursor=pointer]:
+          - generic [ref=e1184]: Chicken, broiler, dark meat and skin, roasted
+          - generic [ref=e1185]: CNF
+          - generic [ref=e1186]:
+            - text: 253 kcal
+            - generic [ref=e1187]: · P 26.0g · C 0.0g · F 15.8g
+          - generic [ref=e1188]: Add to Recipe
+          - button "Details" [ref=e1189]
+        - button "Chicken, broiler, giblets, flour coated, fried CNF 277 kcal · P 32.5g · C 4.3g · F 13.5g Add to Recipe Details" [ref=e1191] [cursor=pointer]:
+          - generic [ref=e1192]: Chicken, broiler, giblets, flour coated, fried
+          - generic [ref=e1193]: CNF
+          - generic [ref=e1194]:
+            - text: 277 kcal
+            - generic [ref=e1195]: · P 32.5g · C 4.3g · F 13.5g
+          - generic [ref=e1196]: Add to Recipe
+          - button "Details" [ref=e1197]
+        - button "Chicken, broiler, light meat and skin, roasted CNF 222 kcal · P 29.0g · C 0.0g · F 10.8g Add to Recipe Details" [ref=e1199] [cursor=pointer]:
+          - generic [ref=e1200]: Chicken, broiler, light meat and skin, roasted
+          - generic [ref=e1201]: CNF
+          - generic [ref=e1202]:
+            - text: 222 kcal
+            - generic [ref=e1203]: · P 29.0g · C 0.0g · F 10.8g
+          - generic [ref=e1204]: Add to Recipe
+          - button "Details" [ref=e1205]
+        - button "Chicken, broiler, dark meat and skin, flour coated, fried CNF 285 kcal · P 27.2g · C 4.1g · F 16.9g Add to Recipe Details" [ref=e1207] [cursor=pointer]:
+          - generic [ref=e1208]: Chicken, broiler, dark meat and skin, flour coated, fried
+          - generic [ref=e1209]: CNF
+          - generic [ref=e1210]:
+            - text: 285 kcal
+            - generic [ref=e1211]: · P 27.2g · C 4.1g · F 16.9g
+          - generic [ref=e1212]: Add to Recipe
+          - button "Details" [ref=e1213]
+        - button "Chicken, broiler, light meat and skin, flour coated, fried CNF 246 kcal · P 30.4g · C 1.8g · F 12.1g Add to Recipe Details" [ref=e1215] [cursor=pointer]:
+          - generic [ref=e1216]: Chicken, broiler, light meat and skin, flour coated, fried
+          - generic [ref=e1217]: CNF
+          - generic [ref=e1218]:
+            - text: 246 kcal
+            - generic [ref=e1219]: · P 30.4g · C 1.8g · F 12.1g
+          - generic [ref=e1220]: Add to Recipe
+          - button "Details" [ref=e1221]
+        - button "Chicken, broiler, dark meat and skin, batter dipped, fried CNF 298 kcal · P 21.9g · C 9.4g · F 18.6g Add to Recipe Details" [ref=e1223] [cursor=pointer]:
+          - generic [ref=e1224]: Chicken, broiler, dark meat and skin, batter dipped, fried
+          - generic [ref=e1225]: CNF
+          - generic [ref=e1226]:
+            - text: 298 kcal
+            - generic [ref=e1227]: · P 21.9g · C 9.4g · F 18.6g
+          - generic [ref=e1228]: Add to Recipe
+          - button "Details" [ref=e1229]
+        - button "Chicken, broiler, light meat and skin, batter dipped, fried CNF 277 kcal · P 23.6g · C 9.5g · F 15.4g Add to Recipe Details" [ref=e1231] [cursor=pointer]:
+          - generic [ref=e1232]: Chicken, broiler, light meat and skin, batter dipped, fried
+          - generic [ref=e1233]: CNF
+          - generic [ref=e1234]:
+            - text: 277 kcal
+            - generic [ref=e1235]: · P 23.6g · C 9.5g · F 15.4g
+          - generic [ref=e1236]: Add to Recipe
+          - button "Details" [ref=e1237]
+        - button "Soup, chicken USDA 40 kcal · P 3.4g · C 4.0g · F 1.1g Add to Recipe Details" [ref=e1239] [cursor=pointer]:
+          - generic [ref=e1240]: Soup, chicken
+          - generic [ref=e1241]: USDA
+          - generic [ref=e1242]:
+            - text: 40 kcal
+            - generic [ref=e1243]: · P 3.4g · C 4.0g · F 1.1g
+          - generic [ref=e1244]: Add to Recipe
+          - button "Details" [ref=e1245]
+        - button "Orange chicken USDA 262 kcal · P 14.5g · C 22.5g · F 12.7g Add to Recipe Details" [ref=e1247] [cursor=pointer]:
+          - generic [ref=e1248]: Orange chicken
+          - generic [ref=e1249]: USDA
+          - generic [ref=e1250]:
+            - text: 262 kcal
+            - generic [ref=e1251]: · P 14.5g · C 22.5g · F 12.7g
+          - generic [ref=e1252]: Add to Recipe
+          - button "Details" [ref=e1253]
+        - button "Almond chicken USDA 195 kcal · P 15.7g · C 4.5g · F 13.2g Add to Recipe Details" [ref=e1255] [cursor=pointer]:
+          - generic [ref=e1256]: Almond chicken
+          - generic [ref=e1257]: USDA
+          - generic [ref=e1258]:
+            - text: 195 kcal
+            - generic [ref=e1259]: · P 15.7g · C 4.5g · F 13.2g
+          - generic [ref=e1260]: Add to Recipe
+          - button "Details" [ref=e1261]
+        - button "Barbecue chicken USDA 167 kcal · P 19.0g · C 12.2g · F 4.6g Add to Recipe Details" [ref=e1263] [cursor=pointer]:
+          - generic [ref=e1264]: Barbecue chicken
+          - generic [ref=e1265]: USDA
+          - generic [ref=e1266]:
+            - text: 167 kcal
+            - generic [ref=e1267]: · P 19.0g · C 12.2g · F 4.6g
+          - generic [ref=e1268]: Add to Recipe
+          - button "Details" [ref=e1269]
+        - button "Chili with chicken USDA 100 kcal · P 14.1g · C 2.4g · F 3.7g Add to Recipe Details" [ref=e1271] [cursor=pointer]:
+          - generic [ref=e1272]: Chili with chicken
+          - generic [ref=e1273]: USDA
+          - generic [ref=e1274]:
+            - text: 100 kcal
+            - generic [ref=e1275]: · P 14.1g · C 2.4g · F 3.7g
+          - generic [ref=e1276]: Add to Recipe
+          - button "Details" [ref=e1277]
+        - button "Biryani with chicken USDA 104 kcal · P 7.2g · C 13.6g · F 2.4g Add to Recipe Details" [ref=e1279] [cursor=pointer]:
+          - generic [ref=e1280]: Biryani with chicken
+          - generic [ref=e1281]: USDA
+          - generic [ref=e1282]:
+            - text: 104 kcal
+            - generic [ref=e1283]: · P 7.2g · C 13.6g · F 2.4g
+          - generic [ref=e1284]: Add to Recipe
+          - button "Details" [ref=e1285]
+  - generic [ref=e54]:
+    - generic [ref=e55]: More
+    - navigation [ref=e56]:
+      - link "🍽️ Meals" [ref=e57] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e58]: 🍽️
+        - generic [ref=e59]: Meals
+      - link "📦 Inventory" [ref=e60] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e61]: 📦
+        - generic [ref=e62]: Inventory
+      - link "🛒 Grocery" [ref=e63] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e64]: 🛒
+        - generic [ref=e65]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e66] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e67]: 👨‍👩‍👧
+        - generic [ref=e68]: Household
+      - link "⚙️ Settings" [ref=e69] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e70]: ⚙️
+        - generic [ref=e71]: Settings
+      - link "📘 User Guide" [ref=e72] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e73]: 📘
+        - generic [ref=e74]: User Guide
+    - button "🚪 Log Out" [ref=e76]:
+      - generic [ref=e77]: 🚪
+      - generic [ref=e78]: Log Out

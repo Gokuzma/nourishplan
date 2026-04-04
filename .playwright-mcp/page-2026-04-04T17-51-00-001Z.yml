@@ -1,0 +1,464 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]:
+      - text: NourishPlan
+      - paragraph [ref=e8]: The Millers
+    - navigation [ref=e9]:
+      - link "🏠 Home" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]: 🏠
+        - generic [ref=e12]: Home
+      - link "📖 Recipes" [ref=e13] [cursor=pointer]:
+        - /url: /recipes
+        - generic [ref=e14]: 📖
+        - generic [ref=e15]: Recipes
+      - link "🍽️ Meals" [ref=e16] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e17]: 🍽️
+        - generic [ref=e18]: Meals
+      - link "📋 Plan" [ref=e19] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e20]: 📋
+        - generic [ref=e21]: Plan
+      - link "📦 Inventory" [ref=e22] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e23]: 📦
+        - generic [ref=e24]: Inventory
+      - link "🛒 Grocery" [ref=e25] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e26]: 🛒
+        - generic [ref=e27]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e28] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e29]: 👨‍👩‍👧
+        - generic [ref=e30]: Household
+      - link "⚙️ Settings" [ref=e31] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e32]: ⚙️
+        - generic [ref=e33]: Settings
+      - link "📘 User Guide" [ref=e34] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e35]: 📘
+        - generic [ref=e36]: User Guide
+    - button "🚪 Log Out" [ref=e38]:
+      - generic [ref=e39]: 🚪
+      - generic [ref=e40]: Log Out
+  - main [ref=e41]:
+    - generic [ref=e79]:
+      - button "← Meals" [ref=e80]
+      - textbox "Meal name" [ref=e82]: Chicken Stir Fry
+      - generic [ref=e83]:
+        - heading "Items" [level=2] [ref=e84]
+        - generic [ref=e488]:
+          - generic [ref=e489]:
+            - generic [ref=e490]:
+              - generic [ref=e491]: F
+              - paragraph [ref=e492]: CHICKEN
+            - paragraph [ref=e493]: 214.0 cal · 42.8g P · 0.0g C · 3.6g F
+          - button "200g" [ref=e494]
+          - button "Remove item" [ref=e495]: ×
+      - button "Search ingredients" [ref=e86]:
+        - img [ref=e87]
+        - generic [ref=e90]: Search ingredients
+    - paragraph [ref=e92]:
+      - text: "Per serving: 214.0 cal |"
+      - generic [ref=e93]: 42.8g
+      - text: P |
+      - generic [ref=e94]: 0.0g
+      - text: C |
+      - generic [ref=e95]: 3.6g
+      - text: F
+    - dialog "Add Food" [ref=e496]:
+      - generic [ref=e497]:
+        - button "Back to home" [ref=e498]:
+          - img [ref=e499]
+        - generic [ref=e501]: Add Food
+        - button "Cancel" [ref=e502]
+      - searchbox "Search foods…" [active] [ref=e504]: rice
+      - generic [ref=e505]:
+        - button "Search" [ref=e506]
+        - button "My Foods" [ref=e507]
+      - generic [ref=e510]:
+        - button "Rice crackers USDA 416 kcal · P 10.0g · C 82.6g · F 5.0g Add to Recipe Details" [ref=e512] [cursor=pointer]:
+          - generic [ref=e513]: Rice crackers
+          - generic [ref=e514]: USDA
+          - generic [ref=e515]:
+            - text: 416 kcal
+            - generic [ref=e516]: · P 10.0g · C 82.6g · F 5.0g
+          - generic [ref=e517]: Add to Recipe
+          - button "Details" [ref=e518]
+        - button "RICE USDA 139 kcal · P 3.5g · C 26.4g · F 2.4g Add to Recipe Details" [ref=e520] [cursor=pointer]:
+          - generic [ref=e521]: RICE
+          - generic [ref=e522]: USDA
+          - generic [ref=e523]:
+            - text: 139 kcal
+            - generic [ref=e524]: · P 3.5g · C 26.4g · F 2.4g
+          - generic [ref=e525]: Add to Recipe
+          - button "Details" [ref=e526]
+        - button "Rice cake USDA 392 kcal · P 7.1g · C 81.1g · F 4.3g Add to Recipe Details" [ref=e528] [cursor=pointer]:
+          - generic [ref=e529]: Rice cake
+          - generic [ref=e530]: USDA
+          - generic [ref=e531]:
+            - text: 392 kcal
+            - generic [ref=e532]: · P 7.1g · C 81.1g · F 4.3g
+          - generic [ref=e533]: Add to Recipe
+          - button "Details" [ref=e534]
+        - button "Rice milk USDA 47 kcal · P 0.3g · C 9.2g · F 1.0g Add to Recipe Details" [ref=e536] [cursor=pointer]:
+          - generic [ref=e537]: Rice milk
+          - generic [ref=e538]: USDA
+          - generic [ref=e539]:
+            - text: 47 kcal
+            - generic [ref=e540]: · P 0.3g · C 9.2g · F 1.0g
+          - generic [ref=e541]: Add to Recipe
+          - button "Details" [ref=e542]
+        - button "Rice paper USDA 323 kcal · P 5.9g · C 72.3g · F 1.1g Add to Recipe Details" [ref=e544] [cursor=pointer]:
+          - generic [ref=e545]: Rice paper
+          - generic [ref=e546]: USDA
+          - generic [ref=e547]:
+            - text: 323 kcal
+            - generic [ref=e548]: · P 5.9g · C 72.3g · F 1.1g
+          - generic [ref=e549]: Add to Recipe
+          - button "Details" [ref=e550]
+        - button "Rice pilaf USDA 137 kcal · P 3.3g · C 24.1g · F 3.0g Add to Recipe Details" [ref=e552] [cursor=pointer]:
+          - generic [ref=e553]: Rice pilaf
+          - generic [ref=e554]: USDA
+          - generic [ref=e555]:
+            - text: 137 kcal
+            - generic [ref=e556]: · P 3.3g · C 24.1g · F 3.0g
+          - generic [ref=e557]: Add to Recipe
+          - button "Details" [ref=e558]
+        - button "Rice dressing USDA 110 kcal · P 2.0g · C 17.6g · F 3.3g Add to Recipe Details" [ref=e560] [cursor=pointer]:
+          - generic [ref=e561]: Rice dressing
+          - generic [ref=e562]: USDA
+          - generic [ref=e563]:
+            - text: 110 kcal
+            - generic [ref=e564]: · P 2.0g · C 17.6g · F 3.3g
+          - generic [ref=e565]: Add to Recipe
+          - button "Details" [ref=e566]
+        - button "Rice croquette USDA 154 kcal · P 3.4g · C 20.1g · F 6.6g Add to Recipe Details" [ref=e568] [cursor=pointer]:
+          - generic [ref=e569]: Rice croquette
+          - generic [ref=e570]: USDA
+          - generic [ref=e571]:
+            - text: 154 kcal
+            - generic [ref=e572]: · P 3.4g · C 20.1g · F 6.6g
+          - generic [ref=e573]: Add to Recipe
+          - button "Details" [ref=e574]
+        - button "Rice with raisins USDA 162 kcal · P 2.6g · C 32.1g · F 2.6g Add to Recipe Details" [ref=e576] [cursor=pointer]:
+          - generic [ref=e577]: Rice with raisins
+          - generic [ref=e578]: USDA
+          - generic [ref=e579]:
+            - text: 162 kcal
+            - generic [ref=e580]: · P 2.6g · C 32.1g · F 2.6g
+          - generic [ref=e581]: Add to Recipe
+          - button "Details" [ref=e582]
+        - button "Dirty rice USDA 112 kcal · P 5.1g · C 17.3g · F 2.3g Add to Recipe Details" [ref=e584] [cursor=pointer]:
+          - generic [ref=e585]: Dirty rice
+          - generic [ref=e586]: USDA
+          - generic [ref=e587]:
+            - text: 112 kcal
+            - generic [ref=e588]: · P 5.1g · C 17.3g · F 2.3g
+          - generic [ref=e589]: Add to Recipe
+          - button "Details" [ref=e590]
+        - button "Soup, rice USDA 51 kcal · P 3.5g · C 6.8g · F 1.1g Add to Recipe Details" [ref=e592] [cursor=pointer]:
+          - generic [ref=e593]: Soup, rice
+          - generic [ref=e594]: USDA
+          - generic [ref=e595]:
+            - text: 51 kcal
+            - generic [ref=e596]: · P 3.5g · C 6.8g · F 1.1g
+          - generic [ref=e597]: Add to Recipe
+          - button "Details" [ref=e598]
+        - button "Chips, rice USDA 384 kcal · P 8.2g · C 81.5g · F 2.8g Add to Recipe Details" [ref=e600] [cursor=pointer]:
+          - generic [ref=e601]: Chips, rice
+          - generic [ref=e602]: USDA
+          - generic [ref=e603]:
+            - text: 384 kcal
+            - generic [ref=e604]: · P 8.2g · C 81.5g · F 2.8g
+          - generic [ref=e605]: Add to Recipe
+          - button "Details" [ref=e606]
+        - button "Bread, rice USDA 248 kcal · P 4.3g · C 45.8g · F 5.2g Add to Recipe Details" [ref=e608] [cursor=pointer]:
+          - generic [ref=e609]: Bread, rice
+          - generic [ref=e610]: USDA
+          - generic [ref=e611]:
+            - text: 248 kcal
+            - generic [ref=e612]: · P 4.3g · C 45.8g · F 5.2g
+          - generic [ref=e613]: Add to Recipe
+          - button "Details" [ref=e614]
+        - button "Cream of rice USDA 69 kcal · P 1.2g · C 15.3g · F 0.1g Add to Recipe Details" [ref=e616] [cursor=pointer]:
+          - generic [ref=e617]: Cream of rice
+          - generic [ref=e618]: USDA
+          - generic [ref=e619]:
+            - text: 69 kcal
+            - generic [ref=e620]: · P 1.2g · C 15.3g · F 0.1g
+          - generic [ref=e621]: Add to Recipe
+          - button "Details" [ref=e622]
+        - button "Pudding, rice USDA 108 kcal · P 3.2g · C 18.4g · F 2.1g Add to Recipe Details" [ref=e624] [cursor=pointer]:
+          - generic [ref=e625]: Pudding, rice
+          - generic [ref=e626]: USDA
+          - generic [ref=e627]:
+            - text: 108 kcal
+            - generic [ref=e628]: · P 3.2g · C 18.4g · F 2.1g
+          - generic [ref=e629]: Add to Recipe
+          - button "Details" [ref=e630]
+        - button "Crackers, rice USDA 416 kcal · P 10.0g · C 82.6g · F 5.0g Add to Recipe Details" [ref=e632] [cursor=pointer]:
+          - generic [ref=e633]: Crackers, rice
+          - generic [ref=e634]: USDA
+          - generic [ref=e635]:
+            - text: 416 kcal
+            - generic [ref=e636]: · P 10.0g · C 82.6g · F 5.0g
+          - generic [ref=e637]: Add to Recipe
+          - button "Details" [ref=e638]
+        - button "Gumbo, no rice USDA 83 kcal · P 8.5g · C 4.0g · F 3.7g Add to Recipe Details" [ref=e640] [cursor=pointer]:
+          - generic [ref=e641]: Gumbo, no rice
+          - generic [ref=e642]: USDA
+          - generic [ref=e643]:
+            - text: 83 kcal
+            - generic [ref=e644]: · P 8.5g · C 4.0g · F 3.7g
+          - generic [ref=e645]: Add to Recipe
+          - button "Details" [ref=e646]
+        - button "Gumbo with rice USDA 89 kcal · P 8.2g · C 6.5g · F 3.4g Add to Recipe Details" [ref=e648] [cursor=pointer]:
+          - generic [ref=e649]: Gumbo with rice
+          - generic [ref=e650]: USDA
+          - generic [ref=e651]:
+            - text: 89 kcal
+            - generic [ref=e652]: · P 8.2g · C 6.5g · F 3.4g
+          - generic [ref=e653]: Add to Recipe
+          - button "Details" [ref=e654]
+        - button "Adobo, with rice USDA 181 kcal · P 17.7g · C 8.9g · F 7.9g Add to Recipe Details" [ref=e656] [cursor=pointer]:
+          - generic [ref=e657]: Adobo, with rice
+          - generic [ref=e658]: USDA
+          - generic [ref=e659]:
+            - text: 181 kcal
+            - generic [ref=e660]: · P 17.7g · C 8.9g · F 7.9g
+          - generic [ref=e661]: Add to Recipe
+          - button "Details" [ref=e662]
+        - button "Vegetable oil, rice bran CNF 885 kcal · P 0.0g · C 0.0g · F 100.0g Add to Recipe Details" [ref=e664] [cursor=pointer]:
+          - generic [ref=e665]: Vegetable oil, rice bran
+          - generic [ref=e666]: CNF
+          - generic [ref=e667]:
+            - text: 885 kcal
+            - generic [ref=e668]: · P 0.0g · C 0.0g · F 100.0g
+          - generic [ref=e669]: Add to Recipe
+          - button "Details" [ref=e670]
+        - button "Babyfood, cereal, rice, dry CNF 400 kcal · P 7.6g · C 85.0g · F 2.5g Add to Recipe Details" [ref=e672] [cursor=pointer]:
+          - generic [ref=e673]: Babyfood, cereal, rice, dry
+          - generic [ref=e674]: CNF
+          - generic [ref=e675]:
+            - text: 400 kcal
+            - generic [ref=e676]: · P 7.6g · C 85.0g · F 2.5g
+          - generic [ref=e677]: Add to Recipe
+          - button "Details" [ref=e678]
+        - button "Soup, chicken rice, dehydrated CNF 369 kcal · P 15.1g · C 57.1g · F 8.9g Add to Recipe Details" [ref=e680] [cursor=pointer]:
+          - generic [ref=e681]: Soup, chicken rice, dehydrated
+          - generic [ref=e682]: CNF
+          - generic [ref=e683]:
+            - text: 369 kcal
+            - generic [ref=e684]: · P 15.1g · C 57.1g · F 8.9g
+          - generic [ref=e685]: Add to Recipe
+          - button "Details" [ref=e686]
+        - button "Cereal, hot, cream of rice, dry CNF AI verification info 370 kcal · P 6.3g · C 82.4g · F 0.5g Add to Recipe Details" [ref=e688] [cursor=pointer]:
+          - generic [ref=e689]: Cereal, hot, cream of rice, dry
+          - generic [ref=e690]: CNF
+          - button "AI verification info" [ref=e692]: ⓘ
+          - generic [ref=e693]:
+            - text: 370 kcal
+            - generic [ref=e694]: · P 6.3g · C 82.4g · F 0.5g
+          - generic [ref=e695]: Add to Recipe
+          - button "Details" [ref=e696]
+        - button "Snacks, crisped rice bar, almond CNF 458 kcal · P 7.0g · C 64.6g · F 20.4g Add to Recipe Details" [ref=e698] [cursor=pointer]:
+          - generic [ref=e699]: Snacks, crisped rice bar, almond
+          - generic [ref=e700]: CNF
+          - generic [ref=e701]:
+            - text: 458 kcal
+            - generic [ref=e702]: · P 7.0g · C 64.6g · F 20.4g
+          - generic [ref=e703]: Add to Recipe
+          - button "Details" [ref=e704]
+        - button "Cereal, hot, cream of rice, cooked CNF 52 kcal · P 0.9g · C 11.4g · F 0.1g Add to Recipe Details" [ref=e706] [cursor=pointer]:
+          - generic [ref=e707]: Cereal, hot, cream of rice, cooked
+          - generic [ref=e708]: CNF
+          - generic [ref=e709]:
+            - text: 52 kcal
+            - generic [ref=e710]: · P 0.9g · C 11.4g · F 0.1g
+          - generic [ref=e711]: Add to Recipe
+          - button "Details" [ref=e712]
+        - button "Soup, chicken rice, ready-to-serve CNF 36 kcal · P 1.8g · C 5.4g · F 0.8g Add to Recipe Details" [ref=e714] [cursor=pointer]:
+          - generic [ref=e715]: Soup, chicken rice, ready-to-serve
+          - generic [ref=e716]: CNF
+          - generic [ref=e717]:
+            - text: 36 kcal
+            - generic [ref=e718]: · P 1.8g · C 5.4g · F 0.8g
+          - generic [ref=e719]: Add to Recipe
+          - button "Details" [ref=e720]
+        - button "Soup, tomato rice, canned, condensed CNF 93 kcal · P 1.6g · C 17.1g · F 2.1g Add to Recipe Details" [ref=e722] [cursor=pointer]:
+          - generic [ref=e723]: Soup, tomato rice, canned, condensed
+          - generic [ref=e724]: CNF
+          - generic [ref=e725]:
+            - text: 93 kcal
+            - generic [ref=e726]: · P 1.6g · C 17.1g · F 2.1g
+          - generic [ref=e727]: Add to Recipe
+          - button "Details" [ref=e728]
+        - button "Dessert, pudding, rice, ready to eat CNF 108 kcal · P 3.2g · C 18.4g · F 2.1g Add to Recipe Details" [ref=e730] [cursor=pointer]:
+          - generic [ref=e731]: Dessert, pudding, rice, ready to eat
+          - generic [ref=e732]: CNF
+          - generic [ref=e733]:
+            - text: 108 kcal
+            - generic [ref=e734]: · P 3.2g · C 18.4g · F 2.1g
+          - generic [ref=e735]: Add to Recipe
+          - button "Details" [ref=e736]
+        - button "Snacks, rice cakes, brown rice, corn CNF 385 kcal · P 8.4g · C 81.2g · F 3.2g Add to Recipe Details" [ref=e738] [cursor=pointer]:
+          - generic [ref=e739]: Snacks, rice cakes, brown rice, corn
+          - generic [ref=e740]: CNF
+          - generic [ref=e741]:
+            - text: 385 kcal
+            - generic [ref=e742]: · P 8.4g · C 81.2g · F 3.2g
+          - generic [ref=e743]: Add to Recipe
+          - button "Details" [ref=e744]
+        - button "Soup, chicken rice, canned, condensed CNF 49 kcal · P 1.9g · C 8.1g · F 1.0g Add to Recipe Details" [ref=e746] [cursor=pointer]:
+          - generic [ref=e747]: Soup, chicken rice, canned, condensed
+          - generic [ref=e748]: CNF
+          - generic [ref=e749]:
+            - text: 49 kcal
+            - generic [ref=e750]: · P 1.9g · C 8.1g · F 1.0g
+          - generic [ref=e751]: Add to Recipe
+          - button "Details" [ref=e752]
+        - button "Bread, rice bran, gluten free, toasted CNF 264 kcal · P 9.7g · C 47.3g · F 5.0g Add to Recipe Details" [ref=e754] [cursor=pointer]:
+          - generic [ref=e755]: Bread, rice bran, gluten free, toasted
+          - generic [ref=e756]: CNF
+          - generic [ref=e757]:
+            - text: 264 kcal
+            - generic [ref=e758]: · P 9.7g · C 47.3g · F 5.0g
+          - generic [ref=e759]: Add to Recipe
+          - button "Details" [ref=e760]
+        - button "Snacks, rice cakes, brown rice, multigrain CNF 387 kcal · P 8.5g · C 80.1g · F 3.5g Add to Recipe Details" [ref=e762] [cursor=pointer]:
+          - generic [ref=e763]: Snacks, rice cakes, brown rice, multigrain
+          - generic [ref=e764]: CNF
+          - generic [ref=e765]:
+            - text: 387 kcal
+            - generic [ref=e766]: · P 8.5g · C 80.1g · F 3.5g
+          - generic [ref=e767]: Add to Recipe
+          - button "Details" [ref=e768]
+        - button "Soup, chicken rice, dehydrated, water added CNF 24 kcal · P 1.0g · C 3.7g · F 0.6g Add to Recipe Details" [ref=e770] [cursor=pointer]:
+          - generic [ref=e771]: Soup, chicken rice, dehydrated, water added
+          - generic [ref=e772]: CNF
+          - generic [ref=e773]:
+            - text: 24 kcal
+            - generic [ref=e774]: · P 1.0g · C 3.7g · F 0.6g
+          - generic [ref=e775]: Add to Recipe
+          - button "Details" [ref=e776]
+        - button "Dessert, pudding, rice, dry mix, unprepared CNF 376 kcal · P 2.7g · C 91.2g · F 0.1g Add to Recipe Details" [ref=e778] [cursor=pointer]:
+          - generic [ref=e779]: Dessert, pudding, rice, dry mix, unprepared
+          - generic [ref=e780]: CNF
+          - generic [ref=e781]:
+            - text: 376 kcal
+            - generic [ref=e782]: · P 2.7g · C 91.2g · F 0.1g
+          - generic [ref=e783]: Add to Recipe
+          - button "Details" [ref=e784]
+        - button "Cereal, ready to eat, Rice Krispies, Kellogg's CNF 393 kcal · P 6.9g · C 85.8g · F 1.0g Add to Recipe Details" [ref=e786] [cursor=pointer]:
+          - generic [ref=e787]: Cereal, ready to eat, Rice Krispies, Kellogg's
+          - generic [ref=e788]: CNF
+          - generic [ref=e789]:
+            - text: 393 kcal
+            - generic [ref=e790]: · P 6.9g · C 85.8g · F 1.0g
+          - generic [ref=e791]: Add to Recipe
+          - button "Details" [ref=e792]
+        - button "Cereal, ready to eat, Millet Rice, Nature's Path CNF 386 kcal · P 12.7g · C 74.7g · F 6.0g Add to Recipe Details" [ref=e794] [cursor=pointer]:
+          - generic [ref=e795]: Cereal, ready to eat, Millet Rice, Nature's Path
+          - generic [ref=e796]: CNF
+          - generic [ref=e797]:
+            - text: 386 kcal
+            - generic [ref=e798]: · P 12.7g · C 74.7g · F 6.0g
+          - generic [ref=e799]: Add to Recipe
+          - button "Details" [ref=e800]
+        - button "Soup, tomato rice, canned, condensed, water added CNF 47 kcal · P 0.8g · C 8.5g · F 1.1g Add to Recipe Details" [ref=e802] [cursor=pointer]:
+          - generic [ref=e803]: Soup, tomato rice, canned, condensed, water added
+          - generic [ref=e804]: CNF
+          - generic [ref=e805]:
+            - text: 47 kcal
+            - generic [ref=e806]: · P 0.8g · C 8.5g · F 1.1g
+          - generic [ref=e807]: Add to Recipe
+          - button "Details" [ref=e808]
+        - button "Soup, chicken rice, canned, condensed, water added CNF 26 kcal · P 1.0g · C 4.2g · F 0.5g Add to Recipe Details" [ref=e810] [cursor=pointer]:
+          - generic [ref=e811]: Soup, chicken rice, canned, condensed, water added
+          - generic [ref=e812]: CNF
+          - generic [ref=e813]:
+            - text: 26 kcal
+            - generic [ref=e814]: · P 1.0g · C 4.2g · F 0.5g
+          - generic [ref=e815]: Add to Recipe
+          - button "Details" [ref=e816]
+        - button "Beans, mung, long rice (chinese noodles), dehydrated CNF 352 kcal · P 0.2g · C 86.1g · F 0.1g Add to Recipe Details" [ref=e818] [cursor=pointer]:
+          - generic [ref=e819]: Beans, mung, long rice (chinese noodles), dehydrated
+          - generic [ref=e820]: CNF
+          - generic [ref=e821]:
+            - text: 352 kcal
+            - generic [ref=e822]: · P 0.2g · C 86.1g · F 0.1g
+          - generic [ref=e823]: Add to Recipe
+          - button "Details" [ref=e824]
+        - button "Cereal, ready to eat, Puffed Rice, unsweenened, Quaker CNF 392 kcal · P 7.3g · C 89.3g · F 0.6g Add to Recipe Details" [ref=e826] [cursor=pointer]:
+          - generic [ref=e827]: Cereal, ready to eat, Puffed Rice, unsweenened, Quaker
+          - generic [ref=e828]: CNF
+          - generic [ref=e829]:
+            - text: 392 kcal
+            - generic [ref=e830]: · P 7.3g · C 89.3g · F 0.6g
+          - generic [ref=e831]: Add to Recipe
+          - button "Details" [ref=e832]
+        - button "Dessert, pudding, rice, dry mix, prepared with 2% milk CNF 82 kcal · P 3.3g · C 13.0g · F 1.8g Add to Recipe Details" [ref=e834] [cursor=pointer]:
+          - generic [ref=e835]: Dessert, pudding, rice, dry mix, prepared with 2% milk
+          - generic [ref=e836]: CNF
+          - generic [ref=e837]:
+            - text: 82 kcal
+            - generic [ref=e838]: · P 3.3g · C 13.0g · F 1.8g
+          - generic [ref=e839]: Add to Recipe
+          - button "Details" [ref=e840]
+        - button "Babyfood, cereal, rice, with milk powder and fruit, dry CNF 404 kcal · P 12.9g · C 71.8g · F 9.8g Add to Recipe Details" [ref=e842] [cursor=pointer]:
+          - generic [ref=e843]: Babyfood, cereal, rice, with milk powder and fruit, dry
+          - generic [ref=e844]: CNF
+          - generic [ref=e845]:
+            - text: 404 kcal
+            - generic [ref=e846]: · P 12.9g · C 71.8g · F 9.8g
+          - generic [ref=e847]: Add to Recipe
+          - button "Details" [ref=e848]
+        - button "Cereal, ready to eat, Brown Rice Crisps, Barbara's Bakery CNF 395 kcal · P 6.8g · C 85.0g · F 1.9g Add to Recipe Details" [ref=e850] [cursor=pointer]:
+          - generic [ref=e851]: Cereal, ready to eat, Brown Rice Crisps, Barbara's Bakery
+          - generic [ref=e852]: CNF
+          - generic [ref=e853]:
+            - text: 395 kcal
+            - generic [ref=e854]: · P 6.8g · C 85.0g · F 1.9g
+          - generic [ref=e855]: Add to Recipe
+          - button "Details" [ref=e856]
+        - button "Dessert, pudding, rice, dry mix, prepared with whole milk CNF 92 kcal · P 3.2g · C 13.0g · F 3.0g Add to Recipe Details" [ref=e858] [cursor=pointer]:
+          - generic [ref=e859]: Dessert, pudding, rice, dry mix, prepared with whole milk
+          - generic [ref=e860]: CNF
+          - generic [ref=e861]:
+            - text: 92 kcal
+            - generic [ref=e862]: · P 3.2g · C 13.0g · F 3.0g
+          - generic [ref=e863]: Add to Recipe
+          - button "Details" [ref=e864]
+  - generic [ref=e54]:
+    - generic [ref=e55]: More
+    - navigation [ref=e56]:
+      - link "🍽️ Meals" [ref=e57] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e58]: 🍽️
+        - generic [ref=e59]: Meals
+      - link "📦 Inventory" [ref=e60] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e61]: 📦
+        - generic [ref=e62]: Inventory
+      - link "🛒 Grocery" [ref=e63] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e64]: 🛒
+        - generic [ref=e65]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e66] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e67]: 👨‍👩‍👧
+        - generic [ref=e68]: Household
+      - link "⚙️ Settings" [ref=e69] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e70]: ⚙️
+        - generic [ref=e71]: Settings
+      - link "📘 User Guide" [ref=e72] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e73]: 📘
+        - generic [ref=e74]: User Guide
+    - button "🚪 Log Out" [ref=e76]:
+      - generic [ref=e77]: 🚪
+      - generic [ref=e78]: Log Out

@@ -1,0 +1,345 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]:
+      - text: NourishPlan
+      - paragraph [ref=e8]: The Millers
+    - navigation [ref=e9]:
+      - link "🏠 Home" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]: 🏠
+        - generic [ref=e12]: Home
+      - link "📖 Recipes" [ref=e13] [cursor=pointer]:
+        - /url: /recipes
+        - generic [ref=e14]: 📖
+        - generic [ref=e15]: Recipes
+      - link "🍽️ Meals" [ref=e16] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e17]: 🍽️
+        - generic [ref=e18]: Meals
+      - link "📋 Plan" [ref=e19] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e20]: 📋
+        - generic [ref=e21]: Plan
+      - link "📦 Inventory" [ref=e22] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e23]: 📦
+        - generic [ref=e24]: Inventory
+      - link "🛒 Grocery" [ref=e25] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e26]: 🛒
+        - generic [ref=e27]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e28] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e29]: 👨‍👩‍👧
+        - generic [ref=e30]: Household
+      - link "⚙️ Settings" [ref=e31] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e32]: ⚙️
+        - generic [ref=e33]: Settings
+      - link "📘 User Guide" [ref=e34] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e35]: 📘
+        - generic [ref=e36]: User Guide
+    - button "🚪 Log Out" [ref=e38]:
+      - generic [ref=e39]: 🚪
+      - generic [ref=e40]: Log Out
+  - main [ref=e41]:
+    - generic [ref=e171]:
+      - generic [ref=e172]:
+        - heading "Meal Plan" [level=1] [ref=e173]
+        - paragraph [ref=e174]: Plan your household's meals for the week.
+      - generic [ref=e175]:
+        - button "Previous week" [ref=e176]: ←
+        - generic [ref=e177]: Mar 29 – Apr 4
+        - generic [ref=e178]:
+          - button "Next week" [ref=e179]: →
+          - button "More options" [ref=e181]:
+            - img [ref=e182]
+      - generic [ref=e185]:
+        - generic [ref=e186]: "Targets for:"
+        - combobox [ref=e187]:
+          - option "Sarah Miller (you)" [selected]
+          - option "Marcus Miller"
+          - option "Zoe Miller"
+      - generic [ref=e206]:
+        - button "Save as template" [ref=e207]
+        - button "Load template" [ref=e208]
+      - generic [ref=e209]:
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - generic [ref=e212]: SunMar 29
+            - generic [ref=e213]: 0 kcal
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - generic [ref=e216]: Breakfast
+              - button "Add meal to Breakfast" [ref=e217]: +
+            - generic [ref=e218]:
+              - generic [ref=e219]: Lunch
+              - button "Add meal to Lunch" [ref=e220]: +
+            - generic [ref=e221]:
+              - generic [ref=e222]: Dinner
+              - button "Add meal to Dinner" [ref=e223]: +
+            - generic [ref=e224]:
+              - generic [ref=e225]: Snacks
+              - button "Add meal to Snacks" [ref=e226]: +
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - img [ref=e230]:
+                - generic [ref=e234]: "0"
+              - generic [ref=e235]: cal
+            - generic [ref=e236]:
+              - img [ref=e237]:
+                - generic [ref=e241]: "0"
+              - generic [ref=e242]: P
+            - generic [ref=e243]:
+              - img [ref=e244]:
+                - generic [ref=e248]: "0"
+              - generic [ref=e249]: C
+            - generic [ref=e250]:
+              - img [ref=e251]:
+                - generic [ref=e255]: "0"
+              - generic [ref=e256]: F
+        - generic [ref=e257]:
+          - generic [ref=e258]:
+            - generic [ref=e259]: MonMar 30
+            - generic [ref=e260]: 0 kcal
+          - generic [ref=e261]:
+            - generic [ref=e262]:
+              - generic [ref=e263]: Breakfast
+              - button "Add meal to Breakfast" [ref=e264]: +
+            - generic [ref=e265]:
+              - generic [ref=e266]: Lunch
+              - button "Add meal to Lunch" [ref=e267]: +
+            - generic [ref=e268]:
+              - generic [ref=e269]: Dinner
+              - button "Add meal to Dinner" [ref=e270]: +
+            - generic [ref=e271]:
+              - generic [ref=e272]: Snacks
+              - button "Add meal to Snacks" [ref=e273]: +
+          - generic [ref=e275]:
+            - generic [ref=e276]:
+              - img [ref=e277]:
+                - generic [ref=e281]: "0"
+              - generic [ref=e282]: cal
+            - generic [ref=e283]:
+              - img [ref=e284]:
+                - generic [ref=e288]: "0"
+              - generic [ref=e289]: P
+            - generic [ref=e290]:
+              - img [ref=e291]:
+                - generic [ref=e295]: "0"
+              - generic [ref=e296]: C
+            - generic [ref=e297]:
+              - img [ref=e298]:
+                - generic [ref=e302]: "0"
+              - generic [ref=e303]: F
+        - generic [ref=e304]:
+          - generic [ref=e305]:
+            - generic [ref=e306]: TueMar 31
+            - generic [ref=e307]: 0 kcal
+          - generic [ref=e308]:
+            - generic [ref=e309]:
+              - generic [ref=e310]: Breakfast
+              - button "Add meal to Breakfast" [ref=e311]: +
+            - generic [ref=e312]:
+              - generic [ref=e313]: Lunch
+              - button "Add meal to Lunch" [ref=e314]: +
+            - generic [ref=e315]:
+              - generic [ref=e316]: Dinner
+              - button "Add meal to Dinner" [ref=e317]: +
+            - generic [ref=e318]:
+              - generic [ref=e319]: Snacks
+              - button "Add meal to Snacks" [ref=e320]: +
+          - generic [ref=e322]:
+            - generic [ref=e323]:
+              - img [ref=e324]:
+                - generic [ref=e328]: "0"
+              - generic [ref=e329]: cal
+            - generic [ref=e330]:
+              - img [ref=e331]:
+                - generic [ref=e335]: "0"
+              - generic [ref=e336]: P
+            - generic [ref=e337]:
+              - img [ref=e338]:
+                - generic [ref=e342]: "0"
+              - generic [ref=e343]: C
+            - generic [ref=e344]:
+              - img [ref=e345]:
+                - generic [ref=e349]: "0"
+              - generic [ref=e350]: F
+        - generic [ref=e351]:
+          - generic [ref=e352]:
+            - generic [ref=e353]: WedApr 1
+            - generic [ref=e354]: 0 kcal
+          - generic [ref=e355]:
+            - generic [ref=e356]:
+              - generic [ref=e357]: Breakfast
+              - button "Add meal to Breakfast" [ref=e358]: +
+            - generic [ref=e359]:
+              - generic [ref=e360]: Lunch
+              - button "Add meal to Lunch" [ref=e361]: +
+            - generic [ref=e362]:
+              - generic [ref=e363]: Dinner
+              - button "Add meal to Dinner" [ref=e364]: +
+            - generic [ref=e365]:
+              - generic [ref=e366]: Snacks
+              - button "Add meal to Snacks" [ref=e367]: +
+          - generic [ref=e369]:
+            - generic [ref=e370]:
+              - img [ref=e371]:
+                - generic [ref=e375]: "0"
+              - generic [ref=e376]: cal
+            - generic [ref=e377]:
+              - img [ref=e378]:
+                - generic [ref=e382]: "0"
+              - generic [ref=e383]: P
+            - generic [ref=e384]:
+              - img [ref=e385]:
+                - generic [ref=e389]: "0"
+              - generic [ref=e390]: C
+            - generic [ref=e391]:
+              - img [ref=e392]:
+                - generic [ref=e396]: "0"
+              - generic [ref=e397]: F
+        - generic [ref=e398]:
+          - generic [ref=e399]:
+            - generic [ref=e400]: ThuApr 2
+            - generic [ref=e401]: 0 kcal
+          - generic [ref=e402]:
+            - generic [ref=e403]:
+              - generic [ref=e404]: Breakfast
+              - button "Add meal to Breakfast" [ref=e405]: +
+            - generic [ref=e406]:
+              - generic [ref=e407]: Lunch
+              - button "Add meal to Lunch" [ref=e408]: +
+            - generic [ref=e409]:
+              - generic [ref=e410]: Dinner
+              - button "Add meal to Dinner" [ref=e411]: +
+            - generic [ref=e412]:
+              - generic [ref=e413]: Snacks
+              - button "Add meal to Snacks" [ref=e414]: +
+          - generic [ref=e416]:
+            - generic [ref=e417]:
+              - img [ref=e418]:
+                - generic [ref=e422]: "0"
+              - generic [ref=e423]: cal
+            - generic [ref=e424]:
+              - img [ref=e425]:
+                - generic [ref=e429]: "0"
+              - generic [ref=e430]: P
+            - generic [ref=e431]:
+              - img [ref=e432]:
+                - generic [ref=e436]: "0"
+              - generic [ref=e437]: C
+            - generic [ref=e438]:
+              - img [ref=e439]:
+                - generic [ref=e443]: "0"
+              - generic [ref=e444]: F
+        - generic [ref=e445]:
+          - generic [ref=e446]:
+            - generic [ref=e447]: FriApr 3
+            - generic [ref=e448]: 0 kcal
+          - generic [ref=e449]:
+            - generic [ref=e450]:
+              - generic [ref=e451]: Breakfast
+              - button "Add meal to Breakfast" [ref=e452]: +
+            - generic [ref=e453]:
+              - generic [ref=e454]: Lunch
+              - button "Add meal to Lunch" [ref=e455]: +
+            - generic [ref=e456]:
+              - generic [ref=e457]: Dinner
+              - button "Add meal to Dinner" [ref=e458]: +
+            - generic [ref=e459]:
+              - generic [ref=e460]: Snacks
+              - button "Add meal to Snacks" [ref=e461]: +
+          - generic [ref=e463]:
+            - generic [ref=e464]:
+              - img [ref=e465]:
+                - generic [ref=e469]: "0"
+              - generic [ref=e470]: cal
+            - generic [ref=e471]:
+              - img [ref=e472]:
+                - generic [ref=e476]: "0"
+              - generic [ref=e477]: P
+            - generic [ref=e478]:
+              - img [ref=e479]:
+                - generic [ref=e483]: "0"
+              - generic [ref=e484]: C
+            - generic [ref=e485]:
+              - img [ref=e486]:
+                - generic [ref=e490]: "0"
+              - generic [ref=e491]: F
+        - generic [ref=e492]:
+          - generic [ref=e493]:
+            - generic [ref=e494]: SatApr 4
+            - generic [ref=e495]: 0 kcal
+          - generic [ref=e496]:
+            - generic [ref=e497]:
+              - generic [ref=e498]: Breakfast
+              - button "Add meal to Breakfast" [ref=e499]: +
+            - generic [ref=e500]:
+              - generic [ref=e501]: Lunch
+              - button "Add meal to Lunch" [ref=e502]: +
+            - generic [ref=e503]:
+              - generic [ref=e504]: Dinner
+              - button "Add meal to Dinner" [ref=e505]: +
+            - generic [ref=e506]:
+              - generic [ref=e507]: Snacks
+              - button "Add meal to Snacks" [ref=e508]: +
+          - generic [ref=e510]:
+            - generic [ref=e511]:
+              - img [ref=e512]:
+                - generic [ref=e516]: "0"
+              - generic [ref=e517]: cal
+            - generic [ref=e518]:
+              - img [ref=e519]:
+                - generic [ref=e523]: "0"
+              - generic [ref=e524]: P
+            - generic [ref=e525]:
+              - img [ref=e526]:
+                - generic [ref=e530]: "0"
+              - generic [ref=e531]: C
+            - generic [ref=e532]:
+              - img [ref=e533]:
+                - generic [ref=e537]: "0"
+              - generic [ref=e538]: F
+      - generic [ref=e539]:
+        - generic [ref=e540]:
+          - generic [ref=e541]: Weekly Budget
+          - button "Toggle budget section" [ref=e542]:
+            - img [ref=e543]
+        - generic [ref=e545]:
+          - generic [ref=e546]: $200.00/week
+          - button "Edit Budget" [ref=e547]
+        - progressbar "Weekly spend" [ref=e548]
+        - paragraph [ref=e549]: spent $0.00 of $200.00 · $200.00 remaining
+  - generic [ref=e139]:
+    - generic [ref=e140]: More
+    - navigation [ref=e141]:
+      - link "🍽️ Meals" [ref=e142] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e143]: 🍽️
+        - generic [ref=e144]: Meals
+      - link "📦 Inventory" [ref=e145] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e146]: 📦
+        - generic [ref=e147]: Inventory
+      - link "🛒 Grocery" [ref=e148] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e149]: 🛒
+        - generic [ref=e150]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e151] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e152]: 👨‍👩‍👧
+        - generic [ref=e153]: Household
+      - link "⚙️ Settings" [ref=e154] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e155]: ⚙️
+        - generic [ref=e156]: Settings
+      - link "📘 User Guide" [ref=e157] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e158]: 📘
+        - generic [ref=e159]: User Guide
+    - button "🚪 Log Out" [ref=e161]:
+      - generic [ref=e162]: 🚪
+      - generic [ref=e163]: Log Out

@@ -1,0 +1,131 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]:
+      - text: NourishPlan
+      - paragraph [ref=e8]: The Millers
+    - navigation [ref=e9]:
+      - link "🏠 Home" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]: 🏠
+        - generic [ref=e12]: Home
+      - link "📖 Recipes" [ref=e13] [cursor=pointer]:
+        - /url: /recipes
+        - generic [ref=e14]: 📖
+        - generic [ref=e15]: Recipes
+      - link "🍽️ Meals" [ref=e16] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e17]: 🍽️
+        - generic [ref=e18]: Meals
+      - link "📋 Plan" [ref=e19] [cursor=pointer]:
+        - /url: /plan
+        - generic [ref=e20]: 📋
+        - generic [ref=e21]: Plan
+      - link "📦 Inventory" [ref=e22] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e23]: 📦
+        - generic [ref=e24]: Inventory
+      - link "🛒 Grocery" [ref=e25] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e26]: 🛒
+        - generic [ref=e27]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e28] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e29]: 👨‍👩‍👧
+        - generic [ref=e30]: Household
+      - link "⚙️ Settings" [ref=e31] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e32]: ⚙️
+        - generic [ref=e33]: Settings
+      - link "📘 User Guide" [ref=e34] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e35]: 📘
+        - generic [ref=e36]: User Guide
+    - button "🚪 Log Out" [ref=e38]:
+      - generic [ref=e39]: 🚪
+      - generic [ref=e40]: Log Out
+  - main [ref=e41]:
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - heading "Grocery List" [level=1] [ref=e44]
+        - button "Regenerate List" [ref=e45]
+      - generic [ref=e46]:
+        - generic [ref=e47]: "Est. total: $0.00"
+        - generic [ref=e48]: 1 of 4 checked
+      - generic [ref=e49]:
+        - heading "Need to Buy" [level=2] [ref=e50]
+        - region "Meat & Seafood" [ref=e51]:
+          - heading "Meat & Seafood" [level=2] [ref=e52]
+          - button "CHICKEN — checked" [ref=e54] [cursor=pointer]:
+            - img [ref=e56]
+            - generic [ref=e58]:
+              - text: CHICKEN
+              - generic [ref=e59]: 350 g
+            - generic [ref=e60]:
+              - generic [ref=e61]: "?"
+              - link "Search for CHICKEN at a grocery store" [ref=e62]:
+                - /url: https://www.google.com/search?q=buy+CHICKEN+grocery
+                - text: 🔍
+        - region "Other" [ref=e111]:
+          - heading "Other" [level=2] [ref=e112]
+          - button "paper towels — unchecked" [ref=e114] [cursor=pointer]:
+            - generic [ref=e116]: paper towels
+            - generic [ref=e117]:
+              - generic [ref=e118]: "?"
+              - link "Search for paper towels at a grocery store" [ref=e119]:
+                - /url: https://www.google.com/search?q=buy+paper%20towels+grocery
+                - text: 🔍
+        - region "Pantry/Dry Goods" [ref=e63]:
+          - heading "Pantry/Dry Goods" [level=2] [ref=e64]
+          - button "RICE — unchecked" [ref=e66] [cursor=pointer]:
+            - generic [ref=e68]:
+              - text: RICE
+              - generic [ref=e69]: 150 g
+            - generic [ref=e70]:
+              - generic [ref=e71]: "?"
+              - link "Search for RICE at a grocery store" [ref=e72]:
+                - /url: https://www.google.com/search?q=buy+RICE+grocery
+                - text: 🔍
+        - region "Produce" [ref=e73]:
+          - heading "Produce" [level=2] [ref=e74]
+          - button "Broccoli raab, raw — unchecked" [ref=e76] [cursor=pointer]:
+            - generic [ref=e78]:
+              - text: Broccoli raab, raw
+              - generic [ref=e79]: 200 g
+            - generic [ref=e80]:
+              - generic [ref=e81]: "?"
+              - link "Search for Broccoli raab, raw at a grocery store" [ref=e82]:
+                - /url: https://www.google.com/search?q=buy+Broccoli%20raab%2C%20raw+grocery
+                - text: 🔍
+        - generic [ref=e83]:
+          - textbox "Add an item..." [active] [ref=e84]
+          - button "Add" [ref=e85]
+  - generic [ref=e86]:
+    - generic [ref=e87]: More
+    - navigation [ref=e88]:
+      - link "🍽️ Meals" [ref=e89] [cursor=pointer]:
+        - /url: /meals
+        - generic [ref=e90]: 🍽️
+        - generic [ref=e91]: Meals
+      - link "📦 Inventory" [ref=e92] [cursor=pointer]:
+        - /url: /inventory
+        - generic [ref=e93]: 📦
+        - generic [ref=e94]: Inventory
+      - link "🛒 Grocery" [ref=e95] [cursor=pointer]:
+        - /url: /grocery
+        - generic [ref=e96]: 🛒
+        - generic [ref=e97]: Grocery
+      - link "👨‍👩‍👧 Household" [ref=e98] [cursor=pointer]:
+        - /url: /household
+        - generic [ref=e99]: 👨‍👩‍👧
+        - generic [ref=e100]: Household
+      - link "⚙️ Settings" [ref=e101] [cursor=pointer]:
+        - /url: /settings
+        - generic [ref=e102]: ⚙️
+        - generic [ref=e103]: Settings
+      - link "📘 User Guide" [ref=e104] [cursor=pointer]:
+        - /url: /guide
+        - generic [ref=e105]: 📘
+        - generic [ref=e106]: User Guide
+    - button "🚪 Log Out" [ref=e108]:
+      - generic [ref=e109]: 🚪
+      - generic [ref=e110]: Log Out
