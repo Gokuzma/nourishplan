@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Ready to execute
-stopped_at: Completed 18-01-PLAN.md
-last_updated: "2026-03-31T01:15:29.185Z"
+stopped_at: Completed 18-02-PLAN.md
+last_updated: "2026-04-04T17:41:54.024Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -104,6 +104,7 @@ Plan: 2 of 3
 | Phase 17-inventory-engine P02 | 11 | 2 tasks | 8 files |
 | Phase 17-inventory-engine P04 | 7 | 2 tasks | 6 files |
 | Phase 18-grocery-list-generation P01 | 324 | 2 tasks | 5 files |
+| Phase 18-grocery-list-generation P02 | 35 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -245,6 +246,9 @@ Recent decisions affecting current work:
 - [Phase 18-grocery-list-generation]: household_id denormalized on grocery_items for RLS efficiency — avoids join to grocery_lists on every row-level check
 - [Phase 18-grocery-list-generation]: aggregateIngredients accepts pre-resolved slot data — caller fetches nested recipe_ingredients before calling
 - [Phase 18-grocery-list-generation]: MAX_RECIPE_DEPTH=5 with console.warn at limit — prevents infinite recursion on circular recipe references
+- [Phase 18-grocery-list-generation]: Supabase realtime postgres_changes subscription on grocery_items with list_id filter — first realtime use in project
+- [Phase 18-grocery-list-generation]: Already Have items stored in DB with notes='inventory-covered' for snapshot consistency (D-01)
+- [Phase 18-grocery-list-generation]: Optimistic toggle with rollback on useToggleGroceryItem; realtime handles cross-member sync
 
 ### v2.0 Decisions
 
@@ -281,6 +285,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T01:15:29.179Z
-Stopped at: Completed 18-01-PLAN.md
+Last session: 2026-04-04T17:41:54.018Z
+Stopped at: Completed 18-02-PLAN.md
 Resume file: None
