@@ -131,6 +131,7 @@ export interface MealPlanSlot {
   slot_order: number
   meal_id: string | null
   is_override: boolean
+  is_locked: boolean
   created_at: string
 }
 
