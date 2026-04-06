@@ -292,24 +292,33 @@ serve(async (req) => {
         avgRatings[id] = vals.reduce((a, b) => a + b, 0) / vals.length;
       }
 
-      // Locked slots
+      // Locked slots (from existing DB rows)
       const lockedSlots = slots.filter((s) => s.is_locked);
-      const unlockedSlots = slots.filter((s) => !s.is_locked);
+      const lockedKey = new Set(lockedSlots.map((s) => `${s.day_index}_${s.slot_name}`));
 
       // Build schedule status lookup: key = `${day_index}_${slot_name}`
       const scheduleStatus: Record<string, string> = {};
       for (const ss of scheduleSlots) {
-        // Normalize "Snacks" (plan grid) vs "Snack" (DB schedule)
+        // Normalize "Snack" (DB schedule) vs "Snacks" (plan grid)
         const normalizedSlotName = ss.slot_name === "Snack" ? "Snacks" : ss.slot_name;
-        scheduleStatus[`${ss.day_of_week}_${normalizedSlotName}`] = ss.status;
+        scheduleStatus[`${ss.day_of_week}_${normalizedSlotName.toLowerCase()}`] = ss.status;
       }
 
-      // Slots to fill with schedule status
-      const slotsToFill = unlockedSlots.map((s) => ({
-        day_index: s.day_index,
-        slot_name: s.slot_name,
-        scheduleStatus: scheduleStatus[`${s.day_index}_${s.slot_name}`] ?? "consume",
-      }));
+      // Enumerate ALL possible slots (7 days x 4 default slots), not just existing DB rows.
+      // Existing DB rows may only cover slots that already have meals assigned.
+      const DEFAULT_SLOT_NAMES = ["breakfast", "lunch", "dinner", "snacks"];
+      const slotsToFill: { day_index: number; slot_name: string; scheduleStatus: string }[] = [];
+      for (let day = 0; day < 7; day++) {
+        for (const slotName of DEFAULT_SLOT_NAMES) {
+          const key = `${day}_${slotName}`;
+          if (lockedKey.has(key)) continue; // skip locked slots
+          slotsToFill.push({
+            day_index: day,
+            slot_name: slotName,
+            scheduleStatus: scheduleStatus[key] ?? "consume",
+          });
+        }
+      }
 
       // Inventory ingredient names for AI context
       const inventoryNames = inventory.map((i) => sanitizeString(i.food_name));
@@ -559,12 +568,17 @@ serve(async (req) => {
           mealId = newMeal.id;
         }
 
+        // Compute slot_order from slot_name for correct display order
+        const slotOrderMap: Record<string, number> = { breakfast: 0, lunch: 1, dinner: 2, snacks: 3 };
+        const slotOrder = slotOrderMap[slotAssignment.slot_name.toLowerCase()] ?? 0;
+
         // Upsert into meal_plan_slots
         await adminClient.from("meal_plan_slots").upsert(
           {
             plan_id: planId,
             day_index: slotAssignment.day_index,
             slot_name: slotAssignment.slot_name,
+            slot_order: slotOrder,
             meal_id: mealId,
             generation_rationale: slotAssignment.rationale,
             is_override: false,
