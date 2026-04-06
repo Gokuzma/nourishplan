@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -13,9 +13,12 @@ import { useMeals } from '../../hooks/useMeals'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
+import { useNutritionGaps } from '../../hooks/useNutritionGaps'
 import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
+import { computeSwapSuggestions } from '../../utils/swapSuggestions'
 import { LogMealModal } from '../log/LogMealModal'
+import { NutritionGapCard } from './NutritionGapCard'
 import { DayCard } from './DayCard'
 import { DayCarousel } from './DayCarousel'
 import { SlotCard } from './SlotCard'
@@ -23,6 +26,7 @@ import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import type { NutritionTarget, Meal, MealItem } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
+import type { SwapSuggestion } from './NutritionGapCard'
 
 const DAY_COUNT = 7
 
@@ -120,6 +124,7 @@ export function PlanGrid({
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
   const toggleLock = useToggleLock()
+  const { gaps } = useNutritionGaps(planId)
 
   // Suggestion data — fetched once for the whole grid
   const today = logDate ?? new Date().toISOString().slice(0, 10)
@@ -373,6 +378,26 @@ export function PlanGrid({
     return map
   }, [displaySlots, memberInputs, currentUserId])
 
+  // Compute swap suggestions from nutrition gaps + available meals
+  const swapSuggestions = useMemo<(SwapSuggestion & { mealId: string })[]>(() => {
+    if (gaps.length === 0 || !slots.length || !meals.length) return []
+    const fullMeals = (meals as (Meal & { meal_items: MealItem[] })[])
+    return computeSwapSuggestions(gaps, slots, fullMeals, weekStart, weekStartDay)
+  }, [gaps, slots, meals, weekStart, weekStartDay])
+
+  const handleApplySwap = useCallback((swap: SwapSuggestion & { mealId: string }) => {
+    const slotOrder = DEFAULT_SLOTS.indexOf(swap.slotName as typeof DEFAULT_SLOTS[number])
+    const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
+    assignSlot.mutate({
+      planId,
+      dayIndex: swap.dayIndex,
+      slotName: swap.slotName,
+      slotOrder: order,
+      mealId: swap.mealId,
+      isOverride: true,
+    })
+  }, [planId, assignSlot])
+
   // Group slots by day_index
   const slotsByDay: Record<number, typeof displaySlots> = {}
   for (let i = 0; i < DAY_COUNT; i++) {
@@ -419,6 +444,13 @@ export function PlanGrid({
 
   return (
     <>
+      {gaps.length > 0 && (
+        <NutritionGapCard
+          gaps={gaps}
+          swapSuggestions={swapSuggestions}
+          onApplySwap={handleApplySwap}
+        />
+      )}
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Mobile: horizontal carousel with scroll-snap */}
         <div className="md:hidden">

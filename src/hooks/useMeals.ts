@@ -17,7 +17,7 @@ export function useMeals() {
     queryFn: async (): Promise<Meal[]> => {
       const { data, error } = await supabase
         .from('meals')
-        .select('*, meal_items(calories_per_100g, quantity_grams)')
+        .select('*, meal_items(calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g, quantity_grams)')
         .eq('household_id', householdId!)
         .is('deleted_at', null)
         .order('name')
