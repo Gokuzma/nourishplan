@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 18: Grocery List Generation** - Auto-generated grocery list from active meal plan, categorised by store aisle, with pantry subtraction and household sharing (completed 2026-04-04)
 - [x] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
  (completed 2026-04-06)
-- [ ] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods
+- [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
 - [ ] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints
 - [ ] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting
 - [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
@@ -182,7 +182,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 17. Inventory Engine | 4/5 | Complete    | 2026-03-26 |
 | 18. Grocery List Generation | 3/3 | Complete   | 2026-04-04 |
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
-| 20. Feedback Engine & Dietary Restrictions | 0/4 | In Progress | - |
+| 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
 | 21. Schedule Model | 0/TBD | Not started | - |
 | 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
@@ -400,10 +400,10 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 20-01-PLAN.md -- DB migration, types, query keys, monotony utility, test stubs
-- [ ] 20-02-PLAN.md -- Rating hooks, RateMealsCard, MealRatingRow, HomePage integration
-- [ ] 20-03-PLAN.md -- Dietary restrictions hooks, won't-eat hooks, Settings sections, AI Edge Function
-- [ ] 20-04-PLAN.md -- IssuesPanel, SlotCard badges, AI tags, InsightsPage, navigation, schema push
+- [x] 20-01-PLAN.md -- DB migration, types, query keys, monotony utility, test stubs
+- [x] 20-02-PLAN.md -- Rating hooks, RateMealsCard, MealRatingRow, HomePage integration
+- [x] 20-03-PLAN.md -- Dietary restrictions hooks, won't-eat hooks, Settings sections, AI Edge Function
+- [x] 20-04-PLAN.md -- IssuesPanel, SlotCard badges, AI tags, InsightsPage, navigation, schema push
 
 ### Phase 21: Schedule Model
 **Goal**: Each household member can set their daily availability for meal prep and eating, and these windows are stored as structured constraints ready to feed the Planning Engine
