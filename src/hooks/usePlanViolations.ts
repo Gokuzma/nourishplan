@@ -1,4 +1,5 @@
-import { useQuery, useMemo } from '@tanstack/react-query'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { WontEatEntry } from '../types/database'
 import type { SlotWithMeal } from './useMealPlan'

@@ -1,7 +1,9 @@
+import { useDroppable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition, calcDayNutrition } from '../../utils/nutrition'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import { ProgressRing } from './ProgressRing'
 import { SlotCard } from './SlotCard'
+import { DropActionMenu } from './DropActionMenu'
 import type { NutritionTarget } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { PortionResult } from '../../utils/portionSuggestions'
@@ -25,9 +27,29 @@ function slotNutrition(slot: SlotWithMeal) {
   return calcMealNutrition(items)
 }
 
-interface SlotViolationCounts {
-  count: number
-  hasAllergy: boolean
+function DroppableSlot({
+  dayIndex,
+  slotName,
+  children,
+  currentSlot,
+}: {
+  dayIndex: number
+  slotName: string
+  children: React.ReactNode
+  currentSlot: SlotWithMeal | null
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `drop-${dayIndex}-${slotName}`,
+    data: { dayIndex, slotName, currentSlot },
+  })
+  return (
+    <div
+      ref={setNodeRef}
+      className={isOver ? 'ring-2 ring-primary/60 rounded-lg bg-primary/5 transition-all' : 'transition-all'}
+    >
+      {children}
+    </div>
+  )
 }
 
 interface DayCardProps {
@@ -38,11 +60,16 @@ interface DayCardProps {
   memberTarget: NutritionTarget | null
   currentUserId?: string
   slotSuggestions?: Map<string, PortionResult | null>
-  slotViolations?: Map<string, SlotViolationCounts>
   onAssignSlot: (slotName: string) => void
   onClearSlot: (slotId: string) => void
   onSwapSlot: (slotName: string) => void
   onLogSlot?: (slot: SlotWithMeal, suggestedServings?: number) => void
+  onToggleLock?: (slotId: string, isLocked: boolean) => void
+  pendingDropSlotKey?: string | null
+  onDropSwap?: () => void
+  onDropReplace?: () => void
+  onDropCancel?: () => void
+  slotViolations?: Map<string, { count: number; hasAllergy: boolean }>
 }
 
 /**
@@ -56,13 +83,17 @@ export function DayCard({
   memberTarget,
   currentUserId,
   slotSuggestions,
-  slotViolations,
   onAssignSlot,
   onClearSlot,
   onSwapSlot,
   onLogSlot,
+  onToggleLock,
+  pendingDropSlotKey,
+  onDropSwap,
+  onDropReplace,
+  onDropCancel,
+  slotViolations,
 }: DayCardProps) {
-  // Derive the actual calendar date for this day
   const weekStartDate = new Date(weekStart + 'T00:00:00Z')
   const dayDate = new Date(weekStartDate)
   dayDate.setUTCDate(weekStartDate.getUTCDate() + dayIndex)
@@ -70,16 +101,13 @@ export function DayCard({
   const dayName = DAY_NAMES[(weekStartDay + dayIndex) % 7]
   const dateLabel = dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
-  // Build slot map: slot_name -> SlotWithMeal
   const slotMap = new Map<string, SlotWithMeal>()
   for (const s of slots) {
     slotMap.set(s.slot_name, s)
   }
 
-  // Custom slots: not in DEFAULT_SLOTS
   const customSlots = slots.filter(s => !DEFAULT_SLOTS.includes(s.slot_name as typeof DEFAULT_SLOTS[number]))
 
-  // Day nutrition totals
   const filledSlots = slots.filter(s => s.meals !== null)
   const dayTotal = calcDayNutrition(filledSlots.map(s => slotNutrition(s)))
 
@@ -108,49 +136,61 @@ export function DayCard({
       <div className="flex flex-col gap-2">
         {DEFAULT_SLOTS.map((slotName) => {
           const s = slotMap.get(slotName) ?? null
-          const viol = slotViolations?.get(slotName)
+          const dropKey = `${dayIndex}:${slotName}`
           return (
-            <SlotCard
-              key={slotName}
-              slotName={slotName}
-              slot={s}
-              suggestions={slotSuggestions?.get(slotName) ?? null}
-              currentUserId={currentUserId}
-              memberTarget={memberTarget}
-              violationCount={viol?.count}
-              hasAllergyViolation={viol?.hasAllergy}
-              onAssign={() => onAssignSlot(slotName)}
-              onClear={() => {
-                if (s) onClearSlot(s.id)
-              }}
-              onSwap={() => onSwapSlot(slotName)}
-              onLog={s?.meals && onLogSlot
-                ? () => onLogSlot(s, getSuggestedServings(slotName))
-                : undefined}
-            />
+            <DroppableSlot key={slotName} dayIndex={dayIndex} slotName={slotName} currentSlot={s}>
+              <SlotCard
+                slotName={slotName}
+                slot={s}
+                suggestions={slotSuggestions?.get(slotName) ?? null}
+                currentUserId={currentUserId}
+                memberTarget={memberTarget}
+                onAssign={() => onAssignSlot(slotName)}
+                onClear={() => {
+                  if (s) onClearSlot(s.id)
+                }}
+                onSwap={() => onSwapSlot(slotName)}
+                onLog={s?.meals && onLogSlot
+                  ? () => onLogSlot(s, getSuggestedServings(slotName))
+                  : undefined}
+                isLocked={s?.is_locked}
+                onToggleLock={s && onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
+                violationCount={slotViolations?.get(slotName)?.count}
+                hasAllergyViolation={slotViolations?.get(slotName)?.hasAllergy}
+              />
+              {pendingDropSlotKey === dropKey && onDropSwap && onDropReplace && onDropCancel && (
+                <DropActionMenu onSwap={onDropSwap} onReplace={onDropReplace} onCancel={onDropCancel} />
+              )}
+            </DroppableSlot>
           )
         })}
 
         {/* Custom slots */}
         {customSlots.map(s => {
-          const viol = slotViolations?.get(s.slot_name)
+          const dropKey = `${dayIndex}:${s.slot_name}`
           return (
-            <SlotCard
-              key={s.id}
-              slotName={s.slot_name}
-              slot={s}
-              suggestions={slotSuggestions?.get(s.slot_name) ?? null}
-              currentUserId={currentUserId}
-              memberTarget={memberTarget}
-              violationCount={viol?.count}
-              hasAllergyViolation={viol?.hasAllergy}
-              onAssign={() => onAssignSlot(s.slot_name)}
-              onClear={() => onClearSlot(s.id)}
-              onSwap={() => onSwapSlot(s.slot_name)}
-              onLog={s.meals && onLogSlot
-                ? () => onLogSlot(s, getSuggestedServings(s.slot_name))
-                : undefined}
-            />
+            <DroppableSlot key={s.id} dayIndex={dayIndex} slotName={s.slot_name} currentSlot={s}>
+              <SlotCard
+                slotName={s.slot_name}
+                slot={s}
+                suggestions={slotSuggestions?.get(s.slot_name) ?? null}
+                currentUserId={currentUserId}
+                memberTarget={memberTarget}
+                onAssign={() => onAssignSlot(s.slot_name)}
+                onClear={() => onClearSlot(s.id)}
+                onSwap={() => onSwapSlot(s.slot_name)}
+                onLog={s.meals && onLogSlot
+                  ? () => onLogSlot(s, getSuggestedServings(s.slot_name))
+                  : undefined}
+                isLocked={s.is_locked}
+                onToggleLock={onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
+                violationCount={slotViolations?.get(s.slot_name)?.count}
+                hasAllergyViolation={slotViolations?.get(s.slot_name)?.hasAllergy}
+              />
+              {pendingDropSlotKey === dropKey && onDropSwap && onDropReplace && onDropCancel && (
+                <DropActionMenu onSwap={onDropSwap} onReplace={onDropReplace} onCancel={onDropCancel} />
+              )}
+            </DroppableSlot>
           )
         })}
       </div>

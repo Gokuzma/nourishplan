@@ -16,6 +16,7 @@ import { calcLogEntryNutrition, calcDayNutrition, MICRONUTRIENT_DISPLAY_ORDER, M
 import { getWeekStart } from '../utils/mealPlan'
 import { getUnloggedSlots } from '../utils/foodLogs'
 import { InventorySummaryWidget } from '../components/inventory/InventorySummaryWidget'
+import { RateMealsCard } from '../components/feedback/RateMealsCard'
 import type { FoodLog } from '../types/database'
 import type { SlotWithMeal } from '../hooks/useMealPlan'
 
@@ -393,6 +394,9 @@ export function HomePage() {
 
       {/* Inventory summary widget */}
       <InventorySummaryWidget />
+
+      {/* Rate today's meals card */}
+      <RateMealsCard />
 
       {/* Action buttons */}
       <div className="flex flex-col gap-2">

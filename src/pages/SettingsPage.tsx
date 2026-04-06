@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
-import { useHousehold, useHouseholdMembers } from '../hooks/useHousehold'
+import { useHousehold, useHouseholdMembers, useMemberProfiles } from '../hooks/useHousehold'
 import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile'
 import { useFoodPrices, useDeleteFoodPrice } from '../hooks/useFoodPrices'
 import { formatCost } from '../utils/cost'
 import { supabase } from '../lib/supabase'
 import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
+import { DietaryRestrictionsSection } from '../components/settings/DietaryRestrictionsSection'
+import { WontEatSection } from '../components/settings/WontEatSection'
 
 export function SettingsPage() {
   const { session, signOut } = useAuth()
@@ -167,6 +169,7 @@ export function SettingsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const { data: members } = useHouseholdMembers()
+  const { data: memberProfiles } = useMemberProfiles()
   const otherMembers = (members ?? []).filter(m => m.user_id !== session?.user.id)
   const isLastMember = otherMembers.length === 0
   const householdDisplayName = membership?.households?.name ?? 'this household'
@@ -372,8 +375,8 @@ export function SettingsPage() {
         </section>
       )}
 
-      {/* Nutrition section */}
-      {session && (
+      {/* Nutrition & Dietary section */}
+      {session && membership && (
         <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
           <h2 className="font-semibold text-text mb-3">Nutrition</h2>
           <a
@@ -382,6 +385,45 @@ export function SettingsPage() {
           >
             Edit Nutrition Targets
           </a>
+          <DietaryRestrictionsSection
+            householdId={membership.household_id}
+            memberId={session.user.id}
+            memberType="user"
+          />
+          <WontEatSection
+            householdId={membership.household_id}
+            memberId={session.user.id}
+            memberType="user"
+          />
+        </section>
+      )}
+
+      {/* Child member profiles — dietary restrictions and won't-eat */}
+      {membership && memberProfiles && memberProfiles.length > 0 && (
+        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
+          <h2 className="font-semibold text-text mb-3">Member Dietary Preferences</h2>
+          {memberProfiles.map(profile => (
+            <div key={profile.id} className="border-t border-secondary pt-4 first:border-t-0 first:pt-0 mt-4 first:mt-0">
+              <a
+                href={`/members/${profile.id}/targets`}
+                className="text-sm text-primary hover:underline"
+              >
+                Edit {profile.name}&apos;s Nutrition Targets
+              </a>
+              <DietaryRestrictionsSection
+                householdId={membership.household_id}
+                memberId={profile.id}
+                memberType="profile"
+                memberName={profile.name}
+              />
+              <WontEatSection
+                householdId={membership.household_id}
+                memberId={profile.id}
+                memberType="profile"
+                memberName={profile.name}
+              />
+            </div>
+          ))}
         </section>
       )}
 
