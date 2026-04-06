@@ -4,7 +4,7 @@ import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import { ProgressRing } from './ProgressRing'
 import { SlotCard } from './SlotCard'
 import { DropActionMenu } from './DropActionMenu'
-import type { NutritionTarget } from '../../types/database'
+import type { NutritionTarget, ScheduleStatus } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { PortionResult } from '../../utils/portionSuggestions'
 
@@ -70,6 +70,7 @@ interface DayCardProps {
   onDropReplace?: () => void
   onDropCancel?: () => void
   slotViolations?: Map<string, { count: number; hasAllergy: boolean }>
+  slotSchedules?: Map<string, ScheduleStatus>
 }
 
 /**
@@ -93,6 +94,7 @@ export function DayCard({
   onDropReplace,
   onDropCancel,
   slotViolations,
+  slotSchedules,
 }: DayCardProps) {
   const weekStartDate = new Date(weekStart + 'T00:00:00Z')
   const dayDate = new Date(weekStartDate)
@@ -157,6 +159,7 @@ export function DayCard({
                 onToggleLock={s && onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
                 violationCount={slotViolations?.get(slotName)?.count}
                 hasAllergyViolation={slotViolations?.get(slotName)?.hasAllergy}
+                scheduleStatus={slotSchedules?.get(slotName) ?? undefined}
               />
               {pendingDropSlotKey === dropKey && onDropSwap && onDropReplace && onDropCancel && (
                 <DropActionMenu onSwap={onDropSwap} onReplace={onDropReplace} onCancel={onDropCancel} />
@@ -186,6 +189,7 @@ export function DayCard({
                 onToggleLock={onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
                 violationCount={slotViolations?.get(s.slot_name)?.count}
                 hasAllergyViolation={slotViolations?.get(s.slot_name)?.hasAllergy}
+                scheduleStatus={slotSchedules?.get(s.slot_name) ?? undefined}
               />
               {pendingDropSlotKey === dropKey && onDropSwap && onDropReplace && onDropCancel && (
                 <DropActionMenu onSwap={onDropSwap} onReplace={onDropReplace} onCancel={onDropCancel} />

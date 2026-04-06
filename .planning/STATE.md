@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Executing Phase 21
-stopped_at: Phase 21 UI-SPEC approved
-last_updated: "2026-04-06T18:01:54.708Z"
+status: Milestone complete
+stopped_at: Phase 20 UI-SPEC approved
+last_updated: "2026-04-06T16:58:23.275Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 21 — schedule-model
+**Current focus:** Phase 20 — feedback-engine-dietary-restrictions
 
 ## Current Position
 
-Phase: 21 (schedule-model) — EXECUTING
-Plan: 1 of 3
+Phase: 20
+Plan: Not started
 Next up: `/gsd-discuss-phase 19`
 
 Progress: ███░░░░░░░ 33%
