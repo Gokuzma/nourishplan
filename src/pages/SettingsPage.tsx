@@ -10,6 +10,7 @@ import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
 import { DietaryRestrictionsSection } from '../components/settings/DietaryRestrictionsSection'
 import { WontEatSection } from '../components/settings/WontEatSection'
+import { ScheduleSection } from '../components/settings/ScheduleSection'
 
 export function SettingsPage() {
   const { session, signOut } = useAuth()
@@ -395,6 +396,12 @@ export function SettingsPage() {
             memberId={session.user.id}
             memberType="user"
           />
+          <ScheduleSection
+            householdId={membership.household_id}
+            memberId={session.user.id}
+            memberType="user"
+            weekStartDay={membership.households?.week_start_day}
+          />
         </section>
       )}
 
@@ -421,6 +428,13 @@ export function SettingsPage() {
                 memberId={profile.id}
                 memberType="profile"
                 memberName={profile.name}
+              />
+              <ScheduleSection
+                householdId={membership.household_id}
+                memberId={profile.id}
+                memberType="profile"
+                memberName={profile.name}
+                weekStartDay={membership.households?.week_start_day}
               />
             </div>
           ))}

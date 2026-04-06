@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { ProgressRing } from './ProgressRing'
 import { PortionSuggestionRow } from './PortionSuggestionRow'
 import { DragHandle } from './DragHandle'
 import { LockBadge } from './LockBadge'
+import { AIRationaleTooltip } from './AIRationaleTooltip'
 import type { MealPlanSlot, Meal, MealItem, NutritionTarget } from '../../types/database'
 import type { PortionResult } from '../../utils/portionSuggestions'
 
@@ -19,6 +20,7 @@ interface SlotCardProps {
   onClear: () => void
   onSwap: () => void
   onLog?: () => void
+  onSuggestAlternative?: () => void
   suggestions?: PortionResult | null
   currentUserId?: string
   memberTarget?: NutritionTarget | null
@@ -26,6 +28,7 @@ interface SlotCardProps {
   onToggleLock?: () => void
   violationCount?: number
   hasAllergyViolation?: boolean
+  scheduleStatus?: 'prep' | 'consume' | 'quick' | 'away'
 }
 
 function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
@@ -44,8 +47,12 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
   return calcMealNutrition(items)
 }
 
-function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation }: SlotCardProps & { slot: SlotWithMeal }) {
+function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, onSuggestAlternative, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation }: SlotCardProps & { slot: SlotWithMeal }) {
   const [expanded, setExpanded] = useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const tooltipId = `rationale-${slot.id}`
+  const generation_rationale = slot.generation_rationale ?? null
+  const handleCloseTooltip = useCallback(() => setTooltipOpen(false), [])
   const meal = slot.meals ?? null
   const nutrition = calcSlotNutrition(meal)
   const calories = nutrition.calories
@@ -78,10 +85,16 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-lg border bg-surface shadow-sm ${isDragging ? 'opacity-50 border-dashed border-accent/30' : 'border-accent/30'} ${isLocked ? 'border-l-[3px] border-l-primary' : ''}`}
+      className={`relative rounded-lg border bg-surface shadow-sm ${isDragging ? 'opacity-50 border-dashed border-accent/30' : 'border-accent/30'} ${isLocked ? 'border-l-[3px] border-l-primary' : ''}`}
     >
       {/* Main row */}
-      <div className="flex items-center justify-between py-2 px-3">
+      <div
+        className="flex items-center justify-between py-2 px-3"
+        onMouseEnter={generation_rationale ? () => setTooltipOpen(true) : undefined}
+        onMouseLeave={generation_rationale ? () => setTooltipOpen(false) : undefined}
+        onClick={generation_rationale ? () => setTooltipOpen(o => !o) : undefined}
+        aria-describedby={generation_rationale ? tooltipId : undefined}
+      >
         <DragHandle
           listeners={listeners as Record<string, Function>}
           attributes={attributes as Record<string, unknown>}
@@ -121,7 +134,7 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
         <div className="flex items-center gap-1 ml-2 shrink-0">
           {hasExpandableSuggestions && (
             <button
-              onClick={() => setExpanded(e => !e)}
+              onClick={e => { e.stopPropagation(); setExpanded(e2 => !e2) }}
               className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
               aria-label={expanded ? 'Collapse suggestions' : 'Expand suggestions'}
               title="Portion suggestions"
@@ -144,7 +157,7 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
           )}
           {onLog && (
             <button
-              onClick={onLog}
+              onClick={e => { e.stopPropagation(); onLog() }}
               className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
               aria-label="Log meal"
               title="Log meal"
@@ -154,8 +167,21 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
               </svg>
             </button>
           )}
+          {onSuggestAlternative && (
+            <button
+              onClick={e => { e.stopPropagation(); onSuggestAlternative() }}
+              className="p-1 rounded text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
+              aria-label="Suggest alternative"
+              title="Suggest alternative"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M2 8a6 6 0 1 0 12 0" strokeLinecap="round" />
+                <path d="M12 4l2 2-2 2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
           <button
-            onClick={onSwap}
+            onClick={e => { e.stopPropagation(); onSwap() }}
             className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
             aria-label="Change meal"
             title="Change meal"
@@ -165,7 +191,7 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
             </svg>
           </button>
           <button
-            onClick={onClear}
+            onClick={e => { e.stopPropagation(); onClear() }}
             className="p-1 rounded text-text/30 hover:text-red-500 hover:bg-red-50 transition-colors"
             aria-label="Remove meal"
             title="Remove meal"
@@ -176,6 +202,14 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
           </button>
         </div>
       </div>
+      {generation_rationale && (
+        <AIRationaleTooltip
+          id={tooltipId}
+          text={generation_rationale}
+          isOpen={tooltipOpen}
+          onClose={handleCloseTooltip}
+        />
+      )}
 
       {/* Expandable suggestions section */}
       {expanded && suggestions && (

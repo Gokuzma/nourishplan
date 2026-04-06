@@ -65,6 +65,48 @@ When two wave-2 agents both need the same file (e.g., `InventoryPage.tsx`), the 
 ### gsd-tools `is_last_phase` is unreliable
 The `phase complete` command returns `is_last_phase: true` when no subsequent phase **directory** exists. This does NOT mean the milestone is complete — **always check ROADMAP.md** for remaining planned phases before making claims about milestone status.
 
+### Supabase upsert fails with partial unique indexes
+Supabase/PostgREST `onConflict` does not resolve against partial unique indexes (`CREATE UNIQUE INDEX ... WHERE column IS NOT NULL`). Upserts silently fail or insert duplicates. **Use delete-then-insert** instead of upsert when the table uses partial unique indexes.
+
+### Always test DB writes with Playwright before marking checkpoint approved
+Don't trust that a migration push + code change works — log in with the test account (`claude-test@nourishplan.test` / `ClaudeTest!2026`) and verify the full save-reload cycle in the browser before presenting the checkpoint to the user.
+
+### Slot name mismatch: "Snack" vs "Snacks"
+The DB constraint and `schedule.ts` use `"Snack"` (singular) but `mealPlan.ts DEFAULT_SLOTS` uses `"Snacks"` (plural). When bridging schedule data to the plan grid, **normalize the key** (`"Snack"` → `"Snacks"`). Any future feature crossing these two domains must account for this mismatch.
+
+### Schedule badges must render on empty slots too
+`SlotCard` has two render paths: `OccupiedSlotCard` (meal assigned) and an empty state. Both need schedule badges — users need to see availability status *before* assigning meals, not only after. When adding visual indicators to SlotCard, **always check both code paths**.
+
+### Push migrations before asking user to test DB-backed features
+If a phase creates new tables, the migration must be pushed (`supabase db push`) before any save/load testing can work. Don't present a verification checkpoint for DB-backed features until the migration is confirmed live. Plan 21-03 (migration push) should have been executed *before* the Plan 21-02 checkpoint, not after.
+
+### Stale test credentials waste time
+The demo account (`demo@nourishplan.test`) had outdated passwords in planning docs. Created a dedicated test account (`claude-test@nourishplan.test` / `ClaudeTest!2026`) with known credentials stored in memory. **Always use the test account from memory rather than searching planning docs for credentials.**
+
+### Test account needs seed data for meaningful verification
+A fresh test account with an empty household can't verify features like plan page badges or multi-member schedules. Created "Test Child" managed profile and seeded schedule data for both members. **When testing features that depend on existing data, seed test data via the Supabase REST API before running Playwright checks.** Test account details (household ID, profile IDs) are in memory at `reference_test_account.md`.
+
+### Deploy before presenting live-site verification to user
+The user couldn't test on `nourishplan.gregok.ca` because the code hadn't been deployed yet. **After fixing bugs found during verification, rebuild and redeploy before telling the user to test on the live site.**
+
+### Bash `UID` is a readonly variable on Windows/Git Bash
+`UID` is a reserved shell variable. Using it as a local variable (`UID="some-uuid"`) silently fails. **Use `USER_ID` or another name instead.**
+
+### Windows `/dev/stdin` doesn't exist for piping
+`node -pe "...readFileSync('/dev/stdin')"` fails on Windows. Use `grep`/`cut` to extract JSON fields from curl output, or write to a temp file. **Always use Windows-compatible shell patterns for parsing API responses.**
+
+### SUPABASE_ACCESS_TOKEN lives in .env.local
+The token is stored in `.env.local`, not as a shell environment variable. **Source it before running supabase CLI commands:** `export $(grep SUPABASE_ACCESS_TOKEN .env.local | xargs)`. Don't ask the user for it — check `.env.local` first.
+
+### Edge function meal INSERT requires created_by
+The `meals` table has `created_by uuid NOT NULL`. When an edge function creates meals (e.g., to wrap a recipe during plan generation), **always pass `created_by: user.id`** from the authenticated user. Without it, the INSERT silently fails and downstream logic finds no meal IDs.
+
+### Edge function slot enumeration must cover empty slots
+The plan grid has 7 days × 4 slots = 28 positions, but `meal_plan_slots` only has rows for slots with meals assigned. **When building `slotsToFill` for AI generation, enumerate all possible slots from constants, don't rely on existing DB rows.** Otherwise the AI can only assign to already-occupied slots.
+
+### Worktree agents delete unrelated files
+GSD worktree executor agents sometimes commit deletions of files they shouldn't touch (planning docs, unrelated source files, CLAUDE.md). **After merging each worktree branch, run `git diff <pre-merge-commit>.. --name-status | grep "^D"` and restore any incorrectly deleted files with `git checkout <pre-merge-commit> -- <files>`.**
+
 ### Test assertions must match nav item count
 Adding a new nav item to Sidebar or MobileDrawer requires updating `tests/AppShell.test.tsx`. The test asserts specific nav labels — add the new label to the assertion list.
 

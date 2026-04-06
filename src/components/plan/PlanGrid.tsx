@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -13,16 +13,24 @@ import { useMeals } from '../../hooks/useMeals'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
+import { useGeneratePlan, useGenerationJob, useLatestGeneration, useSuggestAlternative } from '../../hooks/usePlanGeneration'
 import { useNutritionGaps } from '../../hooks/useNutritionGaps'
 import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { computeSwapSuggestions } from '../../utils/swapSuggestions'
 import { LogMealModal } from '../log/LogMealModal'
-import { NutritionGapCard } from './NutritionGapCard'
 import { DayCard } from './DayCard'
 import { DayCarousel } from './DayCarousel'
 import { SlotCard } from './SlotCard'
+import { SlotShimmer } from './SlotShimmer'
+import { GeneratePlanButton } from './GeneratePlanButton'
+import { GenerationProgressBar } from './GenerationProgressBar'
+import { PriorityOrderPanel, getPriorityOrder } from './PriorityOrderPanel'
+import { NutritionGapCard } from './NutritionGapCard'
+import { RecipeSuggestionCard } from './RecipeSuggestionCard'
+import { GenerationJobBadge } from './GenerationJobBadge'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
+import { useQueryClient } from '@tanstack/react-query'
 import type { NutritionTarget, Meal, MealItem } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
@@ -124,7 +132,97 @@ export function PlanGrid({
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
   const toggleLock = useToggleLock()
+  const queryClient = useQueryClient()
+
+  // Generation hooks
+  const generatePlan = useGeneratePlan()
+  const suggestAlternative = useSuggestAlternative()
+  const { data: latestGeneration } = useLatestGeneration(planId)
   const { gaps } = useNutritionGaps(planId)
+
+  const swapSuggestions = useMemo(() => {
+    if (gaps.length === 0 || !slots.length || !meals.length) return []
+    const slotMeals = slots
+      .filter(s => s.meals)
+      .map(s => s.meals!)
+    const allMeals = [...slotMeals, ...meals.filter(m => !slotMeals.some(sm => sm.id === m.id))] as (Meal & { meal_items: MealItem[] })[]
+    return computeSwapSuggestions(gaps, slots, allMeals, weekStart, weekStartDay)
+  }, [gaps, slots, meals, weekStart, weekStartDay])
+
+  const handleApplySwap = useCallback((swap: SwapSuggestion) => {
+    const slotOrder = DEFAULT_SLOTS.indexOf(swap.slotName as typeof DEFAULT_SLOTS[number])
+    const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
+    assignSlot.mutate({
+      planId,
+      dayIndex: swap.dayIndex,
+      slotName: swap.slotName,
+      slotOrder: order,
+      mealId: swap.mealId,
+      isOverride: true,
+    })
+  }, [planId, assignSlot])
+
+  const [activeJobId, setActiveJobId] = useState<string | null>(null)
+  const [generationStep, setGenerationStep] = useState(0)
+  const [generationError, setGenerationError] = useState<string | null>(null)
+  const [priorityOrder, setPriorityOrder] = useState<string[]>(() =>
+    householdId ? getPriorityOrder(householdId) : []
+  )
+
+  const { data: activeJob } = useGenerationJob(activeJobId)
+
+  const isGenerating = activeJob?.status === 'running' || generatePlan.isPending
+  const isGenerationComplete = activeJob?.status === 'done'
+  const isTimeout = activeJob?.status === 'timeout'
+
+  // Advance progress step while generation runs
+  useEffect(() => {
+    if (!isGenerating) {
+      setGenerationStep(0)
+      return
+    }
+    const interval = setInterval(() => {
+      setGenerationStep(prev => Math.min(prev + 1, 3))
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [isGenerating])
+
+  // On job completion: refresh slot data and clear job
+  useEffect(() => {
+    if (activeJob?.status === 'done' || activeJob?.status === 'timeout' || activeJob?.status === 'error') {
+      queryClient.invalidateQueries({ queryKey: ['meal-plan-slots', planId] })
+      if (activeJob.status === 'error') {
+        setGenerationError('Plan generation failed. Try again.')
+      }
+      setTimeout(() => setActiveJobId(null), 2000)
+    }
+  }, [activeJob?.status, planId, queryClient])
+
+  const handleGenerate = useCallback(async () => {
+    if (!planId) return
+    setGenerationError(null)
+    try {
+      const result = await generatePlan.mutateAsync({
+        planId,
+        weekStart,
+        priorityOrder: householdId ? getPriorityOrder(householdId) : priorityOrder,
+      })
+      setActiveJobId(result.jobId)
+    } catch {
+      setGenerationError('Plan generation failed. Try again.')
+    }
+  }, [planId, weekStart, householdId, priorityOrder, generatePlan])
+
+  // Recipe count — show suggestion card if fewer than 7
+  const recipeCount = useMemo(() => {
+    const mealNames = new Set(slots.map(s => s.meals?.name).filter(Boolean))
+    return mealNames.size
+  }, [slots])
+
+  const suggestedRecipes = useMemo(() => {
+    const snapshot = latestGeneration?.constraint_snapshot as Record<string, unknown> | undefined
+    return (snapshot?.suggestedRecipes as { name: string; prepMinutes: number; description: string }[] | undefined) ?? []
+  }, [latestGeneration])
 
   // Suggestion data — fetched once for the whole grid
   const today = logDate ?? new Date().toISOString().slice(0, 10)
@@ -378,26 +476,6 @@ export function PlanGrid({
     return map
   }, [displaySlots, memberInputs, currentUserId])
 
-  // Compute swap suggestions from nutrition gaps + available meals
-  const swapSuggestions = useMemo<(SwapSuggestion & { mealId: string })[]>(() => {
-    if (gaps.length === 0 || !slots.length || !meals.length) return []
-    const fullMeals = (meals as (Meal & { meal_items: MealItem[] })[])
-    return computeSwapSuggestions(gaps, slots, fullMeals, weekStart, weekStartDay)
-  }, [gaps, slots, meals, weekStart, weekStartDay])
-
-  const handleApplySwap = useCallback((swap: SwapSuggestion & { mealId: string }) => {
-    const slotOrder = DEFAULT_SLOTS.indexOf(swap.slotName as typeof DEFAULT_SLOTS[number])
-    const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
-    assignSlot.mutate({
-      planId,
-      dayIndex: swap.dayIndex,
-      slotName: swap.slotName,
-      slotOrder: order,
-      mealId: swap.mealId,
-      isOverride: true,
-    })
-  }, [planId, assignSlot])
-
   // Group slots by day_index
   const slotsByDay: Record<number, typeof displaySlots> = {}
   for (let i = 0; i < DAY_COUNT; i++) {
@@ -433,6 +511,15 @@ export function PlanGrid({
         onSwapSlot={slotName => openPicker(i, slotName, true)}
         onLogSlot={(slot, suggestedServings) => setLogModalState({ slot, suggestedServings })}
         onToggleLock={handleToggleLock}
+        onSuggestAlternative={slotName =>
+          suggestAlternative.mutate({
+            planId,
+            weekStart,
+            dayIndex: i,
+            slotName,
+            priorityOrder: householdId ? getPriorityOrder(householdId) : priorityOrder,
+          })
+        }
         pendingDropSlotKey={pendingDropSlotKey}
         onDropSwap={executeSwap}
         onDropReplace={executeReplace}
@@ -444,24 +531,74 @@ export function PlanGrid({
 
   return (
     <>
-      {gaps.length > 0 && (
-        <NutritionGapCard
-          gaps={gaps}
-          swapSuggestions={swapSuggestions}
-          onApplySwap={handleApplySwap}
-        />
-      )}
+      {/* Generation controls */}
+      <div className="flex flex-col gap-2 mb-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <GeneratePlanButton
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+            isComplete={isGenerationComplete}
+          />
+          {latestGeneration?.completed_at && (
+            <GenerationJobBadge completedAt={latestGeneration.completed_at} />
+          )}
+        </div>
+
+        {(isGenerating || isTimeout) && (
+          <GenerationProgressBar
+            step={generationStep}
+            isVisible={isGenerating || isTimeout}
+            isTimeout={isTimeout}
+          />
+        )}
+
+        {generationError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-[--radius-card] px-4 py-3 font-sans">
+            {generationError}
+          </div>
+        )}
+
+        {householdId && (
+          <PriorityOrderPanel
+            householdId={householdId}
+            onOrderChange={setPriorityOrder}
+          />
+        )}
+      </div>
+
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Mobile: horizontal carousel with scroll-snap */}
         <div className="md:hidden">
           <DayCarousel currentDayIndex={currentDayIndex} onDayChange={setCurrentDayIndex}>
-            {dayCards}
+            {isGenerating
+              ? dayCards.map((_, i) => (
+                <div key={i} className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4">
+                  {DEFAULT_SLOTS.map(slotName => {
+                    const slot = displaySlots.find(s => s.day_index === i && s.slot_name === slotName)
+                    return slot?.is_locked
+                      ? dayCards[i]
+                      : <SlotShimmer key={slotName} />
+                  })}
+                </div>
+              ))
+              : dayCards}
           </DayCarousel>
         </div>
 
         {/* Desktop: scrollable stack */}
         <div className="hidden md:flex flex-col gap-4">
-          {dayCards}
+          {isGenerating
+            ? dayCards.map((_, i) => (
+              <div key={i} className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4">
+                {DEFAULT_SLOTS.map(slotName => {
+                  const slot = displaySlots.find(s => s.day_index === i && s.slot_name === slotName)
+                  return slot?.is_locked
+                    ? <div key={slotName}>{dayCards[i]}</div>
+                    : <SlotShimmer key={slotName} />
+                })}
+              </div>
+            ))
+            : dayCards}
         </div>
 
         <DragOverlay dropAnimation={{ duration: 200, easing: 'ease-in' }}>
@@ -478,6 +615,23 @@ export function PlanGrid({
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Nutrition gap card — after generation */}
+      {latestGeneration && gaps.length > 0 && (
+        <div className="mt-4">
+          <NutritionGapCard gaps={gaps} swapSuggestions={swapSuggestions} onApplySwap={handleApplySwap} />
+        </div>
+      )}
+
+      {/* Recipe suggestion card — when catalog is small */}
+      {recipeCount < 7 && suggestedRecipes.length > 0 && (
+        <div className="mt-4">
+          <RecipeSuggestionCard
+            suggestions={suggestedRecipes}
+            onAdd={() => {}}
+          />
+        </div>
+      )}
 
       {/* Meal picker modal — outside DndContext */}
       {pickerState && (
