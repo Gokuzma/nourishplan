@@ -184,7 +184,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
 | 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
 | 21. Schedule Model | 3/3 | Complete    | 2026-04-06 |
-| 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
+| 22. Constraint-Based Planning Engine | 0/4 | In Progress | - |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
 | 24. Dynamic Portioning | 0/TBD | Not started | - |
 
@@ -425,8 +425,13 @@ Plans:
   3. Generated plan skips locked slots (Phase 19) and only fills unlocked slots
   4. Plan page highlights nutrition gaps per member after generation and offers swap suggestions to close them
   5. Recipes already in inventory are weighted higher in recipe selection — ingredients the household has are preferred
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 22-01-PLAN.md -- DB migration, types, query keys, nutrition gap utility
+- [ ] 22-02-PLAN.md -- generate-plan Edge Function (AI solver)
+- [ ] 22-03-PLAN.md -- React hooks and UI components (PlanGrid integration)
+- [ ] 22-04-PLAN.md -- Schema push, edge function deploy, and human verification
 
 ### Phase 23: Prep Optimisation
 **Goal**: Users can see a batch prep schedule for the week and a day-of task sequence for any meal, so cooking time is used efficiently
