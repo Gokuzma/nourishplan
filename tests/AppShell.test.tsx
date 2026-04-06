@@ -41,7 +41,7 @@ describe('AppShell', () => {
     expect(screen.queryByText('Foods')).toBeNull()
   })
 
-  it('Sidebar renders 9 navigation items including Meals, Inventory, Grocery, and functional Plan', async () => {
+  it('Sidebar renders 10 navigation items including Meals, Inventory, Grocery, Insights, and functional Plan', async () => {
     const { Sidebar } = await import('../src/components/layout/Sidebar')
 
     render(
@@ -58,6 +58,7 @@ describe('AppShell', () => {
     expect(screen.getByText('Grocery')).toBeInTheDocument()
     expect(screen.getByText('Household')).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
+    expect(screen.getByText('Insights')).toBeInTheDocument()
     expect(screen.getByText('User Guide')).toBeInTheDocument()
 
     // Plan tab should now be a functional link (no longer coming-soon)
