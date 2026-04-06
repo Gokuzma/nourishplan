@@ -8,8 +8,6 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core'
-import { useSchedule } from '../../hooks/useSchedule'
-import { buildGrid } from '../../utils/schedule'
 import { useMealPlanSlots, useAssignSlot, useClearSlot, useToggleLock } from '../../hooks/useMealPlan'
 import { useMeals } from '../../hooks/useMeals'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
@@ -22,7 +20,7 @@ import { DayCard } from './DayCard'
 import { DayCarousel } from './DayCarousel'
 import { SlotCard } from './SlotCard'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
-import type { NutritionTarget, Meal, MealItem, ScheduleStatus } from '../../types/database'
+import type { NutritionTarget, Meal, MealItem } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
 
@@ -325,27 +323,6 @@ export function PlanGrid({
     toggleLock.mutate({ slotId, isLocked, planId })
   }
 
-  const { data: scheduleSlots } = useSchedule(
-    householdId,
-    selectedMemberId,
-    selectedMemberType ?? 'user'
-  )
-
-  const slotSchedulesByDay = useMemo(() => {
-    if (!scheduleSlots?.length) return undefined
-    const grid = buildGrid(scheduleSlots)
-    const byDay = new Map<number, Map<string, ScheduleStatus>>()
-    for (const [key, status] of grid) {
-      const [dayStr, ...slotParts] = key.split(':')
-      const dayOfWeek = Number(dayStr)
-      if (!byDay.has(dayOfWeek)) byDay.set(dayOfWeek, new Map())
-      // Normalize "Snack" -> "Snacks" to match DEFAULT_SLOTS
-      const slotName = slotParts.join(':')
-      byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, status)
-    }
-    return byDay
-  }, [scheduleSlots])
-
   // Build MemberInput array from fetched data (memoized — rebuilds when data changes)
   const memberInputs = useMemo<MemberInput[]>(() => {
     if (!targets || !allLogs || !householdMembers) return []
@@ -436,7 +413,6 @@ export function PlanGrid({
         onDropReplace={executeReplace}
         onDropCancel={handleDropCancel}
         slotViolations={slotViolationsByDay?.get(i)}
-        slotSchedules={slotSchedulesByDay?.get((weekStartDay + i) % 7)}
       />
     )
   })

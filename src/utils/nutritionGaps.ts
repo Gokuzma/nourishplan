@@ -1,5 +1,6 @@
 import type { NutritionTarget } from '../types/database'
 import type { SlotWithMeal } from '../hooks/useMealPlan'
+import { calcIngredientNutrition, calcMealNutrition } from './nutrition'
 
 export interface MemberIdentity {
   id: string
@@ -16,62 +17,82 @@ export interface WeeklyGap {
   percentOfTarget: number
 }
 
+const DEFAULT_THRESHOLD = 0.9
+
+function calcSlotNutrition(slot: SlotWithMeal) {
+  if (!slot.meals || !slot.meals.meal_items.length) {
+    return { calories: 0, protein: 0, fat: 0, carbs: 0 }
+  }
+  const items = slot.meals.meal_items.map(item => ({
+    nutrition: calcIngredientNutrition(
+      {
+        calories: item.calories_per_100g,
+        protein: item.protein_per_100g,
+        fat: item.fat_per_100g,
+        carbs: item.carbs_per_100g,
+      },
+      item.quantity_grams,
+    ),
+  }))
+  return calcMealNutrition(items)
+}
+
+/**
+ * Calculates weekly nutrition gaps per member per nutrient.
+ * Returns only gaps where a member's weekly actual falls below threshold (default 90%) of their weekly target.
+ * Weekly target = daily target * 7.
+ * Slots are shared (not per-member) — each slot's nutrition counts for all members.
+ */
 export function calcWeeklyGaps(
   slots: SlotWithMeal[],
   targets: NutritionTarget[],
   members: MemberIdentity[],
-  threshold = 0.9,
+  threshold: number = DEFAULT_THRESHOLD,
 ): WeeklyGap[] {
   const gaps: WeeklyGap[] = []
 
-  // Compute weekly nutrition totals from all slots
-  let totalCalories = 0
-  let totalProtein = 0
-  let totalFat = 0
-  let totalCarbs = 0
-
-  for (const slot of slots) {
-    if (!slot.meals) continue
-    for (const item of slot.meals.meal_items) {
-      const factor = item.quantity_grams / 100
-      totalCalories += item.calories_per_100g * factor
-      totalProtein += item.protein_per_100g * factor
-      totalFat += item.fat_per_100g * factor
-      totalCarbs += item.carbs_per_100g * factor
-    }
-  }
+  const totalNutrition = slots.reduce(
+    (acc, slot) => {
+      const n = calcSlotNutrition(slot)
+      return {
+        calories: acc.calories + n.calories,
+        protein: acc.protein + n.protein,
+        fat: acc.fat + n.fat,
+        carbs: acc.carbs + n.carbs,
+      }
+    },
+    { calories: 0, protein: 0, fat: 0, carbs: 0 },
+  )
 
   for (const member of members) {
-    const target = targets.find(t => {
-      if (member.type === 'user') return t.user_id === member.id
-      return t.member_profile_id === member.id
-    })
+    const target = targets.find(t =>
+      member.type === 'user' ? t.user_id === member.id : t.member_profile_id === member.id,
+    )
+    if (!target) continue
 
-    if (!target || target.calories == null) continue
-
-    const weeklyCaloriesTarget = target.calories * 7
-    const weeklyProteinTarget = (target.protein_g ?? 0) * 7
-    const weeklyFatTarget = (target.fat_g ?? 0) * 7
-    const weeklyCarbsTarget = (target.carbs_g ?? 0) * 7
-
-    const macros: { nutrient: string; actual: number; weeklyTarget: number }[] = [
-      { nutrient: 'calories', actual: totalCalories, weeklyTarget: weeklyCaloriesTarget },
-      { nutrient: 'protein', actual: totalProtein, weeklyTarget: weeklyProteinTarget },
-      { nutrient: 'fat', actual: totalFat, weeklyTarget: weeklyFatTarget },
-      { nutrient: 'carbs', actual: totalCarbs, weeklyTarget: weeklyCarbsTarget },
+    const nutrients: { key: keyof typeof totalNutrition; targetField: keyof NutritionTarget; label: string }[] = [
+      { key: 'calories', targetField: 'calories', label: 'calories' },
+      { key: 'protein', targetField: 'protein_g', label: 'protein' },
+      { key: 'fat', targetField: 'fat_g', label: 'fat' },
+      { key: 'carbs', targetField: 'carbs_g', label: 'carbs' },
     ]
 
-    for (const { nutrient, actual, weeklyTarget } of macros) {
-      if (weeklyTarget <= 0) continue
-      const percent = actual / weeklyTarget
-      if (percent < threshold) {
+    for (const { key, targetField, label } of nutrients) {
+      const dailyTarget = target[targetField] as number | null
+      if (!dailyTarget || dailyTarget <= 0) continue
+
+      const weeklyTarget = dailyTarget * 7
+      const weeklyActual = totalNutrition[key]
+      const percentOfTarget = weeklyActual / weeklyTarget
+
+      if (percentOfTarget < threshold) {
         gaps.push({
           memberId: member.id,
           memberName: member.name,
-          nutrient,
+          nutrient: label,
           weeklyTarget,
-          weeklyActual: actual,
-          percentOfTarget: percent,
+          weeklyActual,
+          percentOfTarget,
         })
       }
     }

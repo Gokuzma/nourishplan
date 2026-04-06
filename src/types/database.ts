@@ -370,14 +370,8 @@ export type Database = {
       }
       meal_plan_slots: {
         Row: MealPlanSlot
-        Insert: Omit<MealPlanSlot, 'id' | 'created_at' | 'is_locked' | 'generation_rationale'> & { id?: string; created_at?: string; is_locked?: boolean; generation_rationale?: string | null }
+        Insert: Omit<MealPlanSlot, 'id' | 'created_at'> & { id?: string; created_at?: string }
         Update: Partial<Omit<MealPlanSlot, 'id' | 'created_at'>>
-      }
-      plan_generations: {
-        Row: PlanGeneration
-        Insert: Omit<PlanGeneration, 'id' | 'created_at' | 'status' | 'pass_count' | 'priority_order' | 'constraint_snapshot' | 'error_message' | 'completed_at'> & { id?: string; created_at?: string; status?: 'running' | 'done' | 'timeout' | 'error'; pass_count?: number; priority_order?: string[]; constraint_snapshot?: Record<string, unknown>; error_message?: string | null; completed_at?: string | null }
-        Update: Partial<Omit<PlanGeneration, 'id' | 'created_at'>>
-        Relationships: []
       }
       meal_plan_templates: {
         Row: MealPlanTemplate

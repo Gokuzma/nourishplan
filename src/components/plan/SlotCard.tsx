@@ -26,7 +26,6 @@ interface SlotCardProps {
   onToggleLock?: () => void
   violationCount?: number
   hasAllergyViolation?: boolean
-  scheduleStatus?: 'prep' | 'consume' | 'quick' | 'away'
 }
 
 function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
@@ -45,7 +44,7 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
   return calcMealNutrition(items)
 }
 
-function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation, scheduleStatus }: SlotCardProps & { slot: SlotWithMeal }) {
+function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation }: SlotCardProps & { slot: SlotWithMeal }) {
   const [expanded, setExpanded] = useState(false)
   const meal = slot.meals ?? null
   const nutrition = calcSlotNutrition(meal)
@@ -91,21 +90,6 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-text truncate font-sans">
             {meal!.name}
-            {scheduleStatus && scheduleStatus !== 'prep' && (
-              <span
-                className={`ml-1 inline-block w-3 h-3 rounded-full align-middle ${
-                  scheduleStatus === 'consume' ? 'bg-accent' :
-                  scheduleStatus === 'quick' ? 'bg-amber-500' :
-                  'bg-red-500'
-                }`}
-                aria-label={`Schedule: ${scheduleStatus}`}
-                title={
-                  scheduleStatus === 'consume' ? 'Pre-made from prep day' :
-                  scheduleStatus === 'quick' ? 'Quick meal only' :
-                  'Away — not eating at home'
-                }
-              />
-            )}
             {violationCount && violationCount > 0 ? (
               <span className={`ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[9px] font-bold leading-none align-middle ${hasAllergyViolation ? 'bg-red-500' : 'bg-amber-500'}`}>
                 {violationCount}
@@ -226,27 +210,9 @@ export function SlotCard(props: SlotCardProps) {
   const { slotName, slot, onAssign } = props
 
   if (!slot?.meal_id && !slot?.meals) {
-    const ss = props.scheduleStatus
     return (
       <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
-        <span className="text-sm text-text/50 font-sans">
-          {slotName}
-          {ss && ss !== 'prep' && (
-            <span
-              className={`ml-1 inline-block w-2.5 h-2.5 rounded-full align-middle ${
-                ss === 'consume' ? 'bg-accent' :
-                ss === 'quick' ? 'bg-amber-500' :
-                'bg-red-500'
-              }`}
-              aria-label={`Schedule: ${ss}`}
-              title={
-                ss === 'consume' ? 'Pre-made from prep day' :
-                ss === 'quick' ? 'Quick meal only' :
-                'Away — not eating at home'
-              }
-            />
-          )}
-        </span>
+        <span className="text-sm text-text/50 font-sans">{slotName}</span>
         <button
           onClick={onAssign}
           className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
