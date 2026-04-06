@@ -10,6 +10,7 @@ export interface SwapSuggestion {
   recipeName: string
   nutrientGain: number
   nutrient: string
+  mealId: string
 }
 
 interface NutritionGapCardProps {
