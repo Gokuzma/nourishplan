@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { useHousehold } from '../hooks/useHousehold'
+import { useState, useMemo } from 'react'
+import { useHousehold, useHouseholdMembers, useMemberProfiles } from '../hooks/useHousehold'
 import { useAuth } from '../hooks/useAuth'
-import { useMealPlan, useCreateMealPlan } from '../hooks/useMealPlan'
+import { useMealPlan, useCreateMealPlan, useMealPlanSlots } from '../hooks/useMealPlan'
 import { useRepeatLastWeek, useLoadTemplate } from '../hooks/useMealPlanTemplates'
 import { useNutritionTarget } from '../hooks/useNutritionTargets'
 import { getWeekStart } from '../utils/mealPlan'
@@ -12,6 +12,9 @@ import { MemberSelector } from '../components/plan/MemberSelector'
 import { NewWeekPrompt } from '../components/plan/NewWeekPrompt'
 import { TemplateManager } from '../components/plan/TemplateManager'
 import { BudgetSummarySection } from '../components/plan/BudgetSummarySection'
+import { IssuesPanel } from '../components/plan/IssuesPanel'
+import { usePlanViolations } from '../hooks/usePlanViolations'
+import { useMonotonyWarnings } from '../hooks/useMonotonyWarnings'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00Z')
@@ -52,6 +55,51 @@ export function PlanPage() {
   const householdId = membership?.household_id
 
   const { data: plan, isPending: planPending } = useMealPlan(weekStart)
+
+  // Prior week for monotony detection (2-week rolling window)
+  const priorWeekStart = useMemo(() => {
+    const [y, m, d] = weekStart.split('-').map(Number)
+    const date = new Date(Date.UTC(y, m - 1, d))
+    date.setUTCDate(date.getUTCDate() - 7)
+    return date.toISOString().slice(0, 10)
+  }, [weekStart])
+
+  const { data: priorWeekPlan } = useMealPlan(priorWeekStart)
+  const { data: slots = [] } = useMealPlanSlots(plan?.id)
+  const { data: priorWeekSlots = [] } = useMealPlanSlots(priorWeekPlan?.id)
+  const { data: householdMembers = [] } = useHouseholdMembers()
+  const { data: memberProfiles = [] } = useMemberProfiles()
+
+  const members = useMemo(() => {
+    const result: { id: string; name: string }[] = []
+    for (const hm of householdMembers) {
+      result.push({ id: hm.user_id, name: hm.profiles?.display_name ?? hm.user_id.slice(0, 8) })
+    }
+    for (const p of memberProfiles) {
+      result.push({ id: p.id, name: p.name })
+    }
+    return result
+  }, [householdMembers, memberProfiles])
+
+  const { violations, hasAllergyViolation } = usePlanViolations(householdId, slots, members)
+  const monotonyWarnings = useMonotonyWarnings(slots, weekStart, priorWeekSlots)
+
+  // Build per-day, per-slot violation counts for SlotCard badges
+  const slotViolationsByDay = useMemo(() => {
+    const byDay = new Map<number, Map<string, { count: number; hasAllergy: boolean }>>()
+    for (const v of violations) {
+      let dayMap = byDay.get(v.dayIndex)
+      if (!dayMap) {
+        dayMap = new Map()
+        byDay.set(v.dayIndex, dayMap)
+      }
+      const existing = dayMap.get(v.mealType) ?? { count: 0, hasAllergy: false }
+      existing.count++
+      if (v.strength === 'allergy') existing.hasAllergy = true
+      dayMap.set(v.mealType, existing)
+    }
+    return byDay
+  }, [violations])
   const createPlan = useCreateMealPlan()
   const repeatLastWeek = useRepeatLastWeek()
   const loadTemplate = useLoadTemplate()
@@ -175,7 +223,15 @@ export function PlanPage() {
             currentUserId={session?.user.id}
             selectedMemberId={selectedMemberId}
             selectedMemberType={selectedMemberType}
+            slotViolationsByDay={slotViolationsByDay}
           />
+          <div className="mt-4 no-print">
+            <IssuesPanel
+              violations={violations}
+              monotonyWarnings={monotonyWarnings}
+              hasAllergyViolation={hasAllergyViolation}
+            />
+          </div>
           <BudgetSummarySection
             weeklyBudget={household?.weekly_budget ?? null}
             weekStart={weekStart}

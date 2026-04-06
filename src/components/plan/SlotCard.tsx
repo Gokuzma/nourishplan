@@ -1,10 +1,7 @@
 import { useState } from 'react'
-import { useDraggable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { ProgressRing } from './ProgressRing'
 import { PortionSuggestionRow } from './PortionSuggestionRow'
-import { DragHandle } from './DragHandle'
-import { LockBadge } from './LockBadge'
 import type { MealPlanSlot, Meal, MealItem, NutritionTarget } from '../../types/database'
 import type { PortionResult } from '../../utils/portionSuggestions'
 
@@ -22,8 +19,8 @@ interface SlotCardProps {
   suggestions?: PortionResult | null
   currentUserId?: string
   memberTarget?: NutritionTarget | null
-  isLocked?: boolean
-  onToggleLock?: () => void
+  violationCount?: number
+  hasAllergyViolation?: boolean
 }
 
 function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
@@ -42,18 +39,33 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
   return calcMealNutrition(items)
 }
 
-function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock }: SlotCardProps & { slot: SlotWithMeal }) {
+/**
+ * Single meal slot card showing assigned meal name + calories, or an empty state.
+ * When suggestions are provided, shows the current user's portion inline with an
+ * expandable section to see all household members' suggestions.
+ */
+export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, violationCount, hasAllergyViolation }: SlotCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const meal = slot.meals ?? null
+  const meal = slot?.meals ?? null
   const nutrition = calcSlotNutrition(meal)
   const calories = nutrition.calories
 
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `slot-${slot.id}`,
-    data: { slot },
-  })
-
   const isDeletedMeal = slot?.meal_id != null && !meal
+
+  if (!slot?.meal_id && !meal) {
+    return (
+      <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
+        <span className="text-sm text-text/50 font-sans">{slotName}</span>
+        <button
+          onClick={onAssign}
+          className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
+          aria-label={`Add meal to ${slotName}`}
+        >
+          +
+        </button>
+      </div>
+    )
+  }
 
   if (isDeletedMeal) {
     return (
@@ -74,17 +86,17 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
   const hasExpandableSuggestions = suggestions && suggestions.suggestions.length > 0
 
   return (
-    <div
-      ref={setNodeRef}
-      className={`rounded-lg border bg-surface shadow-sm ${isDragging ? 'opacity-50 border-dashed border-accent/30' : 'border-accent/30'} ${isLocked ? 'border-l-[3px] border-l-primary' : ''}`}
-    >
+    <div className="relative rounded-lg border border-accent/30 bg-surface shadow-sm">
+      {violationCount != null && violationCount > 0 && (
+        <span
+          className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-[10px] flex items-center justify-center ${hasAllergyViolation ? 'bg-red-500' : 'bg-amber-400'}`}
+          aria-label={`${violationCount} dietary conflict${violationCount !== 1 ? 's' : ''}`}
+        >
+          {violationCount}
+        </span>
+      )}
       {/* Main row */}
       <div className="flex items-center justify-between py-2 px-3">
-        <DragHandle
-          listeners={listeners as Record<string, Function>}
-          attributes={attributes as Record<string, unknown>}
-          ariaLabel={`Drag to reorder ${slotName}`}
-        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-text truncate font-sans">{meal!.name}</p>
           <div className="flex items-center gap-2">
@@ -129,9 +141,6 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
                 <path d="M2 4l4 4 4-4" />
               </svg>
             </button>
-          )}
-          {onToggleLock && (
-            <LockBadge isLocked={!!isLocked} onToggle={onToggleLock} />
           )}
           {onLog && (
             <button
@@ -190,30 +199,4 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, su
       )}
     </div>
   )
-}
-
-/**
- * Single meal slot card showing assigned meal name + calories, or an empty state.
- * When suggestions are provided, shows the current user's portion inline with an
- * expandable section to see all household members' suggestions.
- */
-export function SlotCard(props: SlotCardProps) {
-  const { slotName, slot, onAssign } = props
-
-  if (!slot?.meal_id && !slot?.meals) {
-    return (
-      <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
-        <span className="text-sm text-text/50 font-sans">{slotName}</span>
-        <button
-          onClick={onAssign}
-          className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
-          aria-label={`Add meal to ${slotName}`}
-        >
-          +
-        </button>
-      </div>
-    )
-  }
-
-  return <OccupiedSlotCard {...props} slot={slot} />
 }
