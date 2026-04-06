@@ -70,9 +70,7 @@ Adding a new nav item to Sidebar or MobileDrawer requires updating `tests/AppShe
 
 ## Continuous Improvement
 
-**Read `lessons.md` at the start of every planning and execution phase.** Apply all rules during code generation — don't repeat known mistakes. When you encounter a new mistake, unexpected failure, or learn something non-obvious, add it to `lessons.md` before moving on.
-
-Also add learnings to the Lessons Learned section above when they are specific to this project's architecture. This applies to:
+When you encounter a mistake, unexpected failure, or learn something non-obvious during execution, **add it to the Lessons Learned section above before moving on**. This applies to:
 - Build/test failures caused by environmental issues (worktrees, caching, missing deps)
 - Incorrect assumptions about tool output or API behavior
 - Merge conflicts or integration issues from parallel work

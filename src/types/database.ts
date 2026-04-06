@@ -281,6 +281,31 @@ export interface NormalizedFoodResult {
   portions?: { description: string; grams: number }[]
 }
 
+export type ScheduleStatus = 'prep' | 'consume' | 'quick' | 'away'
+
+export interface MemberScheduleSlot {
+  id: string
+  household_id: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  day_of_week: number
+  slot_name: string
+  status: ScheduleStatus
+  updated_at: string
+}
+
+export interface MemberScheduleException {
+  id: string
+  household_id: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  week_start: string
+  day_of_week: number
+  slot_name: string
+  status: ScheduleStatus
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {

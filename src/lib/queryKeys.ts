@@ -87,4 +87,10 @@ export const queryKeys = {
   insights: {
     household: (householdId: string | undefined) => ['insights', householdId] as const,
   },
+  schedule: {
+    forMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['schedule', householdId, memberId] as const,
+    exceptionsForMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['schedule-exceptions', householdId, memberId] as const,
+  },
 } as const
