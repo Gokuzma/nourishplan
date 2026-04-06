@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { ProgressRing } from './ProgressRing'
 import { PortionSuggestionRow } from './PortionSuggestionRow'
+import { DragHandle } from './DragHandle'
+import { LockBadge } from './LockBadge'
 import type { MealPlanSlot, Meal, MealItem, NutritionTarget } from '../../types/database'
 import type { PortionResult } from '../../utils/portionSuggestions'
 
@@ -19,6 +21,11 @@ interface SlotCardProps {
   suggestions?: PortionResult | null
   currentUserId?: string
   memberTarget?: NutritionTarget | null
+  isLocked?: boolean
+  onToggleLock?: () => void
+  dragHandleListeners?: Record<string, Function>
+  dragHandleAttributes?: Record<string, unknown>
+  isDragSource?: boolean
 }
 
 function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
@@ -42,7 +49,7 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
  * When suggestions are provided, shows the current user's portion inline with an
  * expandable section to see all household members' suggestions.
  */
-export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget }: SlotCardProps) {
+export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, dragHandleListeners, dragHandleAttributes, isDragSource }: SlotCardProps) {
   const [expanded, setExpanded] = useState(false)
   const meal = slot?.meals ?? null
   const nutrition = calcSlotNutrition(meal)
@@ -84,9 +91,14 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
   const hasExpandableSuggestions = suggestions && suggestions.suggestions.length > 0
 
   return (
-    <div className="rounded-lg border border-accent/30 bg-surface shadow-sm">
+    <div className={`rounded-lg border bg-surface shadow-sm ${isDragSource ? 'opacity-50 border-dashed border-accent/30' : 'border-accent/30'} ${isLocked ? 'border-l-[3px] border-l-primary' : ''}`}>
       {/* Main row */}
       <div className="flex items-center justify-between py-2 px-3">
+        <DragHandle
+          listeners={dragHandleListeners}
+          attributes={dragHandleAttributes}
+          ariaLabel={`Drag to reorder ${slotName}`}
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-text truncate font-sans">{meal!.name}</p>
           <div className="flex items-center gap-2">
@@ -131,6 +143,9 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
                 <path d="M2 4l4 4 4-4" />
               </svg>
             </button>
+          )}
+          {onToggleLock && (
+            <LockBadge isLocked={!!isLocked} onToggle={onToggleLock} />
           )}
           {onLog && (
             <button
