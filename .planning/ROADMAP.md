@@ -183,7 +183,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 18. Grocery List Generation | 3/3 | Complete   | 2026-04-04 |
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
 | 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
-| 21. Schedule Model | 0/TBD | Not started | - |
+| 21. Schedule Model | 0/3 | Not started | - |
 | 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
 | 24. Dynamic Portioning | 0/TBD | Not started | - |
@@ -412,8 +412,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Each household member can configure availability windows per day of the week (prep available / quick meal only / away) from their profile or settings
   2. The schedule is stored as structured per-day constraint records and is consumed by the Planning Engine in Phase 22 — no free-text fields
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+Plans:
+- [ ] 21-01-PLAN.md -- DB migration, types, query keys, schedule utilities, hooks, ScheduleSection, SettingsPage integration
+- [ ] 21-02-PLAN.md -- SlotCard schedule badge, DayCard/PlanGrid data wiring, human verification
+- [ ] 21-03-PLAN.md -- Database schema push to production
 
 ### Phase 22: Constraint-Based Planning Engine
 **Goal**: The app can generate a complete weekly meal plan optimised across nutrition targets, household budget, member schedules, dietary restrictions, and recipe preference signals — without blocking the UI
