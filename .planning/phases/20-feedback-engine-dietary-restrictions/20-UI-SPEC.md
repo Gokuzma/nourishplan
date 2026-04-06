@@ -63,8 +63,10 @@ Source: detected from `src/styles/global.css` and existing component patterns.
 | Display (page title) | 28px (`text-2xl`) | 600 (semibold) | 1.2 |
 
 All text uses `font-sans` (`Nunito Variable`). No third weight is introduced — these two
-(400, 600) match the existing codebase convention. Micro-labels inside badges and tags:
-12px (`text-xs`) at weight 400, consistent with existing SlotCard and ExpiryBadge usage.
+(400, 600) match the existing codebase convention. Micro-labels inside badges and tags (e.g.,
+`text-xs` / `SlotCard`, `ExpiryBadge`) fall under the Label / caption tier at 14px for spec
+purposes; `text-xs` may be used in implementation for visual compactness but is not a separate
+named scale step.
 
 ---
 
@@ -89,7 +91,7 @@ Primary (`--color-primary` / `#A8C5A0`) is used for:
 - Active (filled) star rating indicators
 - Satisfied button active state
 - Restriction checkbox checked state
-- Confirm action buttons ("Save restrictions", "Add to won't-eat list")
+- Confirm action buttons ("Save restrictions", "Add food")
 - Won't-eat entry strength badge for "allergy" (hard block) — dark red border overrides for allergen tier
 
 Semantic strength colors for won't-eat preference tiers:
@@ -145,7 +147,7 @@ New components introduced in this phase. All follow existing file conventions
 
 **WontEatSection** — added to SettingsPage below DietaryRestrictionsSection per member profile
 - Section heading: "Won't Eat" at `text-base font-semibold text-text`
-- Entry input: text field + "Add" button, same pattern as ManualAddItemInput in grocery
+- Entry input: text field + "Add food" button, same pattern as ManualAddItemInput in grocery
 - Each won't-eat entry row:
   - Food name: `text-sm text-text`
   - Strength selector: 3-option segmented control ("Dislikes" / "Refuses" / "Allergy"), `text-xs`
@@ -216,7 +218,7 @@ New components introduced in this phase. All follow existing file conventions
 
 ### Won't-Eat Add Flow
 
-1. User types food name in text input, taps "Add".
+1. User types food name in text input, taps "Add food".
 2. Entry appears immediately in list with default strength "Dislikes".
 3. User can change strength inline via segmented control — change saves on tap (no confirm).
 4. Remove entry: tap `×` — no confirmation dialog (not destructive enough to warrant it).
@@ -245,10 +247,10 @@ When a user attempts to add a meal containing a hard-blocked (allergy) ingredien
 |---------|------|
 | Primary CTA — rate meals | "Rate meals" (card heading: "How were today's meals?") |
 | Primary CTA — restrictions | "Save restrictions" |
-| Primary CTA — won't-eat add | "Add" |
+| Primary CTA — won't-eat add | "Add food" |
 | Primary CTA — swap suggestion | "Try [Recipe Name] instead" |
 | Empty state — no ratings yet | "No meals cooked today" / "Rate meals after cooking to help us improve your plan." |
-| Empty state — won't-eat list empty | "No items added yet." / "Type a food you won't eat and tap Add." |
+| Empty state — won't-eat list empty | "No items added yet." / "Type a food you won't eat and tap Add food." |
 | Empty state — issues panel no issues | "No issues this week. Your plan looks great." |
 | Empty state — insights no data | "Not enough data yet." / "Rate a few meals and check back." |
 | Error state — rating save failed | "Couldn't save your rating. Check your connection and try again." |
@@ -280,12 +282,15 @@ When a user attempts to add a meal containing a hard-blocked (allergy) ingredien
 
 ## Accessibility
 
-- Star rating: each star is a `<button>` with `aria-label="Rate [meal name] [N] out of 5 stars"`
-- Strength segmented control: `role="group"` with `aria-label="Preference strength"`, each option is a `<button aria-pressed>`
-- Issues panel toggle: `aria-expanded` on the header button
-- IssueRow: `role="listitem"` inside a `role="list"` container
-- Restriction checkboxes: native `<input type="checkbox">` with visible `<label>` (no custom reimplementation)
-- Warning badge on SlotCard: `aria-label="[N] dietary conflicts"` on the badge button
+| Element | ARIA Contract |
+|---------|--------------|
+| Star rating buttons | `<button aria-label="Rate [meal name] [N] out of 5 stars">` |
+| Strength segmented control | `role="group" aria-label="Preference strength"` — each option is `<button aria-pressed>` |
+| Issues panel toggle | `aria-expanded` on the header button |
+| IssueRow container | `role="list"` wrapping `role="listitem"` rows |
+| Restriction checkboxes | Native `<input type="checkbox">` with visible `<label>` (no custom reimplementation) |
+| Warning badge on SlotCard | `aria-label="[N] dietary conflicts"` on the badge button |
+| Won't-eat remove button | `aria-label="Remove [food name]"` — dynamically bound to the entry's food name |
 
 ---
 
