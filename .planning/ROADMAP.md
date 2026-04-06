@@ -180,7 +180,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 16. Budget Engine & Query Foundation | 4/4 | Complete    | 2026-03-26 |
 | 17. Inventory Engine | 4/5 | Complete    | 2026-03-26 |
 | 18. Grocery List Generation | 3/3 | Complete   | 2026-04-04 |
-| 19. Drag-and-Drop Planner | 0/TBD | Not started | - |
+| 19. Drag-and-Drop Planner | 0/3 | Not started | - |
 | 20. Feedback Engine & Dietary Restrictions | 0/TBD | Not started | - |
 | 21. Schedule Model | 0/TBD | Not started | - |
 | 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
@@ -380,8 +380,12 @@ Plans:
   2. Drag-and-drop works on both desktop (mouse) and mobile (touch) without accidental triggers during scroll
   3. A slot that has been manually filled is visually marked as locked; the locked state persists in the database
   4. Locked slots cannot be overwritten by auto-generation (Phase 22) — they are skipped and the generated plan fills only unlocked slots
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+Plans:
+- [ ] 19-01-PLAN.md � Install dnd-kit, DB migration (is_locked), types, hooks, DragHandle, LockBadge, SlotCard integration
+- [ ] 19-02-PLAN.md � DndContext, DragOverlay, DropActionMenu, droppable slots, DayCarousel mobile layout
+- [ ] 19-03-PLAN.md � Database schema push and human verification of all DnD features
 
 ### Phase 20: Feedback Engine & Dietary Restrictions
 **Goal**: Household members can rate recipes after eating them, flag satiety, set dietary restrictions, and list foods they won't eat — and the system warns when the plan becomes monotonous
