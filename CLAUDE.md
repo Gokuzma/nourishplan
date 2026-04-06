@@ -80,6 +80,21 @@ The DB constraint and `schedule.ts` use `"Snack"` (singular) but `mealPlan.ts DE
 ### Push migrations before asking user to test DB-backed features
 If a phase creates new tables, the migration must be pushed (`supabase db push`) before any save/load testing can work. Don't present a verification checkpoint for DB-backed features until the migration is confirmed live. Plan 21-03 (migration push) should have been executed *before* the Plan 21-02 checkpoint, not after.
 
+### Stale test credentials waste time
+The demo account (`demo@nourishplan.test`) had outdated passwords in planning docs. Created a dedicated test account (`claude-test@nourishplan.test` / `ClaudeTest!2026`) with known credentials stored in memory. **Always use the test account from memory rather than searching planning docs for credentials.**
+
+### Test account needs seed data for meaningful verification
+A fresh test account with an empty household can't verify features like plan page badges or multi-member schedules. Created "Test Child" managed profile and seeded schedule data for both members. **When testing features that depend on existing data, seed test data via the Supabase REST API before running Playwright checks.** Test account details (household ID, profile IDs) are in memory at `reference_test_account.md`.
+
+### Deploy before presenting live-site verification to user
+The user couldn't test on `nourishplan.gregok.ca` because the code hadn't been deployed yet. **After fixing bugs found during verification, rebuild and redeploy before telling the user to test on the live site.**
+
+### Bash `UID` is a readonly variable on Windows/Git Bash
+`UID` is a reserved shell variable. Using it as a local variable (`UID="some-uuid"`) silently fails. **Use `USER_ID` or another name instead.**
+
+### Windows `/dev/stdin` doesn't exist for piping
+`node -pe "...readFileSync('/dev/stdin')"` fails on Windows. Use `grep`/`cut` to extract JSON fields from curl output, or write to a temp file. **Always use Windows-compatible shell patterns for parsing API responses.**
+
 ### Test assertions must match nav item count
 Adding a new nav item to Sidebar or MobileDrawer requires updating `tests/AppShell.test.tsx`. The test asserts specific nav labels — add the new label to the assertion list.
 
