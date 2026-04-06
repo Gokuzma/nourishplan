@@ -71,6 +71,15 @@ Supabase/PostgREST `onConflict` does not resolve against partial unique indexes 
 ### Always test DB writes with Playwright before marking checkpoint approved
 Don't trust that a migration push + code change works — log in with the test account (`claude-test@nourishplan.test` / `ClaudeTest!2026`) and verify the full save-reload cycle in the browser before presenting the checkpoint to the user.
 
+### Slot name mismatch: "Snack" vs "Snacks"
+The DB constraint and `schedule.ts` use `"Snack"` (singular) but `mealPlan.ts DEFAULT_SLOTS` uses `"Snacks"` (plural). When bridging schedule data to the plan grid, **normalize the key** (`"Snack"` → `"Snacks"`). Any future feature crossing these two domains must account for this mismatch.
+
+### Schedule badges must render on empty slots too
+`SlotCard` has two render paths: `OccupiedSlotCard` (meal assigned) and an empty state. Both need schedule badges — users need to see availability status *before* assigning meals, not only after. When adding visual indicators to SlotCard, **always check both code paths**.
+
+### Push migrations before asking user to test DB-backed features
+If a phase creates new tables, the migration must be pushed (`supabase db push`) before any save/load testing can work. Don't present a verification checkpoint for DB-backed features until the migration is confirmed live. Plan 21-03 (migration push) should have been executed *before* the Plan 21-02 checkpoint, not after.
+
 ### Test assertions must match nav item count
 Adding a new nav item to Sidebar or MobileDrawer requires updating `tests/AppShell.test.tsx`. The test asserts specific nav labels — add the new label to the assertion list.
 
