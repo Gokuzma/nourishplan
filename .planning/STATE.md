@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Milestone complete
-stopped_at: Phase 21 context gathered (discuss mode)
-last_updated: "2026-04-06T17:17:05.643Z"
+stopped_at: Phase 21 UI-SPEC approved
+last_updated: "2026-04-06T17:27:04.820Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -289,6 +289,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-06T17:17:05.640Z
-Stopped at: Phase 21 context gathered (discuss mode)
-Resume file: .planning/phases/21-schedule-model/21-CONTEXT.md
+Last session: 2026-04-06T17:27:04.816Z
+Stopped at: Phase 21 UI-SPEC approved
+Resume file: .planning/phases/21-schedule-model/21-UI-SPEC.md
