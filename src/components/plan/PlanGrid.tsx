@@ -1,5 +1,14 @@
-import { useState, useRef, useMemo } from 'react'
-import { useMealPlanSlots, useAssignSlot, useClearSlot } from '../../hooks/useMealPlan'
+import { useState, useMemo } from 'react'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core'
+import { useMealPlanSlots, useAssignSlot, useClearSlot, useToggleLock } from '../../hooks/useMealPlan'
 import { useMeals } from '../../hooks/useMeals'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
@@ -8,6 +17,9 @@ import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { LogMealModal } from '../log/LogMealModal'
 import { DayCard } from './DayCard'
+import { DayCarousel } from './DayCarousel'
+import { SlotCard } from './SlotCard'
+import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import type { NutritionTarget, Meal, MealItem } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
@@ -84,7 +96,7 @@ function calcSlotMacros(meal: (Meal & { meal_items: MealItem[] }) | null) {
 
 /**
  * Week grid orchestrating DayCards.
- * Mobile: single DayCard visible at a time with swipe navigation.
+ * Mobile: horizontal DayCarousel with scroll-snap.
  * Desktop (md+): vertical scrollable stack of all 7 DayCards.
  *
  * Fetches household targets + today's logs once at grid level, then
@@ -105,6 +117,7 @@ export function PlanGrid({
   const { data: meals = [] } = useMeals()
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
+  const toggleLock = useToggleLock()
 
   // Suggestion data — fetched once for the whole grid
   const today = logDate ?? new Date().toISOString().slice(0, 10)
@@ -120,29 +133,28 @@ export function PlanGrid({
     isSwap: boolean
   } | null>(null)
 
-  // Log modal state
   const [logModalState, setLogModalState] = useState<{
     slot: SlotWithMeal
     suggestedServings?: number
   } | null>(null)
 
-  // Touch swipe state
-  const touchStartX = useRef<number | null>(null)
+  // Drag-and-drop state
+  const [activeSlot, setActiveSlot] = useState<SlotWithMeal | null>(null)
+  const [pendingSlots, setPendingSlots] = useState<SlotWithMeal[] | null>(null)
+  const [pendingDrop, setPendingDrop] = useState<{
+    sourceSlot: SlotWithMeal
+    targetSlot: SlotWithMeal
+    targetDayIndex: number
+    targetSlotName: string
+  } | null>(null)
 
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX
-  }
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { distance: 8 } }),
+  )
 
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null) return
-    const delta = touchStartX.current - e.changedTouches[0].clientX
-    touchStartX.current = null
-    if (delta > 50) {
-      setCurrentDayIndex(d => Math.min(d + 1, DAY_COUNT - 1))
-    } else if (delta < -50) {
-      setCurrentDayIndex(d => Math.max(d - 1, 0))
-    }
-  }
+  // Use optimistic slots when available
+  const displaySlots = pendingSlots ?? slots
 
   function openPicker(dayIndex: number, slotName: string, isSwap: boolean) {
     setPickerState({ dayIndex, slotName, isSwap })
@@ -152,8 +164,6 @@ export function PlanGrid({
     if (!pickerState) return
     const { dayIndex, slotName, isSwap } = pickerState
 
-    // Determine slot_order: index in DEFAULT_SLOTS or next available
-    const { DEFAULT_SLOTS } = await import('../../utils/mealPlan')
     const slotOrder = DEFAULT_SLOTS.indexOf(slotName as typeof DEFAULT_SLOTS[number])
     const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
 
@@ -166,6 +176,149 @@ export function PlanGrid({
       isOverride: isSwap,
     })
     setPickerState(null)
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    const slot = event.active.data.current?.slot as SlotWithMeal
+    setActiveSlot(slot)
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setActiveSlot(null)
+    if (!over) return
+
+    const sourceSlot = active.data.current?.slot as SlotWithMeal
+    const overData = over.data.current as {
+      dayIndex: number
+      slotName: string
+      currentSlot: SlotWithMeal | null
+    }
+
+    // Same slot — no action
+    if (sourceSlot.day_index === overData.dayIndex && sourceSlot.slot_name === overData.slotName) return
+
+    // Target is empty: move immediately
+    if (!overData.currentSlot?.meal_id) {
+      executeMoveToEmpty(sourceSlot, overData.dayIndex, overData.slotName)
+      return
+    }
+
+    // Target is occupied: show action menu
+    setPendingDrop({
+      sourceSlot,
+      targetSlot: overData.currentSlot,
+      targetDayIndex: overData.dayIndex,
+      targetSlotName: overData.slotName,
+    })
+  }
+
+  function executeMoveToEmpty(sourceSlot: SlotWithMeal, targetDayIndex: number, targetSlotName: string) {
+    // Optimistic update
+    setPendingSlots(prev => {
+      const base = prev ?? slots
+      return base.map(s => {
+        if (s.id === sourceSlot.id) return { ...s, meal_id: null, meals: null }
+        if (s.day_index === targetDayIndex && s.slot_name === targetSlotName) {
+          return { ...s, meal_id: sourceSlot.meal_id, meals: sourceSlot.meals }
+        }
+        return s
+      })
+    })
+
+    const slotOrder = DEFAULT_SLOTS.indexOf(targetSlotName as typeof DEFAULT_SLOTS[number])
+    const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
+
+    Promise.all([
+      assignSlot.mutateAsync({
+        planId,
+        dayIndex: targetDayIndex,
+        slotName: targetSlotName,
+        slotOrder: order,
+        mealId: sourceSlot.meal_id!,
+        isOverride: false,
+      }),
+      clearSlot.mutateAsync({ slotId: sourceSlot.id, planId }),
+    ]).finally(() => setPendingSlots(null))
+  }
+
+  function executeSwap() {
+    if (!pendingDrop) return
+    const { sourceSlot, targetSlot, targetDayIndex, targetSlotName } = pendingDrop
+
+    // Optimistic update
+    setPendingSlots(prev => {
+      const base = prev ?? slots
+      return base.map(s => {
+        if (s.id === sourceSlot.id) return { ...s, meal_id: targetSlot.meal_id, meals: targetSlot.meals }
+        if (s.id === targetSlot.id) return { ...s, meal_id: sourceSlot.meal_id, meals: sourceSlot.meals }
+        return s
+      })
+    })
+    setPendingDrop(null)
+
+    const targetOrder = DEFAULT_SLOTS.indexOf(targetSlotName as typeof DEFAULT_SLOTS[number])
+    const sourceOrder = DEFAULT_SLOTS.indexOf(sourceSlot.slot_name as typeof DEFAULT_SLOTS[number])
+
+    Promise.all([
+      assignSlot.mutateAsync({
+        planId,
+        dayIndex: targetDayIndex,
+        slotName: targetSlotName,
+        slotOrder: targetOrder >= 0 ? targetOrder : DEFAULT_SLOTS.length,
+        mealId: sourceSlot.meal_id!,
+        isOverride: false,
+      }),
+      assignSlot.mutateAsync({
+        planId,
+        dayIndex: sourceSlot.day_index,
+        slotName: sourceSlot.slot_name,
+        slotOrder: sourceOrder >= 0 ? sourceOrder : DEFAULT_SLOTS.length,
+        mealId: targetSlot.meal_id!,
+        isOverride: false,
+      }),
+    ]).finally(() => setPendingSlots(null))
+  }
+
+  function executeReplace() {
+    if (!pendingDrop) return
+    const { sourceSlot, targetDayIndex, targetSlotName } = pendingDrop
+
+    // Optimistic update
+    setPendingSlots(prev => {
+      const base = prev ?? slots
+      return base.map(s => {
+        if (s.id === sourceSlot.id) return { ...s, meal_id: null, meals: null }
+        if (s.day_index === targetDayIndex && s.slot_name === targetSlotName) {
+          return { ...s, meal_id: sourceSlot.meal_id, meals: sourceSlot.meals }
+        }
+        return s
+      })
+    })
+    setPendingDrop(null)
+
+    const slotOrder = DEFAULT_SLOTS.indexOf(targetSlotName as typeof DEFAULT_SLOTS[number])
+    const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
+
+    Promise.all([
+      assignSlot.mutateAsync({
+        planId,
+        dayIndex: targetDayIndex,
+        slotName: targetSlotName,
+        slotOrder: order,
+        mealId: sourceSlot.meal_id!,
+        isOverride: false,
+      }),
+      clearSlot.mutateAsync({ slotId: sourceSlot.id, planId }),
+    ]).finally(() => setPendingSlots(null))
+  }
+
+  function handleDropCancel() {
+    setPendingDrop(null)
+  }
+
+  function handleToggleLock(slotId: string, isLocked: boolean) {
+    toggleLock.mutate({ slotId, isLocked, planId })
   }
 
   // Build MemberInput array from fetched data (memoized — rebuilds when data changes)
@@ -207,7 +360,7 @@ export function PlanGrid({
     const map = new Map<string, PortionResult | null>()
     if (!currentUserId || memberInputs.length === 0) return map
 
-    for (const slot of slots) {
+    for (const slot of displaySlots) {
       if (!slot.meals) continue
       const macros = calcSlotMacros(slot.meals)
       const key = `${slot.day_index}:${slot.slot_name}`
@@ -216,16 +369,20 @@ export function PlanGrid({
     }
 
     return map
-  }, [slots, memberInputs, currentUserId])
+  }, [displaySlots, memberInputs, currentUserId])
 
   // Group slots by day_index
-  const slotsByDay: Record<number, typeof slots> = {}
+  const slotsByDay: Record<number, typeof displaySlots> = {}
   for (let i = 0; i < DAY_COUNT; i++) {
-    slotsByDay[i] = slots.filter(s => s.day_index === i)
+    slotsByDay[i] = displaySlots.filter(s => s.day_index === i)
   }
 
+  // Compute pendingDropSlotKey for DropActionMenu positioning
+  const pendingDropSlotKey = pendingDrop
+    ? `${pendingDrop.targetDayIndex}:${pendingDrop.targetSlotName}`
+    : null
+
   const dayCards = Array.from({ length: DAY_COUNT }, (_, i) => {
-    // Build per-slot suggestions map for this day (keyed by slot_name)
     const daySuggestions = new Map<string, PortionResult | null>()
     for (const slot of (slotsByDay[i] ?? [])) {
       const key = `${i}:${slot.slot_name}`
@@ -248,60 +405,46 @@ export function PlanGrid({
         onClearSlot={slotId => clearSlot.mutate({ slotId, planId })}
         onSwapSlot={slotName => openPicker(i, slotName, true)}
         onLogSlot={(slot, suggestedServings) => setLogModalState({ slot, suggestedServings })}
+        onToggleLock={handleToggleLock}
+        pendingDropSlotKey={pendingDropSlotKey}
+        onDropSwap={executeSwap}
+        onDropReplace={executeReplace}
+        onDropCancel={handleDropCancel}
       />
     )
   })
 
   return (
     <>
-      {/* Mobile: single card with swipe */}
-      <div
-        className="md:hidden min-h-[70vh]"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Indicator dots */}
-        <div className="flex justify-center gap-1.5 mb-4">
-          {Array.from({ length: DAY_COUNT }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentDayIndex(i)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                i === currentDayIndex ? 'bg-primary' : 'bg-accent/40'
-              }`}
-              aria-label={`Go to day ${i + 1}`}
-            />
-          ))}
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        {/* Mobile: horizontal carousel with scroll-snap */}
+        <div className="md:hidden">
+          <DayCarousel currentDayIndex={currentDayIndex} onDayChange={setCurrentDayIndex}>
+            {dayCards}
+          </DayCarousel>
         </div>
 
-        {/* Navigation arrows */}
-        <div className="flex items-center gap-2 mb-3">
-          <button
-            onClick={() => setCurrentDayIndex(d => Math.max(d - 1, 0))}
-            disabled={currentDayIndex === 0}
-            className="p-2 rounded-full text-text/40 hover:text-text hover:bg-accent/10 disabled:opacity-20 transition-colors"
-          >
-            &larr;
-          </button>
-          <div className="flex-1">
-            {dayCards[currentDayIndex]}
-          </div>
-          <button
-            onClick={() => setCurrentDayIndex(d => Math.min(d + 1, DAY_COUNT - 1))}
-            disabled={currentDayIndex === DAY_COUNT - 1}
-            className="p-2 rounded-full text-text/40 hover:text-text hover:bg-accent/10 disabled:opacity-20 transition-colors"
-          >
-            &rarr;
-          </button>
+        {/* Desktop: scrollable stack */}
+        <div className="hidden md:flex flex-col gap-4">
+          {dayCards}
         </div>
-      </div>
 
-      {/* Desktop: scrollable stack */}
-      <div className="hidden md:flex flex-col gap-4">
-        {dayCards}
-      </div>
+        <DragOverlay dropAnimation={{ duration: 200, easing: 'ease-in' }}>
+          {activeSlot ? (
+            <div className="shadow-xl scale-105 opacity-95 rounded-lg">
+              <SlotCard
+                slotName={activeSlot.slot_name}
+                slot={activeSlot}
+                onAssign={() => {}}
+                onClear={() => {}}
+                onSwap={() => {}}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
-      {/* Meal picker modal */}
+      {/* Meal picker modal — outside DndContext */}
       {pickerState && (
         <MealPicker
           meals={meals}
@@ -310,7 +453,7 @@ export function PlanGrid({
         />
       )}
 
-      {/* Log meal modal */}
+      {/* Log meal modal — outside DndContext */}
       {logModalState && logModalState.slot.meals && selectedMemberId && (
         <LogMealModal
           isOpen={true}
