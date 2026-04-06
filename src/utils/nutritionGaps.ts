@@ -70,6 +70,9 @@ export function calcWeeklyGaps(
     )
     if (!target) continue
 
+    // Skip member entirely if calories target is not set — targets are incomplete
+    if (!target.calories || target.calories <= 0) continue
+
     const nutrients: { key: keyof typeof totalNutrition; targetField: keyof NutritionTarget; label: string }[] = [
       { key: 'calories', targetField: 'calories', label: 'calories' },
       { key: 'protein', targetField: 'protein_g', label: 'protein' },

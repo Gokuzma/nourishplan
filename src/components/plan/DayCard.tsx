@@ -65,6 +65,7 @@ interface DayCardProps {
   onSwapSlot: (slotName: string) => void
   onLogSlot?: (slot: SlotWithMeal, suggestedServings?: number) => void
   onToggleLock?: (slotId: string, isLocked: boolean) => void
+  onSuggestAlternative?: (slotName: string) => void
   pendingDropSlotKey?: string | null
   onDropSwap?: () => void
   onDropReplace?: () => void
@@ -89,6 +90,7 @@ export function DayCard({
   onSwapSlot,
   onLogSlot,
   onToggleLock,
+  onSuggestAlternative,
   pendingDropSlotKey,
   onDropSwap,
   onDropReplace,
@@ -155,6 +157,9 @@ export function DayCard({
                 onLog={s?.meals && onLogSlot
                   ? () => onLogSlot(s, getSuggestedServings(slotName))
                   : undefined}
+                onSuggestAlternative={s?.generation_rationale && onSuggestAlternative
+                  ? () => onSuggestAlternative(slotName)
+                  : undefined}
                 isLocked={s?.is_locked}
                 onToggleLock={s && onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
                 violationCount={slotViolations?.get(slotName)?.count}
@@ -184,6 +189,9 @@ export function DayCard({
                 onSwap={() => onSwapSlot(s.slot_name)}
                 onLog={s.meals && onLogSlot
                   ? () => onLogSlot(s, getSuggestedServings(s.slot_name))
+                  : undefined}
+                onSuggestAlternative={s.generation_rationale && onSuggestAlternative
+                  ? () => onSuggestAlternative(s.slot_name)
                   : undefined}
                 isLocked={s.is_locked}
                 onToggleLock={onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}

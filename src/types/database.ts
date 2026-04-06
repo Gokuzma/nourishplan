@@ -282,6 +282,31 @@ export interface MacroSummary {
   carbs: number
 }
 
+export type ScheduleStatus = 'prep' | 'consume' | 'quick' | 'away'
+
+export interface MemberScheduleSlot {
+  id: string
+  household_id: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  day_of_week: number
+  slot_name: string
+  status: ScheduleStatus
+  updated_at: string
+}
+
+export interface MemberScheduleException {
+  id: string
+  household_id: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  week_start: string
+  day_of_week: number
+  slot_name: string
+  status: ScheduleStatus
+  created_at: string
+}
+
 export interface NormalizedFoodResult {
   id: string
   name: string
@@ -370,8 +395,14 @@ export type Database = {
       }
       meal_plan_slots: {
         Row: MealPlanSlot
-        Insert: Omit<MealPlanSlot, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Insert: Omit<MealPlanSlot, 'id' | 'created_at' | 'is_locked' | 'generation_rationale'> & { id?: string; created_at?: string; is_locked?: boolean; generation_rationale?: string | null }
         Update: Partial<Omit<MealPlanSlot, 'id' | 'created_at'>>
+      }
+      plan_generations: {
+        Row: PlanGeneration
+        Insert: Omit<PlanGeneration, 'id' | 'created_at' | 'status' | 'pass_count' | 'priority_order' | 'constraint_snapshot' | 'error_message' | 'completed_at'> & { id?: string; created_at?: string; status?: 'running' | 'done' | 'timeout' | 'error'; pass_count?: number; priority_order?: string[]; constraint_snapshot?: Record<string, unknown>; error_message?: string | null; completed_at?: string | null }
+        Update: Partial<Omit<PlanGeneration, 'id' | 'created_at'>>
+        Relationships: []
       }
       meal_plan_templates: {
         Row: MealPlanTemplate
