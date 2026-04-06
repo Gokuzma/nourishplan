@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Milestone complete
-stopped_at: Phase 20 UI-SPEC approved
-last_updated: "2026-04-06T16:58:23.275Z"
+status: Executing Phase 22
+stopped_at: Phase 22 context gathered
+last_updated: "2026-04-06T22:25:10.270Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 20 — feedback-engine-dietary-restrictions
+**Current focus:** Phase 22 — constraint-based-planning-engine
 
 ## Current Position
 
-Phase: 20
-Plan: Not started
+Phase: 22 (constraint-based-planning-engine) — EXECUTING
+Plan: 1 of 5
 Next up: `/gsd-discuss-phase 19`
 
 Progress: ███░░░░░░░ 33%
@@ -34,7 +34,7 @@ Progress: ███░░░░░░░ 33%
 
 **Velocity:**
 
-- Total plans completed: 7
+- Total plans completed: 10
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -289,6 +289,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-06T15:43:52.238Z
-Stopped at: Phase 20 UI-SPEC approved
-Resume file: .planning/phases/20-feedback-engine-dietary-restrictions/20-UI-SPEC.md
+Last session: 2026-04-06T19:07:32.967Z
+Stopped at: Phase 22 context gathered
+Resume file: .planning/phases/22-constraint-based-planning-engine/22-CONTEXT.md
