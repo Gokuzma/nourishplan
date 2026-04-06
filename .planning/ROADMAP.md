@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
  (completed 2026-04-06)
 - [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
 - [ ] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints
-- [ ] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting
+- [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
 - [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
 - [ ] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns
 
@@ -184,7 +184,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
 | 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
 | 21. Schedule Model | 0/TBD | Not started | - |
-| 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
+| 22. Constraint-Based Planning Engine | 5/5 | Complete    | 2026-04-06 |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
 | 24. Dynamic Portioning | 0/TBD | Not started | - |
 
