@@ -65,6 +65,12 @@ When two wave-2 agents both need the same file (e.g., `InventoryPage.tsx`), the 
 ### gsd-tools `is_last_phase` is unreliable
 The `phase complete` command returns `is_last_phase: true` when no subsequent phase **directory** exists. This does NOT mean the milestone is complete — **always check ROADMAP.md** for remaining planned phases before making claims about milestone status.
 
+### Supabase upsert fails with partial unique indexes
+Supabase/PostgREST `onConflict` does not resolve against partial unique indexes (`CREATE UNIQUE INDEX ... WHERE column IS NOT NULL`). Upserts silently fail or insert duplicates. **Use delete-then-insert** instead of upsert when the table uses partial unique indexes.
+
+### Always test DB writes with Playwright before marking checkpoint approved
+Don't trust that a migration push + code change works — log in with the test account (`claude-test@nourishplan.test` / `ClaudeTest!2026`) and verify the full save-reload cycle in the browser before presenting the checkpoint to the user.
+
 ### Test assertions must match nav item count
 Adding a new nav item to Sidebar or MobileDrawer requires updating `tests/AppShell.test.tsx`. The test asserts specific nav labels — add the new label to the assertion list.
 
