@@ -38,6 +38,16 @@ export function useSaveSchedule() {
   return useMutation({
     mutationFn: async (params: SaveScheduleParams) => {
       const { householdId, memberId, memberType, grid } = params
+      const column = memberType === 'user' ? 'member_user_id' : 'member_profile_id'
+
+      // Delete existing slots then insert — partial unique indexes don't work with onConflict
+      const { error: delError } = await supabase
+        .from('member_schedule_slots')
+        .delete()
+        .eq('household_id', householdId)
+        .eq(column, memberId)
+      if (delError) throw delError
+
       const days = [0, 1, 2, 3, 4, 5, 6]
       const rows = days.flatMap(day =>
         SLOT_NAMES.map(slot => {
@@ -57,11 +67,9 @@ export function useSaveSchedule() {
           return row
         })
       )
-      const conflictColumn =
-        memberType === 'user' ? 'day_of_week,slot_name,member_user_id' : 'day_of_week,slot_name,member_profile_id'
       const { error } = await supabase
         .from('member_schedule_slots')
-        .upsert(rows, { onConflict: conflictColumn })
+        .insert(rows)
       if (error) throw error
     },
     onSuccess: (_data, params) => {
