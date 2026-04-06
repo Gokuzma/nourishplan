@@ -164,29 +164,3 @@ export function useClearSlot() {
     },
   })
 }
-
-/**
- * Mutation to toggle the is_locked flag on a slot.
- */
-export function useToggleLock() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({
-      slotId,
-      isLocked,
-    }: {
-      slotId: string
-      isLocked: boolean
-      planId: string
-    }): Promise<void> => {
-      const { error } = await supabase
-        .from('meal_plan_slots')
-        .update({ is_locked: isLocked })
-        .eq('id', slotId)
-      if (error) throw error
-    },
-    onSuccess: (_, { planId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.slots(planId) })
-    },
-  })
-}

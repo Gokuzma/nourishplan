@@ -68,4 +68,23 @@ export const queryKeys = {
     items: (listId: string | undefined) =>
       ['grocery-items', listId] as const,
   },
+  ratings: {
+    list: (householdId: string | undefined) => ['ratings', householdId] as const,
+    forMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['ratings', householdId, memberId] as const,
+  },
+  restrictions: {
+    forMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['restrictions', householdId, memberId] as const,
+  },
+  wontEat: {
+    forMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['wont-eat', householdId, memberId] as const,
+  },
+  aiTags: {
+    forRecipe: (recipeId: string | undefined) => ['ai-tags', recipeId] as const,
+  },
+  insights: {
+    household: (householdId: string | undefined) => ['insights', householdId] as const,
+  },
 } as const

@@ -131,7 +131,6 @@ export interface MealPlanSlot {
   slot_order: number
   meal_id: string | null
   is_override: boolean
-  is_locked: boolean
   created_at: string
 }
 
@@ -216,6 +215,48 @@ export interface SpendLog {
   amount: number
   is_partial: boolean
   created_at: string
+}
+
+export interface RecipeRating {
+  id: string
+  household_id: string
+  recipe_id: string
+  recipe_name: string
+  rated_by_user_id: string | null
+  rated_by_member_profile_id: string | null
+  rating: number
+  rated_at: string
+  created_at: string
+}
+
+export interface DietaryRestriction {
+  id: string
+  household_id: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  predefined: string[]
+  custom_entries: string[]
+  updated_at: string
+}
+
+export interface WontEatEntry {
+  id: string
+  household_id: string
+  member_user_id: string | null
+  member_profile_id: string | null
+  food_name: string
+  strength: 'dislikes' | 'refuses' | 'allergy'
+  source: 'manual' | 'ai_restriction' | 'ai_suggestion'
+  created_at: string
+}
+
+export interface AIRecipeTag {
+  id: string
+  household_id: string
+  recipe_id: string
+  tag: string
+  confidence: number | null
+  generated_at: string
 }
 
 export interface MacroSummary {
@@ -364,6 +405,30 @@ export type Database = {
         Row: GroceryItem
         Insert: Omit<GroceryItem, 'id' | 'created_at' | 'updated_at'> & { id?: string; created_at?: string; updated_at?: string }
         Update: Partial<Omit<GroceryItem, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      recipe_ratings: {
+        Row: RecipeRating
+        Insert: Omit<RecipeRating, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<RecipeRating, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      dietary_restrictions: {
+        Row: DietaryRestriction
+        Insert: Omit<DietaryRestriction, 'id' | 'updated_at'> & { id?: string; updated_at?: string }
+        Update: Partial<Omit<DietaryRestriction, 'id'>>
+        Relationships: []
+      }
+      wont_eat_entries: {
+        Row: WontEatEntry
+        Insert: Omit<WontEatEntry, 'id' | 'created_at'> & { id?: string; created_at?: string }
+        Update: Partial<Omit<WontEatEntry, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      ai_recipe_tags: {
+        Row: AIRecipeTag
+        Insert: Omit<AIRecipeTag, 'id' | 'generated_at'> & { id?: string; generated_at?: string }
+        Update: Partial<Omit<AIRecipeTag, 'id' | 'generated_at'>>
         Relationships: []
       }
     }

@@ -1,9 +1,7 @@
-import { useDroppable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition, calcDayNutrition } from '../../utils/nutrition'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import { ProgressRing } from './ProgressRing'
 import { SlotCard } from './SlotCard'
-import { DropActionMenu } from './DropActionMenu'
 import type { NutritionTarget } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { PortionResult } from '../../utils/portionSuggestions'
@@ -27,31 +25,6 @@ function slotNutrition(slot: SlotWithMeal) {
   return calcMealNutrition(items)
 }
 
-function DroppableSlot({
-  dayIndex,
-  slotName,
-  children,
-  currentSlot,
-}: {
-  dayIndex: number
-  slotName: string
-  children: React.ReactNode
-  currentSlot: SlotWithMeal | null
-}) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: `drop-${dayIndex}-${slotName}`,
-    data: { dayIndex, slotName, currentSlot },
-  })
-  return (
-    <div
-      ref={setNodeRef}
-      className={isOver ? 'ring-2 ring-primary/60 rounded-lg bg-primary/5 transition-all' : 'transition-all'}
-    >
-      {children}
-    </div>
-  )
-}
-
 interface DayCardProps {
   dayIndex: number
   weekStart: string
@@ -64,11 +37,6 @@ interface DayCardProps {
   onClearSlot: (slotId: string) => void
   onSwapSlot: (slotName: string) => void
   onLogSlot?: (slot: SlotWithMeal, suggestedServings?: number) => void
-  onToggleLock?: (slotId: string, isLocked: boolean) => void
-  pendingDropSlotKey?: string | null
-  onDropSwap?: () => void
-  onDropReplace?: () => void
-  onDropCancel?: () => void
 }
 
 /**
@@ -86,12 +54,8 @@ export function DayCard({
   onClearSlot,
   onSwapSlot,
   onLogSlot,
-  onToggleLock,
-  pendingDropSlotKey,
-  onDropSwap,
-  onDropReplace,
-  onDropCancel,
 }: DayCardProps) {
+  // Derive the actual calendar date for this day
   const weekStartDate = new Date(weekStart + 'T00:00:00Z')
   const dayDate = new Date(weekStartDate)
   dayDate.setUTCDate(weekStartDate.getUTCDate() + dayIndex)
@@ -99,13 +63,16 @@ export function DayCard({
   const dayName = DAY_NAMES[(weekStartDay + dayIndex) % 7]
   const dateLabel = dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
+  // Build slot map: slot_name -> SlotWithMeal
   const slotMap = new Map<string, SlotWithMeal>()
   for (const s of slots) {
     slotMap.set(s.slot_name, s)
   }
 
+  // Custom slots: not in DEFAULT_SLOTS
   const customSlots = slots.filter(s => !DEFAULT_SLOTS.includes(s.slot_name as typeof DEFAULT_SLOTS[number]))
 
+  // Day nutrition totals
   const filledSlots = slots.filter(s => s.meals !== null)
   const dayTotal = calcDayNutrition(filledSlots.map(s => slotNutrition(s)))
 
@@ -134,59 +101,43 @@ export function DayCard({
       <div className="flex flex-col gap-2">
         {DEFAULT_SLOTS.map((slotName) => {
           const s = slotMap.get(slotName) ?? null
-          const dropKey = `${dayIndex}:${slotName}`
           return (
-            <DroppableSlot key={slotName} dayIndex={dayIndex} slotName={slotName} currentSlot={s}>
-              <SlotCard
-                slotName={slotName}
-                slot={s}
-                suggestions={slotSuggestions?.get(slotName) ?? null}
-                currentUserId={currentUserId}
-                memberTarget={memberTarget}
-                onAssign={() => onAssignSlot(slotName)}
-                onClear={() => {
-                  if (s) onClearSlot(s.id)
-                }}
-                onSwap={() => onSwapSlot(slotName)}
-                onLog={s?.meals && onLogSlot
-                  ? () => onLogSlot(s, getSuggestedServings(slotName))
-                  : undefined}
-                isLocked={s?.is_locked}
-                onToggleLock={s && onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
-              />
-              {pendingDropSlotKey === dropKey && onDropSwap && onDropReplace && onDropCancel && (
-                <DropActionMenu onSwap={onDropSwap} onReplace={onDropReplace} onCancel={onDropCancel} />
-              )}
-            </DroppableSlot>
+            <SlotCard
+              key={slotName}
+              slotName={slotName}
+              slot={s}
+              suggestions={slotSuggestions?.get(slotName) ?? null}
+              currentUserId={currentUserId}
+              memberTarget={memberTarget}
+              onAssign={() => onAssignSlot(slotName)}
+              onClear={() => {
+                if (s) onClearSlot(s.id)
+              }}
+              onSwap={() => onSwapSlot(slotName)}
+              onLog={s?.meals && onLogSlot
+                ? () => onLogSlot(s, getSuggestedServings(slotName))
+                : undefined}
+            />
           )
         })}
 
         {/* Custom slots */}
-        {customSlots.map(s => {
-          const dropKey = `${dayIndex}:${s.slot_name}`
-          return (
-            <DroppableSlot key={s.id} dayIndex={dayIndex} slotName={s.slot_name} currentSlot={s}>
-              <SlotCard
-                slotName={s.slot_name}
-                slot={s}
-                suggestions={slotSuggestions?.get(s.slot_name) ?? null}
-                currentUserId={currentUserId}
-                memberTarget={memberTarget}
-                onAssign={() => onAssignSlot(s.slot_name)}
-                onClear={() => onClearSlot(s.id)}
-                onSwap={() => onSwapSlot(s.slot_name)}
-                onLog={s.meals && onLogSlot
-                  ? () => onLogSlot(s, getSuggestedServings(s.slot_name))
-                  : undefined}
-                isLocked={s.is_locked}
-                onToggleLock={onToggleLock ? () => onToggleLock(s.id, !s.is_locked) : undefined}
-              />
-              {pendingDropSlotKey === dropKey && onDropSwap && onDropReplace && onDropCancel && (
-                <DropActionMenu onSwap={onDropSwap} onReplace={onDropReplace} onCancel={onDropCancel} />
-              )}
-            </DroppableSlot>
-          )
-        })}
+        {customSlots.map(s => (
+          <SlotCard
+            key={s.id}
+            slotName={s.slot_name}
+            slot={s}
+            suggestions={slotSuggestions?.get(s.slot_name) ?? null}
+            currentUserId={currentUserId}
+            memberTarget={memberTarget}
+            onAssign={() => onAssignSlot(s.slot_name)}
+            onClear={() => onClearSlot(s.id)}
+            onSwap={() => onSwapSlot(s.slot_name)}
+            onLog={s.meals && onLogSlot
+              ? () => onLogSlot(s, getSuggestedServings(s.slot_name))
+              : undefined}
+          />
+        ))}
       </div>
 
       {/* Day nutrition bar */}
