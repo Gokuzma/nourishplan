@@ -56,13 +56,14 @@ Source: existing components (`DietaryRestrictionsSection`, `SlotCard`), CONTEXT.
 | Body | 14px (`text-sm`) | 400 regular | 1.5 |
 | Label | 12px (`text-xs`) | 400 regular | 1.4 |
 | Heading (section) | 16px (`text-base`) | 600 semibold | 1.25 |
-| Heading (page) | 24px (`text-2xl`) | 700 bold | 1.2 |
+| Heading (page) | 24px (`text-2xl`) | 600 semibold | 1.2 |
 
 Notes:
 - All text uses `font-sans` (Nunito Variable).
+- Page heading is distinguished from section headings by size (24px vs 16px), not weight — both use 600 semibold.
 - Section headings follow the `<h2 className="font-semibold text-text mb-3">` pattern from SettingsPage.
 - Sub-section headings (e.g. per-member label) follow the `<h4 className="text-base font-semibold text-text">` pattern from DietaryRestrictionsSection.
-- Badge/status labels inside grid cells use `text-xs` (12px, weight 400 or 600 for emphasis).
+- Badge/status labels inside grid cells use `text-xs` (12px) at weight 600 for emphasis.
 
 Source: `src/pages/SettingsPage.tsx`, `src/components/settings/DietaryRestrictionsSection.tsx`.
 
@@ -117,7 +118,7 @@ Structure:
 4. Row labels: Breakfast / Lunch / Dinner / Snack (`text-xs text-text/60`, left-aligned)
 5. Each cell: tap-to-cycle through `prep → consume → quick → away → prep`
 6. Cell renders as a square button with status-colored background (see Color section)
-7. Status label inside cell: 1–4 character abbreviation (`Prep` / `Con` / `Quick` / `Away`), `text-[10px]` weight 600
+7. Status label inside cell: 1–4 character abbreviation (`Prep` / `Con` / `Quick` / `Away`), `text-xs` weight 600
 8. Save button: `bg-primary text-white px-4 py-2 rounded-[--radius-btn] text-sm mt-3`
 9. Exception toggle: inline date picker row below the grid — "Add exception for a specific date" link expands a date input + slot override form
 
