@@ -17,6 +17,7 @@ import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { LogMealModal } from '../log/LogMealModal'
 import { DayCard } from './DayCard'
+import { DayCarousel } from './DayCarousel'
 import { SlotCard } from './SlotCard'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import type { NutritionTarget, Meal, MealItem } from '../../types/database'
@@ -416,22 +417,11 @@ export function PlanGrid({
   return (
     <>
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {/* Mobile: single card with swipe */}
+        {/* Mobile: horizontal carousel with scroll-snap */}
         <div className="md:hidden">
-          {/* Indicator dots */}
-          <div className="flex justify-center gap-1.5 mb-4">
-            {Array.from({ length: DAY_COUNT }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentDayIndex(i)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  i === currentDayIndex ? 'bg-primary' : 'bg-accent/40'
-                }`}
-                aria-label={`Day ${i + 1} of ${DAY_COUNT}`}
-              />
-            ))}
-          </div>
-          {dayCards[currentDayIndex]}
+          <DayCarousel currentDayIndex={currentDayIndex} onDayChange={setCurrentDayIndex}>
+            {dayCards}
+          </DayCarousel>
         </div>
 
         {/* Desktop: scrollable stack */}
