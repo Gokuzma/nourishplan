@@ -26,7 +26,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 16: Budget Engine & Query Foundation** - Centralised query keys, ingredient-level cost entry, recipe cost display, and weekly budget tracking (completed 2026-03-26)
 - [x] **Phase 17: Inventory Engine** - Pantry/fridge/freezer tracking with ledger-based quantities, expiry priority, barcode scanning, and plan-deduction (completed 2026-03-26)
 - [x] **Phase 18: Grocery List Generation** - Auto-generated grocery list from active meal plan, categorised by store aisle, with pantry subtraction and household sharing (completed 2026-04-04)
-- [x] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements (completed 2026-04-06)
+- [x] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
+ (completed 2026-04-06)
 - [ ] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods
 - [ ] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints
 - [ ] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting
@@ -181,7 +182,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 17. Inventory Engine | 4/5 | Complete    | 2026-03-26 |
 | 18. Grocery List Generation | 3/3 | Complete   | 2026-04-04 |
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
-| 20. Feedback Engine & Dietary Restrictions | 0/TBD | Not started | - |
+| 20. Feedback Engine & Dietary Restrictions | 0/4 | In Progress | - |
 | 21. Schedule Model | 0/TBD | Not started | - |
 | 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
@@ -396,8 +397,13 @@ Plans:
   2. Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.) on their profile
   3. Each household member can maintain a list of foods they won't eat, and recipes containing those ingredients are flagged
   4. Plan page warns when the same recipe appears more than twice in a rolling two-week window
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 20-01-PLAN.md -- DB migration, types, query keys, monotony utility, test stubs
+- [ ] 20-02-PLAN.md -- Rating hooks, RateMealsCard, MealRatingRow, HomePage integration
+- [ ] 20-03-PLAN.md -- Dietary restrictions hooks, won't-eat hooks, Settings sections, AI Edge Function
+- [ ] 20-04-PLAN.md -- IssuesPanel, SlotCard badges, AI tags, InsightsPage, navigation, schema push
 
 ### Phase 21: Schedule Model
 **Goal**: Each household member can set their daily availability for meal prep and eating, and these windows are stored as structured constraints ready to feed the Planning Engine
