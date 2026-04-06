@@ -185,10 +185,10 @@ serve(async (req) => {
 
     const jobId = jobRow.id;
 
-    // Time budget — check before each AI pass; 8500ms leaves 1.5s for DB writes
+    // Time budget — check before each AI pass; 6000ms leaves ~4s for DB writes (26+ slot upserts)
     const startTime = Date.now();
     function hasTimeLeft(): boolean {
-      return Date.now() - startTime < 8500;
+      return Date.now() - startTime < 6000;
     }
 
     let finalStatus = "done";
@@ -540,13 +540,9 @@ serve(async (req) => {
         finalStatus = "timeout";
       }
 
-      // Bulk write slot assignments
-      for (const slotAssignment of bestResult.slots) {
-        // Find or create a meal that wraps this recipe
-        const recipe = recipes.find((r) => r.id === slotAssignment.recipe_id);
-        if (!recipe) continue;
-
-        // Look for an existing meal that references this recipe
+      // Pre-fetch/create meals for all recipes to avoid per-slot DB round-trips
+      const mealIdByRecipeId: Record<string, string> = {};
+      for (const recipe of recipes) {
         const { data: existingMeals } = await adminClient
           .from("meals")
           .select("id")
@@ -554,35 +550,38 @@ serve(async (req) => {
           .eq("name", recipe.name)
           .limit(1);
 
-        let mealId: string;
         if (existingMeals && existingMeals.length > 0) {
-          mealId = existingMeals[0].id;
+          mealIdByRecipeId[recipe.id] = existingMeals[0].id;
         } else {
-          // Create a new meal wrapping this recipe
-          const { data: newMeal, error: mealError } = await adminClient
+          const { data: newMeal } = await adminClient
             .from("meals")
             .insert({ household_id: householdId, name: sanitizeString(recipe.name) })
             .select("id")
             .single();
-          if (mealError || !newMeal) continue;
-          mealId = newMeal.id;
+          if (newMeal) mealIdByRecipeId[recipe.id] = newMeal.id;
         }
+      }
 
-        // Compute slot_order from slot_name for correct display order
-        const slotOrderMap: Record<string, number> = { breakfast: 0, lunch: 1, dinner: 2, snacks: 3 };
-        const slotOrder = slotOrderMap[slotAssignment.slot_name.toLowerCase()] ?? 0;
-
-        // Upsert into meal_plan_slots
-        await adminClient.from("meal_plan_slots").upsert(
-          {
+      // Bulk write slot assignments — normalize slot_name to lowercase
+      const slotOrderMap: Record<string, number> = { breakfast: 0, lunch: 1, dinner: 2, snacks: 3 };
+      const upsertRows = bestResult.slots
+        .filter((s) => s.recipe_id && mealIdByRecipeId[s.recipe_id])
+        .map((s) => {
+          const normalizedSlotName = s.slot_name.toLowerCase();
+          return {
             plan_id: planId,
-            day_index: slotAssignment.day_index,
-            slot_name: slotAssignment.slot_name,
-            slot_order: slotOrder,
-            meal_id: mealId,
-            generation_rationale: slotAssignment.rationale,
+            day_index: s.day_index,
+            slot_name: normalizedSlotName,
+            slot_order: slotOrderMap[normalizedSlotName] ?? 0,
+            meal_id: mealIdByRecipeId[s.recipe_id],
+            generation_rationale: s.rationale,
             is_override: false,
-          },
+          };
+        });
+
+      if (upsertRows.length > 0) {
+        await adminClient.from("meal_plan_slots").upsert(
+          upsertRows,
           { onConflict: "plan_id,day_index,slot_name" },
         );
       }
