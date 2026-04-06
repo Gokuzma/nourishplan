@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
  (completed 2026-04-06)
 - [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
 - [x] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints (completed 2026-04-06)
-- [ ] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting
+- [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
 - [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
 - [ ] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns
 
@@ -184,7 +184,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
 | 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
 | 21. Schedule Model | 3/3 | Complete    | 2026-04-06 |
-| 22. Constraint-Based Planning Engine | 0/4 | In Progress | - |
+| 22. Constraint-Based Planning Engine | 4/4 | Complete   | 2026-04-06 |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
 | 24. Dynamic Portioning | 0/TBD | Not started | - |
 
@@ -428,10 +428,10 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 22-01-PLAN.md -- DB migration, types, query keys, nutrition gap utility
-- [ ] 22-02-PLAN.md -- generate-plan Edge Function (AI solver)
-- [ ] 22-03-PLAN.md -- React hooks and UI components (PlanGrid integration)
-- [ ] 22-04-PLAN.md -- Schema push, edge function deploy, and human verification
+- [x] 22-01-PLAN.md -- DB migration, types, query keys, nutrition gap utility
+- [x] 22-02-PLAN.md -- generate-plan Edge Function (AI solver)
+- [x] 22-03-PLAN.md -- React hooks and UI components (PlanGrid integration)
+- [x] 22-04-PLAN.md -- Schema push, edge function deploy, and human verification
 
 ### Phase 23: Prep Optimisation
 **Goal**: Users can see a batch prep schedule for the week and a day-of task sequence for any meal, so cooking time is used efficiently

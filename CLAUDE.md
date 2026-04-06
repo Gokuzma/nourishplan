@@ -95,6 +95,18 @@ The user couldn't test on `nourishplan.gregok.ca` because the code hadn't been d
 ### Windows `/dev/stdin` doesn't exist for piping
 `node -pe "...readFileSync('/dev/stdin')"` fails on Windows. Use `grep`/`cut` to extract JSON fields from curl output, or write to a temp file. **Always use Windows-compatible shell patterns for parsing API responses.**
 
+### SUPABASE_ACCESS_TOKEN lives in .env.local
+The token is stored in `.env.local`, not as a shell environment variable. **Source it before running supabase CLI commands:** `export $(grep SUPABASE_ACCESS_TOKEN .env.local | xargs)`. Don't ask the user for it — check `.env.local` first.
+
+### Edge function meal INSERT requires created_by
+The `meals` table has `created_by uuid NOT NULL`. When an edge function creates meals (e.g., to wrap a recipe during plan generation), **always pass `created_by: user.id`** from the authenticated user. Without it, the INSERT silently fails and downstream logic finds no meal IDs.
+
+### Edge function slot enumeration must cover empty slots
+The plan grid has 7 days × 4 slots = 28 positions, but `meal_plan_slots` only has rows for slots with meals assigned. **When building `slotsToFill` for AI generation, enumerate all possible slots from constants, don't rely on existing DB rows.** Otherwise the AI can only assign to already-occupied slots.
+
+### Worktree agents delete unrelated files
+GSD worktree executor agents sometimes commit deletions of files they shouldn't touch (planning docs, unrelated source files, CLAUDE.md). **After merging each worktree branch, run `git diff <pre-merge-commit>.. --name-status | grep "^D"` and restore any incorrectly deleted files with `git checkout <pre-merge-commit> -- <files>`.**
+
 ### Test assertions must match nav item count
 Adding a new nav item to Sidebar or MobileDrawer requires updating `tests/AppShell.test.tsx`. The test asserts specific nav labels — add the new label to the assertion list.
 
