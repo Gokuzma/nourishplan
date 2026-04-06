@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
  (completed 2026-04-06)
 - [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
-- [ ] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints
+- [x] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints (completed 2026-04-06)
 - [ ] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting
 - [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
 - [ ] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns
@@ -183,7 +183,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 18. Grocery List Generation | 3/3 | Complete   | 2026-04-04 |
 | 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
 | 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
-| 21. Schedule Model | 0/TBD | Not started | - |
+| 21. Schedule Model | 3/3 | Complete    | 2026-04-06 |
 | 22. Constraint-Based Planning Engine | 0/TBD | Not started | - |
 | 23. Prep Optimisation | 0/TBD | Not started | - |
 | 24. Dynamic Portioning | 0/TBD | Not started | - |
