@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { ProgressRing } from './ProgressRing'
 import { PortionSuggestionRow } from './PortionSuggestionRow'
@@ -23,9 +24,6 @@ interface SlotCardProps {
   memberTarget?: NutritionTarget | null
   isLocked?: boolean
   onToggleLock?: () => void
-  dragHandleListeners?: Record<string, Function>
-  dragHandleAttributes?: Record<string, unknown>
-  isDragSource?: boolean
 }
 
 function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
@@ -44,33 +42,18 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
   return calcMealNutrition(items)
 }
 
-/**
- * Single meal slot card showing assigned meal name + calories, or an empty state.
- * When suggestions are provided, shows the current user's portion inline with an
- * expandable section to see all household members' suggestions.
- */
-export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, dragHandleListeners, dragHandleAttributes, isDragSource }: SlotCardProps) {
+function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, suggestions, currentUserId, memberTarget, isLocked, onToggleLock }: SlotCardProps & { slot: SlotWithMeal }) {
   const [expanded, setExpanded] = useState(false)
-  const meal = slot?.meals ?? null
+  const meal = slot.meals ?? null
   const nutrition = calcSlotNutrition(meal)
   const calories = nutrition.calories
 
-  const isDeletedMeal = slot?.meal_id != null && !meal
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `slot-${slot.id}`,
+    data: { slot },
+  })
 
-  if (!slot?.meal_id && !meal) {
-    return (
-      <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
-        <span className="text-sm text-text/50 font-sans">{slotName}</span>
-        <button
-          onClick={onAssign}
-          className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
-          aria-label={`Add meal to ${slotName}`}
-        >
-          +
-        </button>
-      </div>
-    )
-  }
+  const isDeletedMeal = slot?.meal_id != null && !meal
 
   if (isDeletedMeal) {
     return (
@@ -91,12 +74,15 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
   const hasExpandableSuggestions = suggestions && suggestions.suggestions.length > 0
 
   return (
-    <div className={`rounded-lg border bg-surface shadow-sm ${isDragSource ? 'opacity-50 border-dashed border-accent/30' : 'border-accent/30'} ${isLocked ? 'border-l-[3px] border-l-primary' : ''}`}>
+    <div
+      ref={setNodeRef}
+      className={`rounded-lg border bg-surface shadow-sm ${isDragging ? 'opacity-50 border-dashed border-accent/30' : 'border-accent/30'} ${isLocked ? 'border-l-[3px] border-l-primary' : ''}`}
+    >
       {/* Main row */}
       <div className="flex items-center justify-between py-2 px-3">
         <DragHandle
-          listeners={dragHandleListeners}
-          attributes={dragHandleAttributes}
+          listeners={listeners as Record<string, Function>}
+          attributes={attributes as Record<string, unknown>}
           ariaLabel={`Drag to reorder ${slotName}`}
         />
         <div className="flex-1 min-w-0">
@@ -204,4 +190,30 @@ export function SlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, sug
       )}
     </div>
   )
+}
+
+/**
+ * Single meal slot card showing assigned meal name + calories, or an empty state.
+ * When suggestions are provided, shows the current user's portion inline with an
+ * expandable section to see all household members' suggestions.
+ */
+export function SlotCard(props: SlotCardProps) {
+  const { slotName, slot, onAssign } = props
+
+  if (!slot?.meal_id && !slot?.meals) {
+    return (
+      <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
+        <span className="text-sm text-text/50 font-sans">{slotName}</span>
+        <button
+          onClick={onAssign}
+          className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
+          aria-label={`Add meal to ${slotName}`}
+        >
+          +
+        </button>
+      </div>
+    )
+  }
+
+  return <OccupiedSlotCard {...props} slot={slot} />
 }
