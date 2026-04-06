@@ -339,7 +339,9 @@ export function PlanGrid({
       const [dayStr, ...slotParts] = key.split(':')
       const dayOfWeek = Number(dayStr)
       if (!byDay.has(dayOfWeek)) byDay.set(dayOfWeek, new Map())
-      byDay.get(dayOfWeek)!.set(slotParts.join(':'), status)
+      // Normalize "Snack" -> "Snacks" to match DEFAULT_SLOTS
+      const slotName = slotParts.join(':')
+      byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, status)
     }
     return byDay
   }, [scheduleSlots])

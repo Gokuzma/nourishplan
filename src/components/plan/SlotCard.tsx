@@ -226,9 +226,27 @@ export function SlotCard(props: SlotCardProps) {
   const { slotName, slot, onAssign } = props
 
   if (!slot?.meal_id && !slot?.meals) {
+    const ss = props.scheduleStatus
     return (
       <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
-        <span className="text-sm text-text/50 font-sans">{slotName}</span>
+        <span className="text-sm text-text/50 font-sans">
+          {slotName}
+          {ss && ss !== 'prep' && (
+            <span
+              className={`ml-1 inline-block w-2.5 h-2.5 rounded-full align-middle ${
+                ss === 'consume' ? 'bg-accent' :
+                ss === 'quick' ? 'bg-amber-500' :
+                'bg-red-500'
+              }`}
+              aria-label={`Schedule: ${ss}`}
+              title={
+                ss === 'consume' ? 'Pre-made from prep day' :
+                ss === 'quick' ? 'Quick meal only' :
+                'Away — not eating at home'
+              }
+            />
+          )}
+        </span>
         <button
           onClick={onAssign}
           className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
