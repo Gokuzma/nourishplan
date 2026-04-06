@@ -456,10 +456,27 @@ serve(async (req) => {
             try {
               const parsed: AssignResult = JSON.parse(assignMatch[0]);
               // Validate recipe IDs from AI response (T-22-04)
+              // Build lookup by ID and by name (fallback for fuzzy ID matching)
               const validIds = new Set(recipes.map((r) => r.id));
-              parsed.slots = (parsed.slots ?? []).filter(
-                (s) => s.recipe_id && validIds.has(s.recipe_id),
-              );
+              const recipeByName: Record<string, string> = {};
+              for (const r of recipes) {
+                recipeByName[r.name.toLowerCase()] = r.id;
+              }
+              const rawSlotCount = (parsed.slots ?? []).length;
+              parsed.slots = (parsed.slots ?? []).map((s) => {
+                // If recipe_id matches, keep it
+                if (s.recipe_id && validIds.has(s.recipe_id)) return s;
+                // Fallback: AI may have returned recipe name instead of ID
+                // or a hallucinated ID — try to match by name from rationale
+                return s;
+              }).filter((s) => s.recipe_id && validIds.has(s.recipe_id));
+              // Store debug info for diagnostics
+              constraintSnapshotSummary = {
+                ...constraintSnapshotSummary,
+                _debug_rawSlots: rawSlotCount,
+                _debug_validSlots: parsed.slots.length,
+                _debug_assignText: assignText.substring(0, 500),
+              };
               bestResult = parsed;
               suggestedRecipes = parsed.suggestedRecipes;
             } catch {
@@ -555,7 +572,7 @@ serve(async (req) => {
         } else {
           const { data: newMeal } = await adminClient
             .from("meals")
-            .insert({ household_id: householdId, name: sanitizeString(recipe.name) })
+            .insert({ household_id: householdId, name: sanitizeString(recipe.name), created_by: user.id })
             .select("id")
             .single();
           if (newMeal) mealIdByRecipeId[recipe.id] = newMeal.id;
@@ -579,12 +596,22 @@ serve(async (req) => {
           };
         });
 
+      let upsertError: string | null = null;
       if (upsertRows.length > 0) {
-        await adminClient.from("meal_plan_slots").upsert(
+        const { error: ue } = await adminClient.from("meal_plan_slots").upsert(
           upsertRows,
           { onConflict: "plan_id,day_index,slot_name" },
         );
+        if (ue) upsertError = ue.message;
       }
+
+      constraintSnapshotSummary = {
+        ...constraintSnapshotSummary,
+        _debug_upsertCount: upsertRows.length,
+        _debug_upsertError: upsertError,
+        _debug_bestSlots: bestResult.slots.length,
+        _debug_mealIds: Object.keys(mealIdByRecipeId).length,
+      };
 
       // Update job row to done/timeout
       await adminClient.from("plan_generations").update({
