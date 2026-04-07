@@ -316,6 +316,16 @@ Plans:
 Plans:
 - [ ] 15-01-PLAN.md — Fix recipe deletion cache invalidation and remove ComingSoonPage dead code
 
+### Phase 15: Universal recipe import — paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 14
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 15 to break down)
+
 ---
 
 ## v2.0 AMPS — Phase Details

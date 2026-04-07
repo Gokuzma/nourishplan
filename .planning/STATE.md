@@ -274,6 +274,7 @@ Recent decisions affecting current work:
 - Phase 13 added: Recipe, Meal Plan & Account Management (recipe UX, notes/dates, meal plan start date, print, deletions, account management)
 - Phase 14 added: How-To Manual (in-app usage guide)
 - Phases 16–24 added: v2.0 AMPS milestone (Budget, Inventory, Grocery, DnD Planner, Feedback/Dietary, Schedule, Planning Engine, Prep, Dynamic Portioning)
+- Phase 15 added: Universal recipe import — paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
 
 ### Pending Todos
 
