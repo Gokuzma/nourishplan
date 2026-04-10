@@ -205,6 +205,21 @@ serve(async (req) => {
     let suggestedRecipes: SuggestedRecipe[] | undefined;
     let constraintSnapshotSummary: Record<string, unknown> = {};
 
+    interface DroppedAssignment {
+      day_index: number;
+      slot_name: string;
+      raw_recipe_id: string | null;
+      reason: string;
+    }
+    const droppedAssignments: DroppedAssignment[] = [];
+    interface SkippedSlot {
+      day_index: number;
+      slot_name: string;
+      reason: string;
+    }
+    const skippedSlots: SkippedSlot[] = [];
+    const reusedFills: { day_index: number; slot_name: string; meal_id: string; source: string }[] = [];
+
     try {
       // Constraint snapshot assembly (parallel)
       const [
@@ -433,7 +448,7 @@ serve(async (req) => {
             model: assignModel,
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -463,21 +478,38 @@ serve(async (req) => {
           if (assignMatch) {
             try {
               const parsed: AssignResult = JSON.parse(assignMatch[0]);
-              // Validate recipe IDs from AI response (T-22-04)
-              // Build lookup by ID and by name (fallback for fuzzy ID matching)
+              // Validate recipe IDs from AI response (T-22-04).
+              // Any assignment that fails validation is logged to droppedAssignments
+              // for observability — no more silent drops.
               const validIds = new Set(recipes.map((r) => r.id));
               const recipeByName: Record<string, string> = {};
               for (const r of recipes) {
                 recipeByName[r.name.toLowerCase()] = r.id;
               }
               const rawSlotCount = (parsed.slots ?? []).length;
-              parsed.slots = (parsed.slots ?? []).map((s) => {
-                // If recipe_id matches, keep it
-                if (s.recipe_id && validIds.has(s.recipe_id)) return s;
-                // Fallback: AI may have returned recipe name instead of ID
-                // or a hallucinated ID — try to match by name from rationale
-                return s;
-              }).filter((s) => s.recipe_id && validIds.has(s.recipe_id));
+              const validSlots: AssignedSlot[] = [];
+              for (const s of (parsed.slots ?? [])) {
+                if (!s.recipe_id) {
+                  droppedAssignments.push({
+                    day_index: s.day_index,
+                    slot_name: s.slot_name,
+                    raw_recipe_id: null,
+                    reason: "missing_recipe_id",
+                  });
+                  continue;
+                }
+                if (!validIds.has(s.recipe_id)) {
+                  droppedAssignments.push({
+                    day_index: s.day_index,
+                    slot_name: s.slot_name,
+                    raw_recipe_id: s.recipe_id,
+                    reason: "invalid_recipe_id",
+                  });
+                  continue;
+                }
+                validSlots.push(s);
+              }
+              parsed.slots = validSlots;
               // Store debug info for diagnostics
               constraintSnapshotSummary = {
                 ...constraintSnapshotSummary,
@@ -515,7 +547,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -548,11 +580,22 @@ serve(async (req) => {
           if (verifyMatch) {
             try {
               const parsed: AssignResult = JSON.parse(verifyMatch[0]);
-              // Validate recipe IDs (T-22-04)
+              // Validate recipe IDs (T-22-04) — log drops to droppedAssignments
               const validIds = new Set(recipes.map((r) => r.id));
-              parsed.slots = (parsed.slots ?? []).filter(
-                (s) => s.recipe_id && validIds.has(s.recipe_id),
-              );
+              const validVerifySlots: AssignedSlot[] = [];
+              for (const s of (parsed.slots ?? [])) {
+                if (!s.recipe_id || !validIds.has(s.recipe_id)) {
+                  droppedAssignments.push({
+                    day_index: s.day_index,
+                    slot_name: s.slot_name,
+                    raw_recipe_id: s.recipe_id ?? null,
+                    reason: !s.recipe_id ? "missing_recipe_id" : "invalid_recipe_id",
+                  });
+                  continue;
+                }
+                validVerifySlots.push(s);
+              }
+              parsed.slots = validVerifySlots;
               if ((parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
                 bestResult = parsed;
                 suggestedRecipes = parsed.suggestedRecipes;
@@ -575,6 +618,90 @@ serve(async (req) => {
         finalStatus = "partial";
       } else {
         finalStatus = "done";
+      }
+
+      // Slot-level fallback (Gap A closure). For every slotToFill that ended up
+      // without a valid assignment in bestResult.slots, attempt to reuse a meal
+      // from elsewhere in bestResult.slots. If no reuse is possible, mark the
+      // slot as skipped with a reason so the UI can show user-facing messaging.
+      //
+      // This honors D-22 (repeats allowed when catalog is small) and D-21
+      // (suggest recipes the user could add).
+      if (pass2Completed) {
+        const assignedKeySet = new Set(
+          bestResult.slots.map((s) => `${s.day_index}_${s.slot_name}`),
+        );
+        const awayKeySet = new Set(
+          Object.entries(scheduleStatus)
+            .filter(([, status]) => status === "away")
+            .map(([k]) => k),
+        );
+
+        // Build a pool of candidate reuse assignments from bestResult.slots.
+        // Prefer recipes that were NOT already assigned to the target slot_name
+        // on any day, then fall back to any assigned recipe. This reduces visible
+        // repetition of e.g. "Tomato Soup at Breakfast AND Snacks on same day".
+        for (const slot of slotsToFill) {
+          const key = `${slot.day_index}_${slot.slot_name}`;
+          if (assignedKeySet.has(key)) continue;
+          if (awayKeySet.has(key)) continue;
+
+          // Try to find a reuse candidate
+          const sameSlotNameUses = bestResult.slots.filter(
+            (s) => s.slot_name === slot.slot_name,
+          );
+          const otherSlotNameUses = bestResult.slots.filter(
+            (s) => s.slot_name !== slot.slot_name,
+          );
+
+          // Prefer a recipe not yet used in this slot_name (variety),
+          // then any recipe from bestResult.slots.
+          const reuseFrom =
+            otherSlotNameUses.find((s) => !sameSlotNameUses.some((u) => u.recipe_id === s.recipe_id))
+            ?? otherSlotNameUses[0]
+            ?? sameSlotNameUses[0];
+
+          if (reuseFrom) {
+            bestResult.slots.push({
+              day_index: slot.day_index,
+              slot_name: slot.slot_name,
+              recipe_id: reuseFrom.recipe_id,
+              rationale: `Reused ${reuseFrom.rationale ? "(" + reuseFrom.rationale.slice(0, 60) + ")" : "from plan"} — catalog has no ${slot.slot_name.toLowerCase()}-specific recipe`,
+            });
+            reusedFills.push({
+              day_index: slot.day_index,
+              slot_name: slot.slot_name,
+              meal_id: reuseFrom.recipe_id,
+              source: "reuse_from_plan",
+            });
+            assignedKeySet.add(key);
+          } else {
+            // No reuse candidate — mark as skipped and ensure suggestedRecipes
+            // has at least one generic snack entry so the user has an option.
+            skippedSlots.push({
+              day_index: slot.day_index,
+              slot_name: slot.slot_name,
+              reason: "no_catalog_recipe_and_no_reuse_candidate",
+            });
+          }
+        }
+
+        // If any Snacks slot was skipped AND suggestedRecipes doesn't already
+        // contain at least one generic snack, seed a canonical snack suggestion.
+        const snacksSkipped = skippedSlots.some((s) => s.slot_name === "Snacks");
+        const hasSnackSuggestion = (suggestedRecipes ?? []).some((r) =>
+          /snack|yogurt|trail mix|hummus|nut|fruit|granola/i.test(r.name + " " + r.description),
+        );
+        if (snacksSkipped && !hasSnackSuggestion) {
+          suggestedRecipes = [
+            ...(suggestedRecipes ?? []),
+            {
+              name: "Greek Yogurt with Berries and Granola",
+              prepMinutes: 3,
+              description: "Protein-rich snack: Greek yogurt topped with mixed berries and a tablespoon of granola. 180 kcal, 15g protein.",
+            },
+          ];
+        }
       }
 
       // Pre-fetch/create meals for all recipes to avoid per-slot DB round-trips
@@ -626,12 +753,26 @@ serve(async (req) => {
         if (ue) upsertError = ue.message;
       }
 
+      const totalSlotsToFill = slotsToFill.filter((s) => {
+        const key = `${s.day_index}_${s.slot_name}`;
+        return scheduleStatus[key] !== "away";
+      }).length;
       constraintSnapshotSummary = {
         ...constraintSnapshotSummary,
         _debug_upsertCount: upsertRows.length,
         _debug_upsertError: upsertError,
         _debug_bestSlots: bestResult.slots.length,
         _debug_mealIds: Object.keys(mealIdByRecipeId).length,
+        droppedAssignments,
+        skippedSlots,
+        reusedFills,
+        coverage: {
+          totalSlotsToFill,
+          filledSlots: upsertRows.length,
+          reusedFills: reusedFills.length,
+          skippedSlots: skippedSlots.length,
+          droppedAssignments: droppedAssignments.length,
+        },
       };
 
       // Update job row to done/timeout
