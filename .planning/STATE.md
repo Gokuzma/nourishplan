@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Ready to execute
-stopped_at: Phase 22 context gathered
-last_updated: "2026-04-10T17:47:05.787Z"
+stopped_at: Phase 23 context gathered
+last_updated: "2026-04-10T18:00:00.000Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 22 — constraint-based-planning-engine
+**Current focus:** Phase 23 — prep-optimisation
 
 ## Current Position
 
-Phase: 22
+Phase: 23
 Plan: Not started
-Next up: `/gsd-discuss-phase 19`
+Next up: `/gsd-plan-phase 23`
 
 Progress: ███░░░░░░░ 33%
 
