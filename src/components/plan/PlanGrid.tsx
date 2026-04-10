@@ -574,13 +574,28 @@ export function PlanGrid({
         <div className="md:hidden">
           <DayCarousel currentDayIndex={currentDayIndex} onDayChange={setCurrentDayIndex}>
             {isGenerating
-              ? dayCards.map((_, i) => (
-                <div key={i} className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4">
+              ? Array.from({ length: DAY_COUNT }, (_, i) => (
+                <div
+                  key={i}
+                  data-testid={`shimmer-day-${i}`}
+                  className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4"
+                >
                   {DEFAULT_SLOTS.map(slotName => {
                     const slot = displaySlots.find(s => s.day_index === i && s.slot_name === slotName)
-                    return slot?.is_locked
-                      ? dayCards[i]
-                      : <SlotShimmer key={slotName} />
+                    if (slot?.is_locked && slot.meal_id) {
+                      return (
+                        <SlotCard
+                          key={slotName}
+                          slotName={slotName}
+                          slot={slot}
+                          isLocked
+                          onAssign={() => {}}
+                          onClear={() => {}}
+                          onSwap={() => {}}
+                        />
+                      )
+                    }
+                    return <SlotShimmer key={slotName} />
                   })}
                 </div>
               ))
@@ -591,13 +606,28 @@ export function PlanGrid({
         {/* Desktop: scrollable stack */}
         <div className="hidden md:flex flex-col gap-4">
           {isGenerating
-            ? dayCards.map((_, i) => (
-              <div key={i} className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4">
+            ? Array.from({ length: DAY_COUNT }, (_, i) => (
+              <div
+                key={i}
+                data-testid={`shimmer-day-${i}-desktop`}
+                className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4"
+              >
                 {DEFAULT_SLOTS.map(slotName => {
                   const slot = displaySlots.find(s => s.day_index === i && s.slot_name === slotName)
-                  return slot?.is_locked
-                    ? <div key={slotName}>{dayCards[i]}</div>
-                    : <SlotShimmer key={slotName} />
+                  if (slot?.is_locked && slot.meal_id) {
+                    return (
+                      <SlotCard
+                        key={slotName}
+                        slotName={slotName}
+                        slot={slot}
+                        isLocked
+                        onAssign={() => {}}
+                        onClear={() => {}}
+                        onSwap={() => {}}
+                      />
+                    )
+                  }
+                  return <SlotShimmer key={slotName} />
                 })}
               </div>
             ))
