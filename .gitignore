@@ -25,6 +25,3 @@ dist-ssr
 *.sw?
 
 .vercel
-
-# Claude Code per-session state (Stop hook flag files)
-.claude/.stop-hook-state/

@@ -175,7 +175,7 @@ export function PlanGrid({
   const { data: activeJob } = useGenerationJob(activeJobId)
 
   const isGenerating = activeJob?.status === 'running' || generatePlan.isPending
-  const isGenerationComplete = activeJob?.status === 'done'
+  const isGenerationComplete = activeJob?.status === 'done' || activeJob?.status === 'partial'
   const isTimeout = activeJob?.status === 'timeout'
 
   // Advance progress step while generation runs
@@ -192,7 +192,7 @@ export function PlanGrid({
 
   // On job completion: refresh slot data and clear job
   useEffect(() => {
-    if (activeJob?.status === 'done' || activeJob?.status === 'timeout' || activeJob?.status === 'error') {
+    if (activeJob?.status === 'done' || activeJob?.status === 'partial' || activeJob?.status === 'timeout' || activeJob?.status === 'error') {
       queryClient.invalidateQueries({ queryKey: ['meal-plan-slots', planId] })
       if (activeJob.status === 'error') {
         setGenerationError('Plan generation failed. Try again.')

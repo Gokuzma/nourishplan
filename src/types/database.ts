@@ -141,7 +141,7 @@ export interface PlanGeneration {
   household_id: string
   plan_id: string
   triggered_by: string
-  status: 'running' | 'done' | 'timeout' | 'error'
+  status: 'running' | 'done' | 'timeout' | 'partial' | 'error'
   constraint_snapshot: Record<string, unknown>
   priority_order: string[]
   pass_count: number
@@ -400,7 +400,7 @@ export type Database = {
       }
       plan_generations: {
         Row: PlanGeneration
-        Insert: Omit<PlanGeneration, 'id' | 'created_at' | 'status' | 'pass_count' | 'priority_order' | 'constraint_snapshot' | 'error_message' | 'completed_at'> & { id?: string; created_at?: string; status?: 'running' | 'done' | 'timeout' | 'error'; pass_count?: number; priority_order?: string[]; constraint_snapshot?: Record<string, unknown>; error_message?: string | null; completed_at?: string | null }
+        Insert: Omit<PlanGeneration, 'id' | 'created_at' | 'status' | 'pass_count' | 'priority_order' | 'constraint_snapshot' | 'error_message' | 'completed_at'> & { id?: string; created_at?: string; status?: 'running' | 'done' | 'timeout' | 'partial' | 'error'; pass_count?: number; priority_order?: string[]; constraint_snapshot?: Record<string, unknown>; error_message?: string | null; completed_at?: string | null }
         Update: Partial<Omit<PlanGeneration, 'id' | 'created_at'>>
         Relationships: []
       }
