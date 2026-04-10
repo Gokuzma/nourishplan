@@ -185,16 +185,23 @@ serve(async (req) => {
 
     const jobId = jobRow.id;
 
-    // Time budget — check before each AI pass; 6000ms leaves ~4s for DB writes (26+ slot upserts)
+    // Wall-clock budget for the AI solver loop.
+    // Edge Function platform timeout is 150000ms (150s). 90000ms (90s) leaves
+    // ~60s headroom for DB writes, meal row upserts, and platform overhead.
+    // Pass 1 (Haiku shortlist, ~3s) + Pass 2 (Haiku/Sonnet assign, max_tokens=4096, ~5-15s)
+    // + passes 3-5 (Haiku correction, ~3-8s each if violations) fit comfortably in 90s.
+    const WALL_CLOCK_BUDGET_MS = 90000;
     const startTime = Date.now();
     function hasTimeLeft(): boolean {
-      return Date.now() - startTime < 6000;
+      return Date.now() - startTime < WALL_CLOCK_BUDGET_MS;
     }
 
     let finalStatus = "done";
     let passCount = 0;
     let errorMessage: string | undefined;
     let bestResult: AssignResult = { slots: [], violations: [] };
+    let pass2Completed = false;
+    let correctionPassesSkippedForTime = false;
     let suggestedRecipes: SuggestedRecipe[] | undefined;
     let constraintSnapshotSummary: Record<string, unknown> = {};
 
@@ -480,6 +487,7 @@ serve(async (req) => {
               };
               bestResult = parsed;
               suggestedRecipes = parsed.suggestedRecipes;
+              pass2Completed = true;
             } catch {
               // Keep empty bestResult
             }
@@ -489,7 +497,10 @@ serve(async (req) => {
 
       // Passes 3-5 — Verify and Correct (if violations exist)
       for (let pass = 3; pass <= 5; pass++) {
-        if (!hasTimeLeft()) break;
+        if (!hasTimeLeft()) {
+          correctionPassesSkippedForTime = true;
+          break;
+        }
         if ((bestResult.violations ?? []).length === 0) break;
 
         passCount++;
@@ -553,9 +564,17 @@ serve(async (req) => {
         }
       }
 
-      // Check time budget status
-      if (!hasTimeLeft()) {
+      // Determine final status.
+      // 'done'    = Pass 2 completed AND correction passes 3-5 either ran to completion or were unnecessary
+      // 'partial' = Pass 2 completed but correction passes 3-5 were skipped for time (assignment is written, but not verified)
+      // 'timeout' = Pass 2 did NOT complete within budget (assignment is empty or stale)
+      // 'error'   = thrown exception, handled in outer catch block
+      if (!pass2Completed) {
         finalStatus = "timeout";
+      } else if (correctionPassesSkippedForTime) {
+        finalStatus = "partial";
+      } else {
+        finalStatus = "done";
       }
 
       // Pre-fetch/create meals for all recipes to avoid per-slot DB round-trips

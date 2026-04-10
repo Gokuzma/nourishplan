@@ -48,7 +48,7 @@ export function useGenerationJob(jobId: string | null) {
     enabled: !!jobId && !!householdId,
     refetchInterval: (query) => {
       const status = query.state.data?.status
-      if (status === 'done' || status === 'timeout' || status === 'error') return false
+      if (status === 'done' || status === 'partial' || status === 'timeout' || status === 'error') return false
       return 2000
     },
   })
