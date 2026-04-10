@@ -174,7 +174,23 @@ The app helps families cook efficiently by producing three linked artifacts from
 
 </deferred>
 
+<post_research_resolutions>
+## Post-Research Resolutions (2026-04-10)
+
+After `23-RESEARCH.md` surfaced three open questions, the user resolved them:
+
+- **R-01: Rate limit cap → raise to 20/day, add `kind` column.** The shared per-household daily counter used by Phase 22 (`plan_generations`-backed) is raised from 10/day to 20/day, and the counter row gains a `kind` column so steps / batch-prep / cook-sequence / reheat / freezer-classify usage can be reported independently. CONTEXT.md D-29 (shared budget) still holds — this is a single cap, not separate caps. Migration 029 (or a sibling) introduces the `kind` column and raises the limit. Supersedes RESEARCH.md §J.
+
+- **R-02: Mid-cook recipe edit → live-bind, no snapshot.** `cook_sessions.step_state` does NOT snapshot `recipes.instructions`. The Cook Mode UI reads steps live from the recipe; if the recipe is edited during an active cook, the session reflects the new steps. Planner MUST handle the edge cases this creates: (a) previously checked-off step indexes may no longer correspond to the same step text after an edit — use a stable step id (not index) inside `step_state`, (b) if a step is deleted, its check-off state is discarded silently, (c) if a step is added, it appears unchecked. Supersedes RESEARCH.md §D2 snapshot recommendation.
+
+- **R-03: Cross-platform PWA notifications required.** Passive-step timer notifications MUST work on Android, iOS, macOS, and Windows — every platform the PWA can install on. Use the Web Notifications API via `navigator.serviceWorker.ready.then(reg => reg.showNotification(...))` as the primary path. Add an in-app fallback (audible chime + visual banner) that fires when the OS notification cannot be dispatched (permission denied, browser tab backgrounded on a platform that blocks SW notifications). The UAT plan MUST include a matrix of {Chrome Android, Safari iOS ≥16.4, macOS Safari, macOS Chrome, Windows Chrome/Edge} with an explicit pass/fail per platform. If iOS 16.4+ reliability is sketchy in UAT, the in-app fallback covers it but the attempt is mandatory. Supersedes RESEARCH.md §G recommendation to plan-then-verify only.
+
+These resolutions are LOCKED. Treat them as equivalent to the D-01..D-30 decisions above.
+
+</post_research_resolutions>
+
 ---
 
 *Phase: 23-prep-optimisation*
 *Context gathered: 2026-04-10*
+*Post-research resolutions: 2026-04-10*
