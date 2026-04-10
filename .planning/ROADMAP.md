@@ -2,9 +2,11 @@
 
 ## Overview
 
-NourishPlan is built in five phases that follow the strict dependency chain the food hierarchy imposes. Phase 1 establishes the schema and auth foundation that every feature depends on. Phase 2 builds the food data and recipe engine — the nutrition calculation layer that sits under everything else. Phase 3 delivers meal planning with per-person targets, the core user-facing promise. Phase 4 closes the feedback loop with daily logging and the nutrition summary. Phase 5 delivers the app's primary differentiator — per-person portion suggestions — and brings the PWA to production quality.
+NourishPlan is built in milestone-driven phases. v1.0 (Phases 1-7) established the foundation: auth, food data, recipe builder, meal planning with nutrition targets, daily logging, portion suggestions, and production launch. v1.1 (Phases 8-15) polished the UI, cleaned up dead code, fixed calculation bugs, redesigned the home page, and added recipe/account management with a how-to guide.
 
-v2.0 (AMPS) adds a constraint-solving layer on top. Phases 16–24 transform NourishPlan from a tracking app into a planning engine. Budget and Inventory come first because their data model decisions are irreversible. Grocery, Drag-and-Drop, Feedback, and Schedule follow — delivering visible wins and accumulating signal data. The Planning Engine (Phase 22) ships last, once it has real data to work with. Prep Optimization and Dynamic Portioning close out the milestone.
+v2.0 AMPS (Phases 16-24) adds a constraint-solving planning engine. Budget and Inventory came first because their data model decisions are irreversible. Grocery, Drag-and-Drop, Feedback, Schedule, and the Planning Engine followed — delivering visible wins and accumulating signal data. Prep Optimisation and Dynamic Portioning close out the milestone.
+
+Phase 25 (Universal Recipe Import) is a standalone feature that can be built any time after Phase 13.
 
 ## Phases
 
@@ -14,25 +16,31 @@ v2.0 (AMPS) adds a constraint-solving layer on top. Phases 16–24 transform Nou
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: Foundation & Auth** - Schema, household system, auth, and PWA scaffold (completed 2008-03-13)
-- [x] **Phase 2: Food Data & Recipe Builder** - USDA search, custom foods, and recipe builder with live nutrition (gap closure in progress) (completed 2008-03-13)
-- [ ] **Phase 3: Meal Planning & Targets** - Full meal hierarchy, household-shared plans, and per-person nutrition targets
-- [ ] **Phase 4: Daily Logging & Summary** - Portion logging, daily nutrition summary, offline PWA
-- [ ] **Phase 5: Portion Suggestions & Polish** - Per-person portion suggestions, micronutrients, weekly templates, PWA audit
+- [x] **Phase 1: Foundation & Auth** - Schema, household system, auth, and PWA scaffold (completed 2026-03-13)
+- [x] **Phase 2: Food Data & Recipe Builder** - USDA search, custom foods, and recipe builder with live nutrition (completed 2026-03-13)
+- [x] **Phase 3: Meal Planning & Targets** - Full meal hierarchy, household-shared plans, and per-person nutrition targets (completed 2026-03-13)
+- [x] **Phase 4: Daily Logging & Summary** - Portion logging, daily nutrition summary, offline PWA (completed 2026-03-14)
+- [x] **Phase 5: Portion Suggestions & Polish** - Per-person portion suggestions, micronutrients, CNF integration, PWA audit (completed 2026-03-14)
+- [x] **Phase 6: Launch on gregok.ca** - Production deploy, splash screen, OG tags, portfolio card (completed 2026-03-15)
+- [x] **Phase 7: Fix Auth & Household Integration Gaps** - Password reset, useCreateHousehold type fix (completed 2026-03-15)
+- [x] **Phase 8: v1.1 UI Polish** - Dark mode, nutrition rings, measurement units, mobile drawer, settings expansion (completed 2026-03-15)
+- [x] **Phase 9: Dead Code Removal & Theme Token Cleanup** - Remove dead code, OfflineBanner theme tokens (completed 2026-03-15)
+- [x] **Phase 10: Requirements Documentation** - Formalise LAUNCH and POLISH requirement IDs (completed 2026-03-15)
 - [x] **Phase 11: Nutrition & Calculation Fixes** - Fix calorie/macro scaling, micronutrient goal updates, specific serving measurements (completed 2026-03-15)
 - [x] **Phase 12: Home Page & Food Search Redesign** - Remove Food tab, home page food logging, better search sorting, meal drill-down (completed 2026-03-15)
 - [x] **Phase 13: Recipe, Meal Plan & Account Management** - Recipe UX fixes, notes/dates, meal plan start date, print, deletions, account management (completed 2026-03-16)
 - [x] **Phase 14: How-To Manual** - In-app guide explaining how to use all features (completed 2026-03-17)
+- [x] **Phase 15: v1.1 Audit Gap Closure** - Cache invalidation, dead code, test stubs, requirement IDs (completed 2026-03-18)
 - [x] **Phase 16: Budget Engine & Query Foundation** - Centralised query keys, ingredient-level cost entry, recipe cost display, and weekly budget tracking (completed 2026-03-26)
 - [x] **Phase 17: Inventory Engine** - Pantry/fridge/freezer tracking with ledger-based quantities, expiry priority, barcode scanning, and plan-deduction (completed 2026-03-26)
 - [x] **Phase 18: Grocery List Generation** - Auto-generated grocery list from active meal plan, categorised by store aisle, with pantry subtraction and household sharing (completed 2026-04-04)
-- [x] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements
- (completed 2026-04-06)
-- [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
-- [ ] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints
-- [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
+- [x] **Phase 19: Drag-and-Drop Planner** - Touch-friendly drag-and-drop plan editing with locked-slot mechanism for manual placements (completed 2026-04-06)
+- [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
+- [x] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints (completed 2026-04-06)
+- [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
 - [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
 - [ ] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns
+- [ ] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
 
 ## Phase Details
 
@@ -48,10 +56,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. The app renders correctly on a phone screen with the pastel colour scheme and is responsive at all viewport sizes
 **Plans**: 4 plans
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold, Tailwind theme, DB schema, test infra
-- [ ] 01-02-PLAN.md — Auth system and responsive app shell
-- [ ] 01-03-PLAN.md — Household create/join/invite and member management
-- [ ] 01-04-PLAN.md — Integration wiring, Home page, and end-to-end verification
+- [x] 01-01-PLAN.md — Project scaffold, Tailwind theme, DB schema, test infra
+- [x] 01-02-PLAN.md — Auth system and responsive app shell
+- [x] 01-03-PLAN.md — Household create/join/invite and member management
+- [x] 01-04-PLAN.md — Integration wiring, Home page, and end-to-end verification
 
 ### Phase 2: Food Data & Recipe Builder
 **Goal**: Users can search for foods, add custom foods, and build recipes with auto-calculated nutrition
@@ -65,14 +73,14 @@ Plans:
   5. User can toggle ingredient weight state (raw vs cooked) on a recipe and see nutrition recalculate
 **Plans**: 8 plans
 Plans:
-- [ ] 02-01-PLAN.md — DB schema, types, and TDD nutrition utility functions
-- [ ] 02-02-PLAN.md — Edge Functions for USDA, Open Food Facts, and AI verification
-- [ ] 02-03-PLAN.md — Food search UI, custom food CRUD, and /foods route
-- [ ] 02-04-PLAN.md — Recipe builder with ingredients, servings, and sticky nutrition bar
-- [ ] 02-05-PLAN.md — Nested recipes, raw/cooked toggle, AI verification, and user verification
-- [ ] 02-06-PLAN.md — (gap closure) Fix RLS policies on food/recipe tables to use security-definer helpers
-- [ ] 02-07-PLAN.md — (gap closure) Deploy edge functions and set API secrets
-- [ ] 02-08-PLAN.md — (gap closure) Fix ingredient_id UUID type to text for external food IDs
+- [x] 02-01-PLAN.md — DB schema, types, and TDD nutrition utility functions
+- [x] 02-02-PLAN.md — Edge Functions for USDA, Open Food Facts, and AI verification
+- [x] 02-03-PLAN.md — Food search UI, custom food CRUD, and /foods route
+- [x] 02-04-PLAN.md — Recipe builder with ingredients, servings, and sticky nutrition bar
+- [x] 02-05-PLAN.md — Nested recipes, raw/cooked toggle, AI verification, and user verification
+- [x] 02-06-PLAN.md — (gap closure) Fix RLS policies on food/recipe tables to use security-definer helpers
+- [x] 02-07-PLAN.md — (gap closure) Deploy edge functions and set API secrets
+- [x] 02-08-PLAN.md — (gap closure) Fix ingredient_id UUID type to text for external food IDs
 
 ### Phase 3: Meal Planning & Targets
 **Goal**: Households can build and share a weekly meal plan, and each member has personal nutrition targets set
@@ -86,12 +94,12 @@ Plans:
   5. Each household member can set personal calorie, macro, micronutrient, and custom nutrition targets
 **Plans**: 6 plans
 Plans:
-- [ ] 03-01-PLAN.md — DB migration, TypeScript types, and nutrition/meal-plan utility functions
-- [ ] 03-02-PLAN.md — Meals CRUD hooks and MealBuilder UI
-- [ ] 03-03-PLAN.md — Nutrition targets hooks and member targets page
-- [ ] 03-04-PLAN.md — Meal plan grid, day cards, slot assignment, and progress rings
-- [ ] 03-05-PLAN.md — Template save/load, new week prompt, and navigation wiring
-- [ ] 03-06-PLAN.md — Human verification of all Phase 3 features
+- [x] 03-01-PLAN.md — DB migration, TypeScript types, and nutrition/meal-plan utility functions
+- [x] 03-02-PLAN.md — Meals CRUD hooks and MealBuilder UI
+- [x] 03-03-PLAN.md — Nutrition targets hooks and member targets page
+- [x] 03-04-PLAN.md — Meal plan grid, day cards, slot assignment, and progress rings
+- [x] 03-05-PLAN.md — Template save/load, new week prompt, and navigation wiring
+- [x] 03-06-PLAN.md — Human verification of all Phase 3 features
 
 ### Phase 4: Daily Logging & Summary
 **Goal**: Each household member can log what they ate and see their daily nutrition progress against their targets
@@ -104,11 +112,11 @@ Plans:
   4. Log entries made while offline are saved locally and sync automatically when the device reconnects
 **Plans**: 5 plans
 Plans:
-- [ ] 04-01-PLAN.md — DB migration, FoodLog type, utility functions, and unit tests
-- [ ] 04-02-PLAN.md — Food log CRUD hooks and logging UI components
-- [ ] 04-03-PLAN.md — PWA icons, workbox caching, offline banner, and install prompt
-- [ ] 04-04-PLAN.md — HomePage daily dashboard with progress rings, log list, and logging interactions
-- [ ] 04-05-PLAN.md — Human verification of all Phase 4 features
+- [x] 04-01-PLAN.md — DB migration, FoodLog type, utility functions, and unit tests
+- [x] 04-02-PLAN.md — Food log CRUD hooks and logging UI components
+- [x] 04-03-PLAN.md — PWA icons, workbox caching, offline banner, and install prompt
+- [x] 04-04-PLAN.md — HomePage daily dashboard with progress rings, log list, and logging interactions
+- [x] 04-05-PLAN.md — Human verification of all Phase 4 features
 
 ### Phase 5: Portion Suggestions & Polish
 **Goal**: The app suggests how much each household member should eat per dish, micronutrients are fully visible, Open Food Facts is removed and replaced with Canadian Nutrient File, and the PWA passes production quality checks
@@ -121,11 +129,11 @@ Plans:
   4. Open Food Facts integration is completely removed — no edge function, no UI tab, no references in code
 **Plans**: 5 plans
 Plans:
-- [ ] 05-01-PLAN.md — OFF removal, CNF edge function, type updates, and micronutrient constants
-- [ ] 05-02-PLAN.md — Portion suggestion algorithm TDD (pure functions and tests)
-- [ ] 05-03-PLAN.md — Unified USDA+CNF search UI and micronutrient display panel
-- [ ] 05-04-PLAN.md — Portion suggestion UI on meal plan and LogMealModal pre-fill
-- [ ] 05-05-PLAN.md — PWA audit fixes and human verification
+- [x] 05-01-PLAN.md — OFF removal, CNF edge function, type updates, and micronutrient constants
+- [x] 05-02-PLAN.md — Portion suggestion algorithm TDD (pure functions and tests)
+- [x] 05-03-PLAN.md — Unified USDA+CNF search UI and micronutrient display panel
+- [x] 05-04-PLAN.md — Portion suggestion UI on meal plan and LogMealModal pre-fill
+- [x] 05-05-PLAN.md — PWA audit fixes and human verification
 
 ### Phase 6: Launch on gregok.ca
 **Goal**: Deploy NourishPlan as a production PWA at nourishplan.gregok.ca with launch polish, invite-only auth, and a portfolio project card
@@ -140,9 +148,9 @@ Plans:
   6. New signups are blocked (invite-only) while existing users can log in
 **Plans**: 3 plans
 Plans:
-- [ ] 06-01-PLAN.md — Vercel config, splash screen, OG tags, 404 page, and offline page
-- [ ] 06-02-PLAN.md — Portfolio site NourishPlan project card
-- [ ] 06-03-PLAN.md — GitHub repo, Vercel deploy, DNS, and Supabase auth setup
+- [x] 06-01-PLAN.md — Vercel config, splash screen, OG tags, 404 page, and offline page
+- [x] 06-02-PLAN.md — Portfolio site NourishPlan project card
+- [x] 06-03-PLAN.md — GitHub repo, Vercel deploy, DNS, and Supabase auth setup
 
 ### Phase 7: Fix Auth & Household Integration Gaps
 **Goal**: Close the two integration gaps found by the v1.0 milestone audit — fix the broken password reset flow and the useCreateHousehold type mismatch
@@ -154,39 +162,37 @@ Plans:
   2. useCreateHousehold return type includes week_start_day — no TypeScript errors
   3. Password Reset E2E flow completes without errors
 Plans:
-- [ ] 07-01-PLAN.md — Password reset route, reset page component, and useCreateHousehold type fix
+- [x] 07-01-PLAN.md — Password reset route, reset page component, and useCreateHousehold type fix
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 5/5 | Complete   | 2008-03-13 |
-| 2. Food Data & Recipe Builder | 8/8 | Complete   | 2008-03-13 |
-| 3. Meal Planning & Targets | 5/6 | In Progress|  |
-| 4. Daily Logging & Summary | 3/5 | In Progress|  |
-| 5. Portion Suggestions & Polish | 2/5 | In Progress|  |
-| 6. Launch on gregok.ca | 3/3 | Complete   | 2008-03-15 |
-| 7. Fix Auth & Household Integration Gaps | 1/1 | Complete   | 2008-03-15 |
-| 8. v1.1 UI Polish | 6/6 | Complete   | 2026-03-15 |
-| 9. Dead Code Removal & Theme Token Cleanup | 0/0 | Pending |  |
-| 10. Requirements Documentation Formalization | 1/1 | Complete    | 2026-03-15 |
-| 11. Nutrition & Calculation Fixes | 2/2 | Complete | 2026-03-15 |
-| 12. Home Page & Food Search Redesign | 2/2 | Complete | 2026-03-15 |
-| 13. Recipe, Meal Plan & Account Mgmt | 4/4 | Complete | 2026-03-16 |
-| 14. How-To Manual | 1/1 | Complete | 2026-03-17 |
-| 15. v1.1 Audit Gap Closure | 1/1 | Complete    | 2026-03-18 |
-| 16. Budget Engine & Query Foundation | 4/4 | Complete    | 2026-03-26 |
-| 17. Inventory Engine | 4/5 | Complete    | 2026-03-26 |
-| 18. Grocery List Generation | 3/3 | Complete   | 2026-04-04 |
-| 19. Drag-and-Drop Planner | 3/3 | Complete    | 2026-04-06 |
-| 20. Feedback Engine & Dietary Restrictions | 4/4 | Complete    | 2026-04-06 |
-| 21. Schedule Model | 0/TBD | Not started | - |
-| 22. Constraint-Based Planning Engine | 5/5 | Complete    | 2026-04-06 |
-| 23. Prep Optimisation | 0/TBD | Not started | - |
-| 24. Dynamic Portioning | 0/TBD | Not started | - |
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| 1. Foundation & Auth | Complete | 2026-03-13 |
+| 2. Food Data & Recipe Builder | Complete | 2026-03-13 |
+| 3. Meal Planning & Targets | Complete | 2026-03-13 |
+| 4. Daily Logging & Summary | Complete | 2026-03-14 |
+| 5. Portion Suggestions & Polish | Complete | 2026-03-14 |
+| 6. Launch on gregok.ca | Complete | 2026-03-15 |
+| 7. Fix Auth & Household Integration Gaps | Complete | 2026-03-15 |
+| 8. v1.1 UI Polish | Complete | 2026-03-15 |
+| 9. Dead Code Removal & Theme Token Cleanup | Complete | 2026-03-15 |
+| 10. Requirements Documentation | Complete | 2026-03-15 |
+| 11. Nutrition & Calculation Fixes | Complete | 2026-03-15 |
+| 12. Home Page & Food Search Redesign | Complete | 2026-03-15 |
+| 13. Recipe, Meal Plan & Account Mgmt | Complete | 2026-03-16 |
+| 14. How-To Manual | Complete | 2026-03-17 |
+| 15. v1.1 Audit Gap Closure | Complete | 2026-03-18 |
+| 16. Budget Engine & Query Foundation | Complete | 2026-03-26 |
+| 17. Inventory Engine | Complete | 2026-03-26 |
+| 18. Grocery List Generation | Complete | 2026-04-04 |
+| 19. Drag-and-Drop Planner | Complete | 2026-04-06 |
+| 20. Feedback Engine & Dietary Restrictions | Complete | 2026-04-06 |
+| 21. Schedule Model | Complete | 2026-04-06 |
+| 22. Constraint-Based Planning Engine | Complete | 2026-04-06 |
+| 23. Prep Optimisation | Not started | - |
+| 24. Dynamic Portioning | Not started | - |
+| 25. Universal Recipe Import | Not started | - |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -201,14 +207,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
   5. Settings page allows editing display name, avatar, and household name (admin only)
   6. Nutrition targets form supports entering macros as percentages of calories with P+C+F=100% validation
 **Plans:** 6/6 plans complete
-
 Plans:
-- [ ] 08-01-PLAN.md — DB migrations (custom food portions, macro_mode, RLS policies) and type updates
-- [ ] 08-02-PLAN.md — Dark mode audit and ProgressRing theme-aware background
-- [ ] 08-03-PLAN.md — Per-slot mini nutrition rings on meal plan SlotCards
-- [ ] 08-04-PLAN.md — CNF serving sizes and PortionStepper unit selector
-- [ ] 08-05-PLAN.md — Mobile "More" drawer, Settings expansion, profile/avatar editing
-- [ ] 08-06-PLAN.md — Macro percentage scaling toggle on NutritionTargetsForm
+- [x] 08-01-PLAN.md — DB migrations (custom food portions, macro_mode, RLS policies) and type updates
+- [x] 08-02-PLAN.md — Dark mode audit and ProgressRing theme-aware background
+- [x] 08-03-PLAN.md — Per-slot mini nutrition rings on meal plan SlotCards
+- [x] 08-04-PLAN.md — CNF serving sizes and PortionStepper unit selector
+- [x] 08-05-PLAN.md — Mobile "More" drawer, Settings expansion, profile/avatar editing
+- [x] 08-06-PLAN.md — Macro percentage scaling toggle on NutritionTargetsForm
 
 ### Phase 9: Dead Code Removal & Theme Token Cleanup
 **Goal:** Remove dead code identified by the v1.1 milestone audit and fix OfflineBanner to use theme tokens for dark mode compatibility
@@ -222,12 +227,12 @@ Plans:
   4. `comingSoon` dead code branch is removed from Sidebar.tsx
 **Plans:** 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme token fix
+- [x] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme token fix
 
 ### Phase 10: Requirements Documentation Formalization
 **Goal:** Add LAUNCH and POLISH requirement definitions to REQUIREMENTS.md so all implemented features have formal requirement entries
 **Depends on:** Phase 8
-**Requirements:** LAUNCH-01–LAUNCH-06, POLISH-01–POLISH-06
+**Requirements:** LAUNCH-01-LAUNCH-06, POLISH-01-POLISH-06
 **Gap Closure:** Closes documentation gaps from v1.1 audit
 **Success Criteria** (what must be TRUE):
   1. LAUNCH-01 through LAUNCH-06 are defined in REQUIREMENTS.md with descriptions matching ROADMAP.md
@@ -235,7 +240,7 @@ Plans:
   3. Traceability table includes all 12 new requirements mapped to their phases
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 10-01-PLAN.md — Add LAUNCH and POLISH requirement definitions, traceability rows, and ROADMAP reference corrections
+- [x] 10-01-PLAN.md — Add LAUNCH and POLISH requirement definitions, traceability rows, and ROADMAP reference corrections
 
 ### Phase 11: Nutrition & Calculation Fixes
 
@@ -247,10 +252,9 @@ Plans:
   2. Logging a food updates the user's daily micronutrient goal progress
   3. Serving sizes display specific measurements (grams, cups, tbsp, etc.) instead of generic "1 serving"
 **Plans:** 2/2 plans complete
-
 Plans:
-- [ ] 11-01-PLAN.md — DB migration (serving_unit), FreeformLogModal fix, LogMealModal micros, LogEntryItem display, hook expansion
-- [ ] 11-02-PLAN.md — RecipeBuilder foodDataMap hydration and HomePage micronutrient summary
+- [x] 11-01-PLAN.md — DB migration (serving_unit), FreeformLogModal fix, LogMealModal micros, LogEntryItem display, hook expansion
+- [x] 11-02-PLAN.md — RecipeBuilder foodDataMap hydration and HomePage micronutrient summary
 
 ### Phase 12: Home Page & Food Search Redesign
 
@@ -264,9 +268,8 @@ Plans:
   4. Home page + button is replaced with a contextual "Log food" UI element following UX best practices
 **Plans:** 2/2 plans complete
 Plans:
-
-- [ ] 12-01-PLAN.md — Fuzzy search scoring and FoodSearchOverlay component
-- [ ] 12-02-PLAN.md — HomePage integration, LogEntryItem drill-down, nav cleanup, RecipeBuilder wiring
+- [x] 12-01-PLAN.md — Fuzzy search scoring and FoodSearchOverlay component
+- [x] 12-02-PLAN.md — HomePage integration, LogEntryItem drill-down, nav cleanup, RecipeBuilder wiring
 
 ### Phase 13: Recipe, Meal Plan & Account Management
 
@@ -281,11 +284,10 @@ Plans:
   5. User can delete meals, recipes, and foods they created
   6. User can delete their account with option to delete the household or transfer admin rights to the next member
 **Plans:** 4/4 plans complete
-
 Plans:
-- [ ] 13-01-PLAN.md — Recipe notes migration, FoodSearchOverlay nav fix, RecipeBuilder notes/date, RecipesPage inline delete
-- [ ] 13-02-PLAN.md — Meal inline delete, deleted meal placeholder, start date picker, print meal plan
-- [ ] 13-03-PLAN.md — Account deletion edge function and SettingsPage danger zone
+- [x] 13-01-PLAN.md — Recipe notes migration, FoodSearchOverlay nav fix, RecipeBuilder notes/date, RecipesPage inline delete
+- [x] 13-02-PLAN.md — Meal inline delete, deleted meal placeholder, start date picker, print meal plan
+- [x] 13-03-PLAN.md — Account deletion edge function and SettingsPage danger zone
 
 ### Phase 14: How-To Manual
 
@@ -296,9 +298,8 @@ Plans:
   1. An in-app how-to manual is accessible from the UI explaining how to use all major features (food logging, recipes, meal planning, nutrition targets, household management)
   2. Manual content is accurate and matches the current state of the app
 **Plans:** 1/1 plans complete
-
 Plans:
-- [ ] 14-01-PLAN.md — GuidePage with accordion sections, navigation links, and source-check tests
+- [x] 14-01-PLAN.md — GuidePage with accordion sections, navigation links, and source-check tests
 
 ### Phase 15: v1.1 Audit Gap Closure
 
@@ -310,21 +311,10 @@ Plans:
   1. Deleting a recipe invalidates meal-plan-slots and meals query cache — no stale slot data
   2. ComingSoonPage dead code is removed from App.tsx
   3. All test stubs in tests/settings.test.tsx have real assertions matching implementation
-  4. CALC-01–03, UXLOG-01–04, RCPUX-01–03, MPLAN-01–02, DELMG-01–02, ACCTM-01, DOCS-01 are formally defined in REQUIREMENTS.md
+  4. CALC-01-03, UXLOG-01-04, RCPUX-01-03, MPLAN-01-02, DELMG-01-02, ACCTM-01, DOCS-01 are formally defined in REQUIREMENTS.md
 **Plans:** 1/1 plans complete
-
 Plans:
-- [ ] 15-01-PLAN.md — Fix recipe deletion cache invalidation and remove ComingSoonPage dead code
-
-### Phase 15: Universal recipe import — paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 14
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd-plan-phase 15 to break down)
+- [x] 15-01-PLAN.md — Fix recipe deletion cache invalidation and remove ComingSoonPage dead code
 
 ---
 
@@ -363,7 +353,7 @@ Plans:
 - [x] 17-02-PLAN.md — CRUD hooks, InventoryPage with tabs, add/edit/remove modal, navigation
 - [x] 17-03-PLAN.md — Barcode scanning, QuickScanMode, Open Food Facts lookup
 - [x] 17-04-PLAN.md — Cook deduction (FIFO), receipt, HomePage widget, leftover support
-- [ ] 17-05-PLAN.md — Human verification of all inventory features
+- [x] 17-05-PLAN.md — Human verification of all inventory features
 
 ### Phase 18: Grocery List Generation
 **Goal**: The app auto-generates a categorised grocery list from the active meal plan, subtracts what the household already has in inventory, and lets household members check off items while shopping
@@ -394,26 +384,26 @@ Plans:
 **Plans**: 3 plans
 **UI hint**: yes
 Plans:
-- [x] 19-01-PLAN.md � Install dnd-kit, DB migration (is_locked), types, hooks, DragHandle, LockBadge, SlotCard integration
-- [x] 19-02-PLAN.md � DndContext, DragOverlay, DropActionMenu, droppable slots, DayCarousel mobile layout
-- [x] 19-03-PLAN.md � Database schema push and human verification of all DnD features
+- [x] 19-01-PLAN.md — Install dnd-kit, DB migration (is_locked), types, hooks, DragHandle, LockBadge, SlotCard integration
+- [x] 19-02-PLAN.md — DndContext, DragOverlay, DropActionMenu, droppable slots, DayCarousel mobile layout
+- [x] 19-03-PLAN.md — Database schema push and human verification of all DnD features
 
 ### Phase 20: Feedback Engine & Dietary Restrictions
 **Goal**: Household members can rate recipes after eating them, flag satiety, set dietary restrictions, and list foods they won't eat — and the system warns when the plan becomes monotonous
 **Depends on**: Phase 16
 **Requirements**: FEED-01, FEED-02, FEED-03, FEED-04
 **Success Criteria** (what must be TRUE):
-  1. After logging a meal, user is prompted to rate the recipe (1–5 stars) and indicate satiety (still hungry / satisfied / too much)
+  1. After logging a meal, user is prompted to rate the recipe (1-5 stars) and indicate satiety (still hungry / satisfied / too much)
   2. Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.) on their profile
   3. Each household member can maintain a list of foods they won't eat, and recipes containing those ingredients are flagged
   4. Plan page warns when the same recipe appears more than twice in a rolling two-week window
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [x] 20-01-PLAN.md -- DB migration, types, query keys, monotony utility, test stubs
-- [x] 20-02-PLAN.md -- Rating hooks, RateMealsCard, MealRatingRow, HomePage integration
-- [x] 20-03-PLAN.md -- Dietary restrictions hooks, won't-eat hooks, Settings sections, AI Edge Function
-- [x] 20-04-PLAN.md -- IssuesPanel, SlotCard badges, AI tags, InsightsPage, navigation, schema push
+- [x] 20-01-PLAN.md — DB migration, types, query keys, monotony utility, test stubs
+- [x] 20-02-PLAN.md — Rating hooks, RateMealsCard, MealRatingRow, HomePage integration
+- [x] 20-03-PLAN.md — Dietary restrictions hooks, won't-eat hooks, Settings sections, AI Edge Function
+- [x] 20-04-PLAN.md — IssuesPanel, SlotCard badges, AI tags, InsightsPage, navigation, schema push
 
 ### Phase 21: Schedule Model
 **Goal**: Each household member can set their daily availability for meal prep and eating, and these windows are stored as structured constraints ready to feed the Planning Engine
@@ -422,8 +412,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Each household member can configure availability windows per day of the week (prep available / quick meal only / away) from their profile or settings
   2. The schedule is stored as structured per-day constraint records and is consumed by the Planning Engine in Phase 22 — no free-text fields
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
+Plans:
+- [x] 21-01-PLAN.md — DB migration, types, query keys, and schedule CRUD hooks
+- [x] 21-02-PLAN.md — ScheduleGrid UI, member selector, and Settings integration
+- [x] 21-03-PLAN.md — Human verification of schedule model features
 
 ### Phase 22: Constraint-Based Planning Engine
 **Goal**: The app can generate a complete weekly meal plan optimised across nutrition targets, household budget, member schedules, dietary restrictions, and recipe preference signals — without blocking the UI
@@ -435,8 +429,14 @@ Plans:
   3. Generated plan skips locked slots (Phase 19) and only fills unlocked slots
   4. Plan page highlights nutrition gaps per member after generation and offers swap suggestions to close them
   5. Recipes already in inventory are weighted higher in recipe selection — ingredients the household has are preferred
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
+Plans:
+- [x] 22-01-PLAN.md — Edge function scaffold, constraint data fetching, recipe scoring algorithm
+- [x] 22-02-PLAN.md — Slot assignment, nutrition gap detection, swap suggestions
+- [x] 22-03-PLAN.md — GeneratePlanButton, status polling, PlanGrid integration
+- [x] 22-04-PLAN.md — SwapSuggestions UI, NutritionGaps panel, and plan page wiring
+- [x] 22-05-PLAN.md — Schema push and human verification of all planning engine features
 
 ### Phase 23: Prep Optimisation
 **Goal**: Users can see a batch prep schedule for the week and a day-of task sequence for any meal, so cooking time is used efficiently
@@ -456,5 +456,18 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Per-member portion suggestions use each member's calorie target as the primary driver — members with higher targets receive proportionally larger suggested portions
   2. When a member has logged a recipe multiple times and consistently adjusts the suggested portion, the system adapts future suggestions for that recipe toward the observed amount
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 25: Universal Recipe Import
+**Goal**: Users can paste a URL (blog, YouTube, Instagram) or raw recipe text and the AI extracts a complete recipe with ingredients, macros, and instructions — saved directly to the recipe library
+**Depends on**: Phase 13
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. User can paste a blog URL and get a complete recipe with ingredients and macros
+  2. User can paste raw recipe text and get the same result
+  3. User can paste a YouTube cooking video URL and get a recipe extracted from the transcript
+  4. Recipe appears in the recipe builder ready to edit
+  5. No new database tables or migrations required
 **Plans**: TBD
 **UI hint**: yes

@@ -8,6 +8,8 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
 import { useMealPlanSlots, useAssignSlot, useClearSlot, useToggleLock } from '../../hooks/useMealPlan'
 import { useMeals } from '../../hooks/useMeals'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
@@ -129,6 +131,7 @@ export function PlanGrid({
 }: PlanGridProps) {
   const { data: slots = [] } = useMealPlanSlots(planId)
   const { data: meals = [] } = useMeals()
+  const navigate = useNavigate()
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
   const toggleLock = useToggleLock()
@@ -628,7 +631,14 @@ export function PlanGrid({
         <div className="mt-4">
           <RecipeSuggestionCard
             suggestions={suggestedRecipes}
-            onAdd={() => {}}
+            onAdd={async (suggestion) => {
+              const { data, error } = await supabase.functions.invoke('create-recipe-from-suggestion', {
+                body: { name: suggestion.name, description: suggestion.description },
+              })
+              if (error || !data?.success) return
+              queryClient.invalidateQueries({ queryKey: ['recipes'] })
+              navigate(`/recipes/${data.recipeId}`)
+            }}
           />
         </div>
       )}

@@ -292,21 +292,22 @@ serve(async (req) => {
         avgRatings[id] = vals.reduce((a, b) => a + b, 0) / vals.length;
       }
 
-      // Locked slots (from existing DB rows)
+      // Locked slots (from existing DB rows) — normalize to capitalized for consistent lookup
       const lockedSlots = slots.filter((s) => s.is_locked);
-      const lockedKey = new Set(lockedSlots.map((s) => `${s.day_index}_${s.slot_name}`));
+      const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+      const lockedKey = new Set(lockedSlots.map((s) => `${s.day_index}_${capitalize(s.slot_name)}`));
 
-      // Build schedule status lookup: key = `${day_index}_${slot_name}`
+      // Build schedule status lookup: key = `${day_index}_${SlotName}` (capitalized)
       const scheduleStatus: Record<string, string> = {};
       for (const ss of scheduleSlots) {
         // Normalize "Snack" (DB schedule) vs "Snacks" (plan grid)
-        const normalizedSlotName = ss.slot_name === "Snack" ? "Snacks" : ss.slot_name;
-        scheduleStatus[`${ss.day_of_week}_${normalizedSlotName.toLowerCase()}`] = ss.status;
+        const normalizedSlotName = ss.slot_name === "Snack" ? "Snacks" : capitalize(ss.slot_name);
+        scheduleStatus[`${ss.day_of_week}_${normalizedSlotName}`] = ss.status;
       }
 
       // Enumerate ALL possible slots (7 days x 4 default slots), not just existing DB rows.
-      // Existing DB rows may only cover slots that already have meals assigned.
-      const DEFAULT_SLOT_NAMES = ["breakfast", "lunch", "dinner", "snacks"];
+      // Use CAPITALIZED names to match the frontend DEFAULT_SLOTS and existing DB rows.
+      const DEFAULT_SLOT_NAMES = ["Breakfast", "Lunch", "Dinner", "Snacks"];
       const slotsToFill: { day_index: number; slot_name: string; scheduleStatus: string }[] = [];
       for (let day = 0; day < 7; day++) {
         for (const slotName of DEFAULT_SLOT_NAMES) {
@@ -579,17 +580,18 @@ serve(async (req) => {
         }
       }
 
-      // Bulk write slot assignments — normalize slot_name to lowercase
-      const slotOrderMap: Record<string, number> = { breakfast: 0, lunch: 1, dinner: 2, snacks: 3 };
+      // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
+      const slotOrderMap: Record<string, number> = { "Breakfast": 0, "Lunch": 1, "Dinner": 2, "Snacks": 3 };
       const upsertRows = bestResult.slots
         .filter((s) => s.recipe_id && mealIdByRecipeId[s.recipe_id])
         .map((s) => {
-          const normalizedSlotName = s.slot_name.toLowerCase();
+          // Capitalize to match existing DB rows (e.g., "breakfast" -> "Breakfast")
+          const capitalizedSlotName = s.slot_name.charAt(0).toUpperCase() + s.slot_name.slice(1).toLowerCase();
           return {
             plan_id: planId,
             day_index: s.day_index,
-            slot_name: normalizedSlotName,
-            slot_order: slotOrderMap[normalizedSlotName] ?? 0,
+            slot_name: capitalizedSlotName,
+            slot_order: slotOrderMap[capitalizedSlotName] ?? 0,
             meal_id: mealIdByRecipeId[s.recipe_id],
             generation_rationale: s.rationale,
             is_override: false,

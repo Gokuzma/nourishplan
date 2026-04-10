@@ -163,3 +163,23 @@ caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
 **Root cause:** The test asserts an exact list of nav labels — any new item breaks it.
 **Rule:** When adding a nav item to `Sidebar.tsx` or `MobileDrawer.tsx`, update `tests/AppShell.test.tsx` in the same commit to include the new label.
 **Applies to:** `src/components/layout/Sidebar.tsx`, `src/components/layout/MobileDrawer.tsx`, `tests/AppShell.test.tsx`.
+
+### L-022: `jq` is not on PATH in Git Bash on Windows
+**Bug:** A Stop hook script using `jq -r '.session_id'` failed with `jq: command not found` (exit 127) when pipe-tested in Git Bash.
+**Root cause:** Git Bash on Windows does not bundle `jq`; it is not in `/mingw64/bin` or `/usr/bin` by default and is not a guaranteed dependency.
+**Rule:** Do not use `jq` in bash scripts or hook commands for this project. Use `node` (always available — this is a Node project) for JSON parsing and generation. Canonical patterns:
+- Parse stdin JSON: `node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{try{process.stdout.write(String(JSON.parse(d).field||""))}catch{}})'`
+- Emit JSON from an env var: `VAR="$VAL" node -e 'process.stdout.write(JSON.stringify({key:process.env.VAR}))'`
+**Applies to:** `.claude/hooks/*.sh`, any bash script or hook `command` field that needs to read or emit JSON.
+
+### L-023: Claude Code caches hook config at session start
+**Bug:** Newly added hooks in `.claude/settings.json` did not fire in the current session, even though the JSON was valid and the script was tested in isolation.
+**Root cause:** Claude Code reads `.claude/settings.json` once at session start and caches the `hooks` block. Mid-session edits to that block are not picked up until the config is reloaded.
+**Rule:** After editing `hooks` in `.claude/settings.json`, tell the user to open `/hooks` once (reloads config) or restart Claude Code. Do not claim a hook is "live" or active until the config has been reloaded. Pipe-test the script standalone so you know the script itself is correct, then make the activation caveat explicit in your handoff message.
+**Applies to:** Any workflow that installs, edits, or removes hooks in `.claude/settings.json` or `~/.claude/settings.json`.
+
+### L-024: Check `git diff HEAD` before rewriting a file wholesale
+**Bug:** During the lessons.md migration, `CLAUDE.md` was already modified (`M CLAUDE.md` in `git status`) with uncommitted session learnings (L-014 Playwright fix verification, expanded L-020 worktree review). A naive `Write` that reconstructed the file from partial memory would have silently dropped those edits.
+**Root cause:** The `Read` tool reads the file from disk, not from HEAD, so a wholesale `Write` rewrite is based on the uncommitted working copy. Reconstructing the file from memory instead of working directly from the `Read` output loses any uncommitted changes without warning.
+**Rule:** Before rewriting any existing file with the `Write` tool, run `git diff HEAD -- <file>` to see if there are uncommitted changes. If there are, decide explicitly whether to fold them into the rewrite or commit/stash them separately first. Always work from the latest `Read` output — never reconstruct a file from partial memory.
+**Applies to:** Any wholesale rewrite with the `Write` tool, especially on documentation files like `CLAUDE.md`, `lessons.md`, `README.md`, or configuration like `package.json`.
