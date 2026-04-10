@@ -1,10 +1,11 @@
 ---
 phase: 23
 slug: prep-optimisation
-status: revision-1
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-04-10
+reviewed_at: 2026-04-10
 ---
 
 # Phase 23 — UI Design Contract
