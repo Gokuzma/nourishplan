@@ -1,7 +1,7 @@
 ---
 phase: 23
 slug: prep-optimisation
-status: draft
+status: revision-1
 shadcn_initialized: false
 preset: none
 created: 2026-04-10
@@ -29,6 +29,19 @@ Covers three linked surfaces: (1) Batch prep summary modal on the Plan page, (2)
 Source: `src/styles/global.css` @theme block, confirmed by existing Phase 22 (22-UI-SPEC.md), Phase 19 (SlotCard.tsx), Phase 18 (GroceryItemRow.tsx), Phase 17 (ExpiryBadge.tsx) component patterns.
 
 **No new color tokens introduced.** Phase 23 reuses `--color-primary`, `--color-secondary`, `--color-accent`, `--color-background`, `--color-surface`, `--color-text`, and existing Tailwind utility colors (red-500, amber-500, sky-blue via `#93C5FD`/`#BFDBFE`). Freezer-friendly semantic uses a muted sky-blue tint applied through utility classes only — no new CSS variable.
+
+---
+
+## Visual Hierarchy
+
+Named focal point per primary screen. The executor must preserve these weightings during implementation — additions to any screen should not displace the stated focal point.
+
+- **Plan page:** `BatchPrepButton` sits adjacent to the existing `GeneratePlanButton` and shares equal visual weight — neither dominates. Both are primary CTAs serving the same user job ("set up this week's cooking"), so they live in the same header row, share the same button height (`py-2.5`), and use complementary chrome (Generate Plan = solid primary; Batch prep = outlined primary-on-secondary).
+- **Batch prep modal:** The first (earliest-in-week) `BatchPrepSessionCard` is the focal point — it sits at the top of the scroll body and carries the most urgent "Due soon" chip when applicable. When the stale indicator row is visible it temporarily draws attention (amber pulse above all session cards), but it self-dismisses on recompute and attention returns to the first session card.
+- **Cook Mode active step screen:** The active `CookStepCard` is the primary visual anchor — it is the only card with a 2px primary border, `bg-surface` (vs. `bg-secondary` for others), promoted 16px text, and a shadow. When a timer is running on a passive step, the `CookStepTimer` countdown block becomes the secondary anchor during the wait (30px countdown pulling the eye). The fixed footer `CookStepPrimaryAction` is a persistent tertiary — always in view but never competing with the active card chrome.
+- **Cook Mode complete state (all steps done):** The "Finish cook session" footer `CookStepPrimaryAction` button is the focal point — no active card remains, so the sage primary footer owns all attention as the one thing left to do.
+- **Standalone `/cook` picker:** When the "Resume in progress" section is present (user has an unfinished session), it is the focal point at the top of the scroll body; otherwise the search input above the recipe list is the focal point.
+- **Recipe editor Steps section:** The active (currently-being-edited) step row is the focal point — it gets a subtle focus ring on the text input. The "Regenerate from ingredients" affordance in the section header is a secondary anchor, always visible but quieter (`text-xs text-primary underline`, no button chrome).
 
 ---
 
@@ -63,10 +76,23 @@ Source: 22-UI-SPEC.md spacing table, PlanGrid.tsx MealPicker modal dimensions, E
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body | 14px (`text-sm`) | 400 (regular) | 1.5 |
-| Label | 12px (`text-xs`) | 400 (regular) | 1.4 |
-| Heading | 20px (`text-xl`) | 700 (bold) | 1.2 |
-| Display | 24px (`text-2xl`) | 700 (bold) | 1.2 |
+| Label (meta, chips, helpers) | 12px (`text-xs`) | 400 / 500 / 600 | 1.4 |
+| Body (default) | 14px (`text-sm`) | 400 / 500 / 600 | 1.5 |
+| Kitchen-ergonomic body (Cook Mode active step only) | 16px (`text-base`) | 500 (medium) | 1.5 |
+| Heading (modal titles, section titles) | 20px (`text-xl`) | 600 / 700 | 1.2 |
+| Display (page heading) | 24px (`text-2xl`) | 700 (bold) | 1.2 |
+| Timer countdown (Cook Mode only) | 30px (`text-3xl`) | 700 (bold) `tabular-nums` | 1 |
+
+**Weights used:** 400 (regular), 500 (medium), 600 (semibold), 700 (bold).
+
+| Weight | Usage |
+|--------|-------|
+| 400 regular | Default body text, inactive/completed step text, body copy in banners and prompts |
+| 500 medium | Active step text in Cook Mode, freezer badge label, lane owner chip, pill chips, segmented control labels, MultiMealSwitcher pills, Recipe editor Freezer toggle label |
+| 600 semibold | Modal headers, section headers, primary buttons, lane header labels, batch prep session header, Cook Mode subtitles, Recipe editor Steps section heading |
+| 700 bold | Modal primary titles (batch prep, multi-meal prompt), Cook Mode page display heading, timer countdown |
+
+**Weight palette justification:** Four weights (400/500/600/700) match the existing project weight palette used throughout `src/components/plan/SlotCard.tsx`, `src/components/plan/GeneratePlanButton.tsx`, `src/components/plan/NutritionGapCard.tsx`, and `src/components/grocery/GroceryItemRow.tsx`. Phase 23 components inherit these weights to maintain visual consistency with existing surfaces — consolidating would visibly break the app's established typography.
 
 Notes:
 - All text uses `font-sans` class (Nunito Variable)
@@ -81,7 +107,7 @@ Notes:
 - Per-member lane header label: `text-xs font-semibold uppercase tracking-wide text-text/60`
 - Notification permission prompt body: `text-sm text-text/80 font-sans`
 
-**Size inventory confirmation:** 12px / 14px / 16px / 20px / 24px / 30px = 6 sizes. Over the 3–4 rule. Justification: 16px (base kitchen readability) and 30px (timer countdown) are functional requirements for the Cook Mode kitchen context. Text-base (16px) is only used for the single active-step instruction block; text-3xl is only the countdown timer. All chrome and all non-cook surfaces stay within 12/14/20/24. Checker please note the kitchen-ergonomic justification.
+**Size inventory confirmation:** 12px / 14px / 16px / 20px / 24px / 30px = 6 sizes. The 16px active-step text and 30px timer countdown are stated exceptions to the 3–4 rule with Cook Mode functional justification: 16px is required for kitchen-ergonomic readability at arm's length while cooking; 30px is required for cross-room timer visibility during passive waits. Both sizes are scoped strictly to Cook Mode — the 16px class appears only on the single active-step instruction block, and the 30px class appears only on the countdown timer. All chrome and all non-Cook-Mode surfaces stay within the 12 / 14 / 20 / 24 scale. Both exceptions are functional requirements of the cooking context, not aesthetic choices.
 
 Source: SlotCard.tsx typography patterns, 22-UI-SPEC.md font scale, ExpiryBadge.tsx pill text, NutritionGapCard.tsx headers.
 
@@ -269,7 +295,7 @@ New components required for this phase. All follow existing project patterns.
 ### MultiMealPromptOverlay
 - **Trigger:** Shown when entering Cook Mode for a prep slot that contains more than one recipe (per CONTEXT.md D-21 prep-with-multiple-recipes fork)
 - **Layout:** centered modal, `max-w-sm bg-surface rounded-2xl shadow-xl p-6 flex flex-col gap-4` with backdrop `bg-black/40 backdrop-blur-sm`
-- **Title:** "How do you want to cook these?" (`text-lg font-bold text-text`)
+- **Title:** "How do you want to cook these?" (`text-xl font-bold text-text`)
 - **Body copy:** `text-sm text-text/70 font-sans` — "This prep session covers {N} recipes. Would you like a combined longest-first sequence across all of them, or cook each one separately?"
 - **Two large primary buttons stacked:**
   - Primary ("combined"): `bg-primary text-white rounded-[--radius-btn] px-4 py-3 text-sm font-semibold` — "Combined sequence"
@@ -283,11 +309,11 @@ New components required for this phase. All follow existing project patterns.
 - **Title:** "Get notified when timers finish" (`text-sm font-semibold text-text`)
 - **Body:** `text-sm text-text/70 font-sans` — "Allow notifications so you'll hear when passive steps are done — even if the app is in the background."
 - **Actions row:** `flex gap-2 mt-2`
-  - Primary: "Allow notifications" — `bg-primary text-white rounded-[--radius-btn] px-3 py-1.5 text-xs font-semibold` — tap triggers `Notification.requestPermission()`
+  - Primary: "Allow notifications" — `bg-primary text-white rounded-[--radius-btn] px-3 py-2 text-xs font-semibold` — tap triggers `Notification.requestPermission()`
   - Secondary: "Not now" — `text-xs text-text/60 hover:text-text underline` — dismisses the banner and records `localStorage.cook-notification-dismissed-at={timestamp}`
 - **Denied state (after prompt, user denied):** banner changes to `bg-amber-500/10 border-amber-500/30` with copy "Notifications blocked. Turn them on in your browser settings to hear timers." Single dismiss button `×`. This state is re-shown on the next cook session entry after a 7-day cooldown.
 - **Granted state:** banner does not render at all on subsequent sessions. Service worker takes over passive-timer notifications per D-25.
-- **When prompt fires:** On the tap of "Start" on the first passive-wait step — not earlier (no pre-emptive permission ask), not later (so users can hear the first timer). This single-moment gating prevents permission-prompt fatigue.
+- **When prompt fires:** On the tap of "Start" on the first passive-wait step - not earlier (no pre-emptive permission ask), not later (so users can hear the first timer). This single-moment gating prevents permission-prompt fatigue.
 
 ### ReheatSequenceCard (Cook Mode on consume slots)
 - **Special-case view:** When Cook Mode opens for a slot with `schedule_status='consume'`, instead of the full CookStepCard sequence, render a single condensed card matching CookStepCard dimensions but with 2–3 AI-generated reheat steps in a tight flow (per CONTEXT.md D-21 consume-slot reheat-only flow)
@@ -342,7 +368,7 @@ New components required for this phase. All follow existing project patterns.
 - **Placement:** new small row within the existing recipe metadata section (near servings field, above the Notes section)
 - **Appearance:** `flex items-center justify-between gap-3 py-3 border-t border-accent/20`
 - **Label:** "Freezes well" (`text-sm font-medium text-text`) + helper text "AI will suggest this if you leave it blank" (`text-xs text-text/50`)
-- **Control:** three-state segmented control with labels "Auto" / "Yes" / "No" — `inline-flex bg-secondary rounded-[--radius-btn] p-0.5`, active state `bg-primary text-white`, inactive `text-text/60`. "Auto" = field null (AI decides), "Yes" = true, "No" = false
+- **Control:** three-state segmented control with labels "Auto" / "Yes" / "No" — `inline-flex bg-secondary rounded-[--radius-btn] p-1`, active state `bg-primary text-white`, inactive `text-text/60`. "Auto" = field null (AI decides), "Yes" = true, "No" = false
 - **Shelf-life weeks input (conditional):** visible only when toggle = "Yes". Label "Shelf life" with a numeric input "weeks" suffix, min=1 max=52 default=4. Input class matches RecipeEditorStepsSection duration input.
 
 ### BatchPrepStaleIndicator (internal to BatchPrepModal)
