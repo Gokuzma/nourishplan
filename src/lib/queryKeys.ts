@@ -87,4 +87,10 @@ export const queryKeys = {
   insights: {
     household: (householdId: string | undefined) => ['insights', householdId] as const,
   },
+  planGeneration: {
+    job: (jobId: string | null, householdId: string | undefined) =>
+      ['plan-generation', householdId, jobId] as const,
+    latest: (householdId: string | undefined, weekStart: string) =>
+      ['plan-generation', householdId, weekStart, 'latest'] as const,
+  },
 } as const
