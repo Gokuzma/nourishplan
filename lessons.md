@@ -183,3 +183,13 @@ caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
 **Root cause:** The `Read` tool reads the file from disk, not from HEAD, so a wholesale `Write` rewrite is based on the uncommitted working copy. Reconstructing the file from memory instead of working directly from the `Read` output loses any uncommitted changes without warning.
 **Rule:** Before rewriting any existing file with the `Write` tool, run `git diff HEAD -- <file>` to see if there are uncommitted changes. If there are, decide explicitly whether to fold them into the rewrite or commit/stash them separately first. Always work from the latest `Read` output — never reconstruct a file from partial memory.
 **Applies to:** Any wholesale rewrite with the `Write` tool, especially on documentation files like `CLAUDE.md`, `lessons.md`, `README.md`, or configuration like `package.json`.
+
+### L-025: Deploy edge functions with `--no-verify-jwt` when auth is handled inside the function
+**Bug:** After redeploying `generate-plan` and `create-recipe-from-suggestion`, every call from the frontend returned `{"code":401,"message":"Invalid JWT"}` at the edge runtime layer — before the function code even ran. UAT verification blocked mid-run.
+**Root cause:** The Supabase project now issues ES256 (asymmetric) JWTs via the new auth keys. Supabase edge functions default to `verify_jwt = true`, which uses the legacy HS256 shared-secret verification path. ES256 tokens are rejected at the runtime layer even though the tokens are valid and the function code uses `adminClient.auth.getUser(token)` to do its own verification. The old deployments worked by accident — whatever runtime state they had is incompatible with the new redeploys.
+**Rule:** Deploy edge functions that do their own `getUser(token)` auth with `--no-verify-jwt`:
+```bash
+npx supabase functions deploy <fn> --project-ref <ref> --no-verify-jwt
+```
+Any new function added to this project must either (a) be deployed with `--no-verify-jwt` and validate the JWT itself with the service-role client, or (b) be rewritten to work with ES256 runtime verification (not yet supported for HS256-era projects).
+**Applies to:** All `supabase/functions/*` deployments for this project. Check `generate-plan/index.ts` for the `getUser(token)` pattern — if the function already does that, skip runtime verification.
