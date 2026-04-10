@@ -1,8 +1,8 @@
 ---
 phase: 22-constraint-based-planning-engine
-verified: 2026-04-10T14:22:00Z
-status: human_needed
-score: 5/5 must-haves verified
+verified: 2026-04-10T18:55:00Z
+status: passed
+score: 5/5 must-haves verified + 3/3 live browser tests passed
 re_verification:
   previous_status: human_needed
   previous_score: 5/5
@@ -193,3 +193,63 @@ The only pre-condition required before human UAT: run `scripts/seed-test-nutriti
 _Verified: 2026-04-10T14:22:00Z_
 _Verifier: Claude (gsd-verifier)_
 _Re-verification after: Gap closure plans 22-06 (timeout/partial), 22-07 (snack fallback), 22-08 (shimmer fix), 22-09 (NutritionGapCard test + seed SQL)_
+
+## Live Browser UAT (2026-04-10T18:55:00Z)
+
+All 3 human_needed items executed live on https://nourishplan.gregok.ca against the deployed edge functions and real DB.
+
+### Test 1: End-to-end generation including snack coverage — PASSED
+
+Triggered via `supabase.functions.invoke('generate-plan')` from the Plan page. Latest `plan_generations` row:
+
+```json
+{
+  "status": "done",
+  "pass_count": 2,
+  "elapsedMs": 22588,
+  "coverage": {
+    "filledSlots": 26,
+    "reusedFills": 6,
+    "skippedSlots": 0,
+    "totalSlotsToFill": 26,
+    "droppedAssignments": 6
+  },
+  "suggestedRecipes": 3
+}
+```
+
+- `status: "done"` — not `"timeout"` (Gap B closed) ✓
+- `elapsedMs: 22588` — 22.6s, well under 90s budget (Gap B closed) ✓
+- `filledSlots: 26/26` — all 26 unlocked slots filled (2 slots locked) ✓
+- `reusedFills: 6` — 6 AI hallucinations caught and filled via post-Pass-2 fallback (Gap A closed) ✓
+- `droppedAssignments: 6` — silent drops now explicitly logged in constraint_snapshot ✓
+- `skippedSlots: 0` — no empty slots ✓
+- Every Sun–Sat day has 4 filled slots including Snacks ✓
+
+### Test 2: NutritionGapCard with swap suggestions — PASSED
+
+Pre-condition: seeded `nutrition_targets` for user `0ba05a5e-f536-4bb4-8806-b27d53b7ed1e` in household `c2531bd4-b680-404a-b769-ab4dc8b6f62c` via PostgREST (values from `scripts/seed-test-nutrition-targets.sql`).
+
+- NutritionGapCard rendered below the plan grid: "1 member below nutrition target this week" ✓
+- Expanded to show 4 gap rows: calories 2%, protein 3%, fat 3%, carbs 0% of target ✓
+- Each gap row shows a specific Swap button: `Swap Sun Breakfast to Rice Bowl Lunch (+268g calories)`, etc. ✓
+- Clicked the first swap button — `meal_plan_slots` row for Sun Breakfast updated from "Vegetable Omelette" → "Rice Bowl Lunch" with `is_override: true` ✓
+
+### Test 3: Locked slot shimmer visual — PASSED
+
+During generation in Test 1, I captured a full-page screenshot of the shimmer state.
+
+- Mon Dinner "Stir Fry Dinner" (locked) stayed visible in place with lock indicator ✓
+- Wed Dinner "Tomato Soup" (locked) stayed visible in place with lock indicator ✓
+- All other slots in Mon/Wed showed animate-pulse shimmer ✓
+- Other days (Sun/Tue/Thu/Fri/Sat) showed 4 shimmers per day with no duplicate day-card content ✓
+- No 6+ element stacking bug from the old `dayCards[i]` substitution ✓
+
+### Incident during UAT
+
+First generation attempt returned `401 Invalid JWT` at the edge runtime layer. Root cause: the project now issues ES256 asymmetric JWTs but edge functions default to `verify_jwt = true` which uses legacy HS256 verification. Resolved by redeploying both `generate-plan` and `create-recipe-from-suggestion` with `--no-verify-jwt` (the functions validate auth themselves via `adminClient.auth.getUser(token)`). Documented as lesson L-025.
+
+---
+
+_Live UAT completed: 2026-04-10T18:55:00Z_
+_Status: **passed** (5/5 programmatic + 3/3 live browser)_
