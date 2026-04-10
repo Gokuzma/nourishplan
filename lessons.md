@@ -193,3 +193,22 @@ npx supabase functions deploy <fn> --project-ref <ref> --no-verify-jwt
 ```
 Any new function added to this project must either (a) be deployed with `--no-verify-jwt` and validate the JWT itself with the service-role client, or (b) be rewritten to work with ES256 runtime verification (not yet supported for HS256-era projects).
 **Applies to:** All `supabase/functions/*` deployments for this project. Check `generate-plan/index.ts` for the `getUser(token)` pattern — if the function already does that, skip runtime verification.
+
+### L-026: Playwright `browser_wait_for` on ambient text gives false positives
+**Bug:** During Phase 22 UAT I clicked "Generate Plan" then called `browser_wait_for({text: "Generated"})` to wait for completion. It returned immediately because the page already had "Generated 1h ago" text from the previous run. I believed generation had finished and queried the DB — only to find no new `plan_generations` row, which misled me into thinking the edge function was broken.
+**Root cause:** `browser_wait_for({text: "..."})` matches any substring present on the page, including text that was there before the action. Words like "Generated", "Loaded", "Done", "Complete" are frequently already rendered as ambient UI text (e.g., "Generated 1h ago", "Loaded 3 items"), so waiting for them is a no-op.
+**Rule:** When waiting for an async UI transition, wait on a **transition-unique** signal:
+- Prefer `textGone` on the pre-action state (e.g., `textGone: "Generated 1h ago"`) or disappearance of the loading button (`textGone: "Generating..."`).
+- Or poll the DB / backend directly for the expected state change (`plan_generations` row created in the last N seconds).
+- Never wait on generic words like "Generated", "Saved", "Done", "Loading" without first confirming they are not already present.
+**Applies to:** All Playwright-based UAT on NourishPlan, especially the Plan page generation flow, recipe save flow, and any action that triggers a "completed" banner.
+
+### L-027: Subagent prompts for parallel GSD execution must include explicit feature-preservation lists
+**Bug:** L-020 recurred again during Phase 22 Wave 1 — the 22-06 executor agent deleted the AIRationaleTooltip feature from `SlotCard.tsx` (50 lines) and truncated 7 other unrelated files while implementing a timeout fix. Wave 2 (with strengthened prompts listing specific features to preserve) had ZERO contamination, proving the warning is load-bearing.
+**Root cause:** L-020 says "review every merge for unrelated file modifications" but that's a post-hoc cleanup. The root cause is that executor agents regenerate large portions of files from scratch because they don't know which existing features matter. A generic "don't touch unrelated files" instruction is ignored; a specific list of features to preserve is not.
+**Rule:** When spawning a GSD worktree executor agent that will modify a file containing prior work (especially `PlanGrid.tsx`, `generate-plan/index.ts`, `SlotCard.tsx`, or any file that has been modified by 3+ previous phases), include in the prompt:
+1. A `<critical_l020_warning>` block naming the EXACT features the agent must NOT remove (e.g., "useNavigate + supabase imports for recipe suggestion handler", "AIRationaleTooltip wiring", "WALL_CLOCK_BUDGET_MS constant", "capitalize() helper", "pass2Completed flag").
+2. An explicit "use Edit tool, never Write tool" instruction for any file >200 lines.
+3. The list of files explicitly in scope, with the understanding that all other files are forbidden.
+The warning must reference specific symbols/features by name — generic "don't truncate" is not enough.
+**Applies to:** Every `Task(subagent_type="gsd-executor", ...)` call that targets a file touched by a previous phase. The risk scales with the age of the file and the number of prior phases that have modified it.
