@@ -15,6 +15,13 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 })
 
+// Mock IntersectionObserver — not implemented in jsdom (used by DayCarousel)
+global.IntersectionObserver = class IntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof IntersectionObserver
+
 // Mock import.meta.env so tests don't crash on missing Supabase env vars
 Object.defineProperty(import.meta, 'env', {
   value: {
