@@ -30,6 +30,7 @@ import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } fro
 import { RecipeStepsSection } from './RecipeStepsSection'
 import { RecipeFreezerToggle } from './RecipeFreezerToggle'
 import { useRecipeSteps, useRegenerateRecipeSteps } from '../../hooks/useRecipeSteps'
+import { CookEntryPointOnRecipeDetail } from '../cook/CookEntryPointOnRecipeDetail'
 
 // Default yield factor when ingredient category is unknown (general cooking loss ~15%)
 const DEFAULT_YIELD_FACTOR = YIELD_FACTORS['vegetables'] // 0.85
@@ -787,6 +788,9 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
               shelfLifeWeeks={stepsData?.freezer_shelf_life_weeks ?? null}
             />
           )}
+
+          {/* Cook this recipe entry point */}
+          {recipe && <CookEntryPointOnRecipeDetail recipe={recipe} />}
 
           {/* Mark as Cooked button */}
           <div className="flex items-center gap-3">
