@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useHousehold } from '../hooks/useHousehold'
 import { useRecipes, useCreateRecipe, useDeleteRecipe } from '../hooks/useRecipes'
+import { FreezerBadge } from '../components/plan/FreezerBadge'
 
 function relativeTime(isoString: string): string {
   const diffMs = Date.now() - new Date(isoString).getTime()
@@ -75,7 +76,12 @@ export function RecipesPage() {
                 onClick={() => navigate(`/recipes/${recipe.id}`)}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text truncate">{recipe.name}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-medium text-text truncate">{recipe.name}</p>
+                    {recipe.freezer_friendly === true && (
+                      <FreezerBadge variant="compact" />
+                    )}
+                  </div>
                   {recipe.notes && (
                     <p className="text-xs text-text/40 truncate">{recipe.notes}</p>
                   )}
