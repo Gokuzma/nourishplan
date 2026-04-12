@@ -257,6 +257,7 @@ export function useUpdateCookStep() {
 // ============================================================
 export function useCompleteCookSession() {
   const queryClient = useQueryClient()
+  const { session } = useAuth()
   const { data: membership } = useHousehold()
   const householdId = membership?.household_id
   return useMutation({
@@ -265,6 +266,7 @@ export function useCompleteCookSession() {
         .from('cook_sessions')
         .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('id', sessionId)
+        .eq('started_by', session!.user.id)
       if (error) throw error
     },
     onSuccess: (_, sessionId) => {
