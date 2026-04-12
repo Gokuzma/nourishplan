@@ -123,7 +123,7 @@ export function RecipeStepsSection({ recipeId, recipeName, servings, ingredients
         </div>
         <button
           type="button"
-          onClick={() => (edited && steps.length > 0 ? setConfirmRegenerate(true) : handleRegenerate())}
+          onClick={() => (steps.length > 0 ? setConfirmRegenerate(true) : handleRegenerate())}
           className="text-xs text-primary underline font-sans"
           disabled={regenerateSteps.isPending}
         >
