@@ -1,0 +1,381 @@
+import { useState, useEffect } from 'react'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import {
+  useCookSession,
+  useCreateCookSession,
+  useUpdateCookStep,
+  useCompleteCookSession,
+  useLatestCookSessionForMeal,
+  useActiveCookSessions,
+} from '../hooks/useCookSession'
+import { useRecipeSteps } from '../hooks/useRecipeSteps'
+import { useMealPlanSlots } from '../hooks/useMealPlan'
+import { CookModeShell } from '../components/cook/CookModeShell'
+import { CookStepPrimaryAction } from '../components/cook/CookStepPrimaryAction'
+import { ReheatSequenceCard } from '../components/cook/ReheatSequenceCard'
+import { MultiMealPromptOverlay } from '../components/cook/MultiMealPromptOverlay'
+import type { RecipeStep } from '../types/database'
+
+// D-21 flow modes
+type FlowMode = 'loading' | 'resume-prompt' | 'multi-meal-prompt' | 'reheat' | 'cook' | 'error'
+
+export function CookModePage() {
+  const { mealId, sessionId: routeSessionId } = useParams<{ mealId?: string; sessionId?: string }>()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { session: authSession } = useAuth()
+
+  const slotId = searchParams.get('slotId') ?? undefined
+  const planId = searchParams.get('planId') ?? undefined
+  const source = searchParams.get('source') ?? undefined
+
+  // For D-21 flow branching — look up schedule_status from the slot
+  const { data: slots } = useMealPlanSlots(planId)
+  const currentSlot = slots?.find(s => s.id === slotId) ?? null
+  const scheduleStatus = (currentSlot as { schedule_status?: 'prep' | 'consume' | 'quick' | 'away' } | null)?.schedule_status ?? null
+
+  // Existing session from URL (session resume route)
+  const { data: routeSession, isPending: routeSessionLoading } = useCookSession(routeSessionId)
+
+  // Latest in-progress session for this meal (D-22 resume detection)
+  const { data: existingSession, isPending: existingSessionLoading } = useLatestCookSessionForMeal(mealId)
+
+  // All active sessions (D-26 MultiMealSwitcher)
+  const { data: activeSessions = [] } = useActiveCookSessions()
+
+  // Active session in use
+  const [activeSessionId, setActiveSessionId] = useState<string | undefined>(routeSessionId)
+  const { data: activeSession } = useCookSession(activeSessionId)
+
+  const createSession = useCreateCookSession()
+  const updateStep = useUpdateCookStep()
+  const completeSession = useCompleteCookSession()
+
+  // For single-recipe cook: load recipe steps live (R-02 — live-bound, not snapshotted)
+  const recipeIdForSteps = activeSession?.recipe_ids[0] ?? mealId
+  const { data: recipeStepsData } = useRecipeSteps(recipeIdForSteps)
+  const liveSteps: RecipeStep[] = recipeStepsData?.instructions ?? []
+
+  // Flow mode state machine
+  const [flowMode, setFlowMode] = useState<FlowMode>('loading')
+
+  useEffect(() => {
+    const isLoading = routeSessionLoading || existingSessionLoading
+    if (isLoading) return
+
+    // Resuming a specific session directly
+    if (routeSessionId && routeSession) {
+      setActiveSessionId(routeSessionId)
+      setFlowMode('cook')
+      return
+    }
+
+    // Existing active session for this meal — offer resume (D-22)
+    if (!routeSessionId && existingSession) {
+      setFlowMode('resume-prompt')
+      return
+    }
+
+    // D-21: consume slot → reheat flow
+    if (scheduleStatus === 'consume') {
+      setFlowMode('reheat')
+      return
+    }
+
+    // D-21: prep slot with multiple recipes → multi-meal prompt
+    if (scheduleStatus === 'prep' && currentSlot !== null) {
+      // Multiple recipes inferred from the session context — show prompt
+      setFlowMode('multi-meal-prompt')
+      return
+    }
+
+    // Default: full cook mode
+    setFlowMode('cook')
+  }, [routeSessionId, routeSession, routeSessionLoading, existingSession, existingSessionLoading, scheduleStatus, currentSlot])
+
+  // Computed step state from active session (R-02: keyed by stable step id)
+  const stepOrder = activeSession?.step_state.order ?? []
+  const stepStates = activeSession?.step_state.steps ?? {}
+
+  // Use live recipe steps for the step text/metadata; match by step id
+  const stepsById = new Map(liveSteps.map(s => [s.id, s]))
+
+  const completedSteps = stepOrder.filter(id => stepStates[id]?.completed_at != null).length
+  const totalSteps = stepOrder.length
+
+  // Active step = first in order that is not completed
+  const activeStepId = stepOrder.find(id => stepStates[id]?.completed_at == null) ?? null
+  const activeStep = activeStepId ? stepsById.get(activeStepId) ?? null : null
+
+  const isLastStep = activeStepId != null && stepOrder[stepOrder.length - 1] === activeStepId
+  const allDone = totalSteps > 0 && completedSteps === totalSteps
+
+  function derivePrimaryLabel(): 'Mark complete' | 'Start timer' | 'Mark complete now' | 'Finish cook session' | 'Exit cook mode' {
+    if (allDone) return 'Exit cook mode'
+    if (!activeStep) return 'Exit cook mode'
+    if (isLastStep) return 'Finish cook session'
+    if (activeStep.duration_minutes > 0) return 'Start timer'
+    return 'Mark complete'
+  }
+
+  async function handlePrimaryAction() {
+    if (allDone || !activeStepId || !activeSessionId) {
+      // Complete session and navigate back
+      if (activeSessionId) {
+        await completeSession.mutateAsync(activeSessionId)
+      }
+      navigate(-1)
+      return
+    }
+
+    // Mark active step as complete
+    await updateStep.mutateAsync({
+      sessionId: activeSessionId,
+      stepId: activeStepId,
+      patch: {
+        completed_at: new Date().toISOString(),
+        completed_by: authSession?.user.id ?? null,
+      },
+    })
+
+    if (isLastStep) {
+      await completeSession.mutateAsync(activeSessionId)
+      navigate(-1)
+    }
+  }
+
+  async function handleStartCook(mode: 'combined' | 'per-recipe' | null) {
+    if (!mealId) return
+    const recipeIds = recipeStepsData ? [recipeIdForSteps!] : []
+    const stepsByRecipeId: Record<string, RecipeStep[]> = {}
+    if (recipeIdForSteps && liveSteps.length > 0) {
+      stepsByRecipeId[recipeIdForSteps] = liveSteps
+    }
+    const newSession = await createSession.mutateAsync({
+      meal_id: mealId,
+      recipe_id: recipeIds[0] ?? null,
+      recipe_ids: recipeIds,
+      stepsByRecipeId,
+      mode,
+    })
+    setActiveSessionId(newSession.id)
+    setFlowMode('cook')
+  }
+
+  async function handleResumeExisting() {
+    if (!existingSession) return
+    setActiveSessionId(existingSession.id)
+    setFlowMode('cook')
+  }
+
+  async function handleStartFresh() {
+    await handleStartCook(null)
+  }
+
+  // Loading state
+  if (flowMode === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-text/60 font-sans">Loading cook mode…</p>
+      </div>
+    )
+  }
+
+  // Error state
+  if (flowMode === 'error') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-text/60 font-sans mb-4">Something went wrong.</p>
+          <button type="button" onClick={() => navigate(-1)} className="text-primary underline text-sm">Go back</button>
+        </div>
+      </div>
+    )
+  }
+
+  // Resume prompt (D-22)
+  if (flowMode === 'resume-prompt') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-sm w-full bg-surface rounded-2xl shadow-xl p-6 flex flex-col gap-4">
+          <h2 className="text-xl font-bold text-text">Resume cook session?</h2>
+          <p className="text-sm text-text/70 font-sans">You have an in-progress cook session for this meal.</p>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleResumeExisting}
+              className="bg-primary text-white rounded-[--radius-btn] px-4 py-3 text-sm font-semibold w-full"
+            >
+              Resume session
+            </button>
+            <button
+              type="button"
+              onClick={handleStartFresh}
+              className="bg-secondary border border-primary/30 text-primary rounded-[--radius-btn] px-4 py-3 text-sm font-semibold w-full"
+            >
+              Start fresh
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-xs text-text/50 underline self-start"
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Reheat flow (D-21 consume slot)
+  if (flowMode === 'reheat') {
+    const reheatSteps = liveSteps.length > 0
+      ? liveSteps.map(s => ({ id: s.id, text: s.text }))
+      : [
+          { id: 'reheat-1', text: 'Remove from storage and place in a microwave-safe container.' },
+          { id: 'reheat-2', text: 'Heat on medium power, stirring halfway through.' },
+          { id: 'reheat-3', text: 'Check temperature is hot throughout before serving.' },
+        ]
+
+    const storage = (recipeStepsData?.freezer_friendly) ? 'freezer' : 'fridge'
+
+    return (
+      <div className="min-h-screen flex flex-col bg-background font-sans">
+        <div className="sticky top-0 z-40 bg-surface border-b border-accent/20 px-4 py-3 flex items-center gap-3">
+          <button type="button" onClick={() => navigate(-1)} aria-label="Exit cook mode" className="p-1 -ml-1 text-text/60 hover:text-text transition-colors">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10 3L5 8l5 5" />
+            </svg>
+          </button>
+          <p className="text-sm font-semibold text-text">Reheat</p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 py-4 pb-32">
+          <ReheatSequenceCard
+            storage={storage}
+            steps={reheatSteps}
+            onDone={() => navigate(-1)}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Multi-meal prompt (D-21 prep with multiple recipes)
+  if (flowMode === 'multi-meal-prompt') {
+    return (
+      <>
+        <div className="min-h-screen bg-background" />
+        <MultiMealPromptOverlay
+          recipeCount={2}
+          onCombined={() => handleStartCook('combined')}
+          onPerRecipe={() => handleStartCook('per-recipe')}
+        />
+      </>
+    )
+  }
+
+  // Full cook mode (flowMode === 'cook')
+  const subtitle = slotId
+    ? (source === 'recipe' ? 'Standalone' : `Slot ${slotId.slice(0, 8)}`)
+    : 'Standalone'
+
+  const hasProgress = completedSteps > 0
+
+  return (
+    <CookModeShell
+      mealName={activeSession?.meal_id ?? mealId ?? 'Cook'}
+      subtitle={subtitle}
+      completedSteps={completedSteps}
+      totalSteps={totalSteps}
+      hasProgress={hasProgress}
+      concurrentSessions={activeSessions}
+      currentSessionId={activeSessionId}
+      footer={
+        <CookStepPrimaryAction
+          label={derivePrimaryLabel()}
+          onTap={handlePrimaryAction}
+          pulse={allDone}
+        />
+      }
+    >
+      {/* Inline step card rendering — Plan 06b replaces with CookStepCard component */}
+      {totalSteps === 0 && !activeSession && (
+        <div className="text-center py-12">
+          <p className="text-text/60 font-sans mb-4">No steps loaded yet.</p>
+          <button
+            type="button"
+            onClick={() => handleStartCook(null)}
+            className="bg-primary text-white rounded-[--radius-btn] px-6 py-2.5 text-sm font-semibold"
+          >
+            Start cook session
+          </button>
+        </div>
+      )}
+
+      {stepOrder.map((stepId, idx) => {
+        const step = stepsById.get(stepId)
+        const state = stepStates[stepId]
+        const isCompleted = state?.completed_at != null
+        const isActive = stepId === activeStepId
+
+        if (!step) return null
+
+        return (
+          <div
+            key={stepId}
+            className={
+              isCompleted
+                ? 'bg-secondary/60 rounded-[--radius-card] px-4 py-2 flex items-center gap-3'
+                : isActive
+                  ? 'bg-surface border-2 border-primary rounded-[--radius-card] px-4 py-4 flex flex-col gap-3 shadow-sm'
+                  : 'bg-secondary rounded-[--radius-card] px-4 py-3 opacity-60 flex items-start gap-3'
+            }
+          >
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${
+                isCompleted
+                  ? 'bg-primary/40 text-white'
+                  : isActive
+                    ? 'bg-primary text-white'
+                    : 'border border-text/20 text-text/60'
+              }`}
+            >
+              {isCompleted ? (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M1.5 5l2.5 2.5 4.5-4" />
+                </svg>
+              ) : (
+                idx + 1
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p
+                className={`font-sans ${
+                  isCompleted
+                    ? 'text-sm text-text/40 line-through'
+                    : isActive
+                      ? 'text-base font-medium text-text'
+                      : 'text-sm text-text/60'
+                }`}
+              >
+                {step.text}
+              </p>
+              {step.duration_minutes > 0 && (
+                <span className={`text-xs font-sans ml-auto ${isCompleted ? 'text-text/40' : 'text-text/40'}`}>
+                  {step.duration_minutes} min
+                </span>
+              )}
+              {isCompleted && state?.completed_at && (
+                <span className="text-xs text-text/40 font-sans ml-auto">
+                  {new Date(state.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </CookModeShell>
+  )
+}

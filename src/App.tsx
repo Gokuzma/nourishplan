@@ -21,6 +21,8 @@ import { GuidePage } from './pages/GuidePage'
 import { InventoryPage } from './pages/InventoryPage'
 import { GroceryPage } from './pages/GroceryPage'
 import { InsightsPage } from './pages/InsightsPage'
+import { CookModePage } from './pages/CookModePage'
+import { StandaloneCookPickerPage } from './pages/StandaloneCookPickerPage'
 import { AppShell } from './components/layout/AppShell'
 import { JoinHousehold } from './components/household/JoinHousehold'
 import { InstallPrompt } from './components/log/InstallPrompt'
@@ -155,6 +157,11 @@ function AppRoutes() {
         <Route path="/insights" element={<InsightsPage />} />
         <Route path="/members/:id/targets" element={<MemberTargetsPage />} />
       </Route>
+
+      {/* Cook Mode routes — outside AppShell, full-page experience (D-18, D-20) */}
+      <Route path="/cook" element={<StandaloneCookPickerPage />} />
+      <Route path="/cook/session/:sessionId" element={<CookModePage />} />
+      <Route path="/cook/:mealId" element={<CookModePage />} />
 
       {/* Public utility routes */}
       <Route path="/offline" element={<OfflinePage />} />
