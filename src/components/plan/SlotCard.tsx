@@ -6,6 +6,7 @@ import { PortionSuggestionRow } from './PortionSuggestionRow'
 import { DragHandle } from './DragHandle'
 import { LockBadge } from './LockBadge'
 import { AIRationaleTooltip } from './AIRationaleTooltip'
+import { FreezerBadge } from './FreezerBadge'
 import type { MealPlanSlot, Meal, MealItem, NutritionTarget } from '../../types/database'
 import type { PortionResult } from '../../utils/portionSuggestions'
 
@@ -29,6 +30,8 @@ interface SlotCardProps {
   violationCount?: number
   hasAllergyViolation?: boolean
   scheduleStatus?: 'prep' | 'consume' | 'quick' | 'away'
+  isFreezerFriendly?: boolean
+  onCook?: () => void
 }
 
 function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
@@ -47,7 +50,7 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
   return calcMealNutrition(items)
 }
 
-function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, onSuggestAlternative, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation }: SlotCardProps & { slot: SlotWithMeal }) {
+function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, onSuggestAlternative, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation, isFreezerFriendly, onCook }: SlotCardProps & { slot: SlotWithMeal }) {
   const [expanded, setExpanded] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const tooltipId = `rationale-${slot.id}`
@@ -132,6 +135,9 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
           )}
         </div>
         <div className="flex items-center gap-1 ml-2 shrink-0">
+          {isFreezerFriendly && (
+            <FreezerBadge variant="icon-only" className="mr-1" />
+          )}
           {hasExpandableSuggestions && (
             <button
               onClick={e => { e.stopPropagation(); setExpanded(e2 => !e2) }}
@@ -190,6 +196,20 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
               <path d="M11 2l3 3-8 8H3v-3L11 2z" />
             </svg>
           </button>
+          {onCook && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onCook() }}
+              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
+              aria-label="Cook this meal"
+              title="Cook this meal"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
+                <line x1="6" y1="17" x2="18" y2="17" />
+              </svg>
+            </button>
+          )}
           <button
             onClick={e => { e.stopPropagation(); onClear() }}
             className="p-1 rounded text-text/30 hover:text-red-500 hover:bg-red-50 transition-colors"

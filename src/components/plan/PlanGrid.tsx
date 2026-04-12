@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useMealPlanSlots, useAssignSlot, useClearSlot, useToggleLock } from '../../hooks/useMealPlan'
 import { useMeals } from '../../hooks/useMeals'
+import { useRecipes } from '../../hooks/useRecipes'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
@@ -133,11 +134,21 @@ export function PlanGrid({
 }: PlanGridProps) {
   const { data: slots = [] } = useMealPlanSlots(planId)
   const { data: meals = [] } = useMeals()
+  const { data: allRecipes = [] } = useRecipes()
   const navigate = useNavigate()
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
   const toggleLock = useToggleLock()
   const queryClient = useQueryClient()
+
+  const recipeById = useMemo(() => new Map(allRecipes.map(r => [r.id, r])), [allRecipes])
+
+  function getSlotFreezerFriendly(slot: SlotWithMeal): boolean {
+    if (!slot.meals) return false
+    const recipeItem = slot.meals.meal_items?.find(mi => mi.item_type === 'recipe')
+    if (!recipeItem) return false
+    return recipeById.get(recipeItem.item_id)?.freezer_friendly === true
+  }
 
   // Generation hooks
   const generatePlan = useGeneratePlan()
@@ -496,11 +507,13 @@ export function PlanGrid({
 
   const dayCards = Array.from({ length: DAY_COUNT }, (_, i) => {
     const daySuggestions = new Map<string, PortionResult | null>()
+    const dayFreezerFriendly = new Map<string, boolean>()
     for (const slot of (slotsByDay[i] ?? [])) {
       const key = `${i}:${slot.slot_name}`
       if (slotSuggestionsMap.has(key)) {
         daySuggestions.set(slot.slot_name, slotSuggestionsMap.get(key) ?? null)
       }
+      dayFreezerFriendly.set(slot.slot_name, getSlotFreezerFriendly(slot))
     }
 
     return (
@@ -532,6 +545,8 @@ export function PlanGrid({
         onDropReplace={executeReplace}
         onDropCancel={handleDropCancel}
         slotViolations={slotViolationsByDay?.get(i)}
+        slotFreezerFriendly={dayFreezerFriendly}
+        onCookSlot={(_slotId, mealId) => navigate(`/cook/${mealId}?slotId=${_slotId}`)}
       />
     )
   })
