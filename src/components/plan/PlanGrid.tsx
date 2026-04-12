@@ -27,6 +27,8 @@ import { SlotCard } from './SlotCard'
 import { SlotShimmer } from './SlotShimmer'
 import { GeneratePlanButton } from './GeneratePlanButton'
 import { GenerationProgressBar } from './GenerationProgressBar'
+import { BatchPrepButton } from './BatchPrepButton'
+import { BatchPrepModal } from './BatchPrepModal'
 import { PriorityOrderPanel, getPriorityOrder } from './PriorityOrderPanel'
 import { NutritionGapCard } from './NutritionGapCard'
 import { RecipeSuggestionCard } from './RecipeSuggestionCard'
@@ -168,6 +170,8 @@ export function PlanGrid({
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [generationStep, setGenerationStep] = useState(0)
   const [generationError, setGenerationError] = useState<string | null>(null)
+  const [batchPrepOpen, setBatchPrepOpen] = useState(false)
+  const [reassignmentToast, setReassignmentToast] = useState<string | null>(null)
   const [priorityOrder, setPriorityOrder] = useState<string[]>(() =>
     householdId ? getPriorityOrder(householdId) : []
   )
@@ -542,6 +546,10 @@ export function PlanGrid({
             isGenerating={isGenerating}
             isComplete={isGenerationComplete}
           />
+          <BatchPrepButton
+            onClick={() => setBatchPrepOpen(true)}
+            disabled={slots.filter(s => s.meal_id).length === 0}
+          />
           {latestGeneration?.completed_at && (
             <GenerationJobBadge completedAt={latestGeneration.completed_at} />
           )}
@@ -695,6 +703,38 @@ export function PlanGrid({
           suggestedServings={logModalState.suggestedServings}
         />
       )}
+
+      {/* D-16 reassignment toast */}
+      {reassignmentToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-primary text-white rounded-[--radius-btn] px-4 py-2 text-sm font-sans shadow-lg flex items-center gap-3">
+          <span>{reassignmentToast}</span>
+          <button
+            type="button"
+            onClick={() => setReassignmentToast(null)}
+            className="text-white/80 hover:text-white underline text-xs"
+          >
+            Undo
+          </button>
+        </div>
+      )}
+
+      {/* Batch prep modal */}
+      <BatchPrepModal
+        open={batchPrepOpen}
+        onClose={() => setBatchPrepOpen(false)}
+        planId={planId}
+        weekStart={weekStart}
+        onOpenCookMode={(sessionId) => {
+          setBatchPrepOpen(false)
+          navigate(`/cook/session/${sessionId}`)
+        }}
+        onReassignmentsApplied={(reassignments) => {
+          if (reassignments.length > 0) {
+            const first = reassignments[0]
+            setReassignmentToast(`Moved recipe prep to day ${first.new_day_index + 1} for shared cooking time`)
+          }
+        }}
+      />
     </>
   )
 }
