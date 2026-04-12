@@ -56,14 +56,6 @@ export function CookModePage() {
   const [timerAlert, setTimerAlert] = useState<{ stepText: string; mealName: string } | null>(null)
   const notificationPromptShownRef = useRef(false)
 
-  // Timer interval ref — drives countdown display and fires completion event
-  const timerIntervalRef = useRef<number | null>(null)
-
-  // Cleanup timer interval on unmount
-  useEffect(() => () => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
-  }, [])
-
   const createSession = useCreateCookSession()
   const updateStep = useUpdateCookStep()
   const completeSession = useCompleteCookSession()
@@ -145,6 +137,27 @@ export function CookModePage() {
     setTimerAlert({ stepText: step.text, mealName: recipeName })
   }, [stepsById, activeSession, mealId])
 
+  // Timer effect: track the active step's timer_started_at from persisted session state.
+  // Using useEffect instead of an inline setInterval avoids stale closures over
+  // stepsById/activeSession and auto-clears when activeStepId changes (e.g. collaborator
+  // marks step done remotely).
+  useEffect(() => {
+    const state = activeStepId ? stepStates[activeStepId] : null
+    const timerStartedAt = state?.timer_started_at
+    if (!timerStartedAt || !activeStepId) return
+    const step = stepsById.get(activeStepId)
+    if (!step || step.duration_minutes === 0) return
+    const totalMs = step.duration_minutes * 60 * 1000
+    const startEpoch = new Date(timerStartedAt).getTime()
+    const remaining = totalMs - (Date.now() - startEpoch)
+    if (remaining <= 0) {
+      handleTimerComplete(activeStepId)
+      return
+    }
+    const id = window.setTimeout(() => handleTimerComplete(activeStepId), remaining)
+    return () => window.clearTimeout(id)
+  }, [activeStepId, stepStates, stepsById, handleTimerComplete])
+
   function derivePrimaryLabel(): 'Mark complete' | 'Start timer' | 'Mark complete now' | 'Finish cook session' | 'Exit cook mode' {
     if (allDone) return 'Exit cook mode'
     if (!activeStep) return 'Exit cook mode'
@@ -180,17 +193,8 @@ export function CookModePage() {
         notificationPromptShownRef.current = true
       }
 
-      // Start client-side countdown interval
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
-      const totalMs = activeStep.duration_minutes * 60 * 1000
-      const startEpoch = Date.now()
-      timerIntervalRef.current = window.setInterval(() => {
-        const elapsed = Date.now() - startEpoch
-        if (elapsed >= totalMs) {
-          if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
-          handleTimerComplete(activeStepId)
-        }
-      }, 1000)
+      // Timer completion is now handled by the useEffect that tracks
+      // stepStates[activeStepId].timer_started_at — no inline interval needed.
       return
     }
 
