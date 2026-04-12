@@ -62,6 +62,15 @@ export interface CustomFood {
   updated_at: string
 }
 
+export interface RecipeStep {
+  id: string                                     // stable UUID — survives recipe edits (R-02)
+  text: string                                   // instruction text
+  duration_minutes: number                       // whole minutes, 0 for instantaneous
+  is_active: boolean                             // hands-on vs passive waiting (D-06)
+  ingredients_used: string[]                     // free-text ingredient names from recipe_ingredients.ingredient_name
+  equipment: string[]                            // AI-detected equipment names
+}
+
 export interface Recipe {
   id: string
   household_id: string
@@ -69,9 +78,39 @@ export interface Recipe {
   name: string
   servings: number
   notes: string | null
+  instructions: RecipeStep[] | null              // Phase 23 D-01 — null until AI generates
+  freezer_friendly: boolean | null               // Phase 23 D-02, D-09 — null until classified
+  freezer_shelf_life_weeks: number | null        // Phase 23 D-02
   deleted_at: string | null
   created_at: string
   updated_at: string
+}
+
+export interface CookSessionStepState {
+  completed_at: string | null
+  completed_by: string | null                    // auth.users.id
+  timer_started_at: string | null
+  owner_member_id: string | null                 // household_members.user_id or member_profiles.id
+  recipe_id: string                              // which recipe the step belongs to (multi-meal support)
+}
+
+export interface CookSession {
+  id: string
+  household_id: string
+  started_by: string                             // auth.users.id
+  meal_id: string | null
+  recipe_id: string | null
+  batch_prep_session_key: string | null
+  recipe_ids: string[]
+  step_state: {
+    steps: Record<string, CookSessionStepState>  // keyed by stable step id (R-02)
+    order: string[]                              // stable step ids in sequence order
+  }
+  status: 'in_progress' | 'completed' | 'abandoned'
+  mode: 'combined' | 'per-recipe' | null
+  started_at: string
+  updated_at: string
+  completed_at: string | null
 }
 
 export interface RecipeIngredient {
