@@ -446,7 +446,16 @@ Plans:
   1. Plan page shows a weekly batch prep summary — which recipes can be prepped ahead, grouped by shared ingredients or equipment
   2. User can view a day-of task sequence for any meal showing steps in longest-first order to minimise total cooking time
   3. Recipes that freeze well are visually flagged in the plan view and batch prep suggestions as make-ahead candidates
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+- [ ] 23-01-PLAN.md  -- Schema migration 029, TypeScript types, queryKeys
+- [ ] 23-02-PLAN.md  -- Four edge functions (steps, batch prep, cook sequence, reheat)
+- [ ] 23-03-PLAN.md  -- All hooks + Realtime subscriptions + Notification API wrapper
+- [ ] 23-04-PLAN.md  -- Recipe editor Steps section, FreezerBadge, recipe list badge
+- [ ] 23-05-PLAN.md  -- Batch prep modal, SlotCard freezer badge + Cook action, PlanGrid button
+- [ ] 23-06-PLAN.md  -- Cook Mode route family and full-page UI
+- [ ] 23-07-PLAN.md  -- PWA notifications and timer integration
+- [ ] 23-08-PLAN.md  -- Tests and validation (V-01 through V-10)
 **UI hint**: yes
 
 ### Phase 24: Dynamic Portioning
