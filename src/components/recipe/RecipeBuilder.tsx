@@ -27,6 +27,9 @@ import { IngredientRow } from './IngredientRow'
 import { MicronutrientPanel } from '../plan/MicronutrientPanel'
 import { CookDeductionReceipt } from '../inventory/CookDeductionReceipt'
 import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } from '../../types/database'
+import { RecipeStepsSection } from './RecipeStepsSection'
+import { RecipeFreezerToggle } from './RecipeFreezerToggle'
+import { useRecipeSteps, useRegenerateRecipeSteps } from '../../hooks/useRecipeSteps'
 
 // Default yield factor when ingredient category is unknown (general cooking loss ~15%)
 const DEFAULT_YIELD_FACTOR = YIELD_FACTORS['vegetables'] // 0.85
@@ -267,6 +270,8 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const removeIngredient = useRemoveIngredient()
   const spendLog = useCreateSpendLog()
   const inventoryDeduct = useInventoryDeduct()
+  const { data: stepsData } = useRecipeSteps(recipeId)
+  const regenerateSteps = useRegenerateRecipeSteps()
   const [cookConfirmation, setCookConfirmation] = useState<string | null>(null)
   const [deductionResult, setDeductionResult] = useState<DeductionResult | null>(null)
 
@@ -412,6 +417,27 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       fat_per_100g: food.fat,
       carbs_per_100g: food.carbs,
       micronutrients: food.micronutrients ?? null,
+    }, {
+      onSuccess: () => {
+        // D-03: eager step generation on ingredient mutation (V-07: name/servings changes do NOT trigger)
+        if (recipe && ingredients) {
+          const ingredientsSnapshot = [...ingredients, {
+            ingredient_name: food.name,
+            quantity_grams: grams,
+          }].map(ing => ({
+            name: (ing as { ingredient_name?: string | null; name?: string }).ingredient_name ?? (ing as { name?: string }).name ?? '',
+            quantity_grams: ing.quantity_grams,
+          }))
+          regenerateSteps.mutate({
+            recipeId,
+            recipeName: recipe.name,
+            servings: recipe.servings,
+            ingredientsSnapshot,
+            existingSteps: stepsData?.instructions ?? undefined,
+            notes: recipe.notes,
+          })
+        }
+      },
     })
 
     setPendingFood(null)
@@ -461,6 +487,27 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       protein_per_100g: subNutrition.per100g.protein,
       fat_per_100g: subNutrition.per100g.fat,
       carbs_per_100g: subNutrition.per100g.carbs,
+    }, {
+      onSuccess: () => {
+        // D-03: eager step generation on ingredient mutation (V-07: name/servings changes do NOT trigger)
+        if (recipe && ingredients) {
+          const ingredientsSnapshot = [...ingredients, {
+            ingredient_name: selectedRecipe.name,
+            quantity_grams: grams,
+          }].map(ing => ({
+            name: (ing as { ingredient_name?: string | null; name?: string }).ingredient_name ?? (ing as { name?: string }).name ?? '',
+            quantity_grams: ing.quantity_grams,
+          }))
+          regenerateSteps.mutate({
+            recipeId,
+            recipeName: recipe.name,
+            servings: recipe.servings,
+            ingredientsSnapshot,
+            existingSteps: stepsData?.instructions ?? undefined,
+            notes: recipe.notes,
+          })
+        }
+      },
     })
 
     setPendingRecipe(null)
@@ -468,10 +515,29 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
   function handleEditConfirm(grams: number) {
     if (!editingIngredient) return
+    const editedIngId = editingIngredient.id
     updateIngredient.mutate({
       id: editingIngredient.id,
       recipe_id: editingIngredient.recipe_id,
       updates: { quantity_grams: grams },
+    }, {
+      onSuccess: () => {
+        // D-03: eager step generation on ingredient mutation (V-07: name/servings changes do NOT trigger)
+        if (recipe && ingredients) {
+          const ingredientsSnapshot = ingredients.map(ing => ({
+            name: ing.ingredient_name ?? '',
+            quantity_grams: ing.id === editedIngId ? grams : ing.quantity_grams,
+          }))
+          regenerateSteps.mutate({
+            recipeId,
+            recipeName: recipe.name,
+            servings: recipe.servings,
+            ingredientsSnapshot,
+            existingSteps: stepsData?.instructions ?? undefined,
+            notes: recipe.notes,
+          })
+        }
+      },
     })
     setEditingIngredient(null)
   }
@@ -713,6 +779,15 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             )
           })()}
 
+          {/* Freezer toggle */}
+          {recipe && (
+            <RecipeFreezerToggle
+              recipeId={recipe.id}
+              value={stepsData?.freezer_friendly ?? null}
+              shelfLifeWeeks={stepsData?.freezer_shelf_life_weeks ?? null}
+            />
+          )}
+
           {/* Mark as Cooked button */}
           <div className="flex items-center gap-3">
             <button
@@ -765,6 +840,17 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             </div>
           )}
         </div>
+
+        {/* Steps section */}
+        {recipe && (
+          <RecipeStepsSection
+            recipeId={recipe.id}
+            recipeName={recipe.name}
+            servings={recipe.servings}
+            ingredientsSnapshot={(ingredients ?? []).map(ing => ({ name: ing.ingredient_name ?? '', quantity_grams: ing.quantity_grams }))}
+            notes={recipe.notes}
+          />
+        )}
 
         {/* Search ingredients trigger */}
         <button
