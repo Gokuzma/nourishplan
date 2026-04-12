@@ -185,6 +185,11 @@ export function useUpdateCookStep() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (params: UpdateCookStepParams): Promise<void> => {
+      // NOTE: read-modify-write without optimistic lock — concurrent collaborator
+      // writes on the same step will last-write-win. Realtime will sync the final
+      // server state. For single-step updates this is acceptable; for high-frequency
+      // concurrent updates consider a DB-side jsonb_set RPC.
+      //
       // Fetch current state to do a client-side merge. Since Supabase JS does not
       // expose jsonb_set, we read-modify-write the full step_state. Realtime
       // subscription broadcasts the result to all collaborators (D-24).
