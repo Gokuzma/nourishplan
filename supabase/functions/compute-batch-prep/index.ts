@@ -187,6 +187,21 @@ serve(async (req) => {
       );
     }
 
+    // Verify planId belongs to this household (WR-04: prevent cross-household plan mutation)
+    const { data: plan } = await adminClient
+      .from("meal_plans")
+      .select("id")
+      .eq("id", planId)
+      .eq("household_id", householdId)
+      .maybeSingle();
+
+    if (!plan) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Plan not found or access denied" }),
+        { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+
     // Shared rate limit (R-01: 20/day across all AI calls)
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count: recentJobCount } = await adminClient
