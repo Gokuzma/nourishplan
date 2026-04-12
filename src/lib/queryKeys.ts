@@ -93,4 +93,22 @@ export const queryKeys = {
     latest: (householdId: string | undefined, weekStart: string) =>
       ['plan-generation', householdId, weekStart, 'latest'] as const,
   },
+  cookSession: {
+    detail: (sessionId: string | undefined) =>
+      ['cook-session', sessionId] as const,
+    list: (householdId: string | undefined) =>
+      ['cook-session', householdId, 'list'] as const,
+    active: (householdId: string | undefined) =>
+      ['cook-session', householdId, 'active'] as const,
+    latestForMeal: (householdId: string | undefined, mealId: string | undefined) =>
+      ['cook-session', householdId, 'meal', mealId, 'latest'] as const,
+  },
+  batchPrep: {
+    summary: (householdId: string | undefined, planId: string | undefined) =>
+      ['batch-prep', householdId, planId] as const,
+  },
+  recipeSteps: {
+    detail: (recipeId: string | undefined) =>
+      ['recipe-steps', recipeId] as const,
+  },
 } as const
