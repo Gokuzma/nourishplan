@@ -517,6 +517,17 @@ export type Database = {
         Update: Partial<Omit<AIRecipeTag, 'id' | 'generated_at'>>
         Relationships: []
       }
+      cook_sessions: {
+        Row: CookSession
+        Insert: Omit<CookSession, 'id' | 'started_at' | 'updated_at' | 'completed_at'> & {
+          id?: string
+          started_at?: string
+          updated_at?: string
+          completed_at?: string | null
+        }
+        Update: Partial<Omit<CookSession, 'id' | 'started_at'>>
+        Relationships: []
+      }
     }
     Enums: {
       household_role: 'admin' | 'member'
