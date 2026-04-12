@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import {
@@ -15,6 +15,9 @@ import { CookModeShell } from '../components/cook/CookModeShell'
 import { CookStepPrimaryAction } from '../components/cook/CookStepPrimaryAction'
 import { ReheatSequenceCard } from '../components/cook/ReheatSequenceCard'
 import { MultiMealPromptOverlay } from '../components/cook/MultiMealPromptOverlay'
+import { NotificationPermissionBanner } from '../components/cook/NotificationPermissionBanner'
+import { InAppTimerAlert } from '../components/cook/InAppTimerAlert'
+import { fireStepDoneNotification, playTimerChime } from '../components/cook/CookTimerNotifications'
 import type { RecipeStep } from '../types/database'
 
 // D-21 flow modes
@@ -47,6 +50,19 @@ export function CookModePage() {
   // Active session in use
   const [activeSessionId, setActiveSessionId] = useState<string | undefined>(routeSessionId)
   const { data: activeSession } = useCookSession(activeSessionId)
+
+  // Notification state (D-25, R-03)
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false)
+  const [timerAlert, setTimerAlert] = useState<{ stepText: string; mealName: string } | null>(null)
+  const notificationPromptShownRef = useRef(false)
+
+  // Timer interval ref — drives countdown display and fires completion event
+  const timerIntervalRef = useRef<number | null>(null)
+
+  // Cleanup timer interval on unmount
+  useEffect(() => () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
+  }, [])
 
   const createSession = useCreateCookSession()
   const updateStep = useUpdateCookStep()
@@ -111,6 +127,24 @@ export function CookModePage() {
   const isLastStep = activeStepId != null && stepOrder[stepOrder.length - 1] === activeStepId
   const allDone = totalSteps > 0 && completedSteps === totalSteps
 
+  // LIMITATION (documented per R-03): When the user closes the app tab while a timer
+  // is running, the service worker cannot fire a setTimeout to trigger showNotification
+  // at the correct time. The timer_started_at is persisted server-side, so when the user
+  // returns, the timer state is recomputed and if expired, the in-app fallback fires
+  // immediately. OS-level timer scheduling would require a background sync API or push
+  // notifications, which are out of scope for this phase.
+
+  // Fire OS notification + mandatory in-app fallback when a passive step timer completes (D-25, R-03)
+  const handleTimerComplete = useCallback(async (stepId: string) => {
+    const step = stepsById.get(stepId)
+    if (!step) return
+    const recipeName = activeSession?.meal_id ?? mealId ?? 'Cook Mode'
+    await fireStepDoneNotification(recipeName, step.text)
+    // ALWAYS fire in-app fallback regardless of notification permission (R-03 MANDATORY)
+    playTimerChime()
+    setTimerAlert({ stepText: step.text, mealName: recipeName })
+  }, [stepsById, activeSession, mealId])
+
   function derivePrimaryLabel(): 'Mark complete' | 'Start timer' | 'Mark complete now' | 'Finish cook session' | 'Exit cook mode' {
     if (allDone) return 'Exit cook mode'
     if (!activeStep) return 'Exit cook mode'
@@ -126,6 +160,37 @@ export function CookModePage() {
         await completeSession.mutateAsync(activeSessionId)
       }
       navigate(-1)
+      return
+    }
+
+    const label = derivePrimaryLabel()
+
+    // "Start timer" — passive step with duration: record timer_started_at and start interval
+    if (label === 'Start timer' && activeStep && activeStep.duration_minutes > 0) {
+      const startedAt = new Date().toISOString()
+      await updateStep.mutateAsync({
+        sessionId: activeSessionId,
+        stepId: activeStepId,
+        patch: { timer_started_at: startedAt },
+      })
+
+      // Notification prompt: show on first passive step timer start (D-25, UI-SPEC line 317)
+      if (!notificationPromptShownRef.current) {
+        setShowNotificationPrompt(true)
+        notificationPromptShownRef.current = true
+      }
+
+      // Start client-side countdown interval
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
+      const totalMs = activeStep.duration_minutes * 60 * 1000
+      const startEpoch = Date.now()
+      timerIntervalRef.current = window.setInterval(() => {
+        const elapsed = Date.now() - startEpoch
+        if (elapsed >= totalMs) {
+          if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
+          handleTimerComplete(activeStepId)
+        }
+      }, 1000)
       return
     }
 
@@ -284,7 +349,15 @@ export function CookModePage() {
   const hasProgress = completedSteps > 0
 
   return (
-    <CookModeShell
+    <>
+      {timerAlert && (
+        <InAppTimerAlert
+          stepText={timerAlert.stepText}
+          mealName={timerAlert.mealName}
+          onDismiss={() => setTimerAlert(null)}
+        />
+      )}
+      <CookModeShell
       mealName={activeSession?.meal_id ?? mealId ?? 'Cook'}
       subtitle={subtitle}
       completedSteps={completedSteps}
@@ -300,6 +373,12 @@ export function CookModePage() {
         />
       }
     >
+      {showNotificationPrompt && (
+        <NotificationPermissionBanner
+          onPermissionChange={() => setShowNotificationPrompt(false)}
+        />
+      )}
+
       {/* Inline step card rendering — Plan 06b replaces with CookStepCard component */}
       {totalSteps === 0 && !activeSession && (
         <div className="text-center py-12">
@@ -377,5 +456,6 @@ export function CookModePage() {
         )
       })}
     </CookModeShell>
+    </>
   )
 }
