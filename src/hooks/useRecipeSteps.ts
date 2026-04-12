@@ -8,6 +8,7 @@ import type { Recipe, RecipeStep } from '../types/database'
 
 interface RecipeStepsData {
   id: string
+  name: string
   instructions: RecipeStep[] | null
   freezer_friendly: boolean | null
   freezer_shelf_life_weeks: number | null
@@ -29,6 +30,7 @@ export function useRecipeSteps(recipeId: string | undefined) {
       const recipe = data as Recipe
       return {
         id: recipe.id,
+        name: recipe.name,
         instructions: parseStepsSafely(recipe.instructions),
         freezer_friendly: recipe.freezer_friendly,
         freezer_shelf_life_weeks: recipe.freezer_shelf_life_weeks,

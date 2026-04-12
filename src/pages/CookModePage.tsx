@@ -130,12 +130,12 @@ export function CookModePage() {
   const handleTimerComplete = useCallback(async (stepId: string) => {
     const step = stepsById.get(stepId)
     if (!step) return
-    const recipeName = activeSession?.meal_id ?? mealId ?? 'Cook Mode'
+    const recipeName = recipeStepsData?.name ?? 'Cook Mode'
     await fireStepDoneNotification(recipeName, step.text)
     // ALWAYS fire in-app fallback regardless of notification permission (R-03 MANDATORY)
     playTimerChime()
     setTimerAlert({ stepText: step.text, mealName: recipeName })
-  }, [stepsById, activeSession, mealId])
+  }, [stepsById, recipeStepsData])
 
   // Timer effect: track the active step's timer_started_at from persisted session state.
   // Using useEffect instead of an inline setInterval avoids stale closures over
@@ -362,7 +362,7 @@ export function CookModePage() {
         />
       )}
       <CookModeShell
-      mealName={activeSession?.meal_id ?? mealId ?? 'Cook'}
+      mealName={recipeStepsData?.name ?? 'Cook Mode'}
       subtitle={subtitle}
       completedSteps={completedSteps}
       totalSteps={totalSteps}
