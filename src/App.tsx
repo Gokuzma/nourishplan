@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useHousehold } from './hooks/useHousehold'
@@ -159,9 +159,17 @@ function AppRoutes() {
       </Route>
 
       {/* Cook Mode routes — outside AppShell, full-page experience (D-18, D-20) */}
-      <Route path="/cook" element={<StandaloneCookPickerPage />} />
-      <Route path="/cook/session/:sessionId" element={<CookModePage />} />
-      <Route path="/cook/:mealId" element={<CookModePage />} />
+      <Route
+        element={
+          <AuthGuard>
+            <Outlet />
+          </AuthGuard>
+        }
+      >
+        <Route path="/cook" element={<StandaloneCookPickerPage />} />
+        <Route path="/cook/session/:sessionId" element={<CookModePage />} />
+        <Route path="/cook/:mealId" element={<CookModePage />} />
+      </Route>
 
       {/* Public utility routes */}
       <Route path="/offline" element={<OfflinePage />} />
