@@ -1,16 +1,24 @@
 // V-03: NotificationPermissionBanner renders denied state with fallback text
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
-// Set up a localStorage mock that the component can use
+// localStorage mock — scoped to this file, restored after all tests
 const localStorageStore: Record<string, string> = {}
 const localStorageMock = {
   getItem: vi.fn((key: string) => localStorageStore[key] ?? null),
   setItem: vi.fn((key: string, value: string) => { localStorageStore[key] = value }),
   removeItem: vi.fn((key: string) => { delete localStorageStore[key] }),
 }
-Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true })
+const originalLocalStorage = Object.getOwnPropertyDescriptor(window, 'localStorage')
+vi.stubGlobal('localStorage', localStorageMock)
+
+afterAll(() => {
+  // Restore original localStorage so other test files are unaffected
+  if (originalLocalStorage) {
+    Object.defineProperty(window, 'localStorage', originalLocalStorage)
+  }
+})
 
 // Mock useNotificationPermission to control permission state in each test
 const mockRequest = vi.fn()
