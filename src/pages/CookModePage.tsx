@@ -39,10 +39,13 @@ export function CookModePage() {
   const scheduleStatus = (currentSlot as { schedule_status?: 'prep' | 'consume' | 'quick' | 'away' } | null)?.schedule_status ?? null
 
   // Existing session from URL (session resume route)
-  const { data: routeSession, isPending: routeSessionLoading } = useCookSession(routeSessionId)
+  const { data: routeSession, isFetching: routeSessionFetching } = useCookSession(routeSessionId)
+  // When routeSessionId is undefined, the query is disabled — treat as not loading
+  const routeSessionLoading = !!routeSessionId && routeSessionFetching
 
   // Latest in-progress session for this meal (D-22 resume detection)
-  const { data: existingSession, isPending: existingSessionLoading } = useLatestCookSessionForMeal(mealId)
+  const { data: existingSession, isFetching: existingSessionFetching } = useLatestCookSessionForMeal(mealId)
+  const existingSessionLoading = !!mealId && existingSessionFetching
 
   // All active sessions (D-26 MultiMealSwitcher)
   const { data: activeSessions = [] } = useActiveCookSessions()
@@ -216,13 +219,15 @@ export function CookModePage() {
 
   async function handleStartCook(mode: 'combined' | 'per-recipe' | null) {
     if (!mealId) return
-    const recipeIds = recipeStepsData ? [recipeIdForSteps!] : []
+    const isFromRecipe = source === 'recipe'
+    const recipeId = isFromRecipe ? mealId : (recipeIdForSteps ?? null)
+    const recipeIds = recipeId ? [recipeId] : []
     const stepsByRecipeId: Record<string, RecipeStep[]> = {}
-    if (recipeIdForSteps && liveSteps.length > 0) {
-      stepsByRecipeId[recipeIdForSteps] = liveSteps
+    if (recipeId && liveSteps.length > 0) {
+      stepsByRecipeId[recipeId] = liveSteps
     }
     const newSession = await createSession.mutateAsync({
-      meal_id: mealId,
+      meal_id: isFromRecipe ? null : mealId,
       recipe_id: recipeIds[0] ?? null,
       recipe_ids: recipeIds,
       stepsByRecipeId,
