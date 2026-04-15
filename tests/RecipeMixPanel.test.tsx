@@ -1,7 +1,27 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { RecipeMixPanel, getRecipeMix } from '../src/components/plan/RecipeMixPanel'
+
+// localStorage shim — Node 25 ships a native localStorage missing .clear(),
+// which overrides the jsdom implementation. Stub here so tests work on any Node.
+const localStorageStore: Record<string, string> = {}
+const localStorageMock = {
+  getItem: vi.fn((key: string) => (key in localStorageStore ? localStorageStore[key] : null)),
+  setItem: vi.fn((key: string, value: string) => { localStorageStore[key] = value }),
+  removeItem: vi.fn((key: string) => { delete localStorageStore[key] }),
+  clear: vi.fn(() => {
+    for (const k of Object.keys(localStorageStore)) delete localStorageStore[k]
+  }),
+}
+const originalLocalStorage = Object.getOwnPropertyDescriptor(window, 'localStorage')
+vi.stubGlobal('localStorage', localStorageMock)
+
+afterAll(() => {
+  if (originalLocalStorage) {
+    Object.defineProperty(window, 'localStorage', originalLocalStorage)
+  }
+})
 
 const HOUSEHOLD_ID = 'hh-test'
 const STORAGE_KEY = `plan-recipe-mix-${HOUSEHOLD_ID}`
