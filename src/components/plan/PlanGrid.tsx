@@ -31,6 +31,7 @@ import { GenerationProgressBar } from './GenerationProgressBar'
 import { BatchPrepButton } from './BatchPrepButton'
 import { BatchPrepModal } from './BatchPrepModal'
 import { PriorityOrderPanel, getPriorityOrder } from './PriorityOrderPanel'
+import { RecipeMixPanel, getRecipeMix } from './RecipeMixPanel'
 import { NutritionGapCard } from './NutritionGapCard'
 import { RecipeSuggestionCard } from './RecipeSuggestionCard'
 import { GenerationJobBadge } from './GenerationJobBadge'
@@ -186,6 +187,9 @@ export function PlanGrid({
   const [priorityOrder, setPriorityOrder] = useState<string[]>(() =>
     householdId ? getPriorityOrder(householdId) : []
   )
+  const [recipeMix, setRecipeMix] = useState(() =>
+    householdId ? getRecipeMix(householdId) : { favorites: 50, liked: 30, novel: 20 }
+  )
 
   const { data: activeJob } = useGenerationJob(activeJobId)
 
@@ -224,12 +228,13 @@ export function PlanGrid({
         planId,
         weekStart,
         priorityOrder: householdId ? getPriorityOrder(householdId) : priorityOrder,
+        recipeMix: householdId ? getRecipeMix(householdId) : recipeMix,
       })
       setActiveJobId(result.jobId)
     } catch {
       setGenerationError('Plan generation failed. Try again.')
     }
-  }, [planId, weekStart, householdId, priorityOrder, generatePlan])
+  }, [planId, weekStart, householdId, priorityOrder, recipeMix, generatePlan])
 
   // Recipe count — show suggestion card if fewer than 7
   const recipeCount = useMemo(() => {
@@ -588,6 +593,13 @@ export function PlanGrid({
           <PriorityOrderPanel
             householdId={householdId}
             onOrderChange={setPriorityOrder}
+          />
+        )}
+
+        {householdId && (
+          <RecipeMixPanel
+            householdId={householdId}
+            onMixChange={setRecipeMix}
           />
         )}
       </div>
