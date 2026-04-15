@@ -123,7 +123,14 @@ function normalizeRecipeMix(raw: unknown): { favorites: number; liked: number; n
   if (total === 0) return defaults;
   const favorites = Math.round((f / total) * 100);
   const liked = Math.round((l / total) * 100);
-  const novel = 100 - favorites - liked;
+  let novel = 100 - favorites - liked;
+  if (novel < 0) {
+    // Both rounded up; steal the deficit from whichever is larger
+    if (favorites >= liked) {
+      return { favorites: favorites + novel, liked, novel: 0 };
+    }
+    return { favorites, liked: liked + novel, novel: 0 };
+  }
   return { favorites, liked, novel };
 }
 

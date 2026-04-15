@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
 import type { PlanGeneration } from '../types/database'
+import type { RecipeMix } from '../components/plan/RecipeMixPanel'
 
 export function useGeneratePlan() {
   const queryClient = useQueryClient()
@@ -10,13 +11,19 @@ export function useGeneratePlan() {
   const householdId = membership?.household_id
 
   return useMutation({
-    mutationFn: async (params: { planId: string; weekStart: string; priorityOrder: string[] }) => {
+    mutationFn: async (params: {
+      planId: string
+      weekStart: string
+      priorityOrder: string[]
+      recipeMix?: RecipeMix
+    }) => {
       const { data, error } = await supabase.functions.invoke('generate-plan', {
         body: {
           householdId,
           planId: params.planId,
           weekStart: params.weekStart,
           priorityOrder: params.priorityOrder,
+          recipeMix: params.recipeMix,
         },
       })
       if (error) throw error
@@ -87,6 +94,7 @@ export function useSuggestAlternative() {
       dayIndex: number
       slotName: string
       priorityOrder: string[]
+      recipeMix?: RecipeMix
     }) => {
       const { data, error } = await supabase.functions.invoke('generate-plan', {
         body: {
@@ -94,6 +102,7 @@ export function useSuggestAlternative() {
           planId: params.planId,
           weekStart: params.weekStart,
           priorityOrder: params.priorityOrder,
+          recipeMix: params.recipeMix,
           singleSlot: { dayIndex: params.dayIndex, slotName: params.slotName },
         },
       })

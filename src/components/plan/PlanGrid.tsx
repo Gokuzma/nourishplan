@@ -543,6 +543,7 @@ export function PlanGrid({
             dayIndex: i,
             slotName,
             priorityOrder: householdId ? getPriorityOrder(householdId) : priorityOrder,
+            recipeMix: householdId ? getRecipeMix(householdId) : recipeMix,
           })
         }
         pendingDropSlotKey={pendingDropSlotKey}
