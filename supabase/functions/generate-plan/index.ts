@@ -11,6 +11,7 @@ interface GenerateRequest {
   planId: string;
   weekStart: string;
   priorityOrder: string[];
+  recipeMix?: { favorites: number; liked: number; novel: number };
 }
 
 interface RecipeRow {
@@ -19,6 +20,7 @@ interface RecipeRow {
   servings: number;
   recipe_ingredients: {
     ingredient_name: string;
+    food_id: string | null;
     quantity_grams: number;
     calories_per_100g: number;
     protein_per_100g: number;
@@ -53,6 +55,8 @@ interface InventoryItemRow {
 interface RatingRow {
   recipe_id: string;
   rating: number;
+  rated_by_user_id: string | null;
+  rated_by_member_profile_id: string | null;
 }
 
 interface NutritionTargetRow {
@@ -87,6 +91,42 @@ function sanitizeString(s: string): string {
   return s.replace(/[\x00-\x1F\x7F]/g, "");
 }
 
+// Inlined from src/utils/cost.ts (Deno cannot import src/)
+function computeRecipeCostPerServing(
+  ingredients: { quantity_grams: number; cost_per_100g: number | null }[],
+  servings: number,
+): { costPerServing: number; pricedCount: number; totalCount: number } {
+  let total = 0;
+  let pricedCount = 0;
+  for (const ing of ingredients) {
+    if (ing.cost_per_100g != null) {
+      total += (ing.quantity_grams / 100) * ing.cost_per_100g;
+      pricedCount++;
+    }
+  }
+  return {
+    costPerServing: servings > 0 ? total / servings : 0,
+    pricedCount,
+    totalCount: ingredients.length,
+  };
+}
+
+// Normalize recipeMix: clamp negatives, force sum=100, fallback to defaults
+function normalizeRecipeMix(raw: unknown): { favorites: number; liked: number; novel: number } {
+  const defaults = { favorites: 50, liked: 30, novel: 20 };
+  if (!raw || typeof raw !== "object") return defaults;
+  const r = raw as Record<string, unknown>;
+  const f = Math.max(0, Number(r.favorites) || 0);
+  const l = Math.max(0, Number(r.liked) || 0);
+  const n = Math.max(0, Number(r.novel) || 0);
+  const total = f + l + n;
+  if (total === 0) return defaults;
+  const favorites = Math.round((f / total) * 100);
+  const liked = Math.round((l / total) * 100);
+  const novel = 100 - favorites - liked;
+  return { favorites, liked, novel };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: CORS_HEADERS });
@@ -95,6 +135,7 @@ serve(async (req) => {
   try {
     const body: GenerateRequest = await req.json();
     const { householdId, planId, weekStart, priorityOrder } = body;
+    const recipeMix = normalizeRecipeMix(body.recipeMix);
 
     if (!householdId || !planId || !weekStart) {
       return new Response(
@@ -233,10 +274,12 @@ serve(async (req) => {
         membersResult,
         profilesResult,
         slotsResult,
+        spendLogsResult,
+        foodPricesResult,
       ] = await Promise.all([
         adminClient
           .from("recipes")
-          .select("id, name, servings, recipe_ingredients(ingredient_name, quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)")
+          .select("id, name, servings, recipe_ingredients(ingredient_name, food_id, quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)")
           .eq("household_id", householdId)
           .is("deleted_at", null),
         adminClient
@@ -258,7 +301,7 @@ serve(async (req) => {
           .is("removed_at", null),
         adminClient
           .from("recipe_ratings")
-          .select("recipe_id, rating")
+          .select("recipe_id, rating, rated_by_user_id, rated_by_member_profile_id")
           .eq("household_id", householdId),
         adminClient
           .from("nutrition_targets")
@@ -276,6 +319,18 @@ serve(async (req) => {
           .from("meal_plan_slots")
           .select("id, plan_id, day_index, slot_name, meal_id, is_locked, is_override")
           .eq("plan_id", planId),
+        // Phase 24: cook history — drives cook_count, last_cooked_date
+        adminClient
+          .from("spend_logs")
+          .select("recipe_id, log_date")
+          .eq("household_id", householdId)
+          .eq("source", "cook")
+          .not("recipe_id", "is", null),
+        // Phase 24: food prices — drives cost_per_serving
+        adminClient
+          .from("food_prices")
+          .select("food_id, food_name, cost_per_100g")
+          .eq("household_id", householdId),
       ]);
 
       const recipes: RecipeRow[] = (recipesResult.data ?? []) as RecipeRow[];
@@ -288,6 +343,10 @@ serve(async (req) => {
       const members = membersResult.data ?? [];
       const profiles = profilesResult.data ?? [];
       const slots: SlotRow[] = (slotsResult.data ?? []) as SlotRow[];
+      const spendLogs: { recipe_id: string | null; log_date: string }[] =
+        (spendLogsResult.data ?? []) as { recipe_id: string | null; log_date: string }[];
+      const foodPrices: { food_id: string; food_name: string; cost_per_100g: number }[] =
+        (foodPricesResult.data ?? []) as { food_id: string; food_name: string; cost_per_100g: number }[];
 
       const memberCount = members.length + profiles.length;
       const hasActiveRestrictions = restrictions.length > 0 || wontEat.some((w) => w.strength === "allergy");
@@ -301,6 +360,7 @@ serve(async (req) => {
         inventoryCount: inventory.length,
         weekStart,
         priorityOrder,
+        recipeMix,
       };
 
       // Average ratings per recipe
@@ -312,6 +372,32 @@ serve(async (req) => {
       }
       for (const [id, vals] of Object.entries(ratingGroups)) {
         avgRatings[id] = vals.reduce((a, b) => a + b, 0) / vals.length;
+      }
+
+      // Phase 24 enrichment: cook history + per-member ratings + price lookup
+      const priceByFoodId = new Map<string, number>(
+        foodPrices.map((p) => [p.food_id, p.cost_per_100g]),
+      );
+
+      const cookCountByRecipe: Record<string, number> = {};
+      const lastCookedByRecipe: Record<string, string | null> = {};
+      for (const s of spendLogs) {
+        if (!s.recipe_id) continue;
+        cookCountByRecipe[s.recipe_id] = (cookCountByRecipe[s.recipe_id] || 0) + 1;
+        const prev = lastCookedByRecipe[s.recipe_id];
+        if (!prev || s.log_date > prev) lastCookedByRecipe[s.recipe_id] = s.log_date;
+      }
+
+      // Per-member ratings keyed by coalesce(rated_by_user_id, rated_by_member_profile_id)
+      const memberRatingsByRecipe: Record<string, Record<string, number[]>> = {};
+      for (const r of ratings) {
+        const memberKey = r.rated_by_user_id ?? r.rated_by_member_profile_id;
+        if (!memberKey) continue;
+        if (!memberRatingsByRecipe[r.recipe_id]) memberRatingsByRecipe[r.recipe_id] = {};
+        if (!memberRatingsByRecipe[r.recipe_id][memberKey]) {
+          memberRatingsByRecipe[r.recipe_id][memberKey] = [];
+        }
+        memberRatingsByRecipe[r.recipe_id][memberKey].push(r.rating);
       }
 
       // Locked slots (from existing DB rows) — normalize to capitalized for consistent lookup
@@ -354,12 +440,66 @@ serve(async (req) => {
       const allPredefined = restrictions.flatMap((r) => r.predefined ?? []);
       const allCustom = restrictions.flatMap((r) => r.custom_entries ?? []).map(sanitizeString);
 
-      // Recipe catalog for AI shortlist
-      const recipeCatalog = recipes.map((r) => ({
+      // Phase 24: compute enriched per-recipe record (used by Pass 2).
+      // Pass 1 receives only a LEAN projection (id/name/ingredients/avg_rating/tier_hint)
+      // per Pitfall 1 to keep token budget under Haiku's response ceiling.
+      type EnrichedRecipe = {
+        id: string;
+        name: string;
+        ingredient_names: string[];
+        avg_rating: number | null;
+        cook_count: number;
+        last_cooked_date: string | null;
+        member_ratings: Record<string, number>;
+        cost_per_serving: number;
+        tier_hint: "favorite" | "liked" | "novel";
+        servings: number;
+      };
+
+      const recipeEnriched: EnrichedRecipe[] = recipes.map((r) => {
+        const ings = r.recipe_ingredients ?? [];
+        const ingsWithPrice = ings.map((i) => ({
+          quantity_grams: i.quantity_grams,
+          cost_per_100g: i.food_id ? priceByFoodId.get(i.food_id) ?? null : null,
+        }));
+        const { costPerServing } = computeRecipeCostPerServing(ingsWithPrice, r.servings || 1);
+
+        const cookCount = cookCountByRecipe[r.id] || 0;
+        const avgRating = avgRatings[r.id] ?? null;
+
+        // Tier hint (pre-AI heuristic; AI makes the final call)
+        let tierHint: "favorite" | "liked" | "novel";
+        if (cookCount === 0) tierHint = "novel";
+        else if (avgRating !== null && avgRating >= 4) tierHint = "favorite";
+        else tierHint = "liked";
+
+        const memberMap = memberRatingsByRecipe[r.id] ?? {};
+        const memberRatings: Record<string, number> = {};
+        for (const [k, vals] of Object.entries(memberMap)) {
+          memberRatings[k] = vals.reduce((a, b) => a + b, 0) / vals.length;
+        }
+
+        return {
+          id: r.id,
+          name: sanitizeString(r.name),
+          ingredient_names: ings.map((ri) => sanitizeString(ri.ingredient_name)),
+          avg_rating: avgRating,
+          cook_count: cookCount,
+          last_cooked_date: lastCookedByRecipe[r.id] ?? null,
+          member_ratings: memberRatings,
+          cost_per_serving: costPerServing,
+          tier_hint: tierHint,
+          servings: r.servings,
+        };
+      });
+
+      // Recipe catalog for AI shortlist (Pass 1) — LEAN shape + tier_hint only.
+      const recipeCatalog = recipeEnriched.map((r) => ({
         id: r.id,
-        name: sanitizeString(r.name),
-        ingredient_names: (r.recipe_ingredients ?? []).map((ri) => sanitizeString(ri.ingredient_name)),
-        avg_rating: avgRatings[r.id] ?? null,
+        name: r.name,
+        ingredient_names: r.ingredient_names,
+        avg_rating: r.avg_rating,
+        tier_hint: r.tier_hint,
       }));
 
       // Pass 1 — Shortlist (Haiku)
@@ -378,7 +518,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 1024,
             system:
-              "You are a household meal planner. Given a recipe catalog and household constraints, return a JSON array of recipe IDs that are good candidates for this week's plan. Consider dietary restrictions (HARD constraint — never include recipes with allergen ingredients), won't-eat lists (HARD — never include), member preferences (ratings), schedule complexity requirements, inventory availability (prefer recipes using ingredients the household has), and budget awareness. Return approximately 30 candidates. Return ONLY a JSON array of ID strings, nothing else.",
+              "You are a household meal planner. Given a recipe catalog and household constraints, return a JSON array of recipe IDs that are good candidates for this week's plan. Consider dietary restrictions (HARD constraint — never include recipes with allergen ingredients), won't-eat lists (HARD — never include), member preferences (ratings), schedule complexity requirements, inventory availability (prefer recipes using ingredients the household has), and budget awareness. Return approximately 30 candidates. Select candidates with tier balance roughly matching the provided recipeMix ratios (favorites/liked/novel percentages). Include enough novel candidates (tier_hint='novel') to support the novel quota. Prefer recipes whose tier_hint matches the tier you are filling. Return ONLY a JSON array of ID strings, nothing else.",
             messages: [
               {
                 role: "user",
@@ -392,6 +532,7 @@ serve(async (req) => {
                     inventory: inventoryNames,
                     priorityOrder: priorityOrder ?? [],
                   },
+                  recipeMix,
                   memberCount,
                   smallCatalog,
                 }),
@@ -419,16 +560,10 @@ serve(async (req) => {
         }
       }
 
-      // Recipe details for shortlisted candidates
-      const shortlistedRecipes = recipes
-        .filter((r) => shortlistedIds.includes(r.id))
-        .map((r) => ({
-          id: r.id,
-          name: sanitizeString(r.name),
-          ingredient_names: (r.recipe_ingredients ?? []).map((ri) => sanitizeString(ri.ingredient_name)),
-          avg_rating: avgRatings[r.id] ?? null,
-          servings: r.servings,
-        }));
+      // Recipe details for shortlisted candidates (Phase 24: enriched with cook history,
+      // per-member ratings, cost_per_serving, tier_hint — Pitfall 1 says Pass 2 only).
+      const shortlistedSet = new Set(shortlistedIds);
+      const shortlistedRecipes = recipeEnriched.filter((r) => shortlistedSet.has(r.id));
 
       // Model selection per D-06: haiku for small simple households, sonnet for complex
       const assignModel =
@@ -448,7 +583,7 @@ serve(async (req) => {
             model: assignModel,
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -459,6 +594,7 @@ serve(async (req) => {
                   inventory: inventoryNames,
                   nutritionTargets,
                   priorityOrder: priorityOrder ?? [],
+                  recipeMix,
                   smallCatalog,
                   constraints: {
                     allergens: allergenNames,
