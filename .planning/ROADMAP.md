@@ -38,7 +38,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
 - [x] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints (completed 2026-04-06)
 - [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
-- [ ] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging
+- [x] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging (completed 2026-04-12)
 - [ ] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns
 - [ ] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
 
@@ -448,16 +448,16 @@ Plans:
   3. Recipes that freeze well are visually flagged in the plan view and batch prep suggestions as make-ahead candidates
 **Plans**: 10 plans
 Plans:
-- [ ] 23-01-PLAN.md  -- Schema migration 029, TypeScript types, queryKeys
-- [ ] 23-02-PLAN.md  -- Four edge functions (steps, batch prep, cook sequence, reheat)
-- [ ] 23-03-PLAN.md  -- Recipe hooks (useRecipeSteps, useBatchPrepSummary, useFreezerClassification)
-- [ ] 23-03b-PLAN.md -- Cook session hooks + Notification wrapper (useCookSession, useNotificationPermission)
-- [ ] 23-04-PLAN.md  -- Recipe editor Steps section, FreezerBadge, recipe list badge
-- [ ] 23-05-PLAN.md  -- Batch prep modal, SlotCard freezer badge + Cook action, PlanGrid button
-- [ ] 23-06-PLAN.md  -- Cook Mode routes, shell, CookModePage, and standalone picker
-- [ ] 23-06b-PLAN.md -- Cook Mode step components and recipe detail entry point
-- [ ] 23-07-PLAN.md  -- PWA notifications and timer integration
-- [ ] 23-08-PLAN.md  -- Tests and validation (V-01 through V-10)
+- [x] 23-01-PLAN.md  -- Schema migration 029, TypeScript types, queryKeys
+- [x] 23-02-PLAN.md  -- Four edge functions (steps, batch prep, cook sequence, reheat)
+- [x] 23-03-PLAN.md  -- Recipe hooks (useRecipeSteps, useBatchPrepSummary, useFreezerClassification)
+- [x] 23-03b-PLAN.md -- Cook session hooks + Notification wrapper (useCookSession, useNotificationPermission)
+- [x] 23-04-PLAN.md  -- Recipe editor Steps section, FreezerBadge, recipe list badge
+- [x] 23-05-PLAN.md  -- Batch prep modal, SlotCard freezer badge + Cook action, PlanGrid button
+- [x] 23-06-PLAN.md  -- Cook Mode routes, shell, CookModePage, and standalone picker
+- [x] 23-06b-PLAN.md -- Cook Mode step components and recipe detail entry point
+- [x] 23-07-PLAN.md  -- PWA notifications and timer integration
+- [x] 23-08-PLAN.md  -- Tests and validation (V-01 through V-10)
 **UI hint**: yes
 
 ### Phase 24: Dynamic Portioning
@@ -467,7 +467,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Per-member portion suggestions use each member's calorie target as the primary driver — members with higher targets receive proportionally larger suggested portions
   2. When a member has logged a recipe multiple times and consistently adjusts the suggested portion, the system adapts future suggestions for that recipe toward the observed amount
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 24-01-PLAN.md — RecipeMixPanel component (three-slider panel with localStorage persistence) and PlanGrid wiring
+- [ ] 24-02-PLAN.md — generate-plan edge function enrichment (cook frequency, last-cooked, per-member ratings, cost per serving, tier-aware AI prompts) + redeploy
 **UI hint**: yes
 
 ### Phase 25: Universal Recipe Import
