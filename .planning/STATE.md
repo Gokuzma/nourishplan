@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Milestone complete
-stopped_at: Phase 25 context gathered
-last_updated: "2026-04-16T03:53:40.986Z"
+stopped_at: Phase 25 UI-SPEC approved
+last_updated: "2026-04-16T04:08:23.074Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -290,6 +290,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T03:53:40.981Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-universal-recipe-import/25-CONTEXT.md
+Last session: 2026-04-16T04:08:23.070Z
+Stopped at: Phase 25 UI-SPEC approved
+Resume file: .planning/phases/25-universal-recipe-import/25-UI-SPEC.md
