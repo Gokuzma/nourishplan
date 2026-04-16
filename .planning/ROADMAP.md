@@ -473,15 +473,20 @@ Plans:
 - [x] 24-02-PLAN.md — generate-plan edge function enrichment (cook frequency, last-cooked, per-member ratings, cost per serving, tier-aware AI prompts) + redeploy
 **UI hint**: yes
 
+
 ### Phase 25: Universal Recipe Import
-**Goal**: Users can paste a URL (blog, YouTube, Instagram) or raw recipe text and the AI extracts a complete recipe with ingredients, macros, and instructions — saved directly to the recipe library
+**Goal**: Users can paste a URL (blog, YouTube) or raw recipe text and the AI extracts a complete recipe with ingredients, macros, and instructions — saved directly to the recipe library
 **Depends on**: Phase 13
-**Requirements**: TBD
+**Requirements**: IMPORT-01, IMPORT-02, IMPORT-03, IMPORT-04, IMPORT-05
 **Success Criteria** (what must be TRUE):
   1. User can paste a blog URL and get a complete recipe with ingredients and macros
   2. User can paste raw recipe text and get the same result
   3. User can paste a YouTube cooking video URL and get a recipe extracted from the transcript
   4. Recipe appears in the recipe builder ready to edit
   5. No new database tables or migrations required
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 25-01-PLAN.md — DB migration (source_url column), edge function (import-recipe), type updates
+- [ ] 25-02-PLAN.md — useImportRecipe hook, ImportRecipeModal, RecipesPage button, RecipeBuilder skeleton + attribution
+- [ ] 25-03-PLAN.md — Schema push, edge function deploy, and human verification
 **UI hint**: yes
