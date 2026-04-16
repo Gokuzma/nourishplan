@@ -499,16 +499,13 @@ Note: Wrap in a try/catch if `new URL()` could throw for invalid URLs — fall b
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the edge function create `custom_foods` rows or just inline macros?**
-   - What we know: D-19 says create custom_food entries for unknown ingredients; D-21 says match existing ones first. `create-recipe-from-suggestion` skips custom_food creation entirely.
-   - What's unclear: If the import function also skips `custom_foods` creation, D-21 dedup is moot since there are no rows to match against. If it creates them, each imported recipe potentially adds 5-10 new custom foods to the user's library.
-   - Recommendation: Implement without custom_food creation (use inline macros only on `recipe_ingredients`, same as existing function). This is the lower-risk choice. The dedup query D-21 can still run — if an existing custom_food exists with the same name, use its ID; if not, generate a new UUID without creating a custom_food row. This avoids library pollution while still honoring the ID-matching intent.
+   - **RESOLVED:** Create custom_food rows for unknown ingredients per locked decision D-19. Flow: ilike dedup check (D-21) -> if match found, use existing ID -> if no match, INSERT new custom_food row with AI-estimated macros, then use that ID for recipe_ingredients.
 
 2. **How should `householdMemberCount` be obtained for D-15?**
-   - Recommendation: Query `COUNT(*)` from `household_members` where `household_id = membership.household_id` inside the edge function — same admin client pattern used for the membership lookup. No need for the client to pass it.
-
+   - **RESOLVED:** Query `COUNT(*)` from `household_members` where `household_id = membership.household_id` inside the edge function — same admin client pattern used for the membership lookup. No need for the client to pass it.
 ---
 
 ## Environment Availability
