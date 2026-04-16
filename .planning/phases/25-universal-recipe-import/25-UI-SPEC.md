@@ -52,7 +52,7 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 (regular) | 1.5 |
-| Label | 14px | 500 (medium) | 1.4 |
+| Label | 14px | 400 (regular) | 1.4 |
 | Heading | 18px | 700 (bold) | 1.3 |
 | Helper / hint | 12px | 400 (regular) | 1.5 |
 
@@ -194,7 +194,7 @@ Two buttons side by side in the header row:
 | Helper text below textarea | Supports blog URLs, YouTube URLs, or pasted recipe text |
 | Primary CTA (idle) | Import Recipe |
 | Primary CTA (loading) | Importing… |
-| CTA (cancel / secondary) | Cancel |
+| CTA (cancel / secondary) | Discard Import |
 | RecipesPage button label | Import Recipe |
 | Success — no message shown | (silent — navigation is the feedback) |
 | Error: URL fetch failure | Could not fetch that URL. Try copying and pasting the recipe text directly instead. |
