@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useHousehold } from '../hooks/useHousehold'
 import { useRecipes, useCreateRecipe, useDeleteRecipe } from '../hooks/useRecipes'
 import { FreezerBadge } from '../components/plan/FreezerBadge'
+import { ImportRecipeModal } from '../components/recipe/ImportRecipeModal'
 
 function relativeTime(isoString: string): string {
   const diffMs = Date.now() - new Date(isoString).getTime()
@@ -24,12 +25,18 @@ export function RecipesPage() {
   const createRecipe = useCreateRecipe()
   const deleteRecipe = useDeleteRecipe()
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   const isAdmin = membership?.role === 'admin'
 
   async function handleCreate() {
     const recipe = await createRecipe.mutateAsync({ name: 'Untitled Recipe', servings: 1 })
     navigate(`/recipes/${recipe.id}`)
+  }
+
+  function handleImportSuccess(recipeId: string) {
+    setImportModalOpen(false)
+    navigate(`/recipes/${recipeId}`)
   }
 
   async function handleDelete(id: string) {
@@ -48,13 +55,21 @@ export function RecipesPage() {
           <h1 className="text-2xl font-bold text-primary">Recipes</h1>
           <p className="text-sm text-text/60 mt-1">Create and manage your household recipes.</p>
         </div>
-        <button
-          onClick={handleCreate}
-          disabled={createRecipe.isPending}
-          className="rounded-[--radius-btn] bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
-        >
-          {createRecipe.isPending ? 'Creating…' : '+ New Recipe'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setImportModalOpen(true)}
+            className="rounded-[--radius-btn] border border-primary text-primary px-4 py-2 text-sm font-semibold hover:bg-primary/10 transition-colors"
+          >
+            Import Recipe
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={createRecipe.isPending}
+            className="rounded-[--radius-btn] bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {createRecipe.isPending ? 'Creating…' : '+ New Recipe'}
+          </button>
+        </div>
       </div>
 
       {isPending ? (
@@ -117,6 +132,11 @@ export function RecipesPage() {
         </div>
       )}
 
+      <ImportRecipeModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   )
 }

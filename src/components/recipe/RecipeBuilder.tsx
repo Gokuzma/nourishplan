@@ -680,6 +680,28 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     setShowFoodSearch(true)
   }
 
+  if (recipePending && ingredientsPending) {
+    return (
+      <div
+        className="px-4 py-6 font-sans pb-[64px]"
+        aria-live="polite"
+        aria-label="Importing recipe, please wait…"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="h-9 w-3/4 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-9 w-1/4 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-5 w-24 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-14 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-14 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-14 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-5 w-16 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-12 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-12 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+        </div>
+      </div>
+    )
+  }
+
   if (recipePending) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -760,6 +782,26 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
               className="w-20 rounded-[--radius-btn] border border-accent/30 bg-surface px-2 py-1 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
+
+          {/* Source URL attribution (D-13) — shown only for imported recipes */}
+          {recipe?.source_url && (
+            <p className="text-xs text-text/40">
+              <a
+                href={recipe.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View original recipe source"
+              >
+                {(() => {
+                  try {
+                    return `Imported from ${new URL(recipe.source_url).hostname}`
+                  } catch {
+                    return `Imported from ${recipe.source_url.slice(0, 60)}${recipe.source_url.length > 60 ? '…' : ''}`
+                  }
+                })()}
+              </a>
+            </p>
+          )}
 
           {/* Cost per serving badge */}
           {(() => {
