@@ -41,6 +41,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging (completed 2026-04-12)
 - [x] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns (completed 2026-04-15)
 - [x] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions (completed 2026-04-19)
+- [ ] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure)
+- [ ] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useSchedule so schedule UI feedback works on the plan page (v2.0 gap closure)
+- [ ] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure)
+- [ ] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
 
 ## Phase Details
 
@@ -190,9 +194,13 @@ Plans:
 | 20. Feedback Engine & Dietary Restrictions | Complete | 2026-04-06 |
 | 21. Schedule Model | Complete | 2026-04-06 |
 | 22. Constraint-Based Planning Engine | Complete | 2026-04-06 |
-| 23. Prep Optimisation | Not started | - |
-| 24. Dynamic Portioning | Not started | - |
+| 23. Prep Optimisation | Complete | 2026-04-12 |
+| 24. Dynamic Portioning | Complete | 2026-04-15 |
 | 25. Universal Recipe Import | Complete | 2026-04-19 |
+| 26. Wire Cook Mode to Inventory and Budget | Not started | - |
+| 27. Wire Schedule Badges to PlanGrid | Not started | - |
+| 28. Resolve Prep Sequence Edge Function Orphans | Not started | - |
+| 29. v2.0 Documentation Reconciliation | Not started | - |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -490,3 +498,59 @@ Plans:
 - [x] 25-02-PLAN.md — useImportRecipe hook, ImportRecipeModal, RecipesPage button, RecipeBuilder skeleton + attribution
 - [x] 25-03-PLAN.md — Schema push, edge function deploy, and human verification
 **UI hint**: yes
+
+## v2.0 Gap Closure — Phase Details
+
+### Phase 26: Wire Cook Mode to Inventory and Budget
+**Goal**: Meals cooked via Plan → Cook Mode trigger inventory deduction, a spend_log entry, and a leftover save prompt — matching the behaviour of the RecipeBuilder "Mark as Cooked" button
+**Depends on**: Phase 25
+**Requirements**: INVT-05, INVT-06, BUDG-03
+**Gap Closure:** Closes CRIT-01 from v2.0 audit (Cook Mode → Inventory/Budget integration)
+**Success Criteria** (what must be TRUE):
+  1. Completing a cook session via `/cook/:mealId` fires `useInventoryDeduct` against the recipe's ingredients (FIFO), matching the RecipeBuilder code path at RecipeBuilder.tsx:590-613
+  2. Completing a cook session inserts a `spend_logs` row with `source: 'cook'` — the meal shows up in `useWeeklySpend` on the PlanPage BudgetSummarySection
+  3. `CookDeductionReceipt` renders on completion with deducted items and any missing/insufficient items
+  4. After completion, the user is prompted to save any uneaten portion as a leftover inventory item via `AddInventoryItemModal` with `leftoverDefaults`
+  5. The end-to-end flow Budget → Cook → Inventory → Grocery reconciles: generating a grocery list after a cook correctly subtracts the deducted ingredients
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 27: Wire Schedule Badges to PlanGrid
+**Goal**: The schedule set via `ScheduleSection` surfaces as coloured dot badges on PlanGrid SlotCards (peach=consume, amber=quick, red=away) so the Phase 21 data model is visible to the user
+**Depends on**: Phase 21
+**Requirements**: SCHED-01, SCHED-02
+**Gap Closure:** Closes CRIT-02 from v2.0 audit (PlanGrid → useSchedule → slotSchedules prop)
+**Success Criteria** (what must be TRUE):
+  1. `PlanGrid.tsx` imports `useSchedule` and calls it with `(householdId, selectedMemberId, selectedMemberType ?? 'user')`
+  2. `PlanGrid.tsx` builds a `Map<number, Map<string, ScheduleStatus>>` keyed by day-of-week and slot name via `buildGrid` (or equivalent), memoised via `useMemo`
+  3. Both the mobile (DayCarousel) and desktop render sites pass `slotSchedules={slotSchedulesByDay?.get(dayIndex)}` to each `DayCard`
+  4. SlotCards display the correct coloured dot when a schedule row exists for that day/slot; prep shows no dot
+  5. Test covers PlanGrid → DayCard prop forwarding so this regression cannot silently recur
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 28: Resolve Prep Sequence Edge Function Orphans
+**Goal**: Either wire `generate-cook-sequence` and `generate-reheat-sequence` into CookModePage (combined multi-recipe sessions + reheat path) or remove them from `supabase/functions/` and update Phase 23 records
+**Depends on**: Phase 23
+**Requirements**: PREP-02
+**Gap Closure:** Closes WARN-01 from v2.0 audit (orphaned edge functions)
+**Success Criteria** (what must be TRUE):
+  1. A decision is recorded: wire-in or remove — documented in the phase PLAN with rationale
+  2. If wire-in: CookModePage invokes `generate-cook-sequence` when `flowMode === 'combined'` (multi-recipe cook session) and `generate-reheat-sequence` when `flowMode === 'reheat'`; the returned step list replaces the current single-recipe / hardcoded fallback
+  3. If remove: `supabase/functions/generate-cook-sequence` and `supabase/functions/generate-reheat-sequence` are deleted; `23-SUMMARY` entries are corrected; Supabase deployment list reflects the removal
+  4. Integration check — `grep -r "cook-sequence\|reheat-sequence" src/` either returns consumer invocations (wire-in) or returns zero matches with zero surviving function files (remove)
+  5. PREP-02 traceability status reflects the decision
+**Plans**: TBD
+
+### Phase 29: v2.0 Documentation Reconciliation
+**Goal**: Close v2.0 audit documentation gaps so the milestone can archive with accurate state — formalise IMPORT requirements, backfill missing VERIFICATION.md files, refresh the stale traceability table, and reconcile Phase 24's ROADMAP text with the D-02 scope pivot
+**Depends on**: Phase 25
+**Requirements**: IMPORT-01, IMPORT-02, IMPORT-03, IMPORT-04, IMPORT-05
+**Gap Closure:** Closes WARN-02 / WARN-03 / WARN-04 / WARN-05 from v2.0 audit (documentation drift)
+**Success Criteria** (what must be TRUE):
+  1. IMPORT-01 through IMPORT-05 are defined in `REQUIREMENTS.md` (description + traceability row mapped to Phase 25, status Complete)
+  2. `.planning/phases/17-inventory-engine/17-VERIFICATION.md` exists with goal-backward verification against INVT-01..INVT-06 using the UAT evidence captured in 17-04-SUMMARY
+  3. `.planning/phases/25-universal-recipe-import/25-VERIFICATION.md` exists with goal-backward verification against IMPORT-01..IMPORT-05 using the live Playwright UAT evidence captured in 25-03-SUMMARY
+  4. v2.0 traceability rows in REQUIREMENTS.md (BUDG, INVT, GROC, PLAN, FEED, SCHED, PREP, PORT, IMPORT) reflect actual satisfied/partial/pending state after Phase 26–28 merges; checkboxes match
+  5. Phase 24 ROADMAP entry is updated in place (or annotated) to reflect the D-02 tier-aware recipe selection pivot; PORT-02 description in REQUIREMENTS.md matches the shipped scope
+**Plans**: TBD

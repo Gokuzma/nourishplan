@@ -138,8 +138,8 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 - [ ] **INVT-02**: Each inventory item tracks quantity and unit (grams, units, ml)
 - [ ] **INVT-03**: Each inventory item has an optional expiry date with priority sorting
 - [ ] **INVT-04**: User can scan a barcode to add an item to inventory
-- [x] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
-- [x] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
+- [ ] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
+- [ ] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
 
 ### Grocery
 
@@ -179,6 +179,14 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 - [ ] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
 - [ ] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
+
+### Recipe Import
+
+- [ ] **IMPORT-01**: User can paste a blog URL and get a complete recipe with ingredients and per-serving macros
+- [ ] **IMPORT-02**: User can paste raw recipe text and get a complete recipe with ingredients and per-serving macros
+- [ ] **IMPORT-03**: User can paste a YouTube cooking video URL and get a recipe extracted from the transcript
+- [ ] **IMPORT-04**: Imported recipe appears in the recipe builder ready to edit (name, servings, ingredients, steps, source attribution)
+- [ ] **IMPORT-05**: Recipe import adds no new tables — only a nullable `recipes.source_url` column
 
 ## v3 Requirements
 
@@ -273,9 +281,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 **Coverage:**
 - v1.0 requirements: 50 total (all complete)
 - v1.1 enhancement requirements: 16 total (all complete)
-- v2.0 requirements: 31 total
-- Mapped to phases: 66 (v1) + 31 (v2.0)
+- v2.0 requirements: 36 total (31 core + 5 IMPORT — added 2026-04-19 during audit reconciliation)
+- Mapped to phases: 66 (v1) + 36 (v2.0)
 - Unmapped v2.0: 0 (roadmap complete)
+- v2.0 gap-closure phases: 26, 27, 28, 29 (see ROADMAP.md v2.0 Gap Closure — Phase Details)
 
 **v2.0 Traceability:**
 
@@ -283,14 +292,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | BUDG-01 | Phase 16 | Pending |
 | BUDG-02 | Phase 16 | Pending |
-| BUDG-03 | Phase 16 | Pending |
+| BUDG-03 | Phase 16, Phase 26 (gap closure) | Pending |
 | BUDG-04 | Phase 16 | Complete |
 | INVT-01 | Phase 17 | Pending |
 | INVT-02 | Phase 17 | Pending |
 | INVT-03 | Phase 17 | Pending |
 | INVT-04 | Phase 17 | Pending |
-| INVT-05 | Phase 17 | Complete |
-| INVT-06 | Phase 17 | Complete |
+| INVT-05 | Phase 17, Phase 26 (gap closure) | Pending |
+| INVT-06 | Phase 17, Phase 26 (gap closure) | Pending |
 | GROC-01 | Phase 18 | Complete |
 | GROC-02 | Phase 18 | Complete |
 | GROC-03 | Phase 18 | Complete |
@@ -305,13 +314,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEED-02 | Phase 20 | Pending |
 | FEED-03 | Phase 20 | Pending |
 | FEED-04 | Phase 20 | Pending |
-| SCHED-01 | Phase 21 | Pending |
-| SCHED-02 | Phase 21 | Pending |
+| SCHED-01 | Phase 21, Phase 27 (gap closure) | Pending |
+| SCHED-02 | Phase 21, Phase 27 (gap closure) | Pending |
 | PREP-01 | Phase 23 | Pending |
-| PREP-02 | Phase 23 | Pending |
+| PREP-02 | Phase 23, Phase 28 (gap closure) | Pending |
 | PREP-03 | Phase 23 | Pending |
 | PORT-01 | Phase 24 | Pending |
 | PORT-02 | Phase 24 | Pending |
+| IMPORT-01 | Phase 25, Phase 29 (gap closure) | Pending |
+| IMPORT-02 | Phase 25, Phase 29 (gap closure) | Pending |
+| IMPORT-03 | Phase 25, Phase 29 (gap closure) | Pending |
+| IMPORT-04 | Phase 25, Phase 29 (gap closure) | Pending |
+| IMPORT-05 | Phase 25, Phase 29 (gap closure) | Pending |
 
 **v1.0/v1.1 Traceability (archived — all complete):**
 
