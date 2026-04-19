@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: In progress
-stopped_at: Phase 25 Plan 01 complete
-last_updated: "2026-04-19T22:32:37Z"
+stopped_at: Phase 25 Plan 02 complete
+last_updated: "2026-04-19T22:39:28Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 25
-Plan: 01 complete (of 03). Next: 25-02 (client UI)
-Next up: `/gsd-execute-plan 25-02`
+Plan: 02 complete (of 03). Next: 25-03 (deploy + verify)
+Next up: `/gsd-execute-plan 25-03`
 
-Progress: ███░░░░░░░ 33%
+Progress: ██████░░░░ 66%
 
 ## Performance Metrics
 
@@ -110,6 +110,7 @@ Progress: ███░░░░░░░ 33%
 | Phase 18-grocery-list-generation P01 | 324 | 2 tasks | 5 files |
 | Phase 18-grocery-list-generation P02 | 35 | 2 tasks | 15 files |
 | Phase 25-universal-recipe-import P01 | 3 | 2 tasks | 3 files |
+| Phase 25-universal-recipe-import P02 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -260,6 +261,10 @@ Recent decisions affecting current work:
 - [Phase 25-universal-recipe-import]: YouTube transcript extraction via ytInitialPlayerResponse regex → captionTracks[0].baseUrl → XML <text> regex with HTML-entity decoding
 - [Phase 25-universal-recipe-import]: Recipe.source_url is null for raw text imports and the trimmed URL otherwise (D-11); instructions written as Phase 23 RecipeStep[] not as a notes string (Pitfall 5)
 - [Phase 25-universal-recipe-import]: custom_foods dedup by exact ilike(name) with no wildcards (Pitfall 4); new row inserted with AI-estimated macros when no match found (D-19, D-21)
+- [Phase 25-universal-recipe-import]: useImportRecipe hook follows useRegenerateRecipeSteps pattern — session/householdId guards before supabase.functions.invoke, throws on response.success === false, invalidates ['recipes'] broad prefix on success
+- [Phase 25-universal-recipe-import]: ImportRecipeModal disables backdrop click and Escape key while the edge function call is pending — prevents accidental dismissal mid-import
+- [Phase 25-universal-recipe-import]: RecipeBuilder skeleton gated on recipePending && ingredientsPending so the existing 'Loading recipe…' single-line fallback is preserved for the edge case where one query resolves first
+- [Phase 25-universal-recipe-import]: Source URL attribution uses new URL(...).hostname inside try/catch with 60-char truncated URL fallback — defensive for legacy rows with malformed URLs
 
 ### v2.0 Decisions
 
@@ -297,6 +302,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T22:32:37Z
-Stopped at: Phase 25 Plan 01 complete (server pipeline: import-recipe edge function + migration 030 in tree, not deployed)
-Resume file: .planning/phases/25-universal-recipe-import/25-01-SUMMARY.md
+Last session: 2026-04-19T22:39:28Z
+Stopped at: Phase 25 Plan 02 complete (client UI: useImportRecipe hook + ImportRecipeModal + RecipesPage button wiring + RecipeBuilder skeleton/source_url attribution)
+Resume file: .planning/phases/25-universal-recipe-import/25-02-SUMMARY.md
