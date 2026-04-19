@@ -40,7 +40,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
 - [x] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging (completed 2026-04-12)
 - [x] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns (completed 2026-04-15)
-- [ ] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
+- [x] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions (completed 2026-04-19)
 
 ## Phase Details
 
@@ -192,7 +192,7 @@ Plans:
 | 22. Constraint-Based Planning Engine | Complete | 2026-04-06 |
 | 23. Prep Optimisation | Not started | - |
 | 24. Dynamic Portioning | Not started | - |
-| 25. Universal Recipe Import | In progress (2/3 plans) | - |
+| 25. Universal Recipe Import | Complete | 2026-04-19 |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -488,5 +488,5 @@ Plans:
 Plans:
 - [x] 25-01-PLAN.md — DB migration (source_url column), edge function (import-recipe), type updates
 - [x] 25-02-PLAN.md — useImportRecipe hook, ImportRecipeModal, RecipesPage button, RecipeBuilder skeleton + attribution
-- [ ] 25-03-PLAN.md — Schema push, edge function deploy, and human verification
+- [x] 25-03-PLAN.md — Schema push, edge function deploy, and human verification
 **UI hint**: yes

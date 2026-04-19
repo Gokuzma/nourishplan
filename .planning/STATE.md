@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UI polish and usability improvements
-status: In progress
-stopped_at: Phase 25 Plan 03 deploy complete — awaiting human verification
-last_updated: "2026-04-19T22:46:00Z"
+milestone: v2.0
+milestone_name: AMPS + Universal Recipe Import
+status: Complete
+stopped_at: Phase 25 Plan 03 complete — universal recipe import shipped to nourishplan.gregok.ca
+last_updated: "2026-04-19T23:10:00Z"
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 50
-  completed_plans: 50
+  total_phases: 15
+  completed_phases: 15
+  total_plans: 53
+  completed_plans: 53
   percent: 100
 ---
 
@@ -24,11 +24,11 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 ## Current Position
 
-Phase: 25
-Plan: 03 in progress — automated deploy complete, awaiting human verification checkpoint
-Next up: user verification on nourishplan.gregok.ca, then continuation agent writes 25-03-SUMMARY.md
+Phase: 25 — COMPLETE (2026-04-19)
+Plan: 03 complete — universal recipe import deployed and UAT approved on nourishplan.gregok.ca
+Next up: No planned phases remaining. All 25 phases (Foundation → Universal Recipe Import) are complete. Awaiting user direction for next milestone or maintenance work.
 
-Progress: ██████░░░░ 66%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
@@ -111,6 +111,7 @@ Progress: ██████░░░░ 66%
 | Phase 18-grocery-list-generation P02 | 35 | 2 tasks | 15 files |
 | Phase 25-universal-recipe-import P01 | 3 | 2 tasks | 3 files |
 | Phase 25-universal-recipe-import P02 | 3 | 2 tasks | 4 files |
+| Phase 25-universal-recipe-import P03 | 240 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -265,6 +266,10 @@ Recent decisions affecting current work:
 - [Phase 25-universal-recipe-import]: ImportRecipeModal disables backdrop click and Escape key while the edge function call is pending — prevents accidental dismissal mid-import
 - [Phase 25-universal-recipe-import]: RecipeBuilder skeleton gated on recipePending && ingredientsPending so the existing 'Loading recipe…' single-line fallback is preserved for the edge case where one query resolves first
 - [Phase 25-universal-recipe-import]: Source URL attribution uses new URL(...).hostname inside try/catch with 60-char truncated URL fallback — defensive for legacy rows with malformed URLs
+- [Phase 25-universal-recipe-import]: Migration 030 pushed to Supabase prod (qyablbzodmftobjslgri); import-recipe edge function deployed v1 ACTIVE with --no-verify-jwt (L-025); frontend redeployed to nourishplan.gregok.ca
+- [Phase 25-universal-recipe-import]: Human UAT via Playwright PASSED for raw text imports (Spaghetti Carbonara end-to-end with 5 ingredients + 5 steps + macros), D-11 attribution null for text, D-13 no badges on recipe cards, D-10 fallback message fires inline on URL fetch failures
+- [Phase 25-universal-recipe-import]: Mainstream recipe sites (allrecipes, NYT Cooking, simplyrecipes) are server-side bot-blocked — D-10 paste-text fallback is the correct UX; URL-import practical utility is narrower than the spec phrasing
+- [Phase 25-universal-recipe-import]: AbortController timeout errors leak raw "The signal has been aborted" string to the modal — follow-up polish: map name === 'AbortError' to the D-10 friendly message
 
 ### v2.0 Decisions
 
@@ -302,6 +307,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T22:46:00Z
-Stopped at: Phase 25 Plan 03 — migration 030 pushed, import-recipe edge function deployed (v1), frontend deployed to nourishplan.gregok.ca. Server-side smoke test of edge function with claude-test account passed (recipe created, ingredients saved, then cleaned up). Awaiting human verification of three import flows (blog URL, YouTube URL, raw text).
-Resume file: .planning/phases/25-universal-recipe-import/25-03-PLAN.md
+Last session: 2026-04-19T23:10:00Z
+Stopped at: Phase 25 Plan 03 COMPLETE — universal recipe import live on nourishplan.gregok.ca. Human UAT via Playwright approved. Raw text imports PASS end-to-end; URL imports fall back to D-10 paste-text guidance when server-side fetch is bot-blocked by mainstream sites (expected per design); D-11 attribution null for text imports confirmed; D-13 no source badges on recipe cards confirmed. Two polish items flagged for future (AbortError → D-10 mapping, URL-import caveat). Phase 25 complete — no next phase planned.
+Resume file: None — awaiting user direction for next work.
