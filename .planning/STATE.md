@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Ready to execute
-stopped_at: Phase 25 UI-SPEC approved
-last_updated: "2026-04-16T12:53:18.676Z"
+status: In progress
+stopped_at: Phase 25 Plan 01 complete
+last_updated: "2026-04-19T22:32:37Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 24 — dynamic-portioning
+**Current focus:** Phase 25 — universal-recipe-import
 
 ## Current Position
 
-Phase: 24
-Plan: Not started
-Next up: `/gsd-plan-phase 23`
+Phase: 25
+Plan: 01 complete (of 03). Next: 25-02 (client UI)
+Next up: `/gsd-execute-plan 25-02`
 
 Progress: ███░░░░░░░ 33%
 
@@ -109,6 +109,7 @@ Progress: ███░░░░░░░ 33%
 | Phase 17-inventory-engine P04 | 7 | 2 tasks | 6 files |
 | Phase 18-grocery-list-generation P01 | 324 | 2 tasks | 5 files |
 | Phase 18-grocery-list-generation P02 | 35 | 2 tasks | 15 files |
+| Phase 25-universal-recipe-import P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -253,6 +254,12 @@ Recent decisions affecting current work:
 - [Phase 18-grocery-list-generation]: Supabase realtime postgres_changes subscription on grocery_items with list_id filter — first realtime use in project
 - [Phase 18-grocery-list-generation]: Already Have items stored in DB with notes='inventory-covered' for snapshot consistency (D-01)
 - [Phase 18-grocery-list-generation]: Optimistic toggle with rollback on useToggleGroceryItem; realtime handles cross-member sync
+- [Phase 25-universal-recipe-import]: import-recipe edge function added; migration 030 adds recipes.source_url TEXT — both present in the working tree but NOT yet pushed/deployed (gated by plan 25-03)
+- [Phase 25-universal-recipe-import]: custom_foods has no category column; AI-supplied category is dropped at the custom_foods insert in import-recipe and carried only through recipe_ingredients at read time
+- [Phase 25-universal-recipe-import]: Input detection regex classifies youtube/url/text server-side (D-04); blog HTML stripped with script/style/tag regex and truncated to 12000 chars before the AI call
+- [Phase 25-universal-recipe-import]: YouTube transcript extraction via ytInitialPlayerResponse regex → captionTracks[0].baseUrl → XML <text> regex with HTML-entity decoding
+- [Phase 25-universal-recipe-import]: Recipe.source_url is null for raw text imports and the trimmed URL otherwise (D-11); instructions written as Phase 23 RecipeStep[] not as a notes string (Pitfall 5)
+- [Phase 25-universal-recipe-import]: custom_foods dedup by exact ilike(name) with no wildcards (Pitfall 4); new row inserted with AI-estimated macros when no match found (D-19, D-21)
 
 ### v2.0 Decisions
 
@@ -290,6 +297,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T04:08:23.070Z
-Stopped at: Phase 25 UI-SPEC approved
-Resume file: .planning/phases/25-universal-recipe-import/25-UI-SPEC.md
+Last session: 2026-04-19T22:32:37Z
+Stopped at: Phase 25 Plan 01 complete (server pipeline: import-recipe edge function + migration 030 in tree, not deployed)
+Resume file: .planning/phases/25-universal-recipe-import/25-01-SUMMARY.md

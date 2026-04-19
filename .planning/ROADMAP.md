@@ -192,7 +192,7 @@ Plans:
 | 22. Constraint-Based Planning Engine | Complete | 2026-04-06 |
 | 23. Prep Optimisation | Not started | - |
 | 24. Dynamic Portioning | Not started | - |
-| 25. Universal Recipe Import | Not started | - |
+| 25. Universal Recipe Import | In progress (1/3 plans) | - |
 
 ### Phase 8: v1.1 UI polish and usability improvements
 
@@ -486,7 +486,7 @@ Plans:
   5. No new database tables or migrations required
 **Plans**: 3 plans
 Plans:
-- [ ] 25-01-PLAN.md — DB migration (source_url column), edge function (import-recipe), type updates
+- [x] 25-01-PLAN.md — DB migration (source_url column), edge function (import-recipe), type updates
 - [ ] 25-02-PLAN.md — useImportRecipe hook, ImportRecipeModal, RecipesPage button, RecipeBuilder skeleton + attribution
 - [ ] 25-03-PLAN.md — Schema push, edge function deploy, and human verification
 **UI hint**: yes
