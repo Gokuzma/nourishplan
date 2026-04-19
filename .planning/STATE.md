@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: In progress
-stopped_at: Phase 25 Plan 02 complete
-last_updated: "2026-04-19T22:39:28Z"
+stopped_at: Phase 25 Plan 03 deploy complete — awaiting human verification
+last_updated: "2026-04-19T22:46:00Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 25
-Plan: 02 complete (of 03). Next: 25-03 (deploy + verify)
-Next up: `/gsd-execute-plan 25-03`
+Plan: 03 in progress — automated deploy complete, awaiting human verification checkpoint
+Next up: user verification on nourishplan.gregok.ca, then continuation agent writes 25-03-SUMMARY.md
 
 Progress: ██████░░░░ 66%
 
@@ -302,6 +302,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T22:39:28Z
-Stopped at: Phase 25 Plan 02 complete (client UI: useImportRecipe hook + ImportRecipeModal + RecipesPage button wiring + RecipeBuilder skeleton/source_url attribution)
-Resume file: .planning/phases/25-universal-recipe-import/25-02-SUMMARY.md
+Last session: 2026-04-19T22:46:00Z
+Stopped at: Phase 25 Plan 03 — migration 030 pushed, import-recipe edge function deployed (v1), frontend deployed to nourishplan.gregok.ca. Server-side smoke test of edge function with claude-test account passed (recipe created, ingredients saved, then cleaned up). Awaiting human verification of three import flows (blog URL, YouTube URL, raw text).
+Resume file: .planning/phases/25-universal-recipe-import/25-03-PLAN.md
