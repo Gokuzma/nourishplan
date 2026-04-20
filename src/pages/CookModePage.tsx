@@ -19,6 +19,11 @@ import { NotificationPermissionBanner } from '../components/cook/NotificationPer
 import { InAppTimerAlert } from '../components/cook/InAppTimerAlert'
 import { fireStepDoneNotification, playTimerChime } from '../components/cook/CookTimerNotifications'
 import type { RecipeStep } from '../types/database'
+import { useRecipe, useRecipeIngredients } from '../hooks/useRecipes'
+import { useCookCompletion } from '../hooks/useCookCompletion'
+import { CookDeductionReceipt } from '../components/inventory/CookDeductionReceipt'
+import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
+import type { DeductionResult } from '../hooks/useInventoryDeduct'
 
 // D-21 flow modes
 type FlowMode = 'loading' | 'resume-prompt' | 'multi-meal-prompt' | 'reheat' | 'cook' | 'error'
@@ -65,6 +70,12 @@ export function CookModePage() {
 
   // For single-recipe cook: load recipe steps live (R-02 — live-bound, not snapshotted)
   const recipeIdForSteps = activeSession?.recipe_ids[0] ?? mealId
+  const { data: cookingRecipe } = useRecipe(recipeIdForSteps ?? '')
+  const { data: cookingIngredients } = useRecipeIngredients(recipeIdForSteps ?? '')
+  const { runCookCompletion } = useCookCompletion()
+  const [deductionResult, setDeductionResult] = useState<DeductionResult | null>(null)
+  const [showLeftoverModal, setShowLeftoverModal] = useState(false)
+  const [leftoverContext, setLeftoverContext] = useState<{ recipeName: string; recipeId: string } | null>(null)
   const { data: recipeStepsData } = useRecipeSteps(recipeIdForSteps)
   const liveSteps: RecipeStep[] = recipeStepsData?.instructions ?? []
 
