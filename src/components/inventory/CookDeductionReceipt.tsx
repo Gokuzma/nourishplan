@@ -5,9 +5,10 @@ interface CookDeductionReceiptProps {
   mealName: string
   result: DeductionResult
   onClose: () => void
+  onSaveLeftover?: () => void
 }
 
-export function CookDeductionReceipt({ mealName, result, onClose }: CookDeductionReceiptProps) {
+export function CookDeductionReceipt({ mealName, result, onClose, onSaveLeftover }: CookDeductionReceiptProps) {
   // Auto-dismiss after 8 seconds
   useEffect(() => {
     const timer = setTimeout(onClose, 8000)
@@ -50,7 +51,15 @@ export function CookDeductionReceipt({ mealName, result, onClose }: CookDeductio
         </ul>
       )}
 
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end gap-2 mt-2">
+        {onSaveLeftover && (
+          <button
+            onClick={onSaveLeftover}
+            className="bg-secondary border border-primary/30 text-primary px-4 py-2 rounded-[--radius-btn] text-sm"
+          >
+            Save leftover portion
+          </button>
+        )}
         <button
           onClick={onClose}
           className="bg-primary text-white px-4 py-2 rounded-[--radius-btn] text-sm"
