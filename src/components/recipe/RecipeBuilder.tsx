@@ -15,17 +15,17 @@ import {
   applyYieldFactor,
   YIELD_FACTORS,
 } from '../../utils/nutrition'
-import { useCreateSpendLog } from '../../hooks/useSpendLog'
 import { useFoodPrices, useSaveFoodPrice, getPriceForIngredient } from '../../hooks/useFoodPrices'
 import { normaliseToCostPer100g, computeRecipeCostPerServing, formatCost } from '../../utils/cost'
-import { useInventoryDeduct } from '../../hooks/useInventoryDeduct'
 import type { DeductionResult } from '../../hooks/useInventoryDeduct'
+import { useCookCompletion } from '../../hooks/useCookCompletion'
 import { supabase } from '../../lib/supabase'
 import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from './NutritionBar'
 import { IngredientRow } from './IngredientRow'
 import { MicronutrientPanel } from '../plan/MicronutrientPanel'
 import { CookDeductionReceipt } from '../inventory/CookDeductionReceipt'
+import { AddInventoryItemModal } from '../inventory/AddInventoryItemModal'
 import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } from '../../types/database'
 import { RecipeStepsSection } from './RecipeStepsSection'
 import { RecipeFreezerToggle } from './RecipeFreezerToggle'
@@ -269,12 +269,12 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const addIngredient = useAddIngredient()
   const updateIngredient = useUpdateIngredient()
   const removeIngredient = useRemoveIngredient()
-  const spendLog = useCreateSpendLog()
-  const inventoryDeduct = useInventoryDeduct()
+  const { runCookCompletion, isPending: cookPending } = useCookCompletion()
   const { data: stepsData } = useRecipeSteps(recipeId)
   const regenerateSteps = useRegenerateRecipeSteps()
   const [cookConfirmation, setCookConfirmation] = useState<string | null>(null)
   const [deductionResult, setDeductionResult] = useState<DeductionResult | null>(null)
+  const [showLeftoverModal, setShowLeftoverModal] = useState(false)
 
   const [localName, setLocalName] = useState<string | null>(null)
   const [localServings, setLocalServings] = useState<string | null>(null)
@@ -573,46 +573,24 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     })
   }
 
-  function handleMarkAsCooked() {
+  async function handleMarkAsCooked() {
     if (!recipe || !ingredients) return
-    const prices = foodPrices ?? []
-    const ingredientsWithCost = ingredients.map(ing => ({
-      quantity_grams: ing.quantity_grams,
-      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id),
-    }))
-    const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(
-      ingredientsWithCost,
-      recipe.servings > 0 ? recipe.servings : 1
-    )
-    const totalCost = costPerServing * (recipe.servings > 0 ? recipe.servings : 1)
-    const isPartial = pricedCount < totalCount
-
-    spendLog.mutate(
-      {
-        recipe_id: recipe.id,
-        amount: totalCost,
-        is_partial: isPartial,
-      },
-      {
-        onSuccess: () => {
-          const msg = isPartial
-            ? `Cooked — partial spend recorded (${formatCost(totalCost)} of estimated total)`
-            : 'Cooked — spend recorded'
-          setCookConfirmation(msg)
-          setTimeout(() => setCookConfirmation(null), 2000)
-
-          // Trigger inventory deduction (non-blocking — failure does not prevent spend log)
-          const needs = (ingredients ?? []).map(ing => ({
-            food_id: ing.ingredient_id,
-            food_name: ing.ingredient_name,
-            quantity_grams: ing.quantity_grams,
-          }))
-          inventoryDeduct.mutateAsync(needs)
-            .then(result => setDeductionResult(result))
-            .catch(() => { /* deduction failure is non-blocking */ })
-        },
-      }
-    )
+    const outcome = await runCookCompletion({
+      recipeId: recipe.id,
+      recipeName: recipe.name,
+      servings: recipe.servings,
+      ingredients,
+    })
+    if (outcome.spendLogged) {
+      const msg = outcome.isPartial
+        ? `Cooked — partial spend recorded (${formatCost(outcome.totalCost)} of estimated total)`
+        : 'Cooked — spend recorded'
+      setCookConfirmation(msg)
+      setTimeout(() => setCookConfirmation(null), 2000)
+    }
+    if (outcome.deductionResult) {
+      setDeductionResult(outcome.deductionResult)
+    }
   }
 
   const perServingNutrition = useMemo(() => {
@@ -838,10 +816,10 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={handleMarkAsCooked}
-              disabled={spendLog.isPending}
+              disabled={cookPending}
               className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
-              {spendLog.isPending ? 'Recording...' : 'Mark as Cooked'}
+              {cookPending ? 'Recording...' : 'Mark as Cooked'}
             </button>
             {cookConfirmation && (
               <span className="text-xs text-primary">{cookConfirmation}</span>
@@ -1004,6 +982,14 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           mealName={recipe?.name ?? 'Recipe'}
           result={deductionResult}
           onClose={() => setDeductionResult(null)}
+          onSaveLeftover={() => setShowLeftoverModal(true)}
+        />
+      )}
+      {showLeftoverModal && recipe && (
+        <AddInventoryItemModal
+          isOpen={showLeftoverModal}
+          onClose={() => setShowLeftoverModal(false)}
+          leftoverDefaults={{ recipeName: recipe.name, recipeId: recipe.id }}
         />
       )}
     </>
