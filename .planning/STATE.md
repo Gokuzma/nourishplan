@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: AMPS + Universal Recipe Import
-status: Complete
-stopped_at: Phase 25 Plan 03 complete — universal recipe import shipped to nourishplan.gregok.ca
-last_updated: "2026-04-19T23:10:00Z"
+status: In Progress
+stopped_at: Phase 26 complete — Cook Mode wired to inventory/budget/leftover, deployed + live-verified on nourishplan.gregok.ca (4/4 deterministic criteria pass)
+last_updated: "2026-04-20T03:15:00Z"
 progress:
-  total_phases: 15
-  completed_phases: 15
-  total_plans: 53
-  completed_plans: 53
-  percent: 100
+  total_phases: 19
+  completed_phases: 16
+  total_plans: 57
+  completed_plans: 57
+  percent: 84
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 25 — universal-recipe-import
+**Current focus:** Phase 26 — wire-cook-mode-to-inventory-and-budget (complete; UAT criterion #5 deferred)
 
 ## Current Position
 
-Phase: 25 — COMPLETE (2026-04-19)
-Plan: 03 complete — universal recipe import deployed and UAT approved on nourishplan.gregok.ca
-Next up: No planned phases remaining. All 25 phases (Foundation → Universal Recipe Import) are complete. Awaiting user direction for next milestone or maintenance work.
+Phase: 26 — COMPLETE (2026-04-20)
+Plan: 04 complete — CookModePage + RecipeBuilder both call shared useCookCompletion hook; spend_logs + FIFO deduct + leftover modal all verified live
+Next up: Phase 27 (Wire Schedule Badges to PlanGrid), Phase 28 (Resolve Prep Sequence Edge Function Orphans), Phase 29 (v2.0 Documentation Reconciliation). Phase 26 success criterion #5 (Budget → Cook → Inventory → Grocery end-to-end reconciliation) remains in 26-HUMAN-UAT.md pending manual Playwright pass.
 
 Progress: ██████████ 100%
 

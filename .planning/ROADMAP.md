@@ -41,7 +41,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging (completed 2026-04-12)
 - [x] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns (completed 2026-04-15)
 - [x] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions (completed 2026-04-19)
-- [ ] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure)
+- [x] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure) (completed 2026-04-19)
 - [ ] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useSchedule so schedule UI feedback works on the plan page (v2.0 gap closure)
 - [ ] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure)
 - [ ] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
@@ -515,10 +515,10 @@ Plans:
 **Plans**: 4 plans
 **UI hint**: yes
 Plans:
-- [ ] 26-01-PLAN.md — useCookCompletion shared hook + vitest unit tests (Wave 1)
-- [ ] 26-02-PLAN.md — Extend CookDeductionReceipt with onSaveLeftover prop + Save leftover portion button (Wave 1)
-- [ ] 26-03-PLAN.md — Refactor RecipeBuilder.handleMarkAsCooked to use shared hook + wire leftover modal (Wave 2)
-- [ ] 26-04-PLAN.md — Wire CookModePage completion sequence + grep-assertion tests (Wave 3)
+- [x] 26-01-PLAN.md — useCookCompletion shared hook + vitest unit tests (Wave 1)
+- [x] 26-02-PLAN.md — Extend CookDeductionReceipt with onSaveLeftover prop + Save leftover portion button (Wave 1)
+- [x] 26-03-PLAN.md — Refactor RecipeBuilder.handleMarkAsCooked to use shared hook + wire leftover modal (Wave 2)
+- [x] 26-04-PLAN.md — Wire CookModePage completion sequence + grep-assertion tests (Wave 3)
 
 ### Phase 27: Wire Schedule Badges to PlanGrid
 **Goal**: The schedule set via `ScheduleSection` surfaces as coloured dot badges on PlanGrid SlotCards (peach=consume, amber=quick, red=away) so the Phase 21 data model is visible to the user
