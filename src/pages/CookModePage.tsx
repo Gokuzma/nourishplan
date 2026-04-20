@@ -19,6 +19,11 @@ import { NotificationPermissionBanner } from '../components/cook/NotificationPer
 import { InAppTimerAlert } from '../components/cook/InAppTimerAlert'
 import { fireStepDoneNotification, playTimerChime } from '../components/cook/CookTimerNotifications'
 import type { RecipeStep } from '../types/database'
+import { useRecipe, useRecipeIngredients } from '../hooks/useRecipes'
+import { useCookCompletion } from '../hooks/useCookCompletion'
+import { CookDeductionReceipt } from '../components/inventory/CookDeductionReceipt'
+import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
+import type { DeductionResult } from '../hooks/useInventoryDeduct'
 
 // D-21 flow modes
 type FlowMode = 'loading' | 'resume-prompt' | 'multi-meal-prompt' | 'reheat' | 'cook' | 'error'
@@ -65,6 +70,12 @@ export function CookModePage() {
 
   // For single-recipe cook: load recipe steps live (R-02 — live-bound, not snapshotted)
   const recipeIdForSteps = activeSession?.recipe_ids[0] ?? mealId
+  const { data: cookingRecipe } = useRecipe(recipeIdForSteps ?? '')
+  const { data: cookingIngredients } = useRecipeIngredients(recipeIdForSteps ?? '')
+  const { runCookCompletion } = useCookCompletion()
+  const [deductionResult, setDeductionResult] = useState<DeductionResult | null>(null)
+  const [showLeftoverModal, setShowLeftoverModal] = useState(false)
+  const [leftoverContext, setLeftoverContext] = useState<{ recipeName: string; recipeId: string } | null>(null)
   const { data: recipeStepsData } = useRecipeSteps(recipeIdForSteps)
   const liveSteps: RecipeStep[] = recipeStepsData?.instructions ?? []
 
@@ -171,9 +182,13 @@ export function CookModePage() {
 
   async function handlePrimaryAction() {
     if (allDone || !activeStepId || !activeSessionId) {
-      // Complete session and navigate back
-      if (activeSessionId) {
+      // Exit cook mode button path. If session is still in-progress, complete it + run hook.
+      // If already completed (re-entry), short-circuit to navigate(-1) — D-16 idempotency.
+      if (activeSessionId && activeSession?.status === 'in_progress') {
+        // Capture the status snapshot BEFORE any await — Landmine 3 (D-16)
         await completeSession.mutateAsync(activeSessionId)
+        await runCookCompletionIfSingleRecipe()
+        return  // Deferred nav — receipt dismissal drives navigate(-1) (D-14)
       }
       navigate(-1)
       return
@@ -212,7 +227,45 @@ export function CookModePage() {
     })
 
     if (isLastStep) {
-      await completeSession.mutateAsync(activeSessionId)
+      // Capture status snapshot BEFORE completeSession await — Landmine 3 (D-16)
+      if (activeSession?.status === 'in_progress') {
+        await completeSession.mutateAsync(activeSessionId)
+        await runCookCompletionIfSingleRecipe()
+        return  // Deferred nav — receipt dismissal drives navigate(-1) (D-14)
+      }
+      navigate(-1)
+    }
+  }
+
+  async function runCookCompletionIfSingleRecipe() {
+    // D-08/D-09: only single-recipe sessions. Combined sessions are Phase 28's scope.
+    if (!activeSession || activeSession.recipe_ids.length !== 1) {
+      if (activeSession && activeSession.recipe_ids.length > 1 && import.meta.env.DEV) {
+        console.warn(
+          `[CookMode] Combined cook session (recipe_ids.length=${activeSession.recipe_ids.length}) detected — spend/deduct/leftover skipped. Combined cooking is Phase 28's scope (PREP-02).`
+        )
+      }
+      navigate(-1)
+      return
+    }
+    if (!cookingIngredients || !cookingRecipe) {
+      // Data not loaded yet — degrade gracefully to navigate(-1) (Landmine 1 / 8)
+      navigate(-1)
+      return
+    }
+    const recipeId = activeSession.recipe_ids[0]
+    const outcome = await runCookCompletion({
+      recipeId,
+      recipeName: cookingRecipe.name,
+      servings: cookingRecipe.servings,
+      ingredients: cookingIngredients,
+    })
+    if (outcome.deductionResult) {
+      setLeftoverContext({ recipeName: cookingRecipe.name, recipeId })
+      setDeductionResult(outcome.deductionResult)
+      // Receipt renders — its onClose handler drives navigate(-1) when dismissed
+    } else {
+      // Deduct skipped or spend failed — no receipt to show. Navigate directly.
       navigate(-1)
     }
   }
@@ -465,6 +518,30 @@ export function CookModePage() {
         )
       })}
     </CookModeShell>
+
+    {deductionResult && leftoverContext && (
+      <CookDeductionReceipt
+        mealName={leftoverContext.recipeName}
+        result={deductionResult}
+        onClose={() => {
+          setDeductionResult(null)
+          // Landmine 4: defer navigation when the leftover modal is open
+          if (!showLeftoverModal) navigate(-1)
+        }}
+        onSaveLeftover={() => setShowLeftoverModal(true)}
+      />
+    )}
+    {showLeftoverModal && leftoverContext && (
+      <AddInventoryItemModal
+        isOpen={showLeftoverModal}
+        onClose={() => {
+          setShowLeftoverModal(false)
+          setDeductionResult(null)
+          navigate(-1)
+        }}
+        leftoverDefaults={leftoverContext}
+      />
+    )}
     </>
   )
 }

@@ -120,3 +120,92 @@ describe('Rate limit sharing (V-10)', () => {
     expect(edgeFn).toMatch(/kind.*steps|steps.*kind/)
   })
 })
+
+describe('CookModePage wiring (Phase 26, INVT-05)', () => {
+  const source = fs.readFileSync(path.join(ROOT, 'src/pages/CookModePage.tsx'), 'utf8')
+
+  it('imports useCookCompletion from the shared hook', () => {
+    expect(source).toContain("import { useCookCompletion }")
+  })
+
+  it('imports CookDeductionReceipt and AddInventoryItemModal', () => {
+    expect(source).toContain("import { CookDeductionReceipt }")
+    expect(source).toContain("import { AddInventoryItemModal }")
+  })
+
+  it('has a single-recipe guard on the completion sequence (D-08/D-09)', () => {
+    expect(source).toContain('recipe_ids.length !== 1')
+  })
+
+  it('warns in dev for combined cook sessions with a Phase 28 reference (D-09)', () => {
+    expect(source).toContain('import.meta.env.DEV')
+    expect(source).toContain('Phase 28')
+  })
+
+  it('calls runCookCompletion from the shared hook', () => {
+    expect(source).toMatch(/runCookCompletion\(\s*\{/)
+  })
+
+  it('renders AddInventoryItemModal with leftoverDefaults (INVT-06)', () => {
+    expect(source).toContain('leftoverDefaults={leftoverContext}')
+  })
+
+  it('defers navigation when the leftover modal is open (Landmine 4)', () => {
+    expect(source).toContain('if (!showLeftoverModal) navigate(-1)')
+  })
+})
+
+describe('Status transition guard (Phase 26, D-16 idempotency)', () => {
+  const source = fs.readFileSync(path.join(ROOT, 'src/pages/CookModePage.tsx'), 'utf8')
+
+  it('reads activeSession.status === in_progress before completeSession.mutateAsync', () => {
+    // Guard appears at least twice — once in the allDone branch, once in the isLastStep branch
+    const matches = source.match(/activeSession\?\.status === 'in_progress'/g) ?? []
+    expect(matches.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('RecipeBuilder uses shared hook (Phase 26, D-01)', () => {
+  const source = fs.readFileSync(path.join(ROOT, 'src/components/recipe/RecipeBuilder.tsx'), 'utf8')
+
+  it('imports useCookCompletion', () => {
+    expect(source).toContain("import { useCookCompletion }")
+  })
+
+  it('has no direct useCreateSpendLog import (refactor replaced it)', () => {
+    expect(source).not.toContain("import { useCreateSpendLog }")
+  })
+
+  it('has no inline spendLog.mutate call', () => {
+    expect(source).not.toMatch(/spendLog\.mutate\(/)
+  })
+
+  it('has no inline inventoryDeduct.mutateAsync call', () => {
+    expect(source).not.toMatch(/inventoryDeduct\.mutateAsync/)
+  })
+
+  it('calls runCookCompletion from handleMarkAsCooked', () => {
+    expect(source).toMatch(/async function handleMarkAsCooked/)
+    expect(source).toMatch(/runCookCompletion\(\s*\{/)
+  })
+})
+
+describe('CookDeductionReceipt leftover button (Phase 26, INVT-06)', () => {
+  const source = fs.readFileSync(
+    path.join(ROOT, 'src/components/inventory/CookDeductionReceipt.tsx'),
+    'utf8'
+  )
+
+  it('exposes an optional onSaveLeftover prop', () => {
+    expect(source).toContain('onSaveLeftover?: () => void')
+  })
+
+  it('renders a Save leftover portion button when onSaveLeftover is provided', () => {
+    expect(source).toContain('Save leftover portion')
+  })
+
+  it('preserves the existing Done button and auto-dismiss timer', () => {
+    expect(source).toContain('Done')
+    expect(source).toContain('setTimeout(onClose, 8000)')
+  })
+})
