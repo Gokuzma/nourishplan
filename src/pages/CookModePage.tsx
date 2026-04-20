@@ -518,6 +518,30 @@ export function CookModePage() {
         )
       })}
     </CookModeShell>
+
+    {deductionResult && leftoverContext && (
+      <CookDeductionReceipt
+        mealName={leftoverContext.recipeName}
+        result={deductionResult}
+        onClose={() => {
+          setDeductionResult(null)
+          // Landmine 4: defer navigation when the leftover modal is open
+          if (!showLeftoverModal) navigate(-1)
+        }}
+        onSaveLeftover={() => setShowLeftoverModal(true)}
+      />
+    )}
+    {showLeftoverModal && leftoverContext && (
+      <AddInventoryItemModal
+        isOpen={showLeftoverModal}
+        onClose={() => {
+          setShowLeftoverModal(false)
+          setDeductionResult(null)
+          navigate(-1)
+        }}
+        leftoverDefaults={leftoverContext}
+      />
+    )}
     </>
   )
 }
