@@ -182,9 +182,13 @@ export function CookModePage() {
 
   async function handlePrimaryAction() {
     if (allDone || !activeStepId || !activeSessionId) {
-      // Complete session and navigate back
-      if (activeSessionId) {
+      // Exit cook mode button path. If session is still in-progress, complete it + run hook.
+      // If already completed (re-entry), short-circuit to navigate(-1) — D-16 idempotency.
+      if (activeSessionId && activeSession?.status === 'in_progress') {
+        // Capture the status snapshot BEFORE any await — Landmine 3 (D-16)
         await completeSession.mutateAsync(activeSessionId)
+        await runCookCompletionIfSingleRecipe()
+        return  // Deferred nav — receipt dismissal drives navigate(-1) (D-14)
       }
       navigate(-1)
       return
@@ -223,7 +227,45 @@ export function CookModePage() {
     })
 
     if (isLastStep) {
-      await completeSession.mutateAsync(activeSessionId)
+      // Capture status snapshot BEFORE completeSession await — Landmine 3 (D-16)
+      if (activeSession?.status === 'in_progress') {
+        await completeSession.mutateAsync(activeSessionId)
+        await runCookCompletionIfSingleRecipe()
+        return  // Deferred nav — receipt dismissal drives navigate(-1) (D-14)
+      }
+      navigate(-1)
+    }
+  }
+
+  async function runCookCompletionIfSingleRecipe() {
+    // D-08/D-09: only single-recipe sessions. Combined sessions are Phase 28's scope.
+    if (!activeSession || activeSession.recipe_ids.length !== 1) {
+      if (activeSession && activeSession.recipe_ids.length > 1 && import.meta.env.DEV) {
+        console.warn(
+          `[CookMode] Combined cook session (recipe_ids.length=${activeSession.recipe_ids.length}) detected — spend/deduct/leftover skipped. Combined cooking is Phase 28's scope (PREP-02).`
+        )
+      }
+      navigate(-1)
+      return
+    }
+    if (!cookingIngredients || !cookingRecipe) {
+      // Data not loaded yet — degrade gracefully to navigate(-1) (Landmine 1 / 8)
+      navigate(-1)
+      return
+    }
+    const recipeId = activeSession.recipe_ids[0]
+    const outcome = await runCookCompletion({
+      recipeId,
+      recipeName: cookingRecipe.name,
+      servings: cookingRecipe.servings,
+      ingredients: cookingIngredients,
+    })
+    if (outcome.deductionResult) {
+      setLeftoverContext({ recipeName: cookingRecipe.name, recipeId })
+      setDeductionResult(outcome.deductionResult)
+      // Receipt renders — its onClose handler drives navigate(-1) when dismissed
+    } else {
+      // Deduct skipped or spend failed — no receipt to show. Navigate directly.
       navigate(-1)
     }
   }
