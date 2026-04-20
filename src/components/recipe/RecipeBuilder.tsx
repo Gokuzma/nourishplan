@@ -573,46 +573,24 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     })
   }
 
-  function handleMarkAsCooked() {
+  async function handleMarkAsCooked() {
     if (!recipe || !ingredients) return
-    const prices = foodPrices ?? []
-    const ingredientsWithCost = ingredients.map(ing => ({
-      quantity_grams: ing.quantity_grams,
-      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id),
-    }))
-    const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(
-      ingredientsWithCost,
-      recipe.servings > 0 ? recipe.servings : 1
-    )
-    const totalCost = costPerServing * (recipe.servings > 0 ? recipe.servings : 1)
-    const isPartial = pricedCount < totalCount
-
-    spendLog.mutate(
-      {
-        recipe_id: recipe.id,
-        amount: totalCost,
-        is_partial: isPartial,
-      },
-      {
-        onSuccess: () => {
-          const msg = isPartial
-            ? `Cooked — partial spend recorded (${formatCost(totalCost)} of estimated total)`
-            : 'Cooked — spend recorded'
-          setCookConfirmation(msg)
-          setTimeout(() => setCookConfirmation(null), 2000)
-
-          // Trigger inventory deduction (non-blocking — failure does not prevent spend log)
-          const needs = (ingredients ?? []).map(ing => ({
-            food_id: ing.ingredient_id,
-            food_name: ing.ingredient_name,
-            quantity_grams: ing.quantity_grams,
-          }))
-          inventoryDeduct.mutateAsync(needs)
-            .then(result => setDeductionResult(result))
-            .catch(() => { /* deduction failure is non-blocking */ })
-        },
-      }
-    )
+    const outcome = await runCookCompletion({
+      recipeId: recipe.id,
+      recipeName: recipe.name,
+      servings: recipe.servings,
+      ingredients,
+    })
+    if (outcome.spendLogged) {
+      const msg = outcome.isPartial
+        ? `Cooked — partial spend recorded (${formatCost(outcome.totalCost)} of estimated total)`
+        : 'Cooked — spend recorded'
+      setCookConfirmation(msg)
+      setTimeout(() => setCookConfirmation(null), 2000)
+    }
+    if (outcome.deductionResult) {
+      setDeductionResult(outcome.deductionResult)
+    }
   }
 
   const perServingNutrition = useMemo(() => {
