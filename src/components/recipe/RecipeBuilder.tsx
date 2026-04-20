@@ -982,6 +982,14 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           mealName={recipe?.name ?? 'Recipe'}
           result={deductionResult}
           onClose={() => setDeductionResult(null)}
+          onSaveLeftover={() => setShowLeftoverModal(true)}
+        />
+      )}
+      {showLeftoverModal && recipe && (
+        <AddInventoryItemModal
+          isOpen={showLeftoverModal}
+          onClose={() => setShowLeftoverModal(false)}
+          leftoverDefaults={{ recipeName: recipe.name, recipeId: recipe.id }}
         />
       )}
     </>
