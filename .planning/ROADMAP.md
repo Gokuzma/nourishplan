@@ -38,8 +38,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 20: Feedback Engine & Dietary Restrictions** - Recipe ratings, satiety tracking, repeat-rate monitoring, per-member dietary restrictions, and avoided foods (completed 2026-04-06)
 - [x] **Phase 21: Schedule Model** - Per-member daily availability windows as planning constraints (completed 2026-04-06)
 - [x] **Phase 22: Constraint-Based Planning Engine** - Async plan generation optimised for nutrition, cost, schedule, and preferences — with inventory-priority and feedback weighting (completed 2026-04-06)
-- [x] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging (completed 2026-04-12)
-- [x] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns (completed 2026-04-15)
+- [x] **Phase 23: Prep Optimisation** - Batch prep suggestions, day-of task sequencing, and freezer-friendly recipe flagging (completed 2026-04-12)
+- [x] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns (completed 2026-04-15)
 - [x] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions (completed 2026-04-19)
 - [ ] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure)
 - [ ] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useSchedule so schedule UI feedback works on the plan page (v2.0 gap closure)
@@ -235,7 +235,7 @@ Plans:
   4. `comingSoon` dead code branch is removed from Sidebar.tsx
 **Plans:** 1 plan
 Plans:
-- [x] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme token fix
+- [x] 09-01-PLAN.md — Dead code removal (usePortionSuggestions, applyStoredTheme export, Sidebar comingSoon branch) and OfflineBanner theme tokens
 
 ### Phase 10: Requirements Documentation Formalization
 **Goal:** Add LAUNCH and POLISH requirement definitions to REQUIREMENTS.md so all implemented features have formal requirement entries
@@ -512,8 +512,13 @@ Plans:
   3. `CookDeductionReceipt` renders on completion with deducted items and any missing/insufficient items
   4. After completion, the user is prompted to save any uneaten portion as a leftover inventory item via `AddInventoryItemModal` with `leftoverDefaults`
   5. The end-to-end flow Budget → Cook → Inventory → Grocery reconciles: generating a grocery list after a cook correctly subtracts the deducted ingredients
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+Plans:
+- [ ] 26-01-PLAN.md — useCookCompletion shared hook + vitest unit tests (Wave 1)
+- [ ] 26-02-PLAN.md — Extend CookDeductionReceipt with onSaveLeftover prop + Save leftover portion button (Wave 1)
+- [ ] 26-03-PLAN.md — Refactor RecipeBuilder.handleMarkAsCooked to use shared hook + wire leftover modal (Wave 2)
+- [ ] 26-04-PLAN.md — Wire CookModePage completion sequence + grep-assertion tests (Wave 3)
 
 ### Phase 27: Wire Schedule Badges to PlanGrid
 **Goal**: The schedule set via `ScheduleSection` surfaces as coloured dot badges on PlanGrid SlotCards (peach=consume, amber=quick, red=away) so the Phase 21 data model is visible to the user
