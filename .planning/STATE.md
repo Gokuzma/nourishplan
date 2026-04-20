@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: AMPS + Universal Recipe Import
+milestone: v1.1
+milestone_name: UI polish and usability improvements
 status: In Progress
-stopped_at: Phase 26 complete — Cook Mode wired to inventory/budget/leftover, deployed + live-verified on nourishplan.gregok.ca (4/4 deterministic criteria pass)
-last_updated: "2026-04-20T03:15:00Z"
+stopped_at: "Phase 27 context gathered \u2014 family-holistic schedule dots locked, ROADMAP #1 to be amended in planning"
+last_updated: "2026-04-20T03:29:13.351Z"
 progress:
-  total_phases: 19
-  completed_phases: 16
-  total_plans: 57
-  completed_plans: 57
-  percent: 84
+  total_phases: 26
+  completed_phases: 24
+  total_plans: 97
+  completed_plans: 96
+  percent: 99
 ---
 
 # Project State
@@ -307,6 +307,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T23:10:00Z
-Stopped at: Phase 25 Plan 03 COMPLETE — universal recipe import live on nourishplan.gregok.ca. Human UAT via Playwright approved. Raw text imports PASS end-to-end; URL imports fall back to D-10 paste-text guidance when server-side fetch is bot-blocked by mainstream sites (expected per design); D-11 attribution null for text imports confirmed; D-13 no source badges on recipe cards confirmed. Two polish items flagged for future (AbortError → D-10 mapping, URL-import caveat). Phase 25 complete — no next phase planned.
-Resume file: None — awaiting user direction for next work.
+Last session: 2026-04-20T03:29:13.347Z
+Stopped at: Phase 27 context gathered \u2014 family-holistic schedule dots locked, ROADMAP #1 to be amended in planning
+Resume file: .planning/phases/27-wire-schedule-badges-to-plangrid/27-CONTEXT.md
