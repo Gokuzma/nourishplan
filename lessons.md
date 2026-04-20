@@ -212,3 +212,27 @@ Any new function added to this project must either (a) be deployed with `--no-ve
 3. The list of files explicitly in scope, with the understanding that all other files are forbidden.
 The warning must reference specific symbols/features by name — generic "don't truncate" is not enough.
 **Applies to:** Every `Task(subagent_type="gsd-executor", ...)` call that targets a file touched by a previous phase. The risk scales with the age of the file and the number of prior phases that have modified it.
+
+### L-028: Playwright MCP snapshot tool is too slow to catch transient UI like 8-second auto-dismiss toasts
+**Bug:** During Phase 26 live UAT I clicked "Mark as Cooked", then ran `browser_wait_for({text: "Save leftover portion", time: 10})`. It timed out after 30s even though the receipt DID render — the receipt's `setTimeout(onClose, 8000)` auto-dismiss fired between the MCP tool's polling intervals. I initially thought the feature was broken and went looking for deploy/cache issues that didn't exist.
+**Root cause:** The Playwright MCP `browser_snapshot`, `browser_wait_for`, and `browser_click` each round-trip through a JSONL protocol layer that adds ~1-3s latency per call. A UI element with an 8s visibility window can render and dismiss entirely within that window — the snapshot tool never catches it. Spend-log writes succeed in the DB (provable via REST API) but the UI evidence is gone by the time the next snapshot runs.
+**Rule:** For UAT of transient UI (auto-dismissing toasts, snackbars, flash messages, receipts with setTimeout-based close) use `browser_evaluate` with an inline click-then-synchronously-capture-state pattern, not `browser_click` + `browser_wait_for`. Example:
+```js
+browser_evaluate(`() => {
+  const btn = [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Mark as Cooked');
+  btn.click();
+  return new Promise((resolve) => {
+    let tries = 0;
+    const check = setInterval(() => {
+      tries++;
+      const receipt = document.querySelector('[class*="fixed"][class*="bottom"]');
+      if (receipt?.textContent.includes('Cooked:') || tries >= 30) {
+        clearInterval(check);
+        resolve({ tries, receiptText: receipt?.innerText });
+      }
+    }, 100);
+  });
+}`)
+```
+This runs inside the page, polls every 100ms, and resolves as soon as the element appears — no MCP round-trip latency in the loop.
+**Applies to:** All Playwright MCP UAT on transient UI. Any toast, banner, snackbar, or receipt with a `setTimeout(..., Nms)` close pattern where N ≤ 10_000. Also applies to modals that open/close in rapid sequence.
