@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: In progress
-stopped_at: "Phase 28 context gathered -- 8 decisions captured (D-01 wire both orphan edge functions in; D-02 reheat AI failure to existing 3-step microwave fallback; D-03 both Combined and Per-recipe modes call generate-cook-sequence; D-04 full-screen 'Planning your cook session...' overlay during cook-sequence call; D-05 cook-sequence failure to per-recipe concatenation fallback; D-06 light touch on Phase 23 records, only REQUIREMENTS.md PREP-02 row; D-07 redeploy both edge functions regardless; D-08 no AI cost telemetry in Phase 28 -- defer to v2.1+); ready for /gsd-plan-phase 28"
-last_updated: "2026-04-21T02:30:00.000Z"
+stopped_at: "Phase 28 UI-SPEC approved -- 6/6 dimensions PASS no FLAGs (CookSequenceLoadingOverlay + ReheatSkeletonCard locked; silent fall-through on both AI failures; 8 grep guards for anti-regression). Ready for /gsd-plan-phase 28."
+last_updated: "2026-04-21T03:15:00.000Z"
 progress:
   total_phases: 26
   completed_phases: 25
