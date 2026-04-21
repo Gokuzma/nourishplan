@@ -77,3 +77,18 @@ export function useSaveSchedule() {
     },
   })
 }
+
+export function useHouseholdSchedules(householdId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.schedule.forHousehold(householdId),
+    queryFn: async (): Promise<MemberScheduleSlot[]> => {
+      const { data, error } = await supabase
+        .from('member_schedule_slots')
+        .select('*')
+        .eq('household_id', householdId!)
+      if (error) throw error
+      return data ?? []
+    },
+    enabled: !!householdId,
+  })
+}
