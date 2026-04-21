@@ -526,17 +526,17 @@ Plans:
 **Requirements**: SCHED-01, SCHED-02
 **Gap Closure:** Closes CRIT-02 from v2.0 audit (PlanGrid → useSchedule → slotSchedules prop)
 **Success Criteria** (what must be TRUE):
-  1. `PlanGrid.tsx` imports `useSchedule` and calls it with `(householdId, selectedMemberId, selectedMemberType ?? 'user')`
+  1. `PlanGrid.tsx` imports `useHouseholdSchedules` from `../../hooks/useSchedule` and calls it with `(householdId)`; the returned rows are aggregated into a `Map<number, Map<string, ScheduleStatus>>` using the precedence rule `away > quick > consume > prep`, memoised via `useMemo`. (Amended in Phase 27 planning per D-08 — original text referenced the single-member `useSchedule` hook.)
   2. `PlanGrid.tsx` builds a `Map<number, Map<string, ScheduleStatus>>` keyed by day-of-week and slot name via `buildGrid` (or equivalent), memoised via `useMemo`
-  3. Both the mobile (DayCarousel) and desktop render sites pass `slotSchedules={slotSchedulesByDay?.get(dayIndex)}` to each `DayCard`
+  3. Both the mobile (DayCarousel) and desktop render sites pass `slotSchedules={slotSchedulesByDay?.get((weekStartDay + dayIndex) % 7)}` to each `DayCard` (day-of-week key, not plan-relative day index — required when `weekStartDay !== 0`). (Amended in Phase 27 planning per D-10 — original text used a plan-relative key that would shift incorrectly for Monday-start households.)
   4. SlotCards display the correct coloured dot when a schedule row exists for that day/slot; prep shows no dot
   5. Test covers PlanGrid → DayCard prop forwarding so this regression cannot silently recur
-**Plans**: 3 plans (2/3 complete)
+**Plans**: 3 plans (3/3 complete)
 **UI hint**: yes
 Plans:
 - [x] 27-01-PLAN.md — Restore queryKeys.schedule + useHouseholdSchedules hook + buildHouseholdGrid/Tooltips helpers (Wave 1)
 - [x] 27-02-PLAN.md — Wire useHouseholdSchedules into PlanGrid + restore SlotCard dot JSX (Wave 2)
-- [ ] 27-03-PLAN.md — Add tests/PlanGrid.schedule.test.tsx regression test + amend ROADMAP §Phase 27 criteria #1/#3 (Wave 3)
+- [x] 27-03-PLAN.md — Add tests/PlanGrid.schedule.test.tsx regression test + amend ROADMAP §Phase 27 criteria #1/#3 (Wave 3)
 
 ### Phase 28: Resolve Prep Sequence Edge Function Orphans
 **Goal**: Either wire `generate-cook-sequence` and `generate-reheat-sequence` into CookModePage (combined multi-recipe sessions + reheat path) or remove them from `supabase/functions/` and update Phase 23 records
