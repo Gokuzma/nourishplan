@@ -1,14 +1,29 @@
 ---
 phase: 27-wire-schedule-badges-to-plangrid
+verified: 2026-04-20T21:21:43Z
+status: passed
+score: 5/5 must-haves verified (ROADMAP criteria #1-5 all PASS)
+overrides_applied: 0
+re_verification:
+  previous_status: VERIFIED
+  previous_score: 5/5 (authored by Plan 03 executor)
+  audit_mode: independent-cross-check
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
+  audit_result: concur
 created: 2026-04-21
 type: phase-closure-verification
 rubric: goal-backward
-status: VERIFIED
+audited: 2026-04-20T21:21:43Z
+auditor: gsd-verifier (independent goal-backward audit, NOT Plan 03 executor)
 ---
 
 # Phase 27 — Verification
 
 **Goal-backward rubric.** Each ROADMAP §Phase 27 acceptance criterion (post-amendment per D-08 / D-10) is mapped to the concrete evidence (commits, files, grep results, test names) that satisfies it. The phase goal is restoration of Phase 21-02 schedule-badge behaviour PLUS extension to a household-holistic view; this rubric proves both halves.
+
+> **Audit note (2026-04-20):** This VERIFICATION.md was originally authored by the Plan 03 executor in the same session as Plan 03's commit, so it is by-construction self-attesting. An independent goal-backward audit (gsd-verifier) re-derived each verdict from the codebase state on 2026-04-20 and **concurs** with the original verdict. The audit evidence and one caveat (UI-SPEC §5 assertion #2 grep-literalism, non-blocking) are appended in the final §Independent Audit section at the bottom of this file.
 
 ---
 
@@ -53,9 +68,9 @@ This phase **closes CRIT-02** from the v2.0 audit (PlanGrid → useSchedule → 
 | Evidence | Source | Result |
 |---|---|---|
 | Day-of-week key used | `src/components/plan/PlanGrid.tsx:598` | `slotSchedules={slotSchedulesByDay?.get((weekStartDay + i) % 7)}` |
-| Both render sites covered | `src/components/plan/PlanGrid.tsx` line 568-604 (`dayCards` array) → rendered inline at lines 684 (mobile DayCarousel branch) AND 716 (desktop stack branch) | One `<DayCard>` JSX shared between both render paths; single textual prop insertion populates both — visibility-criterion satisfied |
+| Both render sites covered | `src/components/plan/PlanGrid.tsx` line 557-604 (`dayCards` array built once) → rendered at lines 684 (mobile DayCarousel branch) AND 716 (desktop stack branch) | One `<DayCard>` JSX shared between both render paths via the `dayCards` array; single textual prop insertion populates both render paths — consistent with existing `slotViolations=`, `slotFreezerFriendly=`, `slotSuggestions=` pattern |
 | Day-of-week computed from `dayIndex` correctly | `src/components/plan/DayCard.tsx:111` | `const dayName = DAY_NAMES[(weekStartDay + dayIndex) % 7]` (matches the data-key formula exactly) |
-| Test locks the day-of-week key | `tests/PlanGrid.schedule.test.tsx` Test 6 | "places the away dot inside the Tuesday DayCard, not the Monday DayCard, when weekStartDay=1" — positive Tuesday + negative Monday, within()-scoped — passes |
+| Test locks the day-of-week key | `tests/PlanGrid.schedule.test.tsx` Test 6 | "places the away dot inside the Tuesday DayCard, not the Monday DayCard, when weekStartDay=1" — positive Tuesday + negative Monday, within()-scoped, runs on BOTH mobile + desktop render copies — passes |
 | ROADMAP audit marker | `.planning/ROADMAP.md:531` | text contains `(Amended in Phase 27 planning per D-10 — original text used a plan-relative key that would shift incorrectly for Monday-start households.)` |
 
 **Status:** PASS
@@ -104,7 +119,7 @@ This phase **closes CRIT-02** from the v2.0 audit (PlanGrid → useSchedule → 
 |---|---|---|
 | Test file exists | `tests/PlanGrid.schedule.test.tsx` | FOUND (322 lines) |
 | 9 it() blocks | `grep -c "^  it(" tests/PlanGrid.schedule.test.tsx` | 9 |
-| All 9 pass | `npx vitest run tests/PlanGrid.schedule.test.tsx` | `Tests: 9 passed (9)` |
+| All 9 pass | `npx vitest run tests/PlanGrid.schedule.test.tsx` | `Tests: 9 passed (9)` — independently re-run 2026-04-20 21:21:35, 1.17s |
 | Locks the import (`useHouseholdSchedules`) | Test 1 | passes |
 | Locks the precedence rule (D-04) | Test 3 | passes |
 | Locks the tooltip format (D-07) | Test 4 | passes (asserts exact `"Away: Dad. Quick: Sam. Consume: Kayla."`) |
@@ -183,5 +198,106 @@ SCHED-01 and SCHED-02 visibility slice is **closed**.
 
 ---
 
+## Independent Audit (gsd-verifier, 2026-04-20T21:21:43Z)
+
+An independent goal-backward audit was performed AFTER the Plan 03 executor authored the original verification above. The auditor did NOT trust SUMMARY claims; each claim was re-derived from the current codebase, tests were re-run, and the ROADMAP criteria were cross-checked against REQUIREMENTS.md (SCHED-01, SCHED-02).
+
+### Audit method
+
+1. Re-read all three PLAN frontmatter must_haves + acceptance_criteria.
+2. Cross-checked every must_have against the actual code in `src/lib/queryKeys.ts`, `src/hooks/useSchedule.ts`, `src/utils/schedule.ts`, `src/components/plan/PlanGrid.tsx`, `src/components/plan/DayCard.tsx`, `src/components/plan/SlotCard.tsx`.
+3. Cross-checked each `tests/` file for structure + it-block count + exact assertion strings.
+4. Re-ran the three Phase 27 test gates:
+   ```
+   npx vitest run tests/PlanGrid.schedule.test.tsx src/lib/queryKeys.test.ts src/utils/schedule.household.test.ts
+   Test Files 3 passed (3)
+        Tests 27 passed (27)
+     Duration 1.17s
+   ```
+5. Re-ran the full test suite (`npx vitest run tests/`): 12 failed | 209 passed | 39 todo — identical to the Plan 03 baseline; the 12 failures are in the 4 deferred-items.md files (theme, auth, AuthContext, guide).
+6. Re-ran `npx vite build`: exit 0, built in 393ms, PWA precache 12 entries, no errors.
+7. Re-grep'd the UI-SPEC §5 anti-regression contract.
+
+### Independent grep results (UI-SPEC §5 assertions)
+
+| Assertion | Required | Actual | Verdict |
+|---|---|---|---|
+| `grep -q "useHouseholdSchedules" src/components/plan/PlanGrid.tsx` | exit 0 | matches (count=2) | PASS |
+| `grep -c "slotSchedules={" src/components/plan/PlanGrid.tsx` | ≥ 2 | **1** | **Literalism mismatch — see note below** |
+| `grep -c "scheduleStatus" src/components/plan/SlotCard.tsx` | ≥ 3 | 15 | PASS |
+| `test -f tests/PlanGrid.schedule.test.tsx` | exit 0 | FOUND | PASS |
+| `diff against 4eab9b7 / cdf039b` | semantic match | verbatim dot JSX restoration | PASS |
+
+### Note on UI-SPEC §5 assertion #2 (grep literalism)
+
+The UI-SPEC asserts `grep -c "slotSchedules={" src/components/plan/PlanGrid.tsx` returns ≥ 2, expecting the prop to appear at "both the mobile `DayCarousel` path and the desktop stack path". Actual count is **1**.
+
+**This is NOT a gap.** PlanGrid uses a single `dayCards` array (line 557, built from `Array.from(...)` with ONE `<DayCard>` JSX expression at lines 569-602) that is rendered TWICE in the JSX tree — once inside `<DayCarousel>` at line 684 (mobile, `md:hidden`) and once inside `<div className="hidden md:flex flex-col gap-4">` at line 716 (desktop). One source-code prop insertion populates both DOM render paths.
+
+This pattern is **consistent with all existing DayCard props** — `slotViolations={`, `slotFreezerFriendly={`, `slotSuggestions={` each appear exactly once in the source for the exact same reason. The UI-SPEC assertion was written without accounting for this architectural reality (Plan 02 SUMMARY §"Deviations from Plan" already self-documented this).
+
+**The underlying intent of ROADMAP criterion #3** ("Both the mobile (DayCarousel) and desktop render sites pass `slotSchedules={...}` to each `DayCard`") is verified by:
+1. The shared `dayCards` array is rendered in BOTH render-path branches (lines 684, 716).
+2. The regression test `tests/PlanGrid.schedule.test.tsx` Tests 4, 6, 7, 8 each uses `getAllByLabelText(...)` / `getAllByText(...)` + loop explicitly because both render paths are in jsdom DOM, and every loop iteration asserts the expected behaviour — proving dots render correctly in BOTH paths.
+
+**Verdict:** accept the grep literalism as a non-blocking spec-vs-implementation wording mismatch; the semantic contract is satisfied and regression-locked.
+
+### Independent re-verification of truths from PLAN frontmatter
+
+All must_haves from Plans 01, 02, 03 were re-checked against the codebase:
+
+| Source | Must-have | Evidence | Verdict |
+|---|---|---|---|
+| 27-01 | `queryKeys.schedule` namespace with `forMember`, `forHousehold`, `exceptionsForMember` | `src/lib/queryKeys.ts:84-91` all three keys present | PASS |
+| 27-01 | `useHouseholdSchedules(householdId)` returns MemberScheduleSlot[] with `enabled: !!householdId` | `src/hooks/useSchedule.ts:81-94` — hook present, household filter + enabled guard | PASS |
+| 27-01 | `buildHouseholdGrid(rows)` applies precedence away > quick > consume > prep | `src/utils/schedule.ts:37-48` — uses `precedence()` + `STATUS_CYCLE.indexOf` | PASS |
+| 27-01 | `buildHouseholdTooltips` format `'Away: Dad. Quick: Sam.'` with prep omitted + UUID fallback | `src/utils/schedule.ts:56-90` — DISPLAY_ORDER array enforces precedence, TITLE_CASE map excludes prep, `.slice(0,8)` fallback | PASS |
+| 27-01 | Existing `useSchedule` + `useSaveSchedule` preserved byte-identical | `src/hooks/useSchedule.ts:8-27` + `:36-79` unchanged (Plan 01 SUMMARY range-diff exit 0) | PASS |
+| 27-02 | PlanGrid calls `useHouseholdSchedules(householdId)` | `src/components/plan/PlanGrid.tsx:258` | PASS |
+| 27-02 | `slotSchedulesByDay` + `slotTooltipsByDay` memoised as `Map<number, Map<string, ...>>` | `PlanGrid.tsx:272-299` | PASS |
+| 27-02 | DayCard receives `slotSchedules` + `slotTooltips` keyed by `(weekStartDay + i) % 7` | `PlanGrid.tsx:598-599` | PASS |
+| 27-02 | Snack → Snacks normalisation applied in both memos | `PlanGrid.tsx:282, 296` — two occurrences of `slotName === 'Snack' ? 'Snacks' : slotName` | PASS |
+| 27-02 | SlotCard renders 12px dot on occupied + 10px dot on empty with colour mapping | `SlotCard.tsx:110-124 + 287-301` — both branches present with exact class tokens | PASS |
+| 27-02 | All 21 existing DayCard props preserved | `PlanGrid.tsx:569-602` — all 21 canonical props + 2 new (slotSchedules, slotTooltips) present; all 14 PlanGrid features preserved per SUMMARY loop | PASS |
+| 27-03 | `tests/PlanGrid.schedule.test.tsx` exists with 9 it-blocks | `tests/PlanGrid.schedule.test.tsx` — file exists, 9 `it(` blocks (lines 164, 181, 193, 210, 228, 239, 275, 300, 314) | PASS |
+| 27-03 | Test covers precedence D-04 | Test 3 asserts away wins over quick + consume | PASS |
+| 27-03 | Test covers day-of-week key D-10 with positive + negative within() scope | Test 6 uses `tueDayCard`/`monDayCard` with compound selector `[class*="rounded-"][class*="bg-surface"]` and asserts on every mobile+desktop render | PASS |
+| 27-03 | Test covers Snack → Snacks D-09 | Test 7 (line 275) | PASS |
+| 27-03 | Test asserts exact tooltip "Away: Dad. Quick: Sam. Consume: Kayla." | Test 4 line 221 — exact-string match | PASS |
+| 27-03 | ROADMAP criterion #1 amended per D-08 | `ROADMAP.md:529` | PASS |
+| 27-03 | ROADMAP criterion #3 amended per D-10 | `ROADMAP.md:531` | PASS |
+
+### REQUIREMENTS.md traceability
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| SCHED-01 ("Each household member can set availability windows per day") — visibility slice | Satisfied (visibility) | `ScheduleSection` still writes rows (Phase 21); PlanGrid now surfaces all household rows via `useHouseholdSchedules` + family-holistic dot |
+| SCHED-02 ("Plan generation respects member schedule constraints") — visibility slice | Satisfied (visibility) | Household-wide schedule is now visible on PlanGrid, which is the planned Phase 27 slice. The backend generation-logic use of schedule constraints is a separate concern tracked in REQUIREMENTS.md (Phase 21, Phase 27 gap closure). |
+
+Both requirements are mapped to "Phase 21, Phase 27 (gap closure)" in REQUIREMENTS.md §traceability (lines 317-318). The Phase 27 slice is the UI-visibility slice (CRIT-02 closure), which is the documented and shipped scope. REQUIREMENTS.md still marks these "Pending" because the generation-respects-constraints side is upstream; that status is a REQUIREMENTS.md lifecycle concern, not a Phase 27 gap.
+
+### Independent verdict
+
+**CONCUR — Phase 27 PASS.**
+
+- All 5 ROADMAP §Phase 27 success criteria independently re-verified against the codebase. Each has concrete code + test evidence.
+- All Plan 01/02/03 must_haves independently verified.
+- Test gates re-run end-to-end: 27/27 Phase-27-specific tests pass; 209/260 full suite passes (12 failures all in deferred-items.md files, 39 todo); build exit 0.
+- The single UI-SPEC §5 grep-literalism discrepancy (`slotSchedules={` count = 1 instead of ≥ 2) is explained by the existing single-JSX-shared-array architecture and does NOT indicate a functional gap; the semantic contract (both render paths receive the prop) is satisfied via JSX reuse and regression-locked via test assertions on both mobile+desktop DOM copies.
+
+### Human UAT recommendation (non-blocking)
+
+The regression test in `tests/PlanGrid.schedule.test.tsx` is jsdom-only — it proves prop forwarding, aria-label rendering, title attribute content, and class tokens, but does NOT visually verify actual pixel colors, dot positioning, or hover behaviour in a real browser. This is acceptable because:
+
+- Every dot property observable from the DOM is asserted (class tokens, aria-label, title attribute, presence/absence).
+- The dot JSX is **verbatim** from commits `4eab9b7` + `cdf039b`, which were themselves verified in Phase 21-02's UAT.
+- The colour tokens (`bg-accent`, `bg-amber-500`, `bg-red-500`) are Tailwind utility classes already used elsewhere in production.
+
+**Recommended but not blocking:** A single human UAT pass at `/plan` in a real browser with a household that has at least 2 members with schedules would confirm the visual presentation (dot colours against the light/dark theme, `ml-1` spacing against the `violationCount` badge, native `title` tooltip hover behaviour in the user's actual browser). This is surfaced to the developer for awareness; it does not block Phase 27 closure since the regression-test contract is comprehensive.
+
+---
+
 *Phase: 27-wire-schedule-badges-to-plangrid*
-*Verification authored: 2026-04-21*
+*Verification authored: 2026-04-21 (Plan 03 executor)*
+*Independent audit: 2026-04-20T21:21:43Z (gsd-verifier)*
+*Audit verdict: CONCUR — PASS*
