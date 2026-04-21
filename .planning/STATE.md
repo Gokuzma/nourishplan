@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: In progress
-stopped_at: "Phase 27 Plan 02 complete -- PlanGrid wired to useHouseholdSchedules with slotSchedulesByDay + slotTooltipsByDay memos; SlotCard dot JSX restored from 4eab9b7/cdf039b on occupied + empty branches; DayCard slotTooltips prop forwarding live; 14-feature preservation loop OK; ready for Plan 27-03 regression test + ROADMAP amendment"
-last_updated: "2026-04-21T01:01:00.000Z"
+stopped_at: "Phase 27 COMPLETE (3/3 plans, CRIT-02 closed) -- Plan 27-03 shipped tests/PlanGrid.schedule.test.tsx (9-it regression test, all pass) + amended ROADMAP §Phase 27 criteria #1+#3 per D-08/D-10 with inline audit markers; zero new vitest regressions; ROADMAP plans counter advanced 2/3 -> 3/3, plan-3 checkbox checked; SCHED-01+SCHED-02 visibility slice closed and locked"
+last_updated: "2026-04-21T01:14:00.000Z"
 progress:
   total_phases: 26
-  completed_phases: 24
+  completed_phases: 25
   total_plans: 100
-  completed_plans: 98
-  percent: 98
+  completed_plans: 99
+  percent: 99
 ---
 
 # Project State
@@ -20,15 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 26 — wire-cook-mode-to-inventory-and-budget (complete; UAT criterion #5 deferred)
+**Current focus:** Phase 27 — wire-schedule-badges-to-plangrid (COMPLETE; CRIT-02 closed and locked by regression test)
 
 ## Current Position
 
-Phase: 27 — IN PROGRESS (started 2026-04-20)
-Plan: 02 complete (eade152) — PlanGrid.tsx now imports + calls useHouseholdSchedules(householdId), builds slotSchedulesByDay + slotTooltipsByDay memos via buildHouseholdGrid/Tooltips with Snack→Snacks normalisation and (weekStartDay + i) % 7 day-of-week key; DayCard.tsx forwards new slotTooltips prop to both SlotCard render sites; SlotCard.tsx renders 12px occupied + 10px empty coloured dots cherry-picked verbatim from 4eab9b7/cdf039b with scheduleTooltip family-view title; W4 dedupe-import guard exit 0 (exactly 1 from '../../types/database'); 14-feature preservation loop exit 0; all 21 DayCard props preserved; 87 insertions / 4 planned deletions across 3 files; vite build exit 0; zero new vitest regressions vs Plan 01 baseline (12 pre-existing failures unchanged)
-Next up: Plan 27-03 (Add tests/PlanGrid.schedule.test.tsx regression test mocking useHouseholdSchedules + amend ROADMAP §Phase 27 criteria #1/#3 per D-08/D-10). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass.
+Phase: 27 — COMPLETE (3/3 plans, CRIT-02 closed)
+Plan: 03 complete (1e9325f + f7589b9) — tests/PlanGrid.schedule.test.tsx ships with 9 passing it() blocks covering useHouseholdSchedules import (D-12), precedence away > quick > consume > prep (D-04), family tooltip exact-string format "Away: Dad. Quick: Sam. Consume: Kayla." (D-07), prep-drop, day-of-week key (weekStartDay + dayIndex) % 7 (D-10) with positive Tuesday + negative Monday within()-scoped, Snack→Snacks normalisation (D-09), UUID first-8-char fallback, empty-schedule no-op; ROADMAP §Phase 27 criteria #1 + #3 amended in place per D-08 / D-10 with "Amended in Phase 27 planning per D-XX" inline audit markers; only §Phase 27 lines 529-539 touched (criteria #2/#4/#5 byte-identical); plans counter advanced 2/3 → 3/3, plan-3 checkbox checked; full vitest suite zero new regressions (12 pre-existing failures unchanged from Plan 01 baseline)
+Next up: Phase 28 (resolve-prep-sequence-edge-function-orphans — wire-in or remove generate-cook-sequence + generate-reheat-sequence). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass.
 
-Progress: █████████░ 98%
+Progress: █████████░ 99%
 
 ## Performance Metrics
 
@@ -114,6 +114,7 @@ Progress: █████████░ 98%
 | Phase 25-universal-recipe-import P03 | 240 | 2 tasks | 3 files |
 | Phase 27-wire-schedule-badges-to-plangrid P01 | 10 | 2 tasks | 5 files |
 | Phase 27-wire-schedule-badges-to-plangrid P02 | 4 | 2 tasks | 3 files |
+| Phase 27-wire-schedule-badges-to-plangrid P03 | 6 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -197,6 +198,9 @@ Recent decisions affecting current work:
 - [Phase 06-launch-on-gregok-ca]: vercel.json buildCommand set to 'vite build' (skipping tsc) — pre-existing TS errors would block every deploy
 - [Phase 06-launch-on-gregok-ca]: Supabase disable_signup and auth URLs configured via Management API — fully automated without manual dashboard steps
 - [Phase 07-fix-auth-household-gaps]: ResetPasswordPage placed outside AuthGuard and GuestGuard — temporary session token from email link would be rejected by guards
+- [Phase 27-wire-schedule-badges-to-plangrid]: tests/PlanGrid.schedule.test.tsx mocks useHouseholdSchedules (NOT useSchedule) so any future regression to single-member hook lands on no-op mock and fails 8/9 tests immediately — prevents L-020/L-027 worktree truncation pattern from silently regressing CRIT-02
+- [Phase 27-wire-schedule-badges-to-plangrid]: ROADMAP §Phase 27 criteria #1 + #3 amended in place per D-08/D-10 with inline "Amended in Phase 27 planning per D-XX" markers — preserves audit trail without separate changelog drift; criteria #2/#4/#5 byte-identical to pre-edit; only §Phase 27 lines 529-539 touched (no other phase modified)
+- [Phase 27-wire-schedule-badges-to-plangrid]: Test 6 + Test 7 use getAllByText + per-element loops to handle PlanGrid's dual mobile/desktop render path (dayCards array rendered twice in jsdom DOM) — stronger integration assertion than scoping to one viewport via media-query mocking
 - [Phase 07-fix-auth-household-gaps]: week_start_day: 0 added to useCreateHousehold return to satisfy Household interface (Sunday DB default)
 - [Phase 07-fix-auth-household-gaps]: 10-second timeout on PASSWORD_RECOVERY wait shows expiry message with /auth link to avoid infinite spinner
 - [Phase 08-v1-1-ui-polish-and-usability-improvements]: DROP POLICY IF EXISTS before recreating profiles UPDATE policy — prevents duplicate error since 001_foundation.sql defines it; keeps migration 014 idempotent
