@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: In progress
-stopped_at: "Phase 27 Plan 01 complete -- queryKeys.schedule + useHouseholdSchedules + buildHouseholdGrid/Tooltips primitives ready for Plan 02 PlanGrid wiring"
-last_updated: "2026-04-20T20:48:00.000Z"
+stopped_at: "Phase 27 Plan 02 complete -- PlanGrid wired to useHouseholdSchedules with slotSchedulesByDay + slotTooltipsByDay memos; SlotCard dot JSX restored from 4eab9b7/cdf039b on occupied + empty branches; DayCard slotTooltips prop forwarding live; 14-feature preservation loop OK; ready for Plan 27-03 regression test + ROADMAP amendment"
+last_updated: "2026-04-21T01:01:00.000Z"
 progress:
   total_phases: 26
   completed_phases: 24
   total_plans: 100
-  completed_plans: 97
-  percent: 97
+  completed_plans: 98
+  percent: 98
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 ## Current Position
 
 Phase: 27 — IN PROGRESS (started 2026-04-20)
-Plan: 01 complete (e71c959) — queryKeys.schedule namespace restored, useHouseholdSchedules hook + buildHouseholdGrid/Tooltips helpers shipped with 10 TDD tests + 3 runtime namespace tests; lines 1-79 of useSchedule.ts byte-identical to HEAD per D-06a
-Next up: Plan 27-02 (Wire useHouseholdSchedules into PlanGrid + restore SlotCard dot JSX from 4eab9b7/cdf039b), Plan 27-03 (regression test + ROADMAP §27 amendment). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass.
+Plan: 02 complete (eade152) — PlanGrid.tsx now imports + calls useHouseholdSchedules(householdId), builds slotSchedulesByDay + slotTooltipsByDay memos via buildHouseholdGrid/Tooltips with Snack→Snacks normalisation and (weekStartDay + i) % 7 day-of-week key; DayCard.tsx forwards new slotTooltips prop to both SlotCard render sites; SlotCard.tsx renders 12px occupied + 10px empty coloured dots cherry-picked verbatim from 4eab9b7/cdf039b with scheduleTooltip family-view title; W4 dedupe-import guard exit 0 (exactly 1 from '../../types/database'); 14-feature preservation loop exit 0; all 21 DayCard props preserved; 87 insertions / 4 planned deletions across 3 files; vite build exit 0; zero new vitest regressions vs Plan 01 baseline (12 pre-existing failures unchanged)
+Next up: Plan 27-03 (Add tests/PlanGrid.schedule.test.tsx regression test mocking useHouseholdSchedules + amend ROADMAP §Phase 27 criteria #1/#3 per D-08/D-10). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass.
 
-Progress: █████████░ 97%
+Progress: █████████░ 98%
 
 ## Performance Metrics
 
@@ -113,6 +113,7 @@ Progress: █████████░ 97%
 | Phase 25-universal-recipe-import P02 | 3 | 2 tasks | 4 files |
 | Phase 25-universal-recipe-import P03 | 240 | 2 tasks | 3 files |
 | Phase 27-wire-schedule-badges-to-plangrid P01 | 10 | 2 tasks | 5 files |
+| Phase 27-wire-schedule-badges-to-plangrid P02 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -276,6 +277,11 @@ Recent decisions affecting current work:
 - [Phase 27-wire-schedule-badges-to-plangrid]: Tooltip format "Away: Dad. Quick: Sam." — Title-Case status word + colon + space + comma-separated names + period; statuses ordered by precedence high->low; prep members omitted entirely; first-8-char UUID fallback for unknown member ids
 - [Phase 27-wire-schedule-badges-to-plangrid]: useSaveSchedule.onSuccess prefix invalidation (['schedule', householdId]) auto-matches new forHousehold cache key — zero mutation changes required
 - [Phase 27-wire-schedule-badges-to-plangrid]: Pre-existing test failures in tests/theme.test.ts, tests/auth.test.ts, tests/AuthContext.test.tsx, tests/guide.test.ts (12 total) are unrelated to schedule wiring — logged to deferred-items.md for separate phase
+- [Phase 27-wire-schedule-badges-to-plangrid]: Plan 02 SlotCard family-tooltip prop shape is D-07 Option B (parallel scheduleStatus + scheduleTooltip props), NOT Option A (richer object) — keeps the SlotCard interface narrow for callers that don't care about the tooltip; tooltip falls back to Phase 21 literal when scheduleTooltip absent for zero-regression on empty-household case
+- [Phase 27-wire-schedule-badges-to-plangrid]: Plan 02 W4 dedupe-import discipline — extended existing `import type { NutritionTarget, Meal, MealItem } from '../../types/database'` line in place to add ScheduleStatus, never created a second import line from the same module; verified by grep -c returning exactly 1 post-edit (anti-regression for any future executor working on PlanGrid imports)
+- [Phase 27-wire-schedule-badges-to-plangrid]: Plan 02 keying duality on DayCard — slotViolationsByDay uses plan-relative `i` (correct: violations are per-plan), but slotSchedulesByDay + slotTooltipsByDay use day-of-week `(weekStartDay + i) % 7` per D-10 (correct: schedules are weekly recurrences, not plan-specific); both keying schemes coexist on the same <DayCard> render line
+- [Phase 27-wire-schedule-badges-to-plangrid]: Plan 02 Snack→Snacks normalisation lives in PlanGrid.tsx (not src/utils/schedule.ts) per D-09 — closer to the DayCard consumer that uses DEFAULT_SLOTS, applied verbatim in BOTH the slotSchedulesByDay and slotTooltipsByDay memos so a Snack-slot tooltip lands on the Snacks SlotCard, matching cdf039b baseline
+- [Phase 27-wire-schedule-badges-to-plangrid]: Plan 02 single-source DayCard JSX architecture — PlanGrid.tsx renders one shared <DayCard> JSX block inside `dayCards = Array.from(...)` that feeds both mobile (DayCarousel ~line 657) and desktop (stack ~line 689) render paths; one textual prop insertion populates both render sites, satisfying ROADMAP §Phase 27 criterion #3 visibility assertion without doubling source-code surface area
 
 ### v2.0 Decisions
 
@@ -313,6 +319,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T20:48:00.000Z
-Stopped at: Phase 27 Plan 01 complete -- queryKeys.schedule namespace restored, useHouseholdSchedules + buildHouseholdGrid + buildHouseholdTooltips primitives ready for Plan 02 PlanGrid wiring; 10/10 TDD tests pass, 8/8 queryKeys tests pass, D-06a range-diff exit 0, vite build exit 0, no regressions in tests/ suite
-Resume file: .planning/phases/27-wire-schedule-badges-to-plangrid/27-02-PLAN.md
+Last session: 2026-04-21T01:01:00.000Z
+Stopped at: Phase 27 Plan 02 complete -- PlanGrid.tsx wired to useHouseholdSchedules + slotSchedulesByDay + slotTooltipsByDay memos with Snack→Snacks normalisation and (weekStartDay + i) % 7 day-of-week key; DayCard.tsx forwards new slotTooltips prop to both SlotCard render sites; SlotCard.tsx renders 12px occupied + 10px empty coloured dots cherry-picked from 4eab9b7/cdf039b with scheduleTooltip family-view title (falls back to Phase 21 literal); commits b84ed11 (SlotCard) + eade152 (DayCard + PlanGrid); 14-feature preservation loop OK on all 14 features; W4 dedupe-import guard exit 0 (exactly 1 from '../../types/database'); all 21 DayCard props preserved; vite build exit 0; zero new vitest regressions vs Plan 01 baseline (12 pre-existing failures unchanged)
+Resume file: .planning/phases/27-wire-schedule-badges-to-plangrid/27-03-PLAN.md
