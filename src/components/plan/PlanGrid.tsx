@@ -18,6 +18,8 @@ import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
 import { useGeneratePlan, useGenerationJob, useLatestGeneration, useSuggestAlternative } from '../../hooks/usePlanGeneration'
 import { useNutritionGaps } from '../../hooks/useNutritionGaps'
+import { useHouseholdSchedules } from '../../hooks/useSchedule'
+import { buildHouseholdGrid, buildHouseholdTooltips } from '../../utils/schedule'
 import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { computeSwapSuggestions } from '../../utils/swapSuggestions'
@@ -37,7 +39,7 @@ import { RecipeSuggestionCard } from './RecipeSuggestionCard'
 import { GenerationJobBadge } from './GenerationJobBadge'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import { useQueryClient } from '@tanstack/react-query'
-import type { NutritionTarget, Meal, MealItem } from '../../types/database'
+import type { NutritionTarget, Meal, MealItem, ScheduleStatus } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
 import type { SwapSuggestion } from './NutritionGapCard'
@@ -253,6 +255,48 @@ export function PlanGrid({
   const { data: allLogs } = useHouseholdDayLogs(householdId, today)
   const { data: householdMembers } = useHouseholdMembers()
   const { data: memberProfiles } = useMemberProfiles()
+  const { data: scheduleSlots } = useHouseholdSchedules(householdId)
+
+  const memberNameById = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const hm of householdMembers ?? []) {
+      const name = hm.profiles?.display_name ?? hm.user_id.slice(0, 8)
+      map.set(hm.user_id, name)
+    }
+    for (const mp of memberProfiles ?? []) {
+      map.set(mp.id, mp.display_name ?? mp.id.slice(0, 8))
+    }
+    return map
+  }, [householdMembers, memberProfiles])
+
+  const slotSchedulesByDay = useMemo(() => {
+    if (!scheduleSlots?.length) return undefined
+    const grid = buildHouseholdGrid(scheduleSlots)
+    const byDay = new Map<number, Map<string, ScheduleStatus>>()
+    for (const [key, status] of grid) {
+      const [dayStr, ...slotParts] = key.split(':')
+      const dayOfWeek = Number(dayStr)
+      if (!byDay.has(dayOfWeek)) byDay.set(dayOfWeek, new Map())
+      // Normalise 'Snack' → 'Snacks' to match DEFAULT_SLOTS in src/utils/mealPlan.ts (D-09, cdf039b baseline)
+      const slotName = slotParts.join(':')
+      byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, status)
+    }
+    return byDay
+  }, [scheduleSlots])
+
+  const slotTooltipsByDay = useMemo(() => {
+    if (!scheduleSlots?.length) return undefined
+    const tooltips = buildHouseholdTooltips(scheduleSlots, memberNameById)
+    const byDay = new Map<number, Map<string, string>>()
+    for (const [key, text] of tooltips) {
+      const [dayStr, ...slotParts] = key.split(':')
+      const dayOfWeek = Number(dayStr)
+      if (!byDay.has(dayOfWeek)) byDay.set(dayOfWeek, new Map())
+      const slotName = slotParts.join(':')
+      byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, text)
+    }
+    return byDay
+  }, [scheduleSlots, memberNameById])
 
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
   const [pickerState, setPickerState] = useState<{
@@ -551,6 +595,8 @@ export function PlanGrid({
         onDropReplace={executeReplace}
         onDropCancel={handleDropCancel}
         slotViolations={slotViolationsByDay?.get(i)}
+        slotSchedules={slotSchedulesByDay?.get((weekStartDay + i) % 7)}
+        slotTooltips={slotTooltipsByDay?.get((weekStartDay + i) % 7)}
         slotFreezerFriendly={dayFreezerFriendly}
         onCookSlot={(_slotId, mealId) => navigate(`/cook/${mealId}?slotId=${_slotId}`)}
       />

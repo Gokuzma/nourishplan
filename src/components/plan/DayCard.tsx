@@ -72,6 +72,7 @@ interface DayCardProps {
   onDropCancel?: () => void
   slotViolations?: Map<string, { count: number; hasAllergy: boolean }>
   slotSchedules?: Map<string, ScheduleStatus>
+  slotTooltips?: Map<string, string>
   slotFreezerFriendly?: Map<string, boolean>
   onCookSlot?: (slotId: string, mealId: string) => void
 }
@@ -99,6 +100,7 @@ export function DayCard({
   onDropCancel,
   slotViolations,
   slotSchedules,
+  slotTooltips,
   slotFreezerFriendly,
   onCookSlot,
 }: DayCardProps) {
@@ -169,6 +171,7 @@ export function DayCard({
                 violationCount={slotViolations?.get(slotName)?.count}
                 hasAllergyViolation={slotViolations?.get(slotName)?.hasAllergy}
                 scheduleStatus={slotSchedules?.get(slotName) ?? undefined}
+                scheduleTooltip={slotTooltips?.get(slotName) ?? undefined}
                 isFreezerFriendly={slotFreezerFriendly?.get(slotName) ?? false}
                 onCook={s?.meal_id && onCookSlot ? () => onCookSlot(s!.id, s!.meal_id!) : undefined}
               />
@@ -204,6 +207,7 @@ export function DayCard({
                 violationCount={slotViolations?.get(s.slot_name)?.count}
                 hasAllergyViolation={slotViolations?.get(s.slot_name)?.hasAllergy}
                 scheduleStatus={slotSchedules?.get(s.slot_name) ?? undefined}
+                scheduleTooltip={slotTooltips?.get(s.slot_name) ?? undefined}
                 isFreezerFriendly={slotFreezerFriendly?.get(s.slot_name) ?? false}
                 onCook={s.meal_id && onCookSlot ? () => onCookSlot(s.id, s.meal_id!) : undefined}
               />
