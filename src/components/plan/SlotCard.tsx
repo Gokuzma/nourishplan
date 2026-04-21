@@ -30,6 +30,7 @@ interface SlotCardProps {
   violationCount?: number
   hasAllergyViolation?: boolean
   scheduleStatus?: 'prep' | 'consume' | 'quick' | 'away'
+  scheduleTooltip?: string
   isFreezerFriendly?: boolean
   onCook?: () => void
 }
@@ -50,7 +51,7 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
   return calcMealNutrition(items)
 }
 
-function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, onSuggestAlternative, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation, isFreezerFriendly, onCook }: SlotCardProps & { slot: SlotWithMeal }) {
+function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, onSuggestAlternative, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation, scheduleStatus, scheduleTooltip, isFreezerFriendly, onCook }: SlotCardProps & { slot: SlotWithMeal }) {
   const [expanded, setExpanded] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const tooltipId = `rationale-${slot.id}`
@@ -106,6 +107,21 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-text truncate font-sans">
             {meal!.name}
+            {scheduleStatus && scheduleStatus !== 'prep' && (
+              <span
+                className={`ml-1 inline-block w-3 h-3 rounded-full align-middle ${
+                  scheduleStatus === 'consume' ? 'bg-accent' :
+                  scheduleStatus === 'quick' ? 'bg-amber-500' :
+                  'bg-red-500'
+                }`}
+                aria-label={`Schedule: ${scheduleStatus}`}
+                title={scheduleTooltip ?? (
+                  scheduleStatus === 'consume' ? 'Pre-made from prep day' :
+                  scheduleStatus === 'quick' ? 'Quick meal only' :
+                  'Away — not eating at home'
+                )}
+              />
+            )}
             {violationCount && violationCount > 0 ? (
               <span className={`ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[9px] font-bold leading-none align-middle ${hasAllergyViolation ? 'bg-red-500' : 'bg-amber-500'}`}>
                 {violationCount}
@@ -261,12 +277,29 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
  * expandable section to see all household members' suggestions.
  */
 export function SlotCard(props: SlotCardProps) {
-  const { slotName, slot, onAssign } = props
+  const { slotName, slot, onAssign, scheduleStatus, scheduleTooltip } = props
 
   if (!slot?.meal_id && !slot?.meals) {
     return (
       <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-dashed border-accent/30 bg-background/50">
-        <span className="text-sm text-text/50 font-sans">{slotName}</span>
+        <span className="text-sm text-text/50 font-sans">
+          {slotName}
+          {scheduleStatus && scheduleStatus !== 'prep' && (
+            <span
+              className={`ml-1 inline-block w-2.5 h-2.5 rounded-full align-middle ${
+                scheduleStatus === 'consume' ? 'bg-accent' :
+                scheduleStatus === 'quick' ? 'bg-amber-500' :
+                'bg-red-500'
+              }`}
+              aria-label={`Schedule: ${scheduleStatus}`}
+              title={scheduleTooltip ?? (
+                scheduleStatus === 'consume' ? 'Pre-made from prep day' :
+                scheduleStatus === 'quick' ? 'Quick meal only' :
+                'Away — not eating at home'
+              )}
+            />
+          )}
+        </span>
         <button
           onClick={onAssign}
           className="w-7 h-7 rounded-full bg-primary/10 text-primary text-lg font-semibold flex items-center justify-center hover:bg-primary/20 transition-colors"
