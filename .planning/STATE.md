@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Ready to execute
-stopped_at: "Phase 27 planned -- 3 plans across 3 waves; latent queryKeys.schedule bug scoped into Plan 01"
-last_updated: "2026-04-20T19:00:00.000Z"
+status: In progress
+stopped_at: "Phase 27 Plan 01 complete -- queryKeys.schedule + useHouseholdSchedules + buildHouseholdGrid/Tooltips primitives ready for Plan 02 PlanGrid wiring"
+last_updated: "2026-04-20T20:48:00.000Z"
 progress:
   total_phases: 26
   completed_phases: 24
-  total_plans: 97
-  completed_plans: 96
-  percent: 99
+  total_plans: 100
+  completed_plans: 97
+  percent: 97
 ---
 
 # Project State
@@ -24,11 +24,11 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 ## Current Position
 
-Phase: 26 — COMPLETE (2026-04-20)
-Plan: 04 complete — CookModePage + RecipeBuilder both call shared useCookCompletion hook; spend_logs + FIFO deduct + leftover modal all verified live
-Next up: Phase 27 (Wire Schedule Badges to PlanGrid), Phase 28 (Resolve Prep Sequence Edge Function Orphans), Phase 29 (v2.0 Documentation Reconciliation). Phase 26 success criterion #5 (Budget → Cook → Inventory → Grocery end-to-end reconciliation) remains in 26-HUMAN-UAT.md pending manual Playwright pass.
+Phase: 27 — IN PROGRESS (started 2026-04-20)
+Plan: 01 complete (e71c959) — queryKeys.schedule namespace restored, useHouseholdSchedules hook + buildHouseholdGrid/Tooltips helpers shipped with 10 TDD tests + 3 runtime namespace tests; lines 1-79 of useSchedule.ts byte-identical to HEAD per D-06a
+Next up: Plan 27-02 (Wire useHouseholdSchedules into PlanGrid + restore SlotCard dot JSX from 4eab9b7/cdf039b), Plan 27-03 (regression test + ROADMAP §27 amendment). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass.
 
-Progress: ██████████ 100%
+Progress: █████████░ 97%
 
 ## Performance Metrics
 
@@ -112,6 +112,7 @@ Progress: ██████████ 100%
 | Phase 25-universal-recipe-import P01 | 3 | 2 tasks | 3 files |
 | Phase 25-universal-recipe-import P02 | 3 | 2 tasks | 4 files |
 | Phase 25-universal-recipe-import P03 | 240 | 2 tasks | 3 files |
+| Phase 27-wire-schedule-badges-to-plangrid P01 | 10 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -270,6 +271,11 @@ Recent decisions affecting current work:
 - [Phase 25-universal-recipe-import]: Human UAT via Playwright PASSED for raw text imports (Spaghetti Carbonara end-to-end with 5 ingredients + 5 steps + macros), D-11 attribution null for text, D-13 no badges on recipe cards, D-10 fallback message fires inline on URL fetch failures
 - [Phase 25-universal-recipe-import]: Mainstream recipe sites (allrecipes, NYT Cooking, simplyrecipes) are server-side bot-blocked — D-10 paste-text fallback is the correct UX; URL-import practical utility is narrower than the spec phrasing
 - [Phase 25-universal-recipe-import]: AbortController timeout errors leak raw "The signal has been aborted" string to the modal — follow-up polish: map name === 'AbortError' to the D-10 friendly message
+- [Phase 27-wire-schedule-badges-to-plangrid]: queryKeys.schedule namespace was truncated by Phase 22 worktree agent; useSchedule.ts:14 referenced queryKeys.schedule.forMember (undefined) — would throw TypeError if called. Plan 27-01 restores forMember + adds forHousehold sibling for new household-wide PlanGrid query
+- [Phase 27-wire-schedule-badges-to-plangrid]: Aggregation precedence away > quick > consume > prep with prep dropped entirely (no dot for prep) — buildHouseholdGrid uses STATUS_CYCLE.indexOf via local precedence(s) helper to keep ordering source of truth in one place
+- [Phase 27-wire-schedule-badges-to-plangrid]: Tooltip format "Away: Dad. Quick: Sam." — Title-Case status word + colon + space + comma-separated names + period; statuses ordered by precedence high->low; prep members omitted entirely; first-8-char UUID fallback for unknown member ids
+- [Phase 27-wire-schedule-badges-to-plangrid]: useSaveSchedule.onSuccess prefix invalidation (['schedule', householdId]) auto-matches new forHousehold cache key — zero mutation changes required
+- [Phase 27-wire-schedule-badges-to-plangrid]: Pre-existing test failures in tests/theme.test.ts, tests/auth.test.ts, tests/AuthContext.test.tsx, tests/guide.test.ts (12 total) are unrelated to schedule wiring — logged to deferred-items.md for separate phase
 
 ### v2.0 Decisions
 
@@ -307,6 +313,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T03:29:13.347Z
-Stopped at: Phase 27 context gathered \u2014 family-holistic schedule dots locked, ROADMAP #1 to be amended in planning
-Resume file: .planning/phases/27-wire-schedule-badges-to-plangrid/27-CONTEXT.md
+Last session: 2026-04-20T20:48:00.000Z
+Stopped at: Phase 27 Plan 01 complete -- queryKeys.schedule namespace restored, useHouseholdSchedules + buildHouseholdGrid + buildHouseholdTooltips primitives ready for Plan 02 PlanGrid wiring; 10/10 TDD tests pass, 8/8 queryKeys tests pass, D-06a range-diff exit 0, vite build exit 0, no regressions in tests/ suite
+Resume file: .planning/phases/27-wire-schedule-badges-to-plangrid/27-02-PLAN.md

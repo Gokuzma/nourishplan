@@ -531,8 +531,12 @@ Plans:
   3. Both the mobile (DayCarousel) and desktop render sites pass `slotSchedules={slotSchedulesByDay?.get(dayIndex)}` to each `DayCard`
   4. SlotCards display the correct coloured dot when a schedule row exists for that day/slot; prep shows no dot
   5. Test covers PlanGrid → DayCard prop forwarding so this regression cannot silently recur
-**Plans**: TBD
+**Plans**: 3 plans (1/3 complete)
 **UI hint**: yes
+Plans:
+- [x] 27-01-PLAN.md — Restore queryKeys.schedule + useHouseholdSchedules hook + buildHouseholdGrid/Tooltips helpers (Wave 1)
+- [ ] 27-02-PLAN.md — Wire useHouseholdSchedules into PlanGrid + restore SlotCard dot JSX (Wave 2)
+- [ ] 27-03-PLAN.md — Add tests/PlanGrid.schedule.test.tsx regression test + amend ROADMAP §Phase 27 criteria #1/#3 (Wave 3)
 
 ### Phase 28: Resolve Prep Sequence Edge Function Orphans
 **Goal**: Either wire `generate-cook-sequence` and `generate-reheat-sequence` into CookModePage (combined multi-recipe sessions + reheat path) or remove them from `supabase/functions/` and update Phase 23 records
