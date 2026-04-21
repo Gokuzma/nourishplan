@@ -22,3 +22,17 @@ describe('queryKeys - feedback engine keys', () => {
     expect(queryKeys.insights.household('hid')).toEqual(['insights', 'hid'])
   })
 })
+
+describe('queryKeys.schedule', () => {
+  it('forMember returns ["schedule", householdId, memberId]', () => {
+    expect(queryKeys.schedule.forMember('h', 'm')).toEqual(['schedule', 'h', 'm'])
+  })
+
+  it('forHousehold returns ["schedule", householdId]', () => {
+    expect(queryKeys.schedule.forHousehold('h')).toEqual(['schedule', 'h'])
+  })
+
+  it('exceptionsForMember returns ["schedule-exceptions", householdId, memberId]', () => {
+    expect(queryKeys.schedule.exceptionsForMember('h', 'm')).toEqual(['schedule-exceptions', 'h', 'm'])
+  })
+})

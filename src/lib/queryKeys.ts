@@ -81,6 +81,14 @@ export const queryKeys = {
     forMember: (householdId: string | undefined, memberId: string | undefined) =>
       ['wont-eat', householdId, memberId] as const,
   },
+  schedule: {
+    forMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['schedule', householdId, memberId] as const,
+    forHousehold: (householdId: string | undefined) =>
+      ['schedule', householdId] as const,
+    exceptionsForMember: (householdId: string | undefined, memberId: string | undefined) =>
+      ['schedule-exceptions', householdId, memberId] as const,
+  },
   aiTags: {
     forRecipe: (recipeId: string | undefined) => ['ai-tags', recipeId] as const,
   },
