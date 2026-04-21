@@ -42,7 +42,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 24: Dynamic Portioning** - Satiety-adaptive portion suggestions using feedback history and per-member consumption patterns (completed 2026-04-15)
 - [x] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions (completed 2026-04-19)
 - [x] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure) (completed 2026-04-19)
-- [ ] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useSchedule so schedule UI feedback works on the plan page (v2.0 gap closure)
+- [x] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useHouseholdSchedules so schedule UI feedback works on the plan page (v2.0 gap closure) (completed 2026-04-21)
 - [ ] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure)
 - [ ] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
 
