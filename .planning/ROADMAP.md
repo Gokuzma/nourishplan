@@ -549,7 +549,14 @@ Plans:
   3. If remove: `supabase/functions/generate-cook-sequence` and `supabase/functions/generate-reheat-sequence` are deleted; `23-SUMMARY` entries are corrected; Supabase deployment list reflects the removal
   4. Integration check — `grep -r "cook-sequence\|reheat-sequence" src/` either returns consumer invocations (wire-in) or returns zero matches with zero surviving function files (remove)
   5. PREP-02 traceability status reflects the decision
-**Plans**: TBD
+**Plans**: 5 plans (0/5 complete)
+**UI hint**: yes
+Plans:
+- [ ] 28-01-PLAN.md — Create useGenerateCookSequence + useGenerateReheatSequence hooks (Wave 1)
+- [ ] 28-02-PLAN.md — Create CookSequenceLoadingOverlay component (Wave 1)
+- [ ] 28-03-PLAN.md — Redeploy both edge functions with --no-verify-jwt (Wave 1, checkpoint)
+- [ ] 28-04-PLAN.md — Wire CookModePage: reheat auto-fire 3-state render + handleStartCook try/catch + overlay conditional (Wave 2)
+- [ ] 28-05-PLAN.md — Add CookModePage.prepSequence regression test + flip REQUIREMENTS.md PREP-02 label to (wire-in) (Wave 3)
 
 ### Phase 29: v2.0 Documentation Reconciliation
 **Goal**: Close v2.0 audit documentation gaps so the milestone can archive with accurate state — formalise IMPORT requirements, backfill missing VERIFICATION.md files, refresh the stale traceability table, and reconcile Phase 24's ROADMAP text with the D-02 scope pivot
