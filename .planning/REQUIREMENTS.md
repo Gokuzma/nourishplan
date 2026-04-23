@@ -129,7 +129,7 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 - [x] **BUDG-01**: User can set a weekly household food budget
 - [x] **BUDG-02**: Each recipe displays a computed cost per serving based on ingredient costs
-- [~] **BUDG-03**: Plan page shows weekly spend vs budget with remaining balance
+- [x] **BUDG-03**: Plan page shows weekly spend vs budget with remaining balance
 - [x] **BUDG-04**: User can enter cost per unit/weight on recipe ingredients
 
 ### Inventory
@@ -138,12 +138,12 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 - [x] **INVT-02**: Each inventory item tracks quantity and unit (grams, units, ml)
 - [x] **INVT-03**: Each inventory item has an optional expiry date with priority sorting
 - [x] **INVT-04**: User can scan a barcode to add an item to inventory
-- [~] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
+- [x] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
 - [~] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
 
 ### Grocery
 
-- [~] **GROC-01**: Grocery list is auto-generated from the active meal plan's ingredients
+- [x] **GROC-01**: Grocery list is auto-generated from the active meal plan's ingredients
 - [~] **GROC-02**: Grocery list subtracts items already in inventory ("have" vs "need to buy")
 - [~] **GROC-03**: Grocery list items are grouped by store category (produce, dairy, etc.)
 - [~] **GROC-04**: User can check off grocery items in-store
@@ -152,16 +152,16 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 ### Planning
 
 - [~] **PLAN-01**: User can drag and drop meals between slots on the weekly plan grid
-- [~] **PLAN-02**: User can auto-generate a meal plan optimized for nutrition, cost, schedule, and preferences
+- [x] **PLAN-02**: User can auto-generate a meal plan optimized for nutrition, cost, schedule, and preferences
 - [~] **PLAN-03**: Manually placed meals are locked and preserved during auto-generation
-- [~] **PLAN-04**: Generated plan highlights nutrition gaps per member with swap suggestions
-- [~] **PLAN-05**: Recipe selection can prioritize using ingredients already in inventory
+- [x] **PLAN-04**: Generated plan highlights nutrition gaps per member with swap suggestions
+- [x] **PLAN-05**: Recipe selection can prioritize using ingredients already in inventory
 
 ### Feedback & Preferences
 
-- [~] **FEED-01**: User can rate a recipe (1-5 stars) after eating it
+- [x] **FEED-01**: User can rate a recipe (1-5 stars) after eating it
 - [~] **FEED-02**: Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.)
-- [~] **FEED-03**: Each household member can set "won't eat" tags for selective eaters
+- [x] **FEED-03**: Each household member can set "won't eat" tags for selective eaters
 - [~] **FEED-04**: System tracks recipe repeat rate and warns when plan becomes monotonous
 
 ### Schedule
@@ -173,12 +173,12 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 - [~] **PREP-01**: User can view batch prep suggestions for the week's meal plan
 - [x] **PREP-02**: User can view day-of task sequencing for a meal
-- [~] **PREP-03**: Freezer-friendly recipes are flagged for make-ahead prep
+- [x] **PREP-03**: Freezer-friendly recipes are flagged for make-ahead prep
 
 ### Portioning
 
-- [~] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
-- [~] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
+- [x] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
+- [x] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
   > **D-02 pivot (2026-04-15):** Shipped scope is tier-aware recipe selection
   > (generate-plan edge function enrichment + RecipeMixPanel three-slider
   > component) rather than portion-size adaptation. Portions remain
@@ -297,35 +297,35 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | BUDG-01 | Phase 16 | Validated |
 | BUDG-02 | Phase 16 | Validated |
-| BUDG-03 | Phase 16, Phase 26 (gap closure) | Partial |
+| BUDG-03 | Phase 16, Phase 26 (gap closure) | Validated |
 | BUDG-04 | Phase 16 | Validated |
 | INVT-01 | Phase 17 | Validated |
 | INVT-02 | Phase 17 | Validated |
 | INVT-03 | Phase 17 | Validated |
 | INVT-04 | Phase 17 | Validated |
-| INVT-05 | Phase 17, Phase 26 (gap closure) | Partial |
+| INVT-05 | Phase 17, Phase 26 (gap closure) | Validated |
 | INVT-06 | Phase 17, Phase 26 (gap closure) | Partial |
-| GROC-01 | Phase 18 | Partial |
+| GROC-01 | Phase 18 | Validated |
 | GROC-02 | Phase 18 | Partial |
 | GROC-03 | Phase 18 | Partial |
 | GROC-04 | Phase 18 | Partial |
 | GROC-05 | Phase 18 | Partial |
 | PLAN-01 | Phase 19 | Partial |
-| PLAN-02 | Phase 22 | Partial |
+| PLAN-02 | Phase 22 | Validated |
 | PLAN-03 | Phase 19 | Partial |
-| PLAN-04 | Phase 22 | Partial |
-| PLAN-05 | Phase 22 | Partial |
-| FEED-01 | Phase 20 | Partial |
+| PLAN-04 | Phase 22 | Validated |
+| PLAN-05 | Phase 22 | Validated |
+| FEED-01 | Phase 20 | Validated |
 | FEED-02 | Phase 20 | Partial |
-| FEED-03 | Phase 20 | Partial |
+| FEED-03 | Phase 20 | Validated |
 | FEED-04 | Phase 20 | Partial |
 | SCHED-01 | Phase 21, Phase 27 (gap closure) | Validated |
 | SCHED-02 | Phase 21, Phase 27 (gap closure) | Validated |
 | PREP-01 | Phase 23 | Partial |
 | PREP-02 | Phase 23, Phase 28 (wire-in) | Validated |
-| PREP-03 | Phase 23 | Partial |
-| PORT-01 | Phase 24 | Partial |
-| PORT-02 | Phase 24 | Partial |
+| PREP-03 | Phase 23 | Validated |
+| PORT-01 | Phase 24 | Validated |
+| PORT-02 | Phase 24 | Validated |
 | IMPORT-01 | Phase 25 | Validated |
 | IMPORT-02 | Phase 25 | Validated |
 | IMPORT-03 | Phase 25 | Partial |
