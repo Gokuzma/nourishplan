@@ -569,4 +569,11 @@ Plans:
   3. `.planning/phases/25-universal-recipe-import/25-VERIFICATION.md` exists with goal-backward verification against IMPORT-01..IMPORT-05 using the live Playwright UAT evidence captured in 25-03-SUMMARY
   4. v2.0 traceability rows in REQUIREMENTS.md (BUDG, INVT, GROC, PLAN, FEED, SCHED, PREP, PORT, IMPORT) reflect actual satisfied/partial/pending state after Phase 26–28 merges; checkboxes match
   5. Phase 24 ROADMAP entry is updated in place (or annotated) to reflect the D-02 tier-aware recipe selection pivot; PORT-02 description in REQUIREMENTS.md matches the shipped scope
-**Plans**: TBD
+**Plans**: 5 plans (3 waves)
+Plans:
+- [ ] 29-01-PLAN.md — 17-VERIFICATION.md retrospective backfill (INVT-01..06, D-01..D-04 template) (Wave 1)
+- [ ] 29-02-PLAN.md — 25-VERIFICATION.md retrospective backfill (IMPORT-01..05, IMPORT-03 human_needed) (Wave 1)
+- [ ] 29-03-PLAN.md — REQUIREMENTS.md v2.0 traceability sweep + checkbox alignment + IMPORT status flip (D-05/D-07/D-09/D-17/D-18) (Wave 2)
+- [ ] 29-04-PLAN.md — Phase 24 ROADMAP + PORT-02 deviation blockquote (D-15/D-16) (Wave 3)
+- [ ] 29-05-PLAN.md — GuidePage.tsx v2.0 refresh (12 sections, D-10..D-14, QUICK_START_STEPS) (Wave 2)
+**UI hint**: yes
