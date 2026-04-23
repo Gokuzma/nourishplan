@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Ready to execute
-stopped_at: Phase 28 complete -- all 5 plans shipped (hooks + overlay + edge-function redeploy + CookModePage wire-in + regression test). CookModePage.tsx 547→611 lines (+64); 8/8 L-020/L-027 preservation features intact; 6/6 UI-SPEC anti-regression grep guards pass; 27 new source-string assertions in tests/CookModePage.prepSequence.test.tsx (27/27 green); vitest full suite 346 passed / 12 failed (baseline unchanged — theme/auth/AuthContext/guide pre-existing); generate-cook-sequence v1 + generate-reheat-sequence v2 ACTIVE on Supabase qyablbzodmftobjslgri; REQUIREMENTS PREP-02 row flipped gap-closure→wire-in and status→Validated; v2.0 audit WARN-01 closed. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unchanged from Phase 27 handoff).
-last_updated: "2026-04-22T23:15:00.000Z"
+stopped_at: Phase 29 context gathered. 29-CONTEXT.md + 29-DISCUSSION-LOG.md committed (81485d0). 18 decisions locked across 5 areas — retrospective VERIFICATION.md template (D-01..D-04), 3-state traceability vocab Pending/Partial/Validated (D-05..D-07), phase-suffix hygiene keeping code-provenance and dropping Phase 29 from IMPORT rows (D-08..D-09), D-02 deviation-block annotation for Phase 24 + PORT-02 (D-15..D-16), IMPORT status flip (D-17), checkbox alignment sweep (D-18). User folded in GuidePage.tsx v2.0 refresh (9 feature families interleaved by workflow, match existing tone, D-10..D-14). Ready for /gsd-plan-phase 29. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (carried from Phase 27 handoff).
+last_updated: "2026-04-23T00:00:00.000Z"
 progress:
   total_phases: 15
   completed_phases: 15
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 28 — resolve-prep-sequence-edge-function-orphans (COMPLETE; WARN-01 closed by wire-in + regression test)
+**Current focus:** Phase 29 — v2-0-documentation-reconciliation (CONTEXT captured; ready for plan)
 
 ## Current Position
 
-Phase: 28 — COMPLETE (5/5 plans, WARN-01 closed)
-Plan ledger: 28-01 hooks (9d040da), 28-02 overlay (afafe81), 28-03 edge redeploy (f18a003 SUMMARY only — zero source drift), 28-04 CookModePage wire-in (2beb181), 28-05 regression test + REQUIREMENTS flip (376dafa). All SUMMARY commits landed: 45eff24, dcf055f, f18a003, 5abfcbb, f5a0e9c. VERIFICATION.md passed with all 5 ROADMAP success criteria satisfied.
-Next up: Phase 29 (v2-0-documentation-reconciliation — close v2.0 audit doc gaps, formalise IMPORT requirements, backfill VERIFICATION.md files). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (carried from Phase 27 handoff).
+Phase: 29 — CONTEXT captured (0/? plans, audit doc-drift WARN-02..05 closure + folded-in GuidePage.tsx v2.0 refresh)
+Context ledger: 29-CONTEXT.md + 29-DISCUSSION-LOG.md (81485d0) — 18 decisions across retro-VERIFICATION template, 3-state traceability vocab (Pending/Partial/Validated), phase-suffix hygiene, D-02 deviation-block annotation convention, IMPORT status flip, checkbox alignment, GuidePage v2.0 refresh interleaved by workflow.
+Next up: `/gsd-plan-phase 29` to decompose into waves. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (carried from Phase 27 handoff).
 
 Progress: ██████████ 100%
 
