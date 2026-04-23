@@ -127,66 +127,66 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 ### Budget
 
-- [ ] **BUDG-01**: User can set a weekly household food budget
-- [ ] **BUDG-02**: Each recipe displays a computed cost per serving based on ingredient costs
-- [ ] **BUDG-03**: Plan page shows weekly spend vs budget with remaining balance
+- [x] **BUDG-01**: User can set a weekly household food budget
+- [x] **BUDG-02**: Each recipe displays a computed cost per serving based on ingredient costs
+- [~] **BUDG-03**: Plan page shows weekly spend vs budget with remaining balance
 - [x] **BUDG-04**: User can enter cost per unit/weight on recipe ingredients
 
 ### Inventory
 
-- [ ] **INVT-01**: User can add items to inventory with storage location (pantry, fridge, freezer)
-- [ ] **INVT-02**: Each inventory item tracks quantity and unit (grams, units, ml)
-- [ ] **INVT-03**: Each inventory item has an optional expiry date with priority sorting
-- [ ] **INVT-04**: User can scan a barcode to add an item to inventory
-- [ ] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
-- [ ] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
+- [x] **INVT-01**: User can add items to inventory with storage location (pantry, fridge, freezer)
+- [x] **INVT-02**: Each inventory item tracks quantity and unit (grams, units, ml)
+- [x] **INVT-03**: Each inventory item has an optional expiry date with priority sorting
+- [x] **INVT-04**: User can scan a barcode to add an item to inventory
+- [~] **INVT-05**: Finalizing a meal plan auto-deducts ingredient quantities from inventory
+- [~] **INVT-06**: Uneaten portions from a recipe appear as leftover inventory items with expiry
 
 ### Grocery
 
-- [x] **GROC-01**: Grocery list is auto-generated from the active meal plan's ingredients
-- [x] **GROC-02**: Grocery list subtracts items already in inventory ("have" vs "need to buy")
-- [x] **GROC-03**: Grocery list items are grouped by store category (produce, dairy, etc.)
-- [x] **GROC-04**: User can check off grocery items in-store
-- [x] **GROC-05**: Grocery list can be shared with household members
+- [~] **GROC-01**: Grocery list is auto-generated from the active meal plan's ingredients
+- [~] **GROC-02**: Grocery list subtracts items already in inventory ("have" vs "need to buy")
+- [~] **GROC-03**: Grocery list items are grouped by store category (produce, dairy, etc.)
+- [~] **GROC-04**: User can check off grocery items in-store
+- [~] **GROC-05**: Grocery list can be shared with household members
 
 ### Planning
 
-- [ ] **PLAN-01**: User can drag and drop meals between slots on the weekly plan grid
-- [ ] **PLAN-02**: User can auto-generate a meal plan optimized for nutrition, cost, schedule, and preferences
-- [ ] **PLAN-03**: Manually placed meals are locked and preserved during auto-generation
-- [ ] **PLAN-04**: Generated plan highlights nutrition gaps per member with swap suggestions
-- [ ] **PLAN-05**: Recipe selection can prioritize using ingredients already in inventory
+- [~] **PLAN-01**: User can drag and drop meals between slots on the weekly plan grid
+- [~] **PLAN-02**: User can auto-generate a meal plan optimized for nutrition, cost, schedule, and preferences
+- [~] **PLAN-03**: Manually placed meals are locked and preserved during auto-generation
+- [~] **PLAN-04**: Generated plan highlights nutrition gaps per member with swap suggestions
+- [~] **PLAN-05**: Recipe selection can prioritize using ingredients already in inventory
 
 ### Feedback & Preferences
 
-- [ ] **FEED-01**: User can rate a recipe (1-5 stars) after eating it
-- [ ] **FEED-02**: Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.)
-- [ ] **FEED-03**: Each household member can set "won't eat" tags for selective eaters
-- [ ] **FEED-04**: System tracks recipe repeat rate and warns when plan becomes monotonous
+- [~] **FEED-01**: User can rate a recipe (1-5 stars) after eating it
+- [~] **FEED-02**: Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.)
+- [~] **FEED-03**: Each household member can set "won't eat" tags for selective eaters
+- [~] **FEED-04**: System tracks recipe repeat rate and warns when plan becomes monotonous
 
 ### Schedule
 
-- [ ] **SCHED-01**: Each household member can set availability windows per day (prep available, quick meal only, away)
-- [ ] **SCHED-02**: Plan generation respects member schedule constraints
+- [x] **SCHED-01**: Each household member can set availability windows per day (prep available, quick meal only, away)
+- [x] **SCHED-02**: Plan generation respects member schedule constraints
 
 ### Prep
 
-- [ ] **PREP-01**: User can view batch prep suggestions for the week's meal plan
-- [ ] **PREP-02**: User can view day-of task sequencing for a meal
-- [ ] **PREP-03**: Freezer-friendly recipes are flagged for make-ahead prep
+- [~] **PREP-01**: User can view batch prep suggestions for the week's meal plan
+- [x] **PREP-02**: User can view day-of task sequencing for a meal
+- [~] **PREP-03**: Freezer-friendly recipes are flagged for make-ahead prep
 
 ### Portioning
 
-- [ ] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
-- [ ] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
+- [~] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
+- [~] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
 
 ### Recipe Import
 
-- [ ] **IMPORT-01**: User can paste a blog URL and get a complete recipe with ingredients and per-serving macros
-- [ ] **IMPORT-02**: User can paste raw recipe text and get a complete recipe with ingredients and per-serving macros
-- [ ] **IMPORT-03**: User can paste a YouTube cooking video URL and get a recipe extracted from the transcript
-- [ ] **IMPORT-04**: Imported recipe appears in the recipe builder ready to edit (name, servings, ingredients, steps, source attribution)
-- [ ] **IMPORT-05**: Recipe import adds no new tables — only a nullable `recipes.source_url` column
+- [x] **IMPORT-01**: User can paste a blog URL and get a complete recipe with ingredients and per-serving macros
+- [x] **IMPORT-02**: User can paste raw recipe text and get a complete recipe with ingredients and per-serving macros
+- [~] **IMPORT-03**: User can paste a YouTube cooking video URL and get a recipe extracted from the transcript
+- [x] **IMPORT-04**: Imported recipe appears in the recipe builder ready to edit (name, servings, ingredients, steps, source attribution)
+- [x] **IMPORT-05**: Recipe import adds no new tables — only a nullable `recipes.source_url` column
 
 ## v3 Requirements
 
@@ -290,42 +290,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUDG-01 | Phase 16 | Pending |
-| BUDG-02 | Phase 16 | Pending |
-| BUDG-03 | Phase 16, Phase 26 (gap closure) | Pending |
-| BUDG-04 | Phase 16 | Complete |
-| INVT-01 | Phase 17 | Pending |
-| INVT-02 | Phase 17 | Pending |
-| INVT-03 | Phase 17 | Pending |
-| INVT-04 | Phase 17 | Pending |
-| INVT-05 | Phase 17, Phase 26 (gap closure) | Pending |
-| INVT-06 | Phase 17, Phase 26 (gap closure) | Pending |
-| GROC-01 | Phase 18 | Complete |
-| GROC-02 | Phase 18 | Complete |
-| GROC-03 | Phase 18 | Complete |
-| GROC-04 | Phase 18 | Complete |
-| GROC-05 | Phase 18 | Complete |
-| PLAN-01 | Phase 19 | Pending |
-| PLAN-02 | Phase 22 | Pending |
-| PLAN-03 | Phase 19 | Pending |
-| PLAN-04 | Phase 22 | Pending |
-| PLAN-05 | Phase 22 | Pending |
-| FEED-01 | Phase 20 | Pending |
-| FEED-02 | Phase 20 | Pending |
-| FEED-03 | Phase 20 | Pending |
-| FEED-04 | Phase 20 | Pending |
-| SCHED-01 | Phase 21, Phase 27 (gap closure) | Pending |
-| SCHED-02 | Phase 21, Phase 27 (gap closure) | Pending |
-| PREP-01 | Phase 23 | Pending |
+| BUDG-01 | Phase 16 | Validated |
+| BUDG-02 | Phase 16 | Validated |
+| BUDG-03 | Phase 16, Phase 26 (gap closure) | Partial |
+| BUDG-04 | Phase 16 | Validated |
+| INVT-01 | Phase 17 | Validated |
+| INVT-02 | Phase 17 | Validated |
+| INVT-03 | Phase 17 | Validated |
+| INVT-04 | Phase 17 | Validated |
+| INVT-05 | Phase 17, Phase 26 (gap closure) | Partial |
+| INVT-06 | Phase 17, Phase 26 (gap closure) | Partial |
+| GROC-01 | Phase 18 | Partial |
+| GROC-02 | Phase 18 | Partial |
+| GROC-03 | Phase 18 | Partial |
+| GROC-04 | Phase 18 | Partial |
+| GROC-05 | Phase 18 | Partial |
+| PLAN-01 | Phase 19 | Partial |
+| PLAN-02 | Phase 22 | Partial |
+| PLAN-03 | Phase 19 | Partial |
+| PLAN-04 | Phase 22 | Partial |
+| PLAN-05 | Phase 22 | Partial |
+| FEED-01 | Phase 20 | Partial |
+| FEED-02 | Phase 20 | Partial |
+| FEED-03 | Phase 20 | Partial |
+| FEED-04 | Phase 20 | Partial |
+| SCHED-01 | Phase 21, Phase 27 (gap closure) | Validated |
+| SCHED-02 | Phase 21, Phase 27 (gap closure) | Validated |
+| PREP-01 | Phase 23 | Partial |
 | PREP-02 | Phase 23, Phase 28 (wire-in) | Validated |
-| PREP-03 | Phase 23 | Pending |
-| PORT-01 | Phase 24 | Pending |
-| PORT-02 | Phase 24 | Pending |
-| IMPORT-01 | Phase 25, Phase 29 (gap closure) | Pending |
-| IMPORT-02 | Phase 25, Phase 29 (gap closure) | Pending |
-| IMPORT-03 | Phase 25, Phase 29 (gap closure) | Pending |
-| IMPORT-04 | Phase 25, Phase 29 (gap closure) | Pending |
-| IMPORT-05 | Phase 25, Phase 29 (gap closure) | Pending |
+| PREP-03 | Phase 23 | Partial |
+| PORT-01 | Phase 24 | Partial |
+| PORT-02 | Phase 24 | Partial |
+| IMPORT-01 | Phase 25 | Validated |
+| IMPORT-02 | Phase 25 | Validated |
+| IMPORT-03 | Phase 25 | Partial |
+| IMPORT-04 | Phase 25 | Validated |
+| IMPORT-05 | Phase 25 | Validated |
 
 **v1.0/v1.1 Traceability (archived — all complete):**
 
