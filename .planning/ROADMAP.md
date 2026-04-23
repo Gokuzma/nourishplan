@@ -45,6 +45,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useHouseholdSchedules so schedule UI feedback works on the plan page (v2.0 gap closure) (completed 2026-04-21)
 - [x] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure) (2026-04-22)
 - [x] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
+- [ ] **Phase 30: Granular Household Member Permissions** - Role-based access (admin, editor, viewer) with per-feature scopes (meal-planning, inventory, budget) beyond current owner-only model
 
 ## Phase Details
 
@@ -324,8 +325,6 @@ Plans:
 Plans:
 - [x] 15-01-PLAN.md — Fix recipe deletion cache invalidation and remove ComingSoonPage dead code
 
----
-
 ## v2.0 AMPS — Phase Details
 
 ### Phase 16: Budget Engine & Query Foundation
@@ -583,3 +582,12 @@ Plans:
 - [x] 29-04-PLAN.md — Phase 24 ROADMAP + PORT-02 deviation blockquote (D-15/D-16) (Wave 3)
 - [x] 29-05-PLAN.md — GuidePage.tsx v2.0 refresh (12 sections, D-10..D-14, QUICK_START_STEPS) (Wave 2)
 **UI hint**: yes
+
+### Phase 30: Granular Household Member Permissions
+**Goal**: Household owners can grant other family members admin rights or more granular permissions (e.g., admin, editor, viewer, or per-feature scopes like meal-planning/inventory/budget) so multiple members can co-manage a household beyond the current owner-only model
+**Depends on**: Phase 29
+**Requirements**: TBD (to be defined during /gsd-spec-phase)
+**Success Criteria**: [To be planned]
+**Plans**: 0 plans
+Plans:
+- [ ] TBD (run /gsd-plan-phase 30 to break down)

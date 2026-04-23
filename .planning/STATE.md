@@ -308,6 +308,7 @@ Recent decisions affecting current work:
 - Phase 14 added: How-To Manual (in-app usage guide)
 - Phases 16–24 added: v2.0 AMPS milestone (Budget, Inventory, Grocery, DnD Planner, Feedback/Dietary, Schedule, Planning Engine, Prep, Dynamic Portioning)
 - Phase 15 added: Universal recipe import — paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions
+- Phase 30 added: Granular household member permissions system — role-based access (admin, editor, viewer) with per-feature scopes (meal-planning, inventory, budget) beyond current owner-only model
 
 ### Pending Todos
 
