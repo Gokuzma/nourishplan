@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 25: Universal Recipe Import** - Paste URL or text, AI extracts complete recipe with ingredients, macros, and instructions (completed 2026-04-19)
 - [x] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure) (completed 2026-04-19)
 - [x] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useHouseholdSchedules so schedule UI feedback works on the plan page (v2.0 gap closure) (completed 2026-04-21)
-- [ ] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure)
+- [x] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure) (2026-04-22)
 - [ ] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
 
 ## Phase Details
@@ -549,14 +549,14 @@ Plans:
   3. If remove: `supabase/functions/generate-cook-sequence` and `supabase/functions/generate-reheat-sequence` are deleted; `23-SUMMARY` entries are corrected; Supabase deployment list reflects the removal
   4. Integration check — `grep -r "cook-sequence\|reheat-sequence" src/` either returns consumer invocations (wire-in) or returns zero matches with zero surviving function files (remove)
   5. PREP-02 traceability status reflects the decision
-**Plans**: 5 plans (0/5 complete)
+**Plans**: 5 plans (5/5 complete)
 **UI hint**: yes
 Plans:
-- [ ] 28-01-PLAN.md — Create useGenerateCookSequence + useGenerateReheatSequence hooks (Wave 1)
-- [ ] 28-02-PLAN.md — Create CookSequenceLoadingOverlay component (Wave 1)
-- [ ] 28-03-PLAN.md — Redeploy both edge functions with --no-verify-jwt (Wave 1, checkpoint)
-- [ ] 28-04-PLAN.md — Wire CookModePage: reheat auto-fire 3-state render + handleStartCook try/catch + overlay conditional (Wave 2)
-- [ ] 28-05-PLAN.md — Add CookModePage.prepSequence regression test + flip REQUIREMENTS.md PREP-02 label to (wire-in) (Wave 3)
+- [x] 28-01-PLAN.md — Create useGenerateCookSequence + useGenerateReheatSequence hooks (Wave 1)
+- [x] 28-02-PLAN.md — Create CookSequenceLoadingOverlay component (Wave 1)
+- [x] 28-03-PLAN.md — Redeploy both edge functions with --no-verify-jwt (Wave 1, checkpoint)
+- [x] 28-04-PLAN.md — Wire CookModePage: reheat auto-fire 3-state render + handleStartCook try/catch + overlay conditional (Wave 2)
+- [x] 28-05-PLAN.md — Add CookModePage.prepSequence regression test + flip REQUIREMENTS.md PREP-02 label to (wire-in) (Wave 3)
 
 ### Phase 29: v2.0 Documentation Reconciliation
 **Goal**: Close v2.0 audit documentation gaps so the milestone can archive with accurate state — formalise IMPORT requirements, backfill missing VERIFICATION.md files, refresh the stale traceability table, and reconcile Phase 24's ROADMAP text with the D-02 scope pivot

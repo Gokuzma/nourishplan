@@ -317,7 +317,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCHED-01 | Phase 21, Phase 27 (gap closure) | Pending |
 | SCHED-02 | Phase 21, Phase 27 (gap closure) | Pending |
 | PREP-01 | Phase 23 | Pending |
-| PREP-02 | Phase 23, Phase 28 (wire-in) | Pending |
+| PREP-02 | Phase 23, Phase 28 (wire-in) | Validated |
 | PREP-03 | Phase 23 | Pending |
 | PORT-01 | Phase 24 | Pending |
 | PORT-02 | Phase 24 | Pending |

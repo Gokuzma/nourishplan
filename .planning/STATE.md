@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: In progress
-stopped_at: "Phase 28 UI-SPEC approved -- 6/6 dimensions PASS no FLAGs (CookSequenceLoadingOverlay + ReheatSkeletonCard locked; silent fall-through on both AI failures; 8 grep guards for anti-regression). Ready for /gsd-plan-phase 28."
-last_updated: "2026-04-21T03:15:00.000Z"
+status: Ready to execute
+stopped_at: Phase 28 complete -- all 5 plans shipped (hooks + overlay + edge-function redeploy + CookModePage wire-in + regression test). CookModePage.tsx 547→611 lines (+64); 8/8 L-020/L-027 preservation features intact; 6/6 UI-SPEC anti-regression grep guards pass; 27 new source-string assertions in tests/CookModePage.prepSequence.test.tsx (27/27 green); vitest full suite 346 passed / 12 failed (baseline unchanged — theme/auth/AuthContext/guide pre-existing); generate-cook-sequence v1 + generate-reheat-sequence v2 ACTIVE on Supabase qyablbzodmftobjslgri; REQUIREMENTS PREP-02 row flipped gap-closure→wire-in and status→Validated; v2.0 audit WARN-01 closed. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unchanged from Phase 27 handoff).
+last_updated: "2026-04-22T23:15:00.000Z"
 progress:
-  total_phases: 26
-  completed_phases: 25
-  total_plans: 100
-  completed_plans: 99
-  percent: 99
+  total_phases: 15
+  completed_phases: 15
+  total_plans: 55
+  completed_plans: 55
+  percent: 100
 ---
 
 # Project State
@@ -20,15 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 27 — wire-schedule-badges-to-plangrid (COMPLETE; CRIT-02 closed and locked by regression test)
+**Current focus:** Phase 28 — resolve-prep-sequence-edge-function-orphans (COMPLETE; WARN-01 closed by wire-in + regression test)
 
 ## Current Position
 
-Phase: 27 — COMPLETE (3/3 plans, CRIT-02 closed)
-Plan: 03 complete (1e9325f + f7589b9) — tests/PlanGrid.schedule.test.tsx ships with 9 passing it() blocks covering useHouseholdSchedules import (D-12), precedence away > quick > consume > prep (D-04), family tooltip exact-string format "Away: Dad. Quick: Sam. Consume: Kayla." (D-07), prep-drop, day-of-week key (weekStartDay + dayIndex) % 7 (D-10) with positive Tuesday + negative Monday within()-scoped, Snack→Snacks normalisation (D-09), UUID first-8-char fallback, empty-schedule no-op; ROADMAP §Phase 27 criteria #1 + #3 amended in place per D-08 / D-10 with "Amended in Phase 27 planning per D-XX" inline audit markers; only §Phase 27 lines 529-539 touched (criteria #2/#4/#5 byte-identical); plans counter advanced 2/3 → 3/3, plan-3 checkbox checked; full vitest suite zero new regressions (12 pre-existing failures unchanged from Plan 01 baseline)
-Next up: Phase 28 (resolve-prep-sequence-edge-function-orphans — wire-in or remove generate-cook-sequence + generate-reheat-sequence). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass.
+Phase: 28 — COMPLETE (5/5 plans, WARN-01 closed)
+Plan ledger: 28-01 hooks (9d040da), 28-02 overlay (afafe81), 28-03 edge redeploy (f18a003 SUMMARY only — zero source drift), 28-04 CookModePage wire-in (2beb181), 28-05 regression test + REQUIREMENTS flip (376dafa). All SUMMARY commits landed: 45eff24, dcf055f, f18a003, 5abfcbb, f5a0e9c. VERIFICATION.md passed with all 5 ROADMAP success criteria satisfied.
+Next up: Phase 29 (v2-0-documentation-reconciliation — close v2.0 audit doc gaps, formalise IMPORT requirements, backfill VERIFICATION.md files). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (carried from Phase 27 handoff).
 
-Progress: █████████░ 99%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
@@ -323,6 +323,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-21T01:01:00.000Z
-Stopped at: Phase 27 Plan 02 complete -- PlanGrid.tsx wired to useHouseholdSchedules + slotSchedulesByDay + slotTooltipsByDay memos with Snack→Snacks normalisation and (weekStartDay + i) % 7 day-of-week key; DayCard.tsx forwards new slotTooltips prop to both SlotCard render sites; SlotCard.tsx renders 12px occupied + 10px empty coloured dots cherry-picked from 4eab9b7/cdf039b with scheduleTooltip family-view title (falls back to Phase 21 literal); commits b84ed11 (SlotCard) + eade152 (DayCard + PlanGrid); 14-feature preservation loop OK on all 14 features; W4 dedupe-import guard exit 0 (exactly 1 from '../../types/database'); all 21 DayCard props preserved; vite build exit 0; zero new vitest regressions vs Plan 01 baseline (12 pre-existing failures unchanged)
-Resume file: .planning/phases/27-wire-schedule-badges-to-plangrid/27-03-PLAN.md
+Last session: 2026-04-22T23:15:00.000Z
+Stopped at: Phase 28 COMPLETE — WARN-01 closed by wire-in. Five plans shipped: hooks (28-01), overlay (28-02), edge-function redeploy with --no-verify-jwt per L-025 (28-03), CookModePage wire-in 547→611 lines preserving 8/8 L-020/L-027 features (28-04), 27-assertion regression test + REQUIREMENTS PREP-02 (gap closure)→(wire-in)→Validated flip (28-05). Vitest 346 passed / 12 failed (baseline unchanged). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated).
+Resume file: .planning/phases/28-resolve-prep-sequence-edge-function-orphans/28-VERIFICATION.md
