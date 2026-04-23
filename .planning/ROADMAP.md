@@ -481,6 +481,12 @@ Plans:
 - [x] 24-02-PLAN.md — generate-plan edge function enrichment (cook frequency, last-cooked, per-member ratings, cost per serving, tier-aware AI prompts) + redeploy
 **UI hint**: yes
 
+> **D-02 pivot (2026-04-15):** Shipped scope is tier-aware recipe selection
+> (generate-plan edge function enrichment + RecipeMixPanel three-slider
+> component) rather than portion-size adaptation. Portions remain
+> calorie-target-driven (PORT-01). See `.planning/phases/24-dynamic-portioning/24-CONTEXT.md`
+> D-02 for the full rationale.
+
 
 ### Phase 25: Universal Recipe Import
 **Goal**: Users can paste a URL (blog, YouTube) or raw recipe text and the AI extracts a complete recipe with ingredients, macros, and instructions — saved directly to the recipe library

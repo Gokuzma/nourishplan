@@ -179,6 +179,11 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 - [~] **PORT-01**: Per-person portion suggestions use calorie targets as primary driver
 - [~] **PORT-02**: Portion models adapt based on feedback ratings and logged consumption history
+  > **D-02 pivot (2026-04-15):** Shipped scope is tier-aware recipe selection
+  > (generate-plan edge function enrichment + RecipeMixPanel three-slider
+  > component) rather than portion-size adaptation. Portions remain
+  > calorie-target-driven (PORT-01). See `.planning/phases/24-dynamic-portioning/24-CONTEXT.md`
+  > D-02 for the full rationale.
 
 ### Recipe Import
 
