@@ -151,9 +151,9 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 ### Planning
 
-- [~] **PLAN-01**: User can drag and drop meals between slots on the weekly plan grid
+- [x] **PLAN-01**: User can drag and drop meals between slots on the weekly plan grid
 - [x] **PLAN-02**: User can auto-generate a meal plan optimized for nutrition, cost, schedule, and preferences
-- [~] **PLAN-03**: Manually placed meals are locked and preserved during auto-generation
+- [x] **PLAN-03**: Manually placed meals are locked and preserved during auto-generation
 - [x] **PLAN-04**: Generated plan highlights nutrition gaps per member with swap suggestions
 - [x] **PLAN-05**: Recipe selection can prioritize using ingredients already in inventory
 
@@ -171,7 +171,7 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 
 ### Prep
 
-- [~] **PREP-01**: User can view batch prep suggestions for the week's meal plan
+- [x] **PREP-01**: User can view batch prep suggestions for the week's meal plan
 - [x] **PREP-02**: User can view day-of task sequencing for a meal
 - [x] **PREP-03**: Freezer-friendly recipes are flagged for make-ahead prep
 
@@ -310,9 +310,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GROC-03 | Phase 18 | Partial |
 | GROC-04 | Phase 18 | Partial |
 | GROC-05 | Phase 18 | Partial |
-| PLAN-01 | Phase 19 | Partial |
+| PLAN-01 | Phase 19 | Validated |
 | PLAN-02 | Phase 22 | Validated |
-| PLAN-03 | Phase 19 | Partial |
+| PLAN-03 | Phase 19 | Validated |
 | PLAN-04 | Phase 22 | Validated |
 | PLAN-05 | Phase 22 | Validated |
 | FEED-01 | Phase 20 | Validated |
@@ -321,7 +321,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEED-04 | Phase 20 | Partial |
 | SCHED-01 | Phase 21, Phase 27 (gap closure) | Validated |
 | SCHED-02 | Phase 21, Phase 27 (gap closure) | Validated |
-| PREP-01 | Phase 23 | Partial |
+| PREP-01 | Phase 23 | Validated |
 | PREP-02 | Phase 23, Phase 28 (wire-in) | Validated |
 | PREP-03 | Phase 23 | Validated |
 | PORT-01 | Phase 24 | Validated |
