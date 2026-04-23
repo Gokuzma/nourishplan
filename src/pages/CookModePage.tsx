@@ -24,9 +24,20 @@ import { useCookCompletion } from '../hooks/useCookCompletion'
 import { CookDeductionReceipt } from '../components/inventory/CookDeductionReceipt'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
 import type { DeductionResult } from '../hooks/useInventoryDeduct'
+import { useGenerateCookSequence } from '../hooks/useGenerateCookSequence'
+import { useGenerateReheatSequence } from '../hooks/useGenerateReheatSequence'
+import { CookSequenceLoadingOverlay } from '../components/cook/CookSequenceLoadingOverlay'
 
 // D-21 flow modes
 type FlowMode = 'loading' | 'resume-prompt' | 'multi-meal-prompt' | 'reheat' | 'cook' | 'error'
+
+// D-02 fallback: hardcoded 3-step microwave sequence used when generate-reheat-sequence fails.
+// This array is the silent-fall-through target per CONTEXT.md D-02 and UI-SPEC line 182.
+const HARDCODED_REHEAT_FALLBACK: { id: string; text: string }[] = [
+  { id: 'reheat-1', text: 'Remove from storage and place in a microwave-safe container.' },
+  { id: 'reheat-2', text: 'Heat on medium power, stirring halfway through.' },
+  { id: 'reheat-3', text: 'Check temperature is hot throughout before serving.' },
+]
 
 export function CookModePage() {
   const { mealId, sessionId: routeSessionId } = useParams<{ mealId?: string; sessionId?: string }>()
@@ -67,6 +78,8 @@ export function CookModePage() {
   const createSession = useCreateCookSession()
   const updateStep = useUpdateCookStep()
   const completeSession = useCompleteCookSession()
+  const generateCookSequence = useGenerateCookSequence()
+  const generateReheatSequence = useGenerateReheatSequence()
 
   // For single-recipe cook: load recipe steps live (R-02 — live-bound, not snapshotted)
   const recipeIdForSteps = activeSession?.recipe_ids[0] ?? mealId
@@ -115,6 +128,18 @@ export function CookModePage() {
     // Default: full cook mode
     setFlowMode('cook')
   }, [routeSessionId, routeSession, routeSessionLoading, existingSession, existingSessionLoading, scheduleStatus, currentSlot])
+
+  // D-02: auto-fire reheat-sequence mutation when entering the reheat branch
+  useEffect(() => {
+    if (flowMode !== 'reheat') return
+    if (!recipeIdForSteps) return
+    if (generateReheatSequence.isPending || generateReheatSequence.isSuccess || generateReheatSequence.isError) return
+    const storage = recipeStepsData?.freezer_friendly ? 'freezer' : 'fridge'
+    generateReheatSequence.mutate({
+      recipeId: recipeIdForSteps,
+      storageHint: storage,
+    })
+  }, [flowMode, recipeIdForSteps, recipeStepsData, generateReheatSequence])
 
   // Computed step state from active session (R-02: keyed by stable step id)
   const stepOrder = activeSession?.step_state.order ?? []
@@ -286,6 +311,24 @@ export function CookModePage() {
       stepsByRecipeId,
       mode,
     })
+
+    // D-03 + D-04: fire generate-cook-sequence for multi-recipe combined/per-recipe sessions.
+    // D-05: on failure, silently fall through to naive per-recipe concatenation already in newSession.step_state.order.
+    if (mode !== null && recipeIds.length >= 1) {
+      try {
+        await generateCookSequence.mutateAsync({
+          cookSessionId: newSession.id,
+          recipeIds,
+          mode,
+          memberIds: [],
+        })
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error('[Phase 28] generate-cook-sequence failed; using per-recipe concatenation fallback', err)
+        }
+      }
+    }
+
     setActiveSessionId(newSession.id)
     setFlowMode('cook')
   }
@@ -358,15 +401,18 @@ export function CookModePage() {
 
   // Reheat flow (D-21 consume slot)
   if (flowMode === 'reheat') {
-    const reheatSteps = liveSteps.length > 0
-      ? liveSteps.map(s => ({ id: s.id, text: s.text }))
-      : [
-          { id: 'reheat-1', text: 'Remove from storage and place in a microwave-safe container.' },
-          { id: 'reheat-2', text: 'Heat on medium power, stirring halfway through.' },
-          { id: 'reheat-3', text: 'Check temperature is hot throughout before serving.' },
-        ]
+    const storage = recipeStepsData?.freezer_friendly ? 'freezer' : 'fridge'
 
-    const storage = (recipeStepsData?.freezer_friendly) ? 'freezer' : 'fridge'
+    // 3-state render per UI-SPEC lines 172-192
+    // D-02: on error, silently fall back to HARDCODED_REHEAT_FALLBACK (no failure UX surface)
+    const aiSteps = generateReheatSequence.isSuccess && generateReheatSequence.data?.steps
+      ? generateReheatSequence.data.steps.map((s, idx) => ({ id: `reheat-ai-${idx}`, text: s.text }))
+      : null
+    const reheatSteps = aiSteps ?? (generateReheatSequence.isError ? HARDCODED_REHEAT_FALLBACK : HARDCODED_REHEAT_FALLBACK)
+
+    if (generateReheatSequence.isError && import.meta.env.DEV) {
+      console.error('[Phase 28] generate-reheat-sequence failed; using hardcoded fallback')
+    }
 
     return (
       <div className="min-h-screen flex flex-col bg-background font-sans">
@@ -379,11 +425,28 @@ export function CookModePage() {
           <p className="text-sm font-semibold text-text">Reheat</p>
         </div>
         <div className="flex-1 overflow-y-auto px-4 py-4 pb-32">
-          <ReheatSequenceCard
-            storage={storage}
-            steps={reheatSteps}
-            onDone={() => navigate(-1)}
-          />
+          {generateReheatSequence.isPending ? (
+            <div
+              role="status"
+              aria-busy="true"
+              aria-label="Loading reheat instructions"
+              className="bg-surface rounded-[--radius-card] px-4 py-4 flex flex-col gap-4"
+            >
+              <div className="h-4 w-32 bg-secondary rounded animate-pulse" />
+              {[0, 1, 2].map(i => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded border border-accent/40 bg-background" />
+                  <div className="h-4 flex-1 bg-secondary rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <ReheatSequenceCard
+              storage={storage}
+              steps={reheatSteps}
+              onDone={() => navigate(-1)}
+            />
+          )}
         </div>
       </div>
     )
@@ -399,6 +462,7 @@ export function CookModePage() {
           onCombined={() => handleStartCook('combined')}
           onPerRecipe={() => handleStartCook('per-recipe')}
         />
+        {generateCookSequence.isPending && <CookSequenceLoadingOverlay />}
       </>
     )
   }
