@@ -12,8 +12,9 @@ interface GuideSection {
 const QUICK_START_STEPS = [
   'Sign in or create your account',
   'Add foods to your food library',
-  'Build a recipe from your foods',
-  'Put your recipe into a meal plan',
+  'Build a recipe, or import one from a URL or pasted text',
+  'Put your recipes into a weekly meal plan',
+  'Generate an AI-optimised plan or drag-and-drop meals yourself',
   'Log what you eat today',
 ]
 
@@ -59,22 +60,60 @@ const GUIDE_SECTIONS: GuideSection[] = [
       'Set the quantity for each ingredient using the input field next to it.',
       'The per-serving nutrition updates automatically as you add ingredients.',
       'Add optional notes or variations at the bottom to help you remember how to make it.',
+      'Imported recipes also land here ready to edit — see "Importing a Recipe" below.',
     ],
     tips: [
       'Tip: You can use another recipe as an ingredient — useful for things like a sauce you make separately.',
     ],
   },
   {
+    id: 'recipe-import',
+    title: 'Importing a Recipe',
+    intro: 'Skip the manual typing — paste a recipe URL or raw text and NourishPlan extracts the name, ingredients, servings, and instructions for you. Great for saving recipes from blogs, videos, or a friend\'s message.',
+    steps: [
+      'Head to the Recipes page and tap "Import Recipe" beside the "+ New Recipe" button.',
+      'Paste a blog URL, a YouTube cooking video URL, or the raw recipe text into the box.',
+      'Tap "Import" and wait a few seconds for the AI to extract the recipe.',
+      'The imported recipe opens in the recipe builder ready to edit — adjust ingredients, servings, or steps as needed.',
+      'If the URL can\'t be fetched (some big recipe sites block automated requests), copy the recipe text from the page and paste it instead.',
+      'Imported recipes keep a link back to the source URL when one was provided — you\'ll see it attributed at the top of the recipe.',
+    ],
+    tips: [
+      'Tip: Raw text paste is the most reliable path — it works for any recipe you can copy, including DMs, PDFs, or hand-typed notes.',
+    ],
+  },
+  {
+    id: 'inventory',
+    title: 'Inventory',
+    intro: 'Track what\'s in your pantry, fridge, and freezer so you know what you already have when you cook or shop. NourishPlan can deduct ingredients as you cook and warn you about items nearing their expiry.',
+    steps: [
+      'Head to the Inventory page from the sidebar or mobile menu.',
+      'Switch between Pantry, Fridge, and Freezer with the tabs across the top.',
+      'Tap "Add Item" to add something manually — fill in name, quantity, unit, storage location, optional expiry date, and price.',
+      'Tap "Scan" to add an item by barcode using your device camera (with a manual barcode entry fallback).',
+      'Tap any item to expand it — from there you can Edit the details or Remove it (with a reason like "Used" or "Discarded").',
+      'Items nearing expiry show a warning badge; the Home page shows a summary card with expiring-soon items.',
+      'When you cook a recipe, NourishPlan deducts the ingredients from inventory (oldest batches first) and shows a receipt listing what was deducted and anything that was missing.',
+    ],
+    tips: [
+      'Tip: After cooking, tap "Save leftover portion" on the receipt to log an uneaten portion as a new inventory item with a 3-day fridge expiry.',
+    ],
+  },
+  {
     id: 'meal-plan',
     title: 'Creating a Meal Plan',
-    intro: 'Organize your meals into a weekly plan shared with your whole household. Everyone sees the same plan and can check portion suggestions based on their own targets.',
+    intro: 'Organize your meals into a weekly plan shared with your whole household. Everyone sees the same plan and can check portion suggestions based on their own targets. You can place meals yourself, drag-and-drop them around, or generate a plan with AI.',
     steps: [
       'Head to the Meals page to create a meal first. Tap "New Meal" and give it a name.',
       'Add recipes or individual foods to your meal from the ingredient search.',
       'Once you have meals ready, head to the Plan page.',
       'You\'ll see a weekly grid with days across the top and meal slots (Breakfast, Lunch, Dinner, Snacks) below.',
       'Tap a day slot to assign a meal to it — search your meals and tap one to add it.',
-      'To swap a meal on a specific day, tap the slot and choose a different meal.',
+      'To rearrange, drag a meal by its grip handle to another slot. On mobile, press and hold the handle then drag.',
+      'Dropping onto an occupied slot offers Swap or Replace.',
+      'To keep a meal fixed during AI generation, tap the lock badge on its slot — locked meals are preserved when you regenerate.',
+      'Tap "Generate Plan" to let the AI fill empty slots using your recipes, nutrition targets, schedule, and budget. Locked slots stay put.',
+      'After generation, a Nutrition Gaps card may appear below the grid with swap suggestions for any member falling short of their targets.',
       'To save your plan as a reusable template, tap the menu and choose "Save as Template".',
       'To start a new week, tap "New Week" and pick a start date.',
     ],
@@ -83,20 +122,88 @@ const GUIDE_SECTIONS: GuideSection[] = [
     ],
   },
   {
+    id: 'grocery-list',
+    title: 'Grocery List',
+    intro: 'Generate a shopping list from your active meal plan. NourishPlan subtracts anything you already have in inventory, groups items by store section, and keeps the list in sync across everyone in your household in real time.',
+    steps: [
+      'Head to the Grocery page from the sidebar or mobile menu.',
+      'Tap "Generate from meal plan" to build a list from the current week\'s plan.',
+      'Items you already have in inventory are marked "Already have" and split from the items you need to buy.',
+      'Items are grouped by store section (Produce, Dairy, Meat, Pantry, etc.) so you can shop aisle by aisle.',
+      'Tap an item to check it off as you shop — checked items stay visible but greyed out.',
+      'Everyone in your household sees the same list and check-offs update live across devices.',
+    ],
+    tips: [
+      'Tip: Generating a grocery list after you\'ve cooked updates the list with the remaining ingredients — items you already used drop off automatically.',
+    ],
+  },
+  {
     id: 'tracking',
     title: 'Tracking Your Day',
-    intro: 'Log what you eat and see how you\'re doing against your nutrition targets. Your daily progress rings update in real time as you log.',
+    intro: 'Log what you eat and see how you\'re doing against your nutrition targets. Your daily progress rings update in real time as you log, and you can cook a planned meal step by step with built-in timers.',
     steps: [
       'Head to the Home page. Your daily progress rings for calories and macros are at the top.',
       'Tap the search bar to find a food and log it — set your portion size and tap "Log".',
       'You can also log a planned meal by tapping "Log Meal" next to a meal slot in your plan.',
       'Set the portion size (you\'ll see a suggestion based on your targets) and tap "Log".',
       'Scroll down to see the micronutrient breakdown for the day.',
+      'To cook a planned recipe, tap "Cook" on the slot — Cook Mode opens with step-by-step instructions, timers, and completion tracking.',
+      'Finishing Cook Mode deducts ingredients from inventory, logs the spend to your weekly budget, and offers to save leftovers.',
+      'After cooking, a "Rate today\'s meals" card appears on the Home page — tap a star (1-5) to rate the recipe. Ratings influence which recipes appear in future AI-generated plans.',
       'To edit or delete a log entry, tap it in the list below and use the Edit or Delete buttons.',
       'To set your personal nutrition targets, head to Settings and tap your name to open Member Targets.',
     ],
     tips: [
       'Tip: Portion suggestions show how much each family member should eat based on their individual targets.',
+    ],
+  },
+  {
+    id: 'prep-schedule',
+    title: 'Prep & Schedule',
+    intro: 'Tell NourishPlan when each household member is available to eat and cook, and it will suggest batch-prep opportunities for the week. Perfect for busy families who want to cook once and eat several times.',
+    steps: [
+      'Head to the Plan page and find the Schedule section.',
+      'For each household member, mark each day slot as Prep (available to cook), Consume (eating only), Quick (quick meal only), or Away.',
+      'Save the schedule — the AI plan generator respects these constraints (no big cook on a Quick day, no meals for members who are Away).',
+      'Slots with a set schedule show a coloured dot on the Plan grid: peach for Consume, amber for Quick, red for Away.',
+      'On the Plan page, tap the Batch Prep button to see which recipes share ingredients or prep steps across the week.',
+      'Freezer-friendly recipes are flagged so you can cook a double batch and freeze half for later.',
+      'When you tap Cook on a prep-slot meal with multiple recipes, NourishPlan generates an AI-optimised combined prep sequence (interleaves steps across recipes). For a reheat-slot, it generates a simple reheat sequence.',
+    ],
+    tips: [
+      'Tip: Setting one Prep day and several Consume days per week is a common pattern — batch cook once, eat leftovers the rest of the week.',
+    ],
+  },
+  {
+    id: 'budget',
+    title: 'Budget',
+    intro: 'Set a weekly food budget and NourishPlan tracks your spend as you cook. Recipe cost is computed from the ingredient prices you\'ve entered — no receipt scanning required.',
+    steps: [
+      'Head to the Plan page and tap the budget amount in the Budget Summary section to edit your weekly household budget.',
+      'Enter ingredient prices as you add them to recipes or inventory — NourishPlan normalises to cost per 100g automatically regardless of the unit you entered.',
+      'Each recipe shows a computed cost per serving in the recipe builder.',
+      'When you cook a recipe, the spend is logged against the current week and the Budget Summary on the Plan page updates.',
+      'The summary shows weekly spend, remaining balance, and highlights if you\'re over budget.',
+      'Over time, the AI plan generator uses cost per serving as one signal when picking recipes — so recipes with cheaper ingredients can get prioritised when the budget is tight.',
+    ],
+    tips: [
+      'Tip: You only need to enter prices once per ingredient — they\'re remembered for future recipes and inventory items.',
+    ],
+  },
+  {
+    id: 'recipe-mix',
+    title: 'Tier-aware Recipe Mix',
+    intro: 'Control how often the AI plan generator picks your favourite, liked, or novel recipes. The three-slider Recipe Mix panel sets the percentage of each tier in your next generated plan.',
+    steps: [
+      'Head to the Plan page and expand the Recipe Mix panel.',
+      'Three sliders control the mix: Favorites (highly rated or frequently cooked), Liked (moderately rated), and Novel (rarely or never cooked).',
+      'Adjust the sliders — the total auto-normalises to 100%.',
+      'Your choice is saved per household in your browser, so you don\'t have to reset it each week.',
+      'Tap "Generate Plan" — the AI picks recipes in the proportions you set and labels each slot in the plan rationale as "Favorite — ...", "Liked — ...", or "Novel — ...".',
+      'Ratings you add after cooking (see "Tracking Your Day") influence which tier each recipe ends up in for future plans.',
+    ],
+    tips: [
+      'Tip: Set Novel to 0% for a week if you want familiar comfort meals; bump it back up when you\'re in an adventurous mood.',
     ],
   },
   {
@@ -140,7 +247,7 @@ export function GuidePage() {
 
         {/* Quick-start card */}
         <div className="bg-surface rounded-[--radius-card] p-4 shadow-sm">
-          <h2 className="font-bold text-text mb-2">Get started in 5 steps</h2>
+          <h2 className="font-bold text-text mb-2">Get started in 6 steps</h2>
           <ol className="list-decimal list-inside flex flex-col gap-2 text-sm text-text/80">
             {QUICK_START_STEPS.map((step, i) => <li key={i}>{step}</li>)}
           </ol>
