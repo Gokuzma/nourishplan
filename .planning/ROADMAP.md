@@ -44,7 +44,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 26: Wire Cook Mode to Inventory and Budget** - Fix CookModePage completion to deduct inventory, log spend, and prompt for leftovers (v2.0 gap closure) (completed 2026-04-19)
 - [x] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useHouseholdSchedules so schedule UI feedback works on the plan page (v2.0 gap closure) (completed 2026-04-21)
 - [x] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure) (2026-04-22)
-- [ ] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
+- [x] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
 
 ## Phase Details
 
@@ -577,9 +577,9 @@ Plans:
   5. Phase 24 ROADMAP entry is updated in place (or annotated) to reflect the D-02 tier-aware recipe selection pivot; PORT-02 description in REQUIREMENTS.md matches the shipped scope
 **Plans**: 5 plans (3 waves)
 Plans:
-- [ ] 29-01-PLAN.md — 17-VERIFICATION.md retrospective backfill (INVT-01..06, D-01..D-04 template) (Wave 1)
-- [ ] 29-02-PLAN.md — 25-VERIFICATION.md retrospective backfill (IMPORT-01..05, IMPORT-03 human_needed) (Wave 1)
-- [ ] 29-03-PLAN.md — REQUIREMENTS.md v2.0 traceability sweep + checkbox alignment + IMPORT status flip (D-05/D-07/D-09/D-17/D-18) (Wave 2)
-- [ ] 29-04-PLAN.md — Phase 24 ROADMAP + PORT-02 deviation blockquote (D-15/D-16) (Wave 3)
-- [ ] 29-05-PLAN.md — GuidePage.tsx v2.0 refresh (12 sections, D-10..D-14, QUICK_START_STEPS) (Wave 2)
+- [x] 29-01-PLAN.md — 17-VERIFICATION.md retrospective backfill (INVT-01..06, D-01..D-04 template) (Wave 1)
+- [x] 29-02-PLAN.md — 25-VERIFICATION.md retrospective backfill (IMPORT-01..05, IMPORT-03 human_needed) (Wave 1)
+- [x] 29-03-PLAN.md — REQUIREMENTS.md v2.0 traceability sweep + checkbox alignment + IMPORT status flip (D-05/D-07/D-09/D-17/D-18) (Wave 2)
+- [x] 29-04-PLAN.md — Phase 24 ROADMAP + PORT-02 deviation blockquote (D-15/D-16) (Wave 3)
+- [x] 29-05-PLAN.md — GuidePage.tsx v2.0 refresh (12 sections, D-10..D-14, QUICK_START_STEPS) (Wave 2)
 **UI hint**: yes

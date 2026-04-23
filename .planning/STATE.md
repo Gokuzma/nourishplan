@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
-status: Ready to execute
-stopped_at: Phase 29 context gathered. 29-CONTEXT.md + 29-DISCUSSION-LOG.md committed (81485d0). 18 decisions locked across 5 areas — retrospective VERIFICATION.md template (D-01..D-04), 3-state traceability vocab Pending/Partial/Validated (D-05..D-07), phase-suffix hygiene keeping code-provenance and dropping Phase 29 from IMPORT rows (D-08..D-09), D-02 deviation-block annotation for Phase 24 + PORT-02 (D-15..D-16), IMPORT status flip (D-17), checkbox alignment sweep (D-18). User folded in GuidePage.tsx v2.0 refresh (9 feature families interleaved by workflow, match existing tone, D-10..D-14). Ready for /gsd-plan-phase 29. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (carried from Phase 27 handoff).
-last_updated: "2026-04-23T00:00:00.000Z"
+status: Phase complete
+stopped_at: "Phase 29 COMPLETE — all four v2.0 audit WARNs (02/03/04/05) closed + folded-in GuidePage v2.0 refresh shipped. Five plans shipped: 17-VERIFICATION.md retrospective (29-01, 629dbc4), 25-VERIFICATION.md retrospective with IMPORT-03 human_needed (29-02, dda1923), REQUIREMENTS.md v2.0 traceability sweep + 35 checkbox alignments (29-03, 67d6dc5), GuidePage.tsx 12-section v2.0 refresh (29-05, 4fcddfa), D-16 deviation blockquotes for Phase 24 pivot (29-04, 143f5e6). 6/6 phase success criteria VALIDATED per 29-VERIFICATION.md. v2.0 milestone is archive-ready. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated; carried from Phase 27/28 handoff)."
+last_updated: "2026-04-23T01:45:00.000Z"
 progress:
-  total_phases: 15
-  completed_phases: 15
-  total_plans: 55
-  completed_plans: 55
+  total_phases: 14
+  completed_phases: 14
+  total_plans: 50
+  completed_plans: 50
   percent: 100
 ---
 
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 29 — v2-0-documentation-reconciliation (CONTEXT captured; ready for plan)
+**Current focus:** Phase 29 — v2-0-documentation-reconciliation (COMPLETE; v2.0 milestone archive-ready)
 
 ## Current Position
 
-Phase: 29 — CONTEXT captured (0/? plans, audit doc-drift WARN-02..05 closure + folded-in GuidePage.tsx v2.0 refresh)
-Context ledger: 29-CONTEXT.md + 29-DISCUSSION-LOG.md (81485d0) — 18 decisions across retro-VERIFICATION template, 3-state traceability vocab (Pending/Partial/Validated), phase-suffix hygiene, D-02 deviation-block annotation convention, IMPORT status flip, checkbox alignment, GuidePage v2.0 refresh interleaved by workflow.
-Next up: `/gsd-plan-phase 29` to decompose into waves. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (carried from Phase 27 handoff).
+Phase: 29 — COMPLETE (5/5 plans shipped across 3 waves; 29-VERIFICATION.md status=passed)
+Evidence: 29-VERIFICATION.md at .planning/phases/29-v2-0-documentation-reconciliation/29-VERIFICATION.md — 6/6 success criteria VALIDATED (5 ROADMAP SCs + folded-in GuidePage scope). Empty human_verification; zero human_needed rows at Phase 29 level (IMPORT-03 deferral belongs to Phase 25's retrospective, not Phase 29).
+Next up: v2.0 milestone archive (`/gsd-complete-milestone`) is now unblocked — all four v2.0 audit WARNs closed; v2.0 traceability table in REQUIREMENTS.md uses Validated/Partial vocabulary per D-05/D-07. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated; carried from Phase 27/28 handoff).
 
 Progress: ██████████ 100%
 
