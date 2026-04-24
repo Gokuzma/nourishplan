@@ -65,7 +65,7 @@ interface SectionHeadProps {
 export function SectionHead({ no, label, aux, className }: SectionHeadProps) {
   return (
     <div className={`section-head ${className ?? ''}`}>
-      <span className="no">§{no}</span>
+      <span className="no">{no}</span>
       <span className="label">{label}</span>
       {aux && <span className="aux">{aux}</span>}
     </div>
@@ -79,14 +79,14 @@ interface FolioProps {
   pageOf: string
 }
 
-export function Folio({ num, title, tagline, pageOf }: FolioProps) {
+export function Folio({ num, title, tagline }: FolioProps) {
   return (
     <div className="folio">
       <span>
         <span className="num">{num}</span> · {title}
       </span>
       <span>{tagline}</span>
-      <span>{pageOf}</span>
+      <span aria-hidden="true">—</span>
     </div>
   )
 }

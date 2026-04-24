@@ -132,7 +132,7 @@ function EditLogModal({ log, onClose }: EditLogModalProps) {
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="kicker mono" style={{ color: 'var(--tomato)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Edit entry</div>
-            <h2 className="serif" style={{ fontSize: 22, fontStyle: 'italic', marginTop: 4 }}>{log.item_name}</h2>
+            <h2 className="serif" style={{ fontSize: 22, marginTop: 4 }}>{log.item_name}</h2>
             {log.slot_name && <p className="mono" style={{ fontSize: 10, color: 'var(--ink-soft)', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 4 }}>{log.slot_name}</p>}
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-sm" aria-label="Close">×</button>
@@ -295,23 +295,22 @@ export function HomePage() {
         <Nameplate
           left={formatDateLong(selectedDate)}
           title={<>Nourish<span className="amp">·</span>plan</>}
-          right="The Sunday Supper Gazette"
+          right="Meal planning for the household"
         />
       </div>
       <div className="md:hidden">
         <Nameplate
           left={formatDateShort(selectedDate)}
           title="The Daily"
-          right={`№${issueNumber(selectedDate).toLocaleString()}`}
+          right={formatDateShort(selectedDate)}
           size="sm"
         />
       </div>
 
       {/* Story head */}
       <StoryHead
-        kicker="FRONT PAGE · 01 — THE DAILY"
-        headline="The day,"
-        headlineAccent="so far."
+        kicker="HOME"
+        headline="The Daily"
         byline={calPct != null ? `${Math.round(totals.calories).toLocaleString()} of ${Math.round(target!.calories).toLocaleString()} kcal\n${calPct}% to target` : null}
         size="sm"
       />
@@ -352,7 +351,7 @@ export function HomePage() {
           <div>
             <SectionHead
               no="01"
-              label="The Ledger of the Day"
+              label="Nutrition"
               aux={calPct != null ? `${calPct}% to target` : 'no target set'}
             />
             <Rule />
@@ -460,7 +459,7 @@ export function HomePage() {
                 <Rule />
                 <div className="py-3">
                   <div className="eyebrow" style={{ marginBottom: 6 }}>{tonightSlot.is_locked ? 'Locked in —' : 'Planned —'}</div>
-                  <div className="serif" style={{ fontSize: 24, fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.02em' }}>
+                  <div className="serif" style={{ fontSize: 24, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
                     {tonightSlot.meals?.name ?? '—'}
                   </div>
                   {tonightSlot.meals && (
@@ -488,7 +487,7 @@ export function HomePage() {
         <div className="md:hidden">
           <SectionHead
             no="01"
-            label="The Ledger of the Day"
+            label="Nutrition"
             aux={calPct != null ? `${calPct}% to target` : ''}
           />
           <Rule />
@@ -543,7 +542,7 @@ export function HomePage() {
               <SectionHead no="04" label="Tonight" aux={tonightSlot.slot_name.toUpperCase()} />
               <Rule />
               <div className="py-3">
-                <div className="serif" style={{ fontSize: 22, fontStyle: 'italic', lineHeight: 1.05 }}>
+                <div className="serif" style={{ fontSize: 22, lineHeight: 1.05 }}>
                   {tonightSlot.meals?.name ?? '—'}
                 </div>
               </div>

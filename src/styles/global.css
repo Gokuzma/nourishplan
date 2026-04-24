@@ -4,97 +4,101 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * NourishPlan v2.0 — "Sunday Supper Gazette" edition
- * Riso-print / newspaper-nameplate palette. Deep ink-teal paper, warm
- * off-white ink, tomato primary accent, chartreuse/butter/plum/sky/leaf
- * riso stack. Fraunces + JetBrains Mono + Inter typography trio.
+ * NourishPlan v2.0 — cookbook edition (Terracotta Garden palette)
+ * Off-white paper, sage-green primary, salmon-pink + silver-lavender complements.
+ * Outfit + Inter + DM Mono + Instrument Serif (italic logo only).
  *
  * Token names preserved (--color-primary/secondary/accent/text/background/
- * surface) so existing Tailwind usages (bg-primary, text-text, etc.) reskin
+ * surface) so existing Tailwind utilities (bg-primary, text-text, etc.) reskin
  * automatically without touching component code.
  */
 
 @theme {
-  /* Semantic surface tokens (light-first, but ground is dark teal — this
-     design inverts convention; dark mode darkens further) */
-  --color-primary: #f04e2b;       /* tomato — primary accent / actions / today */
-  --color-secondary: #0a2b2b;     /* paper-2 — darker panels + bg overlays */
-  --color-accent: #d9e85a;        /* chartreuse — hatched fills / highlights */
-  --color-text: #fff5e1;          /* warm off-white ink */
-  --color-background: #0f3b3a;    /* deep ink-teal paper */
-  --color-surface: #0a2b2b;       /* darker-teal card surface */
+  /* Semantic surface tokens */
+  --color-primary: #7a8c70;       /* sage — primary action */
+  --color-secondary: #f2f1ee;     /* sidebar / paper-2 */
+  --color-accent: #dc9285;        /* salmon pink — urgency, USE UP */
+  --color-text: #282220;          /* ink */
+  --color-background: #fafaf9;    /* paper */
+  --color-surface: #f2f1ee;       /* paper-2 */
 
-  /* Expanded Gazette riso stack (usable as bg-butter, text-plum, etc.) */
-  --color-paper: #0f3b3a;
-  --color-paper-2: #0a2b2b;
-  --color-paper-hi: #17504e;
-  --color-ink: #fff5e1;
-  --color-ink-dim: #d9c9a3;
-  --color-ink-soft: #8fa6a0;
-  --color-rule: #f0e3c0;
-  --color-tomato: #f04e2b;
-  --color-tomato-deep: #c43a20;
-  --color-chartreuse: #d9e85a;
-  --color-butter: #f9d66b;
-  --color-plum: #8b3a62;
-  --color-sky: #6fb3c2;
-  --color-leaf: #4f8a55;
+  /* Cookbook palette (usable as bg-sage, text-plum, etc.) */
+  --color-paper: #fafaf9;
+  --color-paper-2: #f2f1ee;
+  --color-paper-hi: #e6e4e0;
+  --color-ink: #282220;
+  --color-ink-dim: #5c5450;
+  --color-ink-soft: #9c9490;
+  --color-rule: #282220;
+  --color-tomato: #7a8c70;          /* sage */
+  --color-tomato-deep: #5c6e54;
+  --color-chartreuse: #b0c49c;      /* sage fill */
+  --color-butter: #d0c4b8;          /* warm sand */
+  --color-plum: #a89ec0;            /* lavender */
+  --color-sky: #dc9285;             /* salmon pink */
+  --color-leaf: #7a9078;            /* deep sage */
 
-  /* Typography trio */
+  /* Typography — Outfit display, Instrument Serif italic logo, Inter body, DM Mono numerics */
   --font-sans: "Inter", system-ui, sans-serif;
-  --font-serif: "Fraunces", "Playfair Display", Georgia, serif;
-  --font-display: "Fraunces", serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-serif: "Instrument Serif", "Fraunces", Georgia, serif;
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
 
-  /* Gazette is sharp — no rounded corners */
+  /* Sharp corners — editorial, not SaaS-rounded */
   --radius-card: 0px;
   --radius-btn: 0px;
 }
 
-/* Root-level CSS variables (not Tailwind @theme — used by raw utility classes below) */
+/* Root-level CSS variables used by raw utility classes below */
 :root {
-  --paper: #0f3b3a;
-  --paper-2: #0a2b2b;
-  --paper-hi: #17504e;
-  --ink: #fff5e1;
-  --ink-dim: #d9c9a3;
-  --ink-soft: #8fa6a0;
-  --rule-c: #f0e3c0;
-  --rule-soft: rgba(240, 227, 192, 0.28);
-  --rule-softer: rgba(240, 227, 192, 0.14);
-  --tomato: #f04e2b;
-  --tomato-deep: #c43a20;
-  --chartreuse: #d9e85a;
-  --butter: #f9d66b;
-  --plum: #8b3a62;
-  --sky: #6fb3c2;
-  --leaf: #4f8a55;
-  --grain-opacity: 0.12;
-  --font-serif: "Fraunces", "Playfair Display", Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --paper: #fafaf9;
+  --paper-2: #f2f1ee;
+  --sidebar: #f2f1ee;
+  --paper-hi: #e6e4e0;
+  --ink: #282220;
+  --ink-dim: #5c5450;
+  --ink-soft: #9c9490;
+  --rule-c: #282220;
+  --rule-soft: rgba(40, 34, 32, 0.16);
+  --rule-softer: rgba(40, 34, 32, 0.07);
+
+  --tomato: #7a8c70;
+  --tomato-deep: #5c6e54;
+  --chartreuse: #b0c49c;
+  --butter: #d0c4b8;
+  --plum: #a89ec0;
+  --sky: #dc9285;
+  --leaf: #7a9078;
+  --on-accent: #fafaf9;
+  --on-accent-dark: #282220;
+
+  --accent: var(--tomato);
+  --accent-2: var(--chartreuse);
+  --grain-opacity: 0.1;
+
+  --font-serif: "Instrument Serif", "Fraunces", Georgia, serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
   --font-body: "Inter", system-ui, sans-serif;
-  --font-display: "Fraunces", serif;
+  --font-display: "Outfit", system-ui, sans-serif;
 }
 
-/* Dark mode overrides applied when .dark class is on <html> — deeper ground */
+/* Dark mode overrides applied when .dark class is on <html> */
 @layer base {
   .dark {
-    --color-text: #f6ead0;
-    --color-background: #1a1a1a;
-    --color-surface: #0f0f0f;
-    --color-primary: #f04e2b;      /* tomato unchanged */
-    --color-secondary: #0f0f0f;
-    --color-accent: #d9e85a;       /* chartreuse unchanged */
+    --color-text: #ece5d5;
+    --color-background: #1d1d1b;
+    --color-surface: #141412;
 
-    --paper: #1a1a1a;
-    --paper-2: #0f0f0f;
+    --paper: #1d1d1b;
+    --paper-2: #141412;
+    --sidebar: #141412;
     --paper-hi: #252522;
-    --ink: #f6ead0;
-    --ink-dim: #c6b894;
-    --ink-soft: #7a7668;
-    --rule-c: #f6ead0;
-    --rule-soft: rgba(246, 234, 208, 0.22);
-    --rule-softer: rgba(246, 234, 208, 0.10);
+    --ink: #ece5d5;
+    --ink-dim: #9e988a;
+    --ink-soft: #6b6860;
+    --rule-c: #ece5d5;
+    --rule-soft: rgba(236, 229, 213, 0.22);
+    --rule-softer: rgba(236, 229, 213, 0.10);
   }
 
   html, body {
@@ -107,11 +111,12 @@
 }
 
 /*
- * Gazette utility classes — additive to Tailwind. Use when a pattern is
- * specific enough that expressing it via Tailwind atoms would be noisy.
+ * Cookbook utility classes — additive to Tailwind. Shared primitives used
+ * across screens for nameplates, section heads, nutrition bars, planner grid,
+ * list rows, chips, and so on.
  */
 
-/* Paper = deep teal + halftone dot grain */
+/* Paper = off-white + subtle ink-speck grain */
 .paper {
   background: var(--paper);
   color: var(--ink);
@@ -121,10 +126,10 @@
   content: "";
   position: absolute; inset: 0;
   background-image:
-    radial-gradient(rgba(240, 227, 192, 0.14) 1px, transparent 1.1px),
-    radial-gradient(rgba(240, 78, 43, 0.05) 1px, transparent 1.2px);
-  background-size: 6px 6px, 14px 14px;
-  background-position: 0 0, 3px 3px;
+    radial-gradient(var(--rule-softer) 0.7px, transparent 0.8px),
+    radial-gradient(var(--rule-softer) 0.5px, transparent 0.6px);
+  background-size: 5px 5px, 11px 11px;
+  background-position: 0 0, 2px 3px;
   pointer-events: none;
   opacity: var(--grain-opacity);
   z-index: 0;
@@ -132,8 +137,8 @@
 .paper > * { position: relative; z-index: 1; }
 
 /* Typography helpers */
-.serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.015em; }
-.serif-italic { font-family: var(--font-serif); font-style: italic; }
+.serif { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.015em; }
+.serif-italic { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
 .mono { font-family: var(--font-mono); font-feature-settings: "tnum", "zero"; }
 .tnum { font-variant-numeric: tabular-nums; }
 
@@ -142,7 +147,7 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--butter);
+  color: var(--ink-dim);
   font-weight: 500;
 }
 
@@ -165,7 +170,7 @@
     linear-gradient(var(--rule-c), var(--rule-c)) bottom/100% 1px no-repeat;
 }
 
-/* Masthead — newspaper nameplate */
+/* Masthead — page nameplate */
 .nameplate {
   display: flex;
   align-items: baseline;
@@ -193,24 +198,25 @@
   color: var(--ink);
   padding: 0 18px;
   text-align: center;
-  font-style: italic;
 }
 .nameplate .title .amp { color: var(--tomato); font-style: normal; }
 .nameplate.sm .title { font-size: 38px; }
 
 .subhead {
-  padding: 8px 0 14px;
+  padding: 9px 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--butter);
+  color: var(--ink-dim);
+  border-top: 1px solid var(--rule-soft);
   border-bottom: 1px solid var(--rule-c);
 }
 
-/* Story head — page-level kicker + big italic headline + byline */
+/* Story head — page-level kicker + big headline + byline */
 .story-head {
   padding: 20px 0 16px;
   display: grid;
@@ -233,7 +239,6 @@
   letter-spacing: -0.025em;
   color: var(--ink);
   margin-top: 8px;
-  font-style: italic;
   font-weight: 400;
 }
 .story-head .headline em { font-style: normal; color: var(--tomato); }
@@ -247,7 +252,7 @@
   text-align: right;
 }
 
-/* Section heading — hand-numbered with big italic tomato numeral */
+/* Section heading — coral number + label, no italics */
 .section-head {
   padding: 28px 0 8px;
   display: flex;
@@ -256,11 +261,10 @@
 }
 .section-head .no {
   font-family: var(--font-display);
-  font-weight: 400;
-  font-style: italic;
-  font-size: 42px;
+  font-weight: 700;
+  font-size: 38px;
   line-height: 0.9;
-  color: var(--tomato);
+  color: var(--sky);
   letter-spacing: -0.03em;
 }
 .section-head .label {
@@ -269,7 +273,7 @@
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--ink);
-  font-style: italic;
+  font-weight: 500;
   flex: 1;
 }
 .section-head .aux {
@@ -280,8 +284,8 @@
   color: var(--ink-dim);
 }
 
-/* Gazette-style button (sharp corners, mono uppercase label) */
-.gz-btn {
+/* Buttons (sharp, mono, uppercase) */
+.btn, .gz-btn {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -299,23 +303,24 @@
   transition: transform .08s, background .12s;
   border-radius: 0;
 }
-.gz-btn:hover { background: rgba(255, 245, 225, 0.08); transform: translateY(-1px); }
-.gz-btn:active { transform: translateY(1px); }
-.gz-btn-primary {
+.btn:hover, .gz-btn:hover { background: rgba(40, 34, 32, 0.04); transform: translateY(-1px); }
+.btn:active, .gz-btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary, .gz-btn-primary {
   background: var(--tomato);
   border-color: var(--tomato);
-  color: #1a0a05;
+  color: var(--on-accent);
 }
-.gz-btn-primary:hover { background: var(--tomato-deep); }
-.gz-btn-chart {
+.btn-primary:hover, .gz-btn-primary:hover { background: var(--tomato-deep); }
+.btn-chart, .gz-btn-chart {
   background: var(--chartreuse);
   border-color: var(--chartreuse);
-  color: #1a1a0a;
+  color: var(--on-accent-dark);
 }
-.gz-btn-sm { min-height: 32px; padding: 5px 10px; font-size: 10px; }
-.gz-btn-ghost { border-color: transparent; padding-left: 8px; padding-right: 8px; }
+.btn-sm, .gz-btn-sm { min-height: 32px; padding: 5px 10px; font-size: 10px; }
+.btn-ghost, .gz-btn-ghost { border-color: transparent; padding-left: 8px; padding-right: 8px; }
 
-/* Chips — 6 color variants */
+/* Chips — 6 colour variants */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -330,32 +335,31 @@
   border: 1px solid var(--rule-c);
   color: var(--ink);
 }
-.chip-tomato { background: var(--tomato); border-color: var(--tomato); color: #1a0a05; }
-.chip-butter { background: var(--butter); border-color: var(--butter); color: #2a1f00; }
-.chip-chart  { background: var(--chartreuse); border-color: var(--chartreuse); color: #1a1a0a; }
-.chip-plum   { background: var(--plum); border-color: var(--plum); color: #fff5e1; }
-.chip-sky    { background: var(--sky); border-color: var(--sky); color: #081c1c; }
-.chip-leaf   { background: var(--leaf); border-color: var(--leaf); color: #fff5e1; }
+.chip-tomato { background: var(--tomato); border-color: var(--tomato); color: var(--on-accent); }
+.chip-butter { background: var(--butter); border-color: var(--butter); color: var(--on-accent-dark); }
+.chip-chart  { background: var(--chartreuse); border-color: var(--chartreuse); color: var(--on-accent-dark); }
+.chip-plum   { background: var(--plum); border-color: var(--plum); color: var(--on-accent); }
+.chip-sky    { background: var(--sky); border-color: var(--sky); color: var(--on-accent-dark); }
+.chip-leaf   { background: var(--leaf); border-color: var(--leaf); color: var(--on-accent); }
 
 /* Rotated stamp */
 .stamp {
   display: inline-block;
   font-family: var(--font-display);
-  font-style: italic;
-  font-size: 14px;
-  letter-spacing: -0.01em;
+  font-size: 13px;
+  letter-spacing: 0.06em;
   color: var(--tomato);
   border: 2px solid var(--tomato);
   padding: 6px 12px 7px;
-  transform: rotate(-5deg);
+  transform: rotate(-4deg);
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
 }
 .stamp-small { font-size: 11px; padding: 4px 8px; border-width: 1.5px; }
 .stamp-chart { color: var(--chartreuse); border-color: var(--chartreuse); transform: rotate(3deg); }
 
-/* Nutrition bar — hatched chartreuse fill + tomato target tick */
+/* Nutrition bar — sage fill with hatched overlay + tomato target tick */
 .nbar {
   display: grid;
   grid-template-columns: 40px 1fr auto;
@@ -370,7 +374,7 @@
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--butter);
+  color: var(--ink-dim);
 }
 .nbar .nvals {
   font-family: var(--font-mono);
@@ -382,7 +386,7 @@
 .ntrack {
   position: relative;
   height: 12px;
-  background: rgba(255, 245, 225, 0.08);
+  background: rgba(40, 34, 32, 0.05);
   border: 1px solid var(--rule-soft);
 }
 .ntrack .nfill {
@@ -398,7 +402,7 @@
   background: var(--tomato);
 }
 
-/* Expiry pip (inventory urgency dot) */
+/* Expiry pip */
 .pip {
   display: inline-flex;
   align-items: center;
@@ -428,28 +432,17 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 18px;
-  font-style: italic;
-  color: #1a0a05;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--on-accent-dark);
   background: var(--butter);
   border-radius: 50%;
 }
-.avatar.plum { background: var(--plum); color: var(--ink); }
-.avatar.sky { background: var(--sky); color: #081c1c; }
-.avatar.leaf { background: var(--leaf); color: var(--ink); }
-.avatar.chart { background: var(--chartreuse); color: #1a1a0a; }
-.avatar.tomato { background: var(--tomato); color: #1a0a05; }
-
-/* Drop cap (editorial lead paragraph) */
-.drop-cap::first-letter {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 64px;
-  float: left;
-  line-height: 0.85;
-  padding: 4px 10px 0 0;
-  color: var(--tomato);
-}
+.avatar.plum { background: var(--plum); color: var(--on-accent); }
+.avatar.sky { background: var(--sky); color: var(--on-accent-dark); }
+.avatar.leaf { background: var(--leaf); color: var(--on-accent); }
+.avatar.chart { background: var(--chartreuse); color: var(--on-accent-dark); }
+.avatar.tomato { background: var(--tomato); color: var(--on-accent); }
 
 /* Folio (page footer number band) */
 .folio {
@@ -463,11 +456,11 @@
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--butter);
+  color: var(--ink-dim);
 }
 .folio .num {
   font-family: var(--font-display);
-  font-style: italic;
+  font-weight: 600;
   font-size: 20px;
   color: var(--ink);
   letter-spacing: -0.02em;
@@ -499,50 +492,9 @@
   border-bottom: 1px solid var(--rule-softer);
 }
 .menu-pop button:last-child { border-bottom: 0; }
-.menu-pop button:hover { background: var(--tomato); color: #1a0a05; }
+.menu-pop button:hover { background: var(--tomato); color: var(--on-accent); }
 .menu-pop button.danger { color: var(--tomato); }
-
-/*
- * Gazette page-pattern classes — ported from bundle styles.css. These are the
- * editorial layout primitives used in screen-{plan,home,inventory,grocery,
- * household}.jsx rewrites. Component-level Tailwind still works alongside them.
- */
-
-/* Buttons (sharp, mono, uppercase — Gazette default) */
-.btn {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-weight: 500;
-  padding: 10px 14px;
-  border: 1.5px solid var(--rule-c);
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: transform .08s, background .12s;
-  border-radius: 0;
-}
-.btn:hover { background: rgba(255, 245, 225, 0.08); transform: translateY(-1px); }
-.btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.btn-primary {
-  background: var(--tomato);
-  border-color: var(--tomato);
-  color: #1a0a05;
-}
-.btn-primary:hover { background: var(--tomato-deep); }
-.btn-chart {
-  background: var(--chartreuse);
-  border-color: var(--chartreuse);
-  color: #1a1a0a;
-}
-.btn-sm { min-height: 32px; padding: 5px 10px; font-size: 10px; }
-.btn-ghost { border-color: transparent; padding-left: 8px; padding-right: 8px; }
+.menu-pop button.danger:hover { background: var(--tomato); color: var(--on-accent); }
 
 /* Planner grid — ruled + hand-numbered */
 .plan-grid {
@@ -568,15 +520,15 @@
 }
 .plan-grid .ghead .dd {
   font-family: var(--font-display);
-  font-style: italic;
+  font-weight: 600;
   font-size: 22px;
   line-height: 1;
   color: var(--ink);
   margin-top: 2px;
 }
-.plan-grid .ghead.today { background: var(--tomato); }
+.plan-grid .ghead.today { background: var(--plum); }
 .plan-grid .ghead.today .dn,
-.plan-grid .ghead.today .dd { color: #1a0a05; }
+.plan-grid .ghead.today .dd { color: var(--on-accent); }
 .plan-grid .gmeal-label {
   padding: 12px 10px;
   border-right: 2px solid var(--rule-c);
@@ -590,10 +542,10 @@
 .plan-grid .gmeal-label:last-of-type { border-bottom: 0; }
 .plan-grid .gmeal-label .no {
   font-family: var(--font-display);
-  font-style: italic;
-  font-size: 26px;
+  font-weight: 700;
+  font-size: 22px;
   line-height: 0.9;
-  color: var(--tomato);
+  color: var(--sky);
 }
 .plan-grid .gmeal-label .lab {
   font-family: var(--font-mono);
@@ -613,7 +565,7 @@
   position: relative;
 }
 .plan-grid .gcell:last-child { border-right: 0; }
-.plan-grid .gcell.today-col { background: rgba(240, 78, 43, 0.06); }
+.plan-grid .gcell.today-col { background: rgba(168, 158, 192, 0.08); }
 
 /* Slot card (inside plan grid cell) */
 .slot {
@@ -637,14 +589,13 @@
 .slot .slot-tags { display: flex; gap: 3px; margin-top: 5px; flex-wrap: wrap; }
 .slot.empty {
   font-family: var(--font-display);
-  font-style: italic;
   font-size: 13px;
   color: var(--ink-soft);
   cursor: pointer;
 }
 .slot.empty::before { content: "+ "; color: var(--tomato); }
 
-/* Budget strip — ticket stub. 2x2 on mobile, 4-col on tablet+. */
+/* Budget strip — 2x2 mobile, 4-col tablet+. No repeating gradient lines. */
 .budget-strip {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -680,11 +631,11 @@
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--butter);
+  color: var(--ink-dim);
 }
 .budget-strip .bnum {
   font-family: var(--font-display);
-  font-style: italic;
+  font-weight: 600;
   font-size: 24px;
   line-height: 1;
   color: var(--ink);
@@ -702,6 +653,7 @@
   font-style: normal;
   color: var(--ink-soft);
   font-size: 11px;
+  font-weight: 400;
   display: block;
   margin-top: 2px;
 }
@@ -711,7 +663,7 @@
 .budget-strip .bnum.accent { color: var(--tomato); }
 .budget-strip .bnum.chart { color: var(--chartreuse); }
 
-/* Day scrubber pill (mobile plan + grocery aisle jumper) */
+/* Day scrubber pill (mobile plan / grocery aisle jumper) */
 .day-pill {
   flex: 0 0 auto;
   padding: 12px;
@@ -729,15 +681,15 @@
 }
 .day-pill .dd {
   font-family: var(--font-display);
-  font-style: italic;
+  font-weight: 600;
   font-size: 22px;
   color: var(--ink);
   margin-top: 2px;
   line-height: 1;
 }
-.day-pill.active { background: var(--tomato); }
+.day-pill.active { background: var(--plum); }
 .day-pill.active .dn,
-.day-pill.active .dd { color: #1a0a05; }
+.day-pill.active .dd { color: var(--on-accent); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
@@ -819,7 +771,7 @@
   min-height: 34px;
 }
 .seg button:last-child { border-right: 0; }
-.seg button.active { color: #1a0a05; background: var(--butter); }
+.seg button.active { color: var(--on-accent-dark); background: var(--butter); }
 
 /* Search bar (food search / grocery jump) */
 .search {
@@ -838,7 +790,6 @@
   outline: none;
   color: var(--ink);
   font-family: var(--font-display);
-  font-style: italic;
   font-size: 18px;
 }
 .search input::placeholder { color: var(--ink-soft); }
@@ -859,7 +810,7 @@
 .check.on {
   background: var(--tomato);
   border-color: var(--tomato);
-  color: #1a0a05;
+  color: var(--on-accent);
 }
 
 /* Torn paper edge (receipt strip) */

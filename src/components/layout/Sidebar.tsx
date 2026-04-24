@@ -44,7 +44,7 @@ function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
             [
               'relative grid grid-cols-[20px_1fr_auto] items-center gap-3 px-[18px] py-[9px] text-[14px]',
               isActive
-                ? 'bg-[var(--tomato)] text-[#1a0a05] before:content-["→"] before:absolute before:-left-2.5 before:top-1/2 before:-translate-y-1/2 before:text-[var(--tomato)] before:font-[var(--font-display)] before:text-[20px] before:leading-none'
+                ? 'bg-[var(--tomato)] text-[var(--on-accent)] before:content-["→"] before:absolute before:-left-2.5 before:top-1/2 before:-translate-y-1/2 before:text-[var(--tomato)] before:font-[var(--font-display)] before:text-[20px] before:leading-none'
                 : 'text-[var(--ink)] hover:bg-[rgba(255,245,225,0.04)]',
             ].join(' ')
           }
@@ -54,7 +54,7 @@ function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
           <span
             className={[
               'mono text-[10px]',
-              'group-[.active]:text-[#1a0a05]',
+              'group-[.active]:text-[var(--on-accent)]',
             ].join(' ')}
             style={{ color: 'inherit', opacity: 0.65 }}
           >
@@ -73,10 +73,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="relative hidden md:flex flex-col w-[220px] min-h-screen bg-[var(--paper-2)] border-r border-[var(--rule-c)] pt-[18px] pb-5 after:content-[''] after:absolute after:-right-px after:top-0 after:bottom-0 after:w-px after:opacity-50"
-      style={{
-        backgroundImage: 'none',
-      }}
+      className="relative hidden md:flex flex-col w-[220px] min-h-screen bg-[var(--sidebar)] border-r border-[var(--rule-c)] pt-[18px] pb-5 after:content-[''] after:absolute after:-right-px after:top-0 after:bottom-0 after:w-px after:opacity-50"
     >
       {/* decorative dashed right edge (sidebar::after equivalent) */}
       <div
@@ -93,13 +90,13 @@ export function Sidebar() {
         {/* Accessible: preserve "NourishPlan" as a single word for existing tests/screen readers. */}
         <span className="sr-only">NourishPlan</span>
         <div
-          className="serif-italic text-[30px] font-normal leading-[0.9] tracking-[-0.03em] text-[var(--ink)]"
+          className="serif-italic text-[28px] font-semibold leading-[0.9] tracking-[-0.03em] text-[var(--ink)]"
           aria-hidden="true"
         >
           Nourish<span className="not-italic text-[var(--tomato)]">·</span>plan
         </div>
-        <div className="mono mt-2 text-[9px] tracking-[0.2em] uppercase text-[var(--butter)]">
-          The Sunday Supper Gazette
+        <div className="mono mt-2 text-[9px] tracking-[0.2em] uppercase text-[var(--tomato)]">
+          Meal planning for the household
         </div>
         {householdName && (
           <div className="mono mt-0.5 text-[8px] tracking-[0.18em] uppercase text-[var(--ink-soft)] truncate">

@@ -180,10 +180,9 @@ export function PlanPage() {
 
       {/* Story head */}
       <StoryHead
-        kicker="SECTION · 04 — THE PLAN"
-        headline="A week,"
-        headlineAccent="composed."
-        byline={household?.name ? `Filed by the household\n${household.name}` : null}
+        kicker="PLAN"
+        headline="The Week"
+        byline={household?.name ?? null}
         size="sm"
       />
 

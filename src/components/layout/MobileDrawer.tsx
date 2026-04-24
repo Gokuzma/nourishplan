@@ -46,8 +46,8 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
       >
         {/* Masthead */}
         <div className="px-[18px] py-5 border-b-2 border-[var(--rule-c)]">
-          <div className="mono text-[9px] uppercase tracking-[0.2em] text-[var(--butter)]">
-            The Sunday Supper Gazette
+          <div className="mono text-[9px] uppercase tracking-[0.2em] text-[var(--tomato)]">
+            Meal planning for the household
           </div>
           <div
             className="serif-italic mt-1 text-[28px] font-normal leading-[0.9] tracking-[-0.03em] text-[var(--ink)]"
@@ -69,8 +69,8 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 [
                   'grid grid-cols-[20px_1fr_auto] items-center gap-3 px-[18px] py-[11px] text-[14px]',
                   isActive
-                    ? 'bg-[var(--tomato)] text-[#1a0a05]'
-                    : 'text-[var(--ink)] hover:bg-[rgba(255,245,225,0.06)]',
+                    ? 'bg-[var(--tomato)] text-[var(--on-accent)]'
+                    : 'text-[var(--ink)] hover:bg-[rgba(40,34,32,0.04)]',
                 ].join(' ')
               }
             >

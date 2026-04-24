@@ -96,9 +96,8 @@ export function InventoryPage() {
 
       {/* Story head */}
       <StoryHead
-        kicker="SECTION · 05 — THE INVENTORY"
-        headline="What's on"
-        headlineAccent="hand."
+        kicker="INVENTORY"
+        headline="The Pantry"
         byline={urgent.length > 0 ? `Sorted by expiry\n${urgent.length} need${urgent.length === 1 ? 's' : ''} using` : null}
         size="sm"
       />
@@ -108,8 +107,8 @@ export function InventoryPage() {
         <div
           style={{
             padding: '14px 16px',
-            background: 'var(--tomato)',
-            color: '#1a0a05',
+            background: 'var(--sky)',
+            color: 'var(--on-accent-dark)',
             display: 'flex',
             alignItems: 'center',
             gap: 16,
@@ -121,7 +120,7 @@ export function InventoryPage() {
         >
           <span
             className="stamp"
-            style={{ color: '#1a0a05', borderColor: '#1a0a05', background: 'rgba(255, 245, 225, 0.6)' }}
+            style={{ color: 'var(--on-accent-dark)', borderColor: 'var(--on-accent-dark)', background: 'rgba(250, 250, 249, 0.6)' }}
           >
             Use soon!
           </span>
@@ -181,7 +180,7 @@ export function InventoryPage() {
           borderBottom: '1px solid var(--rule-c)',
         }}
       >
-        <span className="eyebrow">№</span>
+        <span className="eyebrow">#</span>
         <span className="eyebrow">Item</span>
         <span className="eyebrow">Quantity</span>
         <span className="eyebrow">Location</span>

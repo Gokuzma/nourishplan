@@ -20,7 +20,7 @@ export function HouseholdPage() {
   if (!membership) {
     return (
       <div className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 font-sans">
-        <Nameplate left="—" title="The Roster" right="—" />
+        <Nameplate left="—" title="The Table" right="—" />
         <p className="serif-italic mt-6" style={{ fontSize: 18, color: 'var(--ink-soft)', textAlign: 'center', padding: 60 }}>
           — you are not in a household yet —
         </p>
@@ -40,23 +40,22 @@ export function HouseholdPage() {
       <div className="hidden md:block">
         <Nameplate
           left={household?.name ? household.name.toUpperCase() : '—'}
-          title={<>The <span className="amp">Roster</span></>}
+          title={<>The <span className="amp">Table</span></>}
           right={`${total} at the table`}
         />
       </div>
       <div className="md:hidden">
         <Nameplate
           left="FAM"
-          title="The Roster"
+          title="The Table"
           right={String(total)}
           size="sm"
         />
       </div>
 
       <StoryHead
-        kicker="SECTION · 08 — THE HOUSEHOLD"
-        headline="Who sits"
-        headlineAccent="at the table."
+        kicker="HOUSEHOLD"
+        headline="The Table"
         byline={`${adminCount} admin${adminCount === 1 ? '' : 's'} · ${memberCount} member${memberCount === 1 ? '' : 's'}\n${household?.name ?? ''}`.trim()}
         size="sm"
       />
@@ -131,7 +130,7 @@ export function HouseholdPage() {
       <div className="hidden md:block">
         <Folio
           num="08"
-          title="The Roster"
+          title="The Table"
           tagline="The people this plan is for."
           pageOf="PAGE 8 OF 10"
         />

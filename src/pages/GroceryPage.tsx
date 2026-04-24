@@ -129,9 +129,8 @@ export function GroceryPage() {
       </div>
 
       <StoryHead
-        kicker="SECTION · 06 — THE LIST"
-        headline="From plan"
-        headlineAccent="to basket."
+        kicker="GROCERY"
+        headline="The List"
         byline={list && estimatedTotal > 0 ? `${formatCost(estimatedTotal)} estimated\n${checkedCount} of ${needToBuy.length} checked` : null}
         size="sm"
       />
@@ -352,7 +351,7 @@ export function GroceryPage() {
             >
               <div style={{ textAlign: 'center', paddingBottom: 14, borderBottom: '1px dashed var(--rule-soft)' }}>
                 <div className="mono" style={{ fontSize: 9, letterSpacing: '0.26em', color: 'var(--butter)' }}>— RECEIPT —</div>
-                <div className="serif" style={{ fontStyle: 'italic', fontSize: 26, marginTop: 6, letterSpacing: '-0.02em', lineHeight: 1.05 }}>
+                <div className="serif" style={{ fontSize: 26, marginTop: 6, letterSpacing: '-0.02em', lineHeight: 1.05 }}>
                   The total,<br />so far.
                 </div>
               </div>
@@ -369,7 +368,7 @@ export function GroceryPage() {
                 <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: 'var(--ink-soft)' }}>ESTIMATED TOTAL</div>
                 <div
                   className="serif tnum"
-                  style={{ fontStyle: 'italic', fontSize: 48, lineHeight: 1, color: 'var(--tomato)', letterSpacing: '-0.03em', marginTop: 4 }}
+                  style={{ fontSize: 48, lineHeight: 1, color: 'var(--tomato)', letterSpacing: '-0.03em', marginTop: 4 }}
                 >
                   {formatCost(estimatedTotal)}
                 </div>
@@ -419,7 +418,7 @@ export function GroceryPage() {
           >
             <div>
               <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: 'var(--ink-soft)' }}>TOTAL</div>
-              <div className="serif tnum" style={{ fontStyle: 'italic', fontSize: 28, color: 'var(--tomato)', lineHeight: 1 }}>
+              <div className="serif tnum" style={{ fontSize: 28, color: 'var(--tomato)', lineHeight: 1 }}>
                 {formatCost(estimatedTotal)}
               </div>
             </div>
