@@ -1,14 +1,22 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { Icon, type IconName } from '../Icon'
 
-const drawerItems = [
-  { label: 'Meals', to: '/meals', icon: '🍽️' },
-  { label: 'Inventory', to: '/inventory', icon: '📦' },
-  { label: 'Grocery', to: '/grocery', icon: '🛒' },
-  { label: 'Insights', to: '/insights', icon: '📊' },
-  { label: 'Household', to: '/household', icon: '👨‍👩‍👧' },
-  { label: 'Settings', to: '/settings', icon: '⚙️' },
-  { label: 'User Guide', to: '/guide', icon: '📘' },
+interface DrawerItem {
+  label: string
+  to: string
+  icon: IconName
+  num: string
+}
+
+const drawerItems: DrawerItem[] = [
+  { label: 'Meals', to: '/meals', icon: 'plate', num: '03' },
+  { label: 'Inventory', to: '/inventory', icon: 'box', num: '05' },
+  { label: 'Grocery', to: '/grocery', icon: 'cart', num: '06' },
+  { label: 'Insights', to: '/insights', icon: 'chart', num: '07' },
+  { label: 'Household', to: '/household', icon: 'users', num: '08' },
+  { label: 'Settings', to: '/settings', icon: 'gear', num: '09' },
+  { label: 'User Guide', to: '/guide', icon: 'compass', num: '10' },
 ]
 
 interface MobileDrawerProps {
@@ -24,7 +32,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-50"
+          className="fixed inset-0 bg-black/60 z-50"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -32,43 +40,59 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
       {/* Drawer panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-64 bg-surface border-l border-secondary z-50 flex flex-col transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-72 bg-[var(--paper-2)] border-l-2 border-[var(--rule-c)] z-50 flex flex-col transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="px-6 py-5 border-b border-secondary">
-          <span className="text-lg font-bold text-primary">More</span>
+        {/* Masthead */}
+        <div className="px-[18px] py-5 border-b-2 border-[var(--rule-c)]">
+          <div className="mono text-[9px] uppercase tracking-[0.2em] text-[var(--butter)]">
+            The Sunday Supper Gazette
+          </div>
+          <div
+            className="serif-italic mt-1 text-[28px] font-normal leading-[0.9] tracking-[-0.03em] text-[var(--ink)]"
+            aria-hidden="true"
+          >
+            More<span className="not-italic text-[var(--tomato)]"> ·</span>
+          </div>
+          <span className="sr-only">More navigation options</span>
         </div>
 
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+        {/* Nav items */}
+        <nav className="flex-1 overflow-y-auto">
           {drawerItems.map((item) => (
             <NavLink
               key={item.label}
               to={item.to}
               onClick={onClose}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-[--radius-btn] transition-colors ${
+                [
+                  'grid grid-cols-[20px_1fr_auto] items-center gap-3 px-[18px] py-[11px] text-[14px]',
                   isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-text/70 hover:bg-secondary hover:text-text'
-                }`
+                    ? 'bg-[var(--tomato)] text-[#1a0a05]'
+                    : 'text-[var(--ink)] hover:bg-[rgba(255,245,225,0.06)]',
+                ].join(' ')
               }
             >
-              <span>{item.icon}</span>
+              <Icon name={item.icon} size={18} />
               <span>{item.label}</span>
+              <span className="mono text-[10px] opacity-65" style={{ color: 'inherit' }}>
+                {item.num}
+              </span>
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-secondary">
+        {/* Sign out */}
+        <div className="px-[18px] py-4 border-t-2 border-[var(--rule-c)]">
           <button
             onClick={async () => {
               onClose()
               await signOut()
             }}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-[--radius-btn] text-text/70 hover:bg-secondary hover:text-text transition-colors"
+            className="w-full flex items-center gap-3 px-2 py-2 text-[13px] text-[var(--ink)] hover:bg-[rgba(255,245,225,0.06)] transition-colors"
           >
-            <span>🚪</span>
+            <Icon name="door" size={16} aria-label="Sign out icon" />
             <span>Log Out</span>
           </button>
         </div>
