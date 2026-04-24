@@ -49,10 +49,29 @@ export function useSaveRestrictions() {
       } else {
         row.member_profile_id = memberId
       }
-      const conflictColumn = memberType === 'user' ? 'member_user_id' : 'member_profile_id'
+      const memberColumn = memberType === 'user' ? 'member_user_id' : 'member_profile_id'
+      const { data: existing, error: lookupError } = await supabase
+        .from('dietary_restrictions')
+        .select('id')
+        .eq('household_id', householdId)
+        .eq(memberColumn, memberId)
+        .maybeSingle()
+      if (lookupError) throw lookupError
+
+      if (existing) {
+        const { data, error } = await supabase
+          .from('dietary_restrictions')
+          .update(row)
+          .eq('id', existing.id)
+          .select()
+          .single()
+        if (error) throw error
+        return data
+      }
+
       const { data, error } = await supabase
         .from('dietary_restrictions')
-        .upsert(row, { onConflict: `household_id,${conflictColumn}` })
+        .insert(row)
         .select()
         .single()
       if (error) throw error

@@ -160,7 +160,7 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 ### Feedback & Preferences
 
 - [x] **FEED-01**: User can rate a recipe (1-5 stars) after eating it
-- [~] **FEED-02**: Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.)
+- [x] **FEED-02**: Each household member can set dietary restrictions (allergens, vegetarian, gluten-free, etc.)
 - [x] **FEED-03**: Each household member can set "won't eat" tags for selective eaters
 - [~] **FEED-04**: System tracks recipe repeat rate and warns when plan becomes monotonous
 
@@ -328,7 +328,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLAN-04 | Phase 22 | Validated |
 | PLAN-05 | Phase 22 | Validated |
 | FEED-01 | Phase 20 | Validated |
-| FEED-02 | Phase 20 | Partial |
+| FEED-02 | Phase 20 | Validated |
 | FEED-03 | Phase 20 | Validated |
 | FEED-04 | Phase 20 | Partial |
 | SCHED-01 | Phase 21, Phase 27 (gap closure) | Validated |
