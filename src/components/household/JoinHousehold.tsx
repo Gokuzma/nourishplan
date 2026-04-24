@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJoinHousehold } from '../../hooks/useHousehold'
 import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
 
 interface JoinHouseholdProps {
   /** Pre-filled invite token from URL query param — auto-joins immediately */
@@ -16,6 +17,37 @@ export function JoinHousehold({ initialToken, onSuccess }: JoinHouseholdProps) {
 
   const { signOut } = useAuth()
   const navigate = useNavigate()
+
+  // D-15: preview the inviting role + household name before the auto-join resolves,
+  // so the user knows whether they will land as Admin or Member.
+  const [invitePreview, setInvitePreview] = useState<
+    { role: 'admin' | 'member'; householdName: string | null } | null
+  >(null)
+
+  useEffect(() => {
+    if (!initialToken) return
+    let cancelled = false
+    supabase
+      .from('household_invites')
+      .select('role, household_id, households(name)')
+      .eq('token', initialToken)
+      .is('used_at', null)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return
+        const rawRole = (data as { role?: 'admin' | 'member' }).role ?? 'member'
+        // The select joins households(name) — PostgREST returns it as an object OR array depending on shape.
+        const joined = (data as { households?: { name?: string | null } | Array<{ name?: string | null }> | null }).households
+        const householdName = Array.isArray(joined)
+          ? joined[0]?.name ?? null
+          : joined?.name ?? null
+        setInvitePreview({ role: rawRole, householdName })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [initialToken])
 
   // Auto-join when arriving via invite link
   useEffect(() => {
@@ -57,9 +89,22 @@ export function JoinHousehold({ initialToken, onSuccess }: JoinHouseholdProps) {
 
   // Show joining state when auto-joining via link
   if (initialToken && (joinHousehold.isPending || !joinHousehold.isError)) {
+    const roleWord = invitePreview?.role === 'admin' ? 'an Admin' : 'a Member'
+    const hhName = invitePreview?.householdName
     return (
       <div className="flex flex-col items-center gap-3 py-4">
-        <p className="text-sm text-text/70">Joining household…</p>
+        {invitePreview ? (
+          <>
+            <p className="text-sm font-semibold text-text">
+              {hhName
+                ? `Join ${hhName} as ${roleWord}`
+                : `Joining as ${roleWord}`}
+            </p>
+            <p className="text-sm text-text/70">Joining household…</p>
+          </>
+        ) : (
+          <p className="text-sm text-text/70">Joining household…</p>
+        )}
       </div>
     )
   }
