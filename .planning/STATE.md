@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UI polish and usability improvements
-status: Ready to execute
-stopped_at: "Phase 30-07 COMPLETE — SPEC Req #8 regression test shipped. tests/e2e/household-permissions.spec.ts passes 1/1 (48s) against live Supabase; promoted admin performs all three admin-gated actions (invite, weekly_budget, role-change) and Remove round-trip proves SPEC Req #3. Final wave of Phase 30 done — all 7 plans shipped across 4 waves."
+milestone: v2.0
+milestone_name: Adaptive Meal Planning System (AMPS)
+status: Milestone complete
+stopped_at: "Phase 30 COMPLETE (2026-04-24) — granular household permissions shipped: 031 migration live (enforce_last_admin trigger + 3 security-definer RPCs + RLS), hook layer, MemberList admin overflow menu, InviteLink role selector, Playwright regression test passes 3x idempotent. v2.0 milestone (phases 16-30) now 15/15 phases and 57/57 plans complete. Ready to archive v2.0 and start v2.1."
 last_updated: "2026-04-24T03:30:00.000Z"
 progress:
   total_phases: 15
