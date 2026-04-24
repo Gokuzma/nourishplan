@@ -1,13 +1,24 @@
 import { useState } from 'react'
 import { useCreateInvite } from '../../hooks/useHousehold'
+import { RoleSegmentedControl } from './RoleSegmentedControl'
+import { RoleBadge } from './RoleBadge'
 
 export function InviteLink() {
   const createInvite = useCreateInvite()
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [role, setRole] = useState<'admin' | 'member'>('member')
+
+  function handleRoleChange(next: 'admin' | 'member') {
+    setRole(next)
+    // D-14: toggling the control AFTER generation clears the displayed link,
+    // forcing the admin to regenerate so the badge + URL never go stale.
+    setInviteUrl(null)
+    setCopied(false)
+  }
 
   function handleGenerate() {
-    createInvite.mutate(undefined, {
+    createInvite.mutate(role, {
       onSuccess: (invite) => {
         const url = `${window.location.origin}/join?invite=${invite.token}`
         setInviteUrl(url)
@@ -39,6 +50,20 @@ export function InviteLink() {
         Generate a shareable link. The link expires in 7 days and can only be used once.
       </p>
 
+      <div className="flex items-center gap-3">
+        {/* Visual heading only — NOT a <label htmlFor> (that would conflict with
+            RoleSegmentedControl aria-label="Invite role" on its <div role="radiogroup">).
+            Accessibility is handled by the radiogroup aria-label, not by this span. */}
+        <span className="text-sm text-text/70" aria-hidden="true">
+          Invite as:
+        </span>
+        <RoleSegmentedControl
+          value={role}
+          onChange={handleRoleChange}
+          disabled={createInvite.isPending}
+        />
+      </div>
+
       {createInvite.error && (
         <p className="text-sm text-red-500">
           {createInvite.error instanceof Error
@@ -51,6 +76,7 @@ export function InviteLink() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 rounded-card border border-accent/40 bg-secondary/50 px-3 py-2">
             <p className="flex-1 break-all text-sm text-text">{inviteUrl}</p>
+            <RoleBadge role={role} />
             <button
               type="button"
               onClick={handleCopy}
