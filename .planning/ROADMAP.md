@@ -584,10 +584,23 @@ Plans:
 **UI hint**: yes
 
 ### Phase 30: Granular Household Member Permissions
-**Goal**: Household owners can grant other family members admin rights or more granular permissions (e.g., admin, editor, viewer, or per-feature scopes like meal-planning/inventory/budget) so multiple members can co-manage a household beyond the current owner-only model
+**Goal**: Any household admin can grant admin rights to another member, demote an admin back to member, invite a new member with a pre-selected role, remove a member from the household, or leave the household themselves — with DB-enforced protection against leaving a household with zero admins.
 **Depends on**: Phase 29
-**Requirements**: TBD (to be defined during /gsd-spec-phase)
-**Success Criteria**: [To be planned]
-**Plans**: 0 plans
+**Requirements**: SPEC-Req-1..SPEC-Req-8 (see 30-SPEC.md — 8 locked requirements: change_member_role RPC, last-admin protection, remove_household_member RPC, leave_household RPC, invite-time role selection, admin UI on HouseholdPage, invite form UI, promoted-admin equivalence regression test)
+**Success Criteria**: 
+- change_member_role RPC promotes/demotes members when called by an admin; rejects non-admin callers and last-admin demotion
+- remove_household_member RPC removes a non-last-admin member when called by an admin
+- leave_household RPC removes caller's own membership row; rejects sole-admin leave with exact string "At least one admin required"
+- household_invites.role column exists with default member; admin can select admin on invite; joiner lands with selected role
+- HouseholdPage admin sees overflow menu with Promote/Demote/Remove on other members and Leave on own row; last-admin edge cases disabled with tooltip "Promote another member to admin first."
+- Non-admin sees read-only role badges plus Leave on own row only
+- Regression test passes: promoted admin creates an invite AND updates households.weekly_budget AND changes another member's role
+**Plans**: 7 plans
 Plans:
-- [ ] TBD (run /gsd-plan-phase 30 to break down)
+- [ ] 30-01-PLAN.md — Migration 031 (invite.role column + last-admin trigger + 3 RPCs + RLS policies) + schema push [BLOCKING] + types update (Wave 1)
+- [ ] 30-02-PLAN.md — Playwright infrastructure + Vitest exclusion + claude-test-member seed script + login helper (Wave 1)
+- [ ] 30-03-PLAN.md — UI primitives: RoleBadge extract, RoleSegmentedControl, ConfirmDialog, MemberActionMenu (Wave 1)
+- [ ] 30-04-PLAN.md — useChangeMemberRole / useRemoveHouseholdMember / useLeaveHousehold hooks + extend useCreateInvite + fix useJoinHousehold line 130 (Wave 2)
+- [ ] 30-05-PLAN.md — MemberList overflow menu + confirm dialogs + last-admin disabled-state logic (Wave 3)
+- [ ] 30-06-PLAN.md — InviteLink segmented control + role badge + clear-on-toggle + JoinHousehold role-preview (Wave 3)
+- [ ] 30-07-PLAN.md — Playwright E2E regression test — promoted-admin equivalence for 3 admin-only actions (Wave 4)
