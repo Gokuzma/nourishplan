@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Ready to execute
-stopped_at: "Phase 28 COMPLETE — WARN-01 closed by wire-in. Five plans shipped: hooks (28-01), overlay (28-02), edge-function redeploy with --no-verify-jwt per L-025 (28-03), CookModePage wire-in 547→611 lines preserving 8/8 L-020/L-027 features (28-04), 27-assertion regression test + REQUIREMENTS PREP-02 (gap closure)→(wire-in)→Validated flip (28-05). Vitest 346 passed / 12 failed (baseline unchanged). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated)."
-last_updated: "2026-04-24T02:36:01.490Z"
+stopped_at: "Phase 30-07 COMPLETE — SPEC Req #8 regression test shipped. tests/e2e/household-permissions.spec.ts passes 1/1 (48s) against live Supabase; promoted admin performs all three admin-gated actions (invite, weekly_budget, role-change) and Remove round-trip proves SPEC Req #3. Final wave of Phase 30 done — all 7 plans shipped across 4 waves."
+last_updated: "2026-04-24T03:30:00.000Z"
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 50
-  completed_plans: 50
+  total_phases: 15
+  completed_phases: 15
+  total_plans: 57
+  completed_plans: 57
   percent: 100
 ---
 
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
-**Current focus:** Phase 29 — v2-0-documentation-reconciliation (COMPLETE; v2.0 milestone archive-ready)
+**Current focus:** Phase 30 — granular-household-member-permissions (COMPLETE; 7/7 plans shipped across 4 waves)
 
 ## Current Position
 
-Phase: 29 — COMPLETE (5/5 plans shipped across 3 waves; 29-VERIFICATION.md status=passed)
-Evidence: 29-VERIFICATION.md at .planning/phases/29-v2-0-documentation-reconciliation/29-VERIFICATION.md — 6/6 success criteria VALIDATED (5 ROADMAP SCs + folded-in GuidePage scope). Empty human_verification; zero human_needed rows at Phase 29 level (IMPORT-03 deferral belongs to Phase 25's retrospective, not Phase 29).
-Next up: v2.0 milestone archive (`/gsd-complete-milestone`) is now unblocked — all four v2.0 audit WARNs closed; v2.0 traceability table in REQUIREMENTS.md uses Validated/Partial vocabulary per D-05/D-07. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated; carried from Phase 27/28 handoff).
+Phase: 30 — COMPLETE (7/7 plans shipped: DB layer + Playwright infra + primitives + hooks + MemberList UI + InviteLink/JoinHousehold UI + E2E regression test)
+Evidence: .planning/phases/30-granular-household-member-permissions-system-admin-editor-vi/30-07-SUMMARY.md — SPEC Req #8 proven end-to-end via 1 passing Playwright test (`1 passed (48.7s)` on 3 consecutive runs, exit 0). Promoted admin B performs invite + weekly_budget + role-change without permission errors; Remove round-trip confirms SPEC Req #3. Idempotent: household_members ends with only Admin A after each run.
+Next up: v2.0 milestone archive (`/gsd-complete-milestone`) is unblocked — Phase 30 was the final in-scope phase. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated; carried from Phase 27/28 handoff).
 
 Progress: ██████████ 100%
 
@@ -324,6 +324,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-22T23:15:00.000Z
-Stopped at: Phase 28 COMPLETE — WARN-01 closed by wire-in. Five plans shipped: hooks (28-01), overlay (28-02), edge-function redeploy with --no-verify-jwt per L-025 (28-03), CookModePage wire-in 547→611 lines preserving 8/8 L-020/L-027 features (28-04), 27-assertion regression test + REQUIREMENTS PREP-02 (gap closure)→(wire-in)→Validated flip (28-05). Vitest 346 passed / 12 failed (baseline unchanged). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated).
-Resume file: .planning/phases/28-resolve-prep-sequence-edge-function-orphans/28-VERIFICATION.md
+Last session: 2026-04-24T03:30:00.000Z
+Stopped at: Phase 30 COMPLETE — all 7 plans shipped across 4 waves. Plan 30-07 delivered the SPEC Req #8 Playwright E2E regression test (tests/e2e/household-permissions.spec.ts, 266 lines), passing 1/1 at ~48s against live Supabase prod DB. Promoted admin B successfully performs all three admin-gated actions (invite, weekly_budget, role-change) and the Remove round-trip proves SPEC Req #3 end-to-end. Test is idempotent — household_members ends with only Admin A each run. Three auto-fixes applied during Task 2 debugging (joinViaInvite fallback, Saved! transition signal, /setup redirect verification).
+Resume file: .planning/phases/30-granular-household-member-permissions-system-admin-editor-vi/30-07-SUMMARY.md

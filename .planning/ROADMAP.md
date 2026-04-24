@@ -45,7 +45,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 27: Wire Schedule Badges to PlanGrid** - Populate slotSchedules via useHouseholdSchedules so schedule UI feedback works on the plan page (v2.0 gap closure) (completed 2026-04-21)
 - [x] **Phase 28: Resolve Prep Sequence Edge Function Orphans** - Wire or remove generate-cook-sequence and generate-reheat-sequence (v2.0 gap closure) (2026-04-22)
 - [x] **Phase 29: v2.0 Documentation Reconciliation** - Add IMPORT-01..05 to REQUIREMENTS.md, write missing VERIFICATION.md files, refresh v2.0 traceability, reconcile Phase 24 ROADMAP text (v2.0 gap closure)
-- [ ] **Phase 30: Granular Household Member Permissions** - Role-based access (admin, editor, viewer) with per-feature scopes (meal-planning, inventory, budget) beyond current owner-only model
+- [x] **Phase 30: Granular Household Member Permissions** - Binary admin/member roles with promotion, demotion, removal, self-leave, invite-time role selection, DB-enforced last-admin protection, and a passing Playwright E2E regression test (2026-04-24)
 
 ## Phase Details
 
@@ -595,12 +595,12 @@ Plans:
 - HouseholdPage admin sees overflow menu with Promote/Demote/Remove on other members and Leave on own row; last-admin edge cases disabled with tooltip "Promote another member to admin first."
 - Non-admin sees read-only role badges plus Leave on own row only
 - Regression test passes: promoted admin creates an invite AND updates households.weekly_budget AND changes another member's role
-**Plans**: 7 plans
+**Plans**: 7 plans (7/7 COMPLETE)
 Plans:
-- [ ] 30-01-PLAN.md — Migration 031 (invite.role column + last-admin trigger + 3 RPCs + RLS policies) + schema push [BLOCKING] + types update (Wave 1)
-- [ ] 30-02-PLAN.md — Playwright infrastructure + Vitest exclusion + claude-test-member seed script + login helper (Wave 1)
-- [ ] 30-03-PLAN.md — UI primitives: RoleBadge extract, RoleSegmentedControl, ConfirmDialog, MemberActionMenu (Wave 1)
-- [ ] 30-04-PLAN.md — useChangeMemberRole / useRemoveHouseholdMember / useLeaveHousehold hooks + extend useCreateInvite + fix useJoinHousehold line 130 (Wave 2)
-- [ ] 30-05-PLAN.md — MemberList overflow menu + confirm dialogs + last-admin disabled-state logic (Wave 3)
-- [ ] 30-06-PLAN.md — InviteLink segmented control + role badge + clear-on-toggle + JoinHousehold role-preview (Wave 3)
-- [ ] 30-07-PLAN.md — Playwright E2E regression test — promoted-admin equivalence for 3 admin-only actions (Wave 4)
+- [x] 30-01-PLAN.md — Migration 031 (invite.role column + last-admin trigger + 3 RPCs + RLS policies) + schema push [BLOCKING] + types update (Wave 1)
+- [x] 30-02-PLAN.md — Playwright infrastructure + Vitest exclusion + claude-test-member seed script + login helper (Wave 1)
+- [x] 30-03-PLAN.md — UI primitives: RoleBadge extract, RoleSegmentedControl, ConfirmDialog, MemberActionMenu (Wave 1)
+- [x] 30-04-PLAN.md — useChangeMemberRole / useRemoveHouseholdMember / useLeaveHousehold hooks + extend useCreateInvite + fix useJoinHousehold line 130 (Wave 2)
+- [x] 30-05-PLAN.md — MemberList overflow menu + confirm dialogs + last-admin disabled-state logic (Wave 3)
+- [x] 30-06-PLAN.md — InviteLink segmented control + role badge + clear-on-toggle + JoinHousehold role-preview (Wave 3)
+- [x] 30-07-PLAN.md — Playwright E2E regression test — promoted-admin equivalence for 3 admin-only actions (Wave 4) — 1 passing test, 48s runtime, idempotent (2026-04-24)
