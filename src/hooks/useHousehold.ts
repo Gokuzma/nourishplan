@@ -127,7 +127,7 @@ export function useJoinHousehold() {
 
       const { error: memberError } = await supabase
         .from('household_members')
-        .insert({ household_id: invite.household_id, user_id: userId, role: 'member' })
+        .insert({ household_id: invite.household_id, user_id: userId, role: invite.role ?? 'member' })
 
       if (memberError) {
         if (memberError.code === '23505') {
@@ -157,7 +157,7 @@ export function useCreateInvite() {
   const { data: membership } = useHousehold()
 
   return useMutation({
-    mutationFn: async (): Promise<HouseholdInvite> => {
+    mutationFn: async (role?: 'admin' | 'member'): Promise<HouseholdInvite> => {
       const { session } = await supabase.auth.getSession().then(r => r.data)
       const userId = session?.user.id
       if (!userId) throw new Error('Not authenticated')
@@ -167,7 +167,7 @@ export function useCreateInvite() {
 
       const { data, error } = await supabase
         .from('household_invites')
-        .insert({ household_id: householdId, created_by: userId })
+        .insert({ household_id: householdId, created_by: userId, role: role ?? 'member' })
         .select()
         .single()
 
