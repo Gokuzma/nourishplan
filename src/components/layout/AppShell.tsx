@@ -9,8 +9,8 @@ export function AppShell() {
       {/* Sidebar — hidden on mobile, visible on md+ */}
       <Sidebar />
 
-      {/* Main content area */}
-      <main className="flex-1 pb-16 md:pb-0">
+      {/* Main content area — min-w-0 prevents flex child from expanding past viewport when nested overflow-x-scroll content (e.g. DayCarousel) has wide intrinsic size */}
+      <main className="flex-1 min-w-0 pb-16 md:pb-0">
         <OfflineBanner />
         <Outlet />
       </main>
