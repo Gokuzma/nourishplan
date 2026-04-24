@@ -502,6 +502,341 @@
 .menu-pop button:hover { background: var(--tomato); color: #1a0a05; }
 .menu-pop button.danger { color: var(--tomato); }
 
+/*
+ * Gazette page-pattern classes — ported from bundle styles.css. These are the
+ * editorial layout primitives used in screen-{plan,home,inventory,grocery,
+ * household}.jsx rewrites. Component-level Tailwind still works alongside them.
+ */
+
+/* Buttons (sharp, mono, uppercase — Gazette default) */
+.btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 10px 14px;
+  border: 1.5px solid var(--rule-c);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform .08s, background .12s;
+  border-radius: 0;
+}
+.btn:hover { background: rgba(255, 245, 225, 0.08); transform: translateY(-1px); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary {
+  background: var(--tomato);
+  border-color: var(--tomato);
+  color: #1a0a05;
+}
+.btn-primary:hover { background: var(--tomato-deep); }
+.btn-chart {
+  background: var(--chartreuse);
+  border-color: var(--chartreuse);
+  color: #1a1a0a;
+}
+.btn-sm { min-height: 32px; padding: 5px 10px; font-size: 10px; }
+.btn-ghost { border-color: transparent; padding-left: 8px; padding-right: 8px; }
+
+/* Planner grid — ruled + hand-numbered */
+.plan-grid {
+  display: grid;
+  grid-template-columns: 72px repeat(7, 1fr);
+  border-top: 2px solid var(--rule-c);
+  border-bottom: 2px solid var(--rule-c);
+  background: var(--paper);
+}
+.plan-grid .ghead {
+  padding: 10px;
+  border-bottom: 2px solid var(--rule-c);
+  border-right: 1px solid var(--rule-soft);
+  background: var(--paper-2);
+}
+.plan-grid .ghead:last-of-type { border-right: 0; }
+.plan-grid .ghead .dn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.plan-grid .ghead .dd {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  margin-top: 2px;
+}
+.plan-grid .ghead.today { background: var(--tomato); }
+.plan-grid .ghead.today .dn,
+.plan-grid .ghead.today .dd { color: #1a0a05; }
+.plan-grid .gmeal-label {
+  padding: 12px 10px;
+  border-right: 2px solid var(--rule-c);
+  border-bottom: 1px dashed var(--rule-soft);
+  background: var(--paper-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+.plan-grid .gmeal-label:last-of-type { border-bottom: 0; }
+.plan-grid .gmeal-label .no {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 26px;
+  line-height: 0.9;
+  color: var(--tomato);
+}
+.plan-grid .gmeal-label .lab {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.plan-grid .gcell {
+  border-right: 1px solid var(--rule-soft);
+  border-bottom: 1px dashed var(--rule-soft);
+  padding: 8px 10px;
+  min-height: 82px;
+  position: relative;
+}
+.plan-grid .gcell:last-child { border-right: 0; }
+.plan-grid .gcell.today-col { background: rgba(240, 78, 43, 0.06); }
+
+/* Slot card (inside plan grid cell) */
+.slot {
+  font-size: 12px;
+  cursor: grab;
+}
+.slot .slot-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.slot .slot-meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--ink-dim);
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+.slot .slot-tags { display: flex; gap: 3px; margin-top: 5px; flex-wrap: wrap; }
+.slot.empty {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.slot.empty::before { content: "+ "; color: var(--tomato); }
+
+/* Budget strip — ticket stub */
+.budget-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 2px solid var(--rule-c);
+  border-bottom: 2px solid var(--rule-c);
+  background: var(--paper-2);
+  background-image: repeating-linear-gradient(90deg, transparent 0 120px, var(--rule-soft) 120px 121px);
+  position: relative;
+}
+.budget-strip > div {
+  padding: 16px 20px;
+  border-right: 1px dashed var(--rule-soft);
+}
+.budget-strip > div:last-child { border-right: 0; }
+.budget-strip .blabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--butter);
+}
+.budget-strip .bnum {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--ink);
+  margin-top: 8px;
+  letter-spacing: -0.02em;
+}
+.budget-strip .bnum .of {
+  font-family: var(--font-mono);
+  font-style: normal;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.budget-strip .bnum.accent { color: var(--tomato); }
+.budget-strip .bnum.chart { color: var(--chartreuse); }
+
+/* Day scrubber pill (mobile plan + grocery aisle jumper) */
+.day-pill {
+  flex: 0 0 auto;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  border-right: 1px dashed var(--rule-soft);
+  min-width: 54px;
+}
+.day-pill .dn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.day-pill .dd {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ink);
+  margin-top: 2px;
+  line-height: 1;
+}
+.day-pill.active { background: var(--tomato); }
+.day-pill.active .dn,
+.day-pill.active .dd { color: #1a0a05; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* List rows (inventory ledger / grocery line items / household members) */
+.list-row {
+  display: grid;
+  gap: 14px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule-softer);
+}
+.list-row .primary {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.list-row .sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+/* Tabs (inventory pantry/fridge/freezer) */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--rule-c);
+}
+.tabs .t {
+  padding: 14px 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+.tabs .t .n {
+  margin-left: 6px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.tabs .t.active {
+  color: var(--tomato);
+  border-bottom-color: var(--tomato);
+}
+.tabs .t.active .n { color: var(--tomato); }
+
+/* Segmented control (role selector / view toggle) */
+.seg {
+  display: inline-flex;
+  border: 1.5px solid var(--rule-c);
+}
+.seg button {
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--rule-soft);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  cursor: pointer;
+  min-height: 34px;
+}
+.seg button:last-child { border-right: 0; }
+.seg button.active { color: #1a0a05; background: var(--butter); }
+
+/* Search bar (food search / grocery jump) */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 2px solid var(--rule-c);
+  border-bottom: 2px solid var(--rule-c);
+  background: var(--paper-2);
+}
+.search input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 18px;
+}
+.search input::placeholder { color: var(--ink-soft); }
+
+/* Check box (grocery check-off) */
+.check {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--rule-c);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: transparent;
+  color: transparent;
+}
+.check.on {
+  background: var(--tomato);
+  border-color: var(--tomato);
+  color: #1a0a05;
+}
+
+/* Torn paper edge (receipt strip) */
+.torn-top {
+  mask: radial-gradient(6px at 6px 0, transparent 98%, #000) 0 0/12px 100% repeat-x;
+}
+
 /* Print styles for meal plan (preserved from v1.x) */
 @media print {
   .no-print,
