@@ -193,6 +193,17 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 - [x] **IMPORT-04**: Imported recipe appears in the recipe builder ready to edit (name, servings, ingredients, steps, source attribution)
 - [x] **IMPORT-05**: Recipe import adds no new tables — only a nullable `recipes.source_url` column
 
+### Granular Permissions
+
+- [x] **HHRBAC-01**: Admin can promote another member to admin or demote an admin back to member via `change_member_role` RPC
+- [x] **HHRBAC-02**: Household enforces at least one admin at all times — demote/remove/leave operations that would leave zero admins are rejected at the DB level with error `"At least one admin required"`
+- [x] **HHRBAC-03**: Admin can remove another member from the household via `remove_household_member` RPC
+- [x] **HHRBAC-04**: Any household member (admin or regular) can leave the household voluntarily via `leave_household` RPC, subject to last-admin protection
+- [x] **HHRBAC-05**: Admin can choose the role (admin or member) a new member will have when accepting an invite — backed by `household_invites.role` column
+- [x] **HHRBAC-06**: HouseholdPage shows role-management controls (promote/demote/remove) inline for admins; non-admins see read-only role badges plus a Leave button for themselves
+- [x] **HHRBAC-07**: InviteLink form lets admins choose whether the generated invite creates an admin or a member (default: member)
+- [x] **HHRBAC-08**: A promoted admin has the same capabilities as the original creator — locked by Playwright regression test covering invite creation, budget update, and member-role change
+
 ## v3 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -286,10 +297,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 **Coverage:**
 - v1.0 requirements: 50 total (all complete)
 - v1.1 enhancement requirements: 16 total (all complete)
-- v2.0 requirements: 36 total (31 core + 5 IMPORT — added 2026-04-19 during audit reconciliation)
-- Mapped to phases: 66 (v1) + 36 (v2.0)
+- v2.0 requirements: 44 total (31 core + 5 IMPORT added 2026-04-19 + 8 HHRBAC added 2026-04-24 during Phase 30 audit reconciliation)
+- Mapped to phases: 66 (v1) + 44 (v2.0)
 - Unmapped v2.0: 0 (roadmap complete)
 - v2.0 gap-closure phases: 26, 27, 28, 29 (see ROADMAP.md v2.0 Gap Closure — Phase Details)
+- v2.0 granular-permissions phase: 30 (shipped 2026-04-24 — net-new feature, not a gap closure)
 
 **v2.0 Traceability:**
 
@@ -331,6 +343,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IMPORT-03 | Phase 25 | Partial |
 | IMPORT-04 | Phase 25 | Validated |
 | IMPORT-05 | Phase 25 | Validated |
+| HHRBAC-01 | Phase 30 | Validated |
+| HHRBAC-02 | Phase 30 | Validated |
+| HHRBAC-03 | Phase 30 | Validated |
+| HHRBAC-04 | Phase 30 | Validated |
+| HHRBAC-05 | Phase 30 | Validated |
+| HHRBAC-06 | Phase 30 | Validated |
+| HHRBAC-07 | Phase 30 | Validated |
+| HHRBAC-08 | Phase 30 | Validated |
 
 **v1.0/v1.1 Traceability (archived — all complete):**
 
@@ -338,4 +358,4 @@ All 66 v1.0/v1.1 requirements mapped and complete. See git history for detailed 
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-25 after v2.0 roadmap creation (Phases 16–24)*
+*Last updated: 2026-04-24 — added HHRBAC-01..08 for Phase 30 (granular household permissions), closing audit finding DOC-01*
