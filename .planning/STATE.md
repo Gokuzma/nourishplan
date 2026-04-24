@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI polish and usability improvements
 status: Phase complete
-stopped_at: "Phase 29 COMPLETE — all four v2.0 audit WARNs (02/03/04/05) closed + folded-in GuidePage v2.0 refresh shipped. Five plans shipped: 17-VERIFICATION.md retrospective (29-01, 629dbc4), 25-VERIFICATION.md retrospective with IMPORT-03 human_needed (29-02, dda1923), REQUIREMENTS.md v2.0 traceability sweep + 35 checkbox alignments (29-03, 67d6dc5), GuidePage.tsx 12-section v2.0 refresh (29-05, 4fcddfa), D-16 deviation blockquotes for Phase 24 pivot (29-04, 143f5e6). 6/6 phase success criteria VALIDATED per 29-VERIFICATION.md. v2.0 milestone is archive-ready. Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated; carried from Phase 27/28 handoff)."
-last_updated: "2026-04-23T01:45:00.000Z"
+stopped_at: "Phase 28 COMPLETE — WARN-01 closed by wire-in. Five plans shipped: hooks (28-01), overlay (28-02), edge-function redeploy with --no-verify-jwt per L-025 (28-03), CookModePage wire-in 547→611 lines preserving 8/8 L-020/L-027 features (28-04), 27-assertion regression test + REQUIREMENTS PREP-02 (gap closure)→(wire-in)→Validated flip (28-05). Vitest 346 passed / 12 failed (baseline unchanged). Phase 26 criterion #5 still in 26-HUMAN-UAT.md pending manual Playwright pass (unrelated)."
+last_updated: "2026-04-24T01:39:54.125Z"
 progress:
   total_phases: 14
   completed_phases: 14
