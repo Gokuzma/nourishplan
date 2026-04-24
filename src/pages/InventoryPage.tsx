@@ -1,16 +1,19 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { StorageLocation, InventoryItem, RemovalReason } from '../types/database'
 import type { BarcodeProduct } from '../utils/barcodeLookup'
 import { useInventoryItems, useRemoveInventoryItem } from '../hooks/useInventory'
+import { getExpiryUrgency } from '../utils/inventory'
 import { InventoryItemRow } from '../components/inventory/InventoryItemRow'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
 import { BarcodeScanner } from '../components/inventory/BarcodeScanner'
 import { QuickScanMode } from '../components/inventory/QuickScanMode'
+import { Nameplate, StoryHead, Folio } from '../components/editorial'
+import { Icon } from '../components/Icon'
 
-const TABS: { label: string; value: StorageLocation }[] = [
-  { label: 'Pantry', value: 'pantry' },
-  { label: 'Fridge', value: 'fridge' },
-  { label: 'Freezer', value: 'freezer' },
+const TABS: { label: string; value: StorageLocation; icon: 'pantry' | 'fridge' | 'freezer' }[] = [
+  { label: 'Pantry', value: 'pantry', icon: 'pantry' },
+  { label: 'Fridge', value: 'fridge', icon: 'fridge' },
+  { label: 'Freezer', value: 'freezer', icon: 'freezer' },
 ]
 
 export function InventoryPage() {
@@ -22,7 +25,29 @@ export function InventoryPage() {
   const [scanResult, setScanResult] = useState<{ product: BarcodeProduct | null; barcode: string } | null>(null)
 
   const { data: items, isPending } = useInventoryItems(activeTab)
+  const { data: pantryItems = [] } = useInventoryItems('pantry')
+  const { data: fridgeItems = [] } = useInventoryItems('fridge')
+  const { data: freezerItems = [] } = useInventoryItems('freezer')
   const removeItem = useRemoveInventoryItem()
+
+  const counts = {
+    pantry: pantryItems.length,
+    fridge: fridgeItems.length,
+    freezer: freezerItems.length,
+  }
+  const total = counts.pantry + counts.fridge + counts.freezer
+
+  // Urgent: items urgently expiring (≤3 days) or already expired, across all locations
+  const urgent = useMemo(() => {
+    const all = [...pantryItems, ...fridgeItems, ...freezerItems]
+    return all
+      .filter(i => {
+        const urgency = getExpiryUrgency(i.expires_at ?? null)
+        return urgency === 'urgent' || urgency === 'expired'
+      })
+      .sort((a, b) => (a.expires_at ?? '').localeCompare(b.expires_at ?? ''))
+      .slice(0, 5)
+  }, [pantryItems, fridgeItems, freezerItems])
 
   function handleEdit(item: InventoryItem) {
     setEditItem(item)
@@ -51,92 +76,180 @@ export function InventoryPage() {
   const panelId = `panel-${activeTab}`
 
   return (
-    <div className="px-4 py-6 font-sans pb-[64px]">
-      {/* Page header */}
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text">Inventory</h1>
-          <p className="text-sm text-text/50 mt-1">
-            Manage your pantry, fridge, and freezer stock.
-          </p>
+    <div className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8 font-sans">
+      {/* Nameplate */}
+      <div className="hidden md:block">
+        <Nameplate
+          left={`${total} items on the books`}
+          title={<>The <span className="amp">Pantry</span></>}
+          right={`Pantry ${counts.pantry} · Fridge ${counts.fridge} · Freezer ${counts.freezer}`}
+        />
+      </div>
+      <div className="md:hidden">
+        <Nameplate
+          left="STOCK"
+          title="Pantry"
+          right={String(total)}
+          size="sm"
+        />
+      </div>
+
+      {/* Story head */}
+      <StoryHead
+        kicker="SECTION · 05 — THE INVENTORY"
+        headline="What's on"
+        headlineAccent="hand."
+        byline={urgent.length > 0 ? `Sorted by expiry\n${urgent.length} need${urgent.length === 1 ? 's' : ''} using` : null}
+        size="sm"
+      />
+
+      {/* URGENT BAND */}
+      {urgent.length > 0 && (
+        <div
+          style={{
+            padding: '14px 16px',
+            background: 'var(--tomato)',
+            color: '#1a0a05',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            flexWrap: 'wrap',
+            borderTop: '2px solid var(--rule-c)',
+            borderBottom: '2px solid var(--rule-c)',
+            marginTop: 14,
+          }}
+        >
+          <span
+            className="stamp"
+            style={{ color: '#1a0a05', borderColor: '#1a0a05', background: 'rgba(255, 245, 225, 0.6)' }}
+          >
+            Use soon!
+          </span>
+          <div
+            className="mono"
+            style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', flex: 1, minWidth: 0 }}
+          >
+            {urgent.map(u => u.food_name).join(' · ')} — expiring within 2 days
+          </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setShowScanner(true)}
-            className="rounded-[--radius-btn] border border-secondary px-3 py-2 text-sm text-text/70 hover:text-text transition-colors"
-          >
-            Scan
+      )}
+
+      {/* TABS + Add */}
+      <div className="flex items-end justify-between gap-2 flex-wrap mt-4">
+        <div role="tablist" className="tabs" style={{ flex: 1, minWidth: 280 }}>
+          {TABS.map(tab => (
+            <button
+              key={tab.value}
+              type="button"
+              id={`tab-${tab.value}`}
+              role="tab"
+              aria-selected={activeTab === tab.value}
+              aria-controls={`panel-${tab.value}`}
+              onClick={() => setActiveTab(tab.value)}
+              className={`t ${activeTab === tab.value ? 'active' : ''}`}
+            >
+              <Icon name={tab.icon} size={16} />
+              <span>{tab.label}</span>
+              <span className="n">· {counts[tab.value]}</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 no-print pb-2">
+          <button type="button" onClick={() => setShowScanner(true)} className="btn btn-sm" aria-label="Scan barcode">
+            <Icon name="search" size={14} /> Scan
+          </button>
+          <button type="button" onClick={() => setShowQuickScan(true)} className="btn btn-sm">
+            Quick scan
           </button>
           <button
-            onClick={() => setShowQuickScan(true)}
-            className="rounded-[--radius-btn] border border-secondary px-3 py-2 text-sm text-text/70 hover:text-text transition-colors"
-          >
-            Quick Scan
-          </button>
-          <button
+            type="button"
             onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
-            className="rounded-[--radius-btn] bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
+            className="btn btn-primary btn-sm"
           >
-            Add Item
+            <Icon name="plus" size={14} /> Add item
           </button>
         </div>
       </div>
 
-      {/* Tab strip */}
+      {/* Section heading: column header row (eyebrows) — desktop only */}
       <div
-        role="tablist"
-        className="flex border-b border-secondary mb-4"
+        className="hidden md:grid mt-4"
+        style={{
+          gridTemplateColumns: '36px 2fr 1fr 1fr 120px',
+          gap: 16,
+          padding: '14px 4px 8px',
+          borderBottom: '1px solid var(--rule-c)',
+        }}
       >
-        {TABS.map(tab => (
-          <button
-            key={tab.value}
-            id={`tab-${tab.value}`}
-            role="tab"
-            aria-selected={activeTab === tab.value}
-            aria-controls={`panel-${tab.value}`}
-            onClick={() => setActiveTab(tab.value)}
-            className={`pb-2 px-4 text-sm border-b-2 transition-colors ${
-              activeTab === tab.value
-                ? 'border-accent text-text font-medium'
-                : 'border-transparent text-text/50 hover:text-text'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        <span className="eyebrow">№</span>
+        <span className="eyebrow">Item</span>
+        <span className="eyebrow">Quantity</span>
+        <span className="eyebrow">Location</span>
+        <span className="eyebrow" style={{ textAlign: 'right' }}>Expires</span>
       </div>
 
-      {/* Tab panel */}
-      <div
-        id={panelId}
-        role="tabpanel"
-        aria-labelledby={activeTabId}
-      >
+      {/* TAB PANEL — list of items */}
+      <div id={panelId} role="tabpanel" aria-labelledby={activeTabId} className="mt-2">
         {isPending ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 mt-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 rounded-[--radius-card] bg-secondary animate-pulse" />
+              <div key={i} className="h-16 bg-paper-2 animate-pulse" style={{ border: '1px solid var(--rule-soft)' }} />
             ))}
           </div>
         ) : items && items.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {items.map(item => (
-              <InventoryItemRow
+          <div className="flex flex-col">
+            {items.map((item, idx) => (
+              <div
                 key={item.id}
-                item={item}
-                onEdit={handleEdit}
-                onRemove={handleRemove}
-                isRemoving={removeItem.isPending && removeItem.variables?.id === item.id}
-              />
+                className="grid items-baseline"
+                style={{
+                  gridTemplateColumns: '36px 1fr',
+                  gap: 12,
+                  borderBottom: '1px dashed var(--rule-softer)',
+                  padding: '8px 0',
+                }}
+              >
+                <span
+                  className="mono tnum"
+                  style={{ fontSize: 11, color: 'var(--ink-soft)', letterSpacing: '0.04em', alignSelf: 'start', paddingTop: 16 }}
+                >
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <InventoryItemRow
+                    item={item}
+                    onEdit={handleEdit}
+                    onRemove={handleRemove}
+                    isRemoving={removeItem.isPending && removeItem.variables?.id === item.id}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-text/50">
-              Nothing in your {TABS.find(t => t.value === activeTab)?.label} yet.
+          <div className="py-16 text-center">
+            <p className="serif-italic" style={{ fontSize: 18, color: 'var(--ink-soft)' }}>
+              — nothing in your {TABS.find(t => t.value === activeTab)?.label.toLowerCase()} yet —
             </p>
+            <button
+              type="button"
+              onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
+              className="btn btn-primary btn-sm mt-4"
+            >
+              Add the first item
+            </button>
           </div>
         )}
+      </div>
+
+      {/* Folio — desktop only */}
+      <div className="hidden md:block">
+        <Folio
+          num="05"
+          title="The Pantry"
+          tagline="Count what you keep. Keep what you'll use."
+          pageOf="PAGE 5 OF 10"
+        />
       </div>
 
       <AddInventoryItemModal
