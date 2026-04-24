@@ -20,6 +20,7 @@ import { InAppTimerAlert } from '../components/cook/InAppTimerAlert'
 import { fireStepDoneNotification, playTimerChime } from '../components/cook/CookTimerNotifications'
 import type { RecipeStep } from '../types/database'
 import { useRecipe, useRecipeIngredients } from '../hooks/useRecipes'
+import { useMeal } from '../hooks/useMeals'
 import { useCookCompletion } from '../hooks/useCookCompletion'
 import { CookDeductionReceipt } from '../components/inventory/CookDeductionReceipt'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
@@ -82,7 +83,15 @@ export function CookModePage() {
   const generateReheatSequence = useGenerateReheatSequence()
 
   // For single-recipe cook: load recipe steps live (R-02 — live-bound, not snapshotted)
-  const recipeIdForSteps = activeSession?.recipe_ids[0] ?? mealId
+  // When entering from a plan slot (source !== 'recipe'), mealId is a meal_id — resolve
+  // the recipe_id(s) from the meal's meal_items (item_type='recipe') rows.
+  const isFromRecipe = source === 'recipe'
+  const { data: mealData } = useMeal(!isFromRecipe && mealId ? mealId : '')
+  const mealRecipeIds: string[] = mealData?.meal_items
+    ? mealData.meal_items.filter(i => i.item_type === 'recipe').map(i => i.item_id)
+    : []
+  const recipeIdForSteps = activeSession?.recipe_ids[0]
+    ?? (isFromRecipe ? mealId : mealRecipeIds[0])
   const { data: cookingRecipe } = useRecipe(recipeIdForSteps ?? '')
   const { data: cookingIngredients } = useRecipeIngredients(recipeIdForSteps ?? '')
   const { runCookCompletion } = useCookCompletion()
@@ -297,12 +306,13 @@ export function CookModePage() {
 
   async function handleStartCook(mode: 'combined' | 'per-recipe' | null) {
     if (!mealId) return
-    const isFromRecipe = source === 'recipe'
-    const recipeId = isFromRecipe ? mealId : (recipeIdForSteps ?? null)
-    const recipeIds = recipeId ? [recipeId] : []
+    const recipeIds = isFromRecipe
+      ? [mealId]
+      : (mealRecipeIds.length > 0 ? mealRecipeIds : (recipeIdForSteps ? [recipeIdForSteps] : []))
+    const primaryRecipeId = recipeIds[0] ?? null
     const stepsByRecipeId: Record<string, RecipeStep[]> = {}
-    if (recipeId && liveSteps.length > 0) {
-      stepsByRecipeId[recipeId] = liveSteps
+    if (primaryRecipeId && liveSteps.length > 0) {
+      stepsByRecipeId[primaryRecipeId] = liveSteps
     }
     const newSession = await createSession.mutateAsync({
       meal_id: isFromRecipe ? null : mealId,
