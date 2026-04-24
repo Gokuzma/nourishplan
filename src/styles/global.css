@@ -3,38 +3,507 @@
 /* Switch dark mode from media-query to class-based so we can toggle */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * NourishPlan v2.0 — "Sunday Supper Gazette" edition
+ * Riso-print / newspaper-nameplate palette. Deep ink-teal paper, warm
+ * off-white ink, tomato primary accent, chartreuse/butter/plum/sky/leaf
+ * riso stack. Fraunces + JetBrains Mono + Inter typography trio.
+ *
+ * Token names preserved (--color-primary/secondary/accent/text/background/
+ * surface) so existing Tailwind usages (bg-primary, text-text, etc.) reskin
+ * automatically without touching component code.
+ */
+
 @theme {
-  /* Light mode tokens */
-  --color-primary: #A8C5A0;
-  --color-secondary: #F5EDE3;
-  --color-accent: #E8B4A2;
-  --color-text: #3D3D3D;
-  --color-background: #FAFAF7;
-  --color-surface: #FFFFFF;
+  /* Semantic surface tokens (light-first, but ground is dark teal — this
+     design inverts convention; dark mode darkens further) */
+  --color-primary: #f04e2b;       /* tomato — primary accent / actions / today */
+  --color-secondary: #0a2b2b;     /* paper-2 — darker panels + bg overlays */
+  --color-accent: #d9e85a;        /* chartreuse — hatched fills / highlights */
+  --color-text: #fff5e1;          /* warm off-white ink */
+  --color-background: #0f3b3a;    /* deep ink-teal paper */
+  --color-surface: #0a2b2b;       /* darker-teal card surface */
 
-  /* Font */
-  --font-sans: 'Nunito Variable', sans-serif;
+  /* Expanded Gazette riso stack (usable as bg-butter, text-plum, etc.) */
+  --color-paper: #0f3b3a;
+  --color-paper-2: #0a2b2b;
+  --color-paper-hi: #17504e;
+  --color-ink: #fff5e1;
+  --color-ink-dim: #d9c9a3;
+  --color-ink-soft: #8fa6a0;
+  --color-rule: #f0e3c0;
+  --color-tomato: #f04e2b;
+  --color-tomato-deep: #c43a20;
+  --color-chartreuse: #d9e85a;
+  --color-butter: #f9d66b;
+  --color-plum: #8b3a62;
+  --color-sky: #6fb3c2;
+  --color-leaf: #4f8a55;
 
-  /* Border radius */
-  --radius-card: 1rem;
-  --radius-btn: 0.5rem;
+  /* Typography trio */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Fraunces", "Playfair Display", Georgia, serif;
+  --font-display: "Fraunces", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Gazette is sharp — no rounded corners */
+  --radius-card: 0px;
+  --radius-btn: 0px;
 }
 
-/* Dark mode overrides applied when .dark class is on <html> */
+/* Root-level CSS variables (not Tailwind @theme — used by raw utility classes below) */
+:root {
+  --paper: #0f3b3a;
+  --paper-2: #0a2b2b;
+  --paper-hi: #17504e;
+  --ink: #fff5e1;
+  --ink-dim: #d9c9a3;
+  --ink-soft: #8fa6a0;
+  --rule-c: #f0e3c0;
+  --rule-soft: rgba(240, 227, 192, 0.28);
+  --rule-softer: rgba(240, 227, 192, 0.14);
+  --tomato: #f04e2b;
+  --tomato-deep: #c43a20;
+  --chartreuse: #d9e85a;
+  --butter: #f9d66b;
+  --plum: #8b3a62;
+  --sky: #6fb3c2;
+  --leaf: #4f8a55;
+  --grain-opacity: 0.12;
+  --font-serif: "Fraunces", "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Fraunces", serif;
+}
+
+/* Dark mode overrides applied when .dark class is on <html> — deeper ground */
 @layer base {
   .dark {
-    --color-text: #E8E5E0;
-    --color-background: #1A1D1A;
-    --color-surface: #252825;
-    --color-primary: #B8D4B0;   /* sage, lightened for dark bg */
-    --color-secondary: #2A2E2A; /* dark neutral, replaces warm cream */
-    --color-accent: #F0C4B2;    /* peach, lightened for dark bg */
+    --color-text: #f6ead0;
+    --color-background: #1a1a1a;
+    --color-surface: #0f0f0f;
+    --color-primary: #f04e2b;      /* tomato unchanged */
+    --color-secondary: #0f0f0f;
+    --color-accent: #d9e85a;       /* chartreuse unchanged */
+
+    --paper: #1a1a1a;
+    --paper-2: #0f0f0f;
+    --paper-hi: #252522;
+    --ink: #f6ead0;
+    --ink-dim: #c6b894;
+    --ink-soft: #7a7668;
+    --rule-c: #f6ead0;
+    --rule-soft: rgba(246, 234, 208, 0.22);
+    --rule-softer: rgba(246, 234, 208, 0.10);
+  }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Print styles for meal plan */
+/*
+ * Gazette utility classes — additive to Tailwind. Use when a pattern is
+ * specific enough that expressing it via Tailwind atoms would be noisy.
+ */
+
+/* Paper = deep teal + halftone dot grain */
+.paper {
+  background: var(--paper);
+  color: var(--ink);
+  position: relative;
+}
+.paper::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(rgba(240, 227, 192, 0.14) 1px, transparent 1.1px),
+    radial-gradient(rgba(240, 78, 43, 0.05) 1px, transparent 1.2px);
+  background-size: 6px 6px, 14px 14px;
+  background-position: 0 0, 3px 3px;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  z-index: 0;
+}
+.paper > * { position: relative; z-index: 1; }
+
+/* Typography helpers */
+.serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.015em; }
+.serif-italic { font-family: var(--font-serif); font-style: italic; }
+.mono { font-family: var(--font-mono); font-feature-settings: "tnum", "zero"; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--butter);
+  font-weight: 500;
+}
+
+/* Rules (hr variants) */
+.rule { border: 0; border-top: 1px solid var(--rule-c); margin: 0; }
+.rule-soft { border-top-color: var(--rule-soft); }
+.rule-dashed { border: 0; border-top: 1px dashed var(--rule-soft); margin: 0; }
+.rule-double {
+  border: 0;
+  height: 6px;
+  border-top: 1px solid var(--rule-c);
+  border-bottom: 1px solid var(--rule-c);
+}
+.rule-triple {
+  border: 0;
+  height: 10px;
+  background:
+    linear-gradient(var(--rule-c), var(--rule-c)) top/100% 1px no-repeat,
+    linear-gradient(var(--rule-c), var(--rule-c)) center/100% 2px no-repeat,
+    linear-gradient(var(--rule-c), var(--rule-c)) bottom/100% 1px no-repeat;
+}
+
+/* Masthead — newspaper nameplate */
+.nameplate {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 0 10px;
+  border-top: 2px solid var(--rule-c);
+  border-bottom: 1px solid var(--rule-c);
+}
+.nameplate .left,
+.nameplate .right {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  flex: 1;
+}
+.nameplate .right { text-align: right; }
+.nameplate .title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 72px;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: var(--ink);
+  padding: 0 18px;
+  text-align: center;
+  font-style: italic;
+}
+.nameplate .title .amp { color: var(--tomato); font-style: normal; }
+.nameplate.sm .title { font-size: 38px; }
+
+.subhead {
+  padding: 8px 0 14px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--butter);
+  border-bottom: 1px solid var(--rule-c);
+}
+
+/* Story head — page-level kicker + big italic headline + byline */
+.story-head {
+  padding: 20px 0 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 24px;
+  border-bottom: 2px solid var(--rule-c);
+}
+.story-head .kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tomato);
+}
+.story-head .headline {
+  font-family: var(--font-display);
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin-top: 8px;
+  font-style: italic;
+  font-weight: 400;
+}
+.story-head .headline em { font-style: normal; color: var(--tomato); }
+.story-head.sm .headline { font-size: 32px; }
+.story-head .byline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: right;
+}
+
+/* Section heading — hand-numbered with big italic tomato numeral */
+.section-head {
+  padding: 28px 0 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.section-head .no {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 42px;
+  line-height: 0.9;
+  color: var(--tomato);
+  letter-spacing: -0.03em;
+}
+.section-head .label {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-style: italic;
+  flex: 1;
+}
+.section-head .aux {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+/* Gazette-style button (sharp corners, mono uppercase label) */
+.gz-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 10px 14px;
+  border: 1.5px solid var(--rule-c);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform .08s, background .12s;
+  border-radius: 0;
+}
+.gz-btn:hover { background: rgba(255, 245, 225, 0.08); transform: translateY(-1px); }
+.gz-btn:active { transform: translateY(1px); }
+.gz-btn-primary {
+  background: var(--tomato);
+  border-color: var(--tomato);
+  color: #1a0a05;
+}
+.gz-btn-primary:hover { background: var(--tomato-deep); }
+.gz-btn-chart {
+  background: var(--chartreuse);
+  border-color: var(--chartreuse);
+  color: #1a1a0a;
+}
+.gz-btn-sm { min-height: 32px; padding: 5px 10px; font-size: 10px; }
+.gz-btn-ghost { border-color: transparent; padding-left: 8px; padding-right: 8px; }
+
+/* Chips — 6 color variants */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 3px 7px;
+  line-height: 1;
+  border: 1px solid var(--rule-c);
+  color: var(--ink);
+}
+.chip-tomato { background: var(--tomato); border-color: var(--tomato); color: #1a0a05; }
+.chip-butter { background: var(--butter); border-color: var(--butter); color: #2a1f00; }
+.chip-chart  { background: var(--chartreuse); border-color: var(--chartreuse); color: #1a1a0a; }
+.chip-plum   { background: var(--plum); border-color: var(--plum); color: #fff5e1; }
+.chip-sky    { background: var(--sky); border-color: var(--sky); color: #081c1c; }
+.chip-leaf   { background: var(--leaf); border-color: var(--leaf); color: #fff5e1; }
+
+/* Rotated stamp */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: var(--tomato);
+  border: 2px solid var(--tomato);
+  padding: 6px 12px 7px;
+  transform: rotate(-5deg);
+  text-transform: uppercase;
+  font-weight: 500;
+  line-height: 1;
+}
+.stamp-small { font-size: 11px; padding: 4px 8px; border-width: 1.5px; }
+.stamp-chart { color: var(--chartreuse); border-color: var(--chartreuse); transform: rotate(3deg); }
+
+/* Nutrition bar — hatched chartreuse fill + tomato target tick */
+.nbar {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--rule-softer);
+}
+.nbar:last-child { border-bottom: 0; }
+.nbar .nlabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--butter);
+}
+.nbar .nvals {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.nbar .nvals .of { color: var(--ink-soft); }
+.ntrack {
+  position: relative;
+  height: 12px;
+  background: rgba(255, 245, 225, 0.08);
+  border: 1px solid var(--rule-soft);
+}
+.ntrack .nfill {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  background: var(--chartreuse);
+  background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(0, 0, 0, 0.08) 3px 4px);
+}
+.ntrack .ntick {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  background: var(--tomato);
+}
+
+/* Expiry pip (inventory urgency dot) */
+.pip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.pip::before {
+  content: "";
+  width: 7px; height: 7px;
+  background: var(--leaf);
+  border-radius: 999px;
+}
+.pip.warn { color: var(--butter); }
+.pip.warn::before { background: var(--butter); }
+.pip.danger { color: var(--tomato); font-weight: 600; }
+.pip.danger::before { background: var(--tomato); animation: blink 1.4s step-end infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+
+/* Avatar circle */
+.avatar {
+  width: 40px; height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  color: #1a0a05;
+  background: var(--butter);
+  border-radius: 50%;
+}
+.avatar.plum { background: var(--plum); color: var(--ink); }
+.avatar.sky { background: var(--sky); color: #081c1c; }
+.avatar.leaf { background: var(--leaf); color: var(--ink); }
+.avatar.chart { background: var(--chartreuse); color: #1a1a0a; }
+.avatar.tomato { background: var(--tomato); color: #1a0a05; }
+
+/* Drop cap (editorial lead paragraph) */
+.drop-cap::first-letter {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 64px;
+  float: left;
+  line-height: 0.85;
+  padding: 4px 10px 0 0;
+  color: var(--tomato);
+}
+
+/* Folio (page footer number band) */
+.folio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0 22px;
+  border-top: 2px solid var(--rule-c);
+  margin-top: 28px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--butter);
+}
+.folio .num {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+/* Menu pop — overflow action dropdown */
+.menu-pop {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 6px;
+  background: var(--paper-2);
+  border: 1.5px solid var(--rule-c);
+  min-width: 160px;
+  z-index: 20;
+  box-shadow: 4px 4px 0 var(--tomato);
+}
+.menu-pop button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--rule-softer);
+}
+.menu-pop button:last-child { border-bottom: 0; }
+.menu-pop button:hover { background: var(--tomato); color: #1a0a05; }
+.menu-pop button.danger { color: var(--tomato); }
+
+/* Print styles for meal plan (preserved from v1.x) */
 @media print {
-  /* Hide app chrome */
   .no-print,
   nav,
   [role="tabbar"],
@@ -43,7 +512,6 @@
     display: none !important;
   }
 
-  /* Force B&W */
   body {
     background: white !important;
     color: black !important;
@@ -51,7 +519,6 @@
     font-size: 11px !important;
   }
 
-  /* Reset layout */
   * {
     color: black !important;
     background: white !important;
@@ -59,37 +526,25 @@
     box-shadow: none !important;
   }
 
-  /* Page margins */
-  @page {
-    margin: 1cm;
-  }
+  @page { margin: 1cm; }
 
-  /* Make plan grid visible and table-like */
   .plan-grid {
     display: block !important;
     width: 100% !important;
   }
 
-  /* Day cards as table cells */
   .day-card {
     border: 1px solid #000 !important;
     padding: 4px 6px !important;
     page-break-inside: avoid;
   }
 
-  /* Headings */
   h1, h2, h3 {
     font-size: 13px !important;
     font-weight: 600 !important;
   }
 
-  /* Show print-only elements */
-  .print-only {
-    display: block !important;
-  }
+  .print-only { display: block !important; }
 }
 
-/* Hide print-only elements on screen */
-.print-only {
-  display: none;
-}
+.print-only { display: none; }

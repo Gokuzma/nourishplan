@@ -22,11 +22,19 @@
     <meta name="twitter:description" content="Share one meal plan while each person gets personalized portion suggestions. A family nutrition app built for real life." />
     <meta name="twitter:image" content="https://nourishplan.gregok.ca/og-image.png" />
 
+    <!-- NourishPlan v2.0 Gazette edition typography trio -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@300..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+
     <style>
       #splash {
         position: fixed;
         inset: 0;
-        background: #A8C5A0;
+        background: #0f3b3a;
         z-index: 9999;
         display: flex;
         flex-direction: column;
@@ -39,17 +47,25 @@
         pointer-events: none;
       }
       #splash-title {
-        color: #ffffff;
-        font-size: 2rem;
-        font-weight: 700;
-        font-family: sans-serif;
+        color: #fff5e1;
+        font-size: 2.75rem;
+        font-weight: 400;
+        font-style: italic;
+        font-family: "Fraunces", Georgia, serif;
+        letter-spacing: -0.03em;
         margin: 0;
       }
+      #splash-title .dot {
+        color: #f04e2b;
+        font-style: normal;
+      }
       #splash-subtitle {
-        color: rgba(255, 255, 255, 0.75);
-        font-size: 0.9rem;
-        font-family: sans-serif;
-        margin: 0.5rem 0 0;
+        color: rgba(249, 214, 107, 0.9);
+        font-size: 0.7rem;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin: 0.75rem 0 0;
       }
     </style>
 
@@ -61,8 +77,8 @@
   </head>
   <body>
     <div id="splash">
-      <p id="splash-title">NourishPlan</p>
-      <p id="splash-subtitle">Family nutrition, together</p>
+      <p id="splash-title">Nourish<span class="dot">·</span>plan</p>
+      <p id="splash-subtitle">The Sunday Supper Gazette</p>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
