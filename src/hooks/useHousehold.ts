@@ -127,7 +127,7 @@ export function useJoinHousehold() {
 
       const { error: memberError } = await supabase
         .from('household_members')
-        .insert({ household_id: invite.household_id, user_id: userId, role: 'member' })
+        .insert({ household_id: invite.household_id, user_id: userId, role: invite.role ?? 'member' })
 
       if (memberError) {
         if (memberError.code === '23505') {
@@ -157,7 +157,7 @@ export function useCreateInvite() {
   const { data: membership } = useHousehold()
 
   return useMutation({
-    mutationFn: async (): Promise<HouseholdInvite> => {
+    mutationFn: async (role?: 'admin' | 'member'): Promise<HouseholdInvite> => {
       const { session } = await supabase.auth.getSession().then(r => r.data)
       const userId = session?.user.id
       if (!userId) throw new Error('Not authenticated')
@@ -167,7 +167,7 @@ export function useCreateInvite() {
 
       const { data, error } = await supabase
         .from('household_invites')
-        .insert({ household_id: householdId, created_by: userId })
+        .insert({ household_id: householdId, created_by: userId, role: role ?? 'member' })
         .select()
         .single()
 
@@ -274,6 +274,71 @@ export function useDeleteMemberProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['household'] })
+    },
+  })
+}
+
+/**
+ * Promotes a member to admin or demotes an admin to member (Phase 30 SPEC Req #1).
+ * - Callable by any admin in the same household as the target member.
+ * - DB-enforced: rejects with 'At least one admin required' (exact string) if it would
+ *   reduce the household's admin count to zero.
+ * - `member_row_id` is the `household_members.id` (the row UUID, NOT the user_id).
+ */
+export function useChangeMemberRole() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (params: { member_row_id: string; new_role: 'admin' | 'member' }) => {
+      const { error } = await supabase
+        .rpc('change_member_role' as never, {
+          member_row_id: params.member_row_id,
+          new_role: params.new_role,
+        } as never)
+      if (error) throw error
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
+    },
+  })
+}
+
+/**
+ * Removes a member from the caller's household (Phase 30 SPEC Req #3).
+ * - Callable by any admin in the same household as the target member.
+ * - DB-enforced last-admin protection.
+ */
+export function useRemoveHouseholdMember() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (member_row_id: string) => {
+      const { error } = await supabase
+        .rpc('remove_household_member' as never, { member_row_id } as never)
+      if (error) throw error
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
+    },
+  })
+}
+
+/**
+ * Current user leaves their household voluntarily (Phase 30 SPEC Req #4).
+ * - Callable by any member (admin OR member) — does NOT require admin role.
+ * - DB-enforced: rejects with 'At least one admin required' if caller is the sole admin.
+ */
+export function useLeaveHousehold() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .rpc('leave_household' as never, {} as never)
+      if (error) throw error
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }
