@@ -28,6 +28,7 @@ export interface HouseholdInvite {
   created_by: string
   expires_at: string
   used_at: string | null
+  role: 'admin' | 'member'
   created_at: string
 }
 
@@ -382,11 +383,12 @@ export type Database = {
       }
       household_invites: {
         Row: HouseholdInvite
-        Insert: Omit<HouseholdInvite, 'id' | 'token' | 'created_at' | 'used_at'> & {
+        Insert: Omit<HouseholdInvite, 'id' | 'token' | 'created_at' | 'used_at' | 'role'> & {
           id?: string
           token?: string
           created_at?: string
           used_at?: string | null
+          role?: 'admin' | 'member'
         }
         Update: Partial<Omit<HouseholdInvite, 'id'>>
       }
