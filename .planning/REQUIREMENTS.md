@@ -144,10 +144,10 @@ Requirements for the Adaptive Meal Planning System (AMPS) milestone. Each maps t
 ### Grocery
 
 - [x] **GROC-01**: Grocery list is auto-generated from the active meal plan's ingredients
-- [~] **GROC-02**: Grocery list subtracts items already in inventory ("have" vs "need to buy")
-- [~] **GROC-03**: Grocery list items are grouped by store category (produce, dairy, etc.)
-- [~] **GROC-04**: User can check off grocery items in-store
-- [~] **GROC-05**: Grocery list can be shared with household members
+- [x] **GROC-02**: Grocery list subtracts items already in inventory ("have" vs "need to buy")
+- [x] **GROC-03**: Grocery list items are grouped by store category (produce, dairy, etc.)
+- [x] **GROC-04**: User can check off grocery items in-store
+- [x] **GROC-05**: Grocery list can be shared with household members
 
 ### Planning
 
@@ -318,10 +318,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INVT-05 | Phase 17, Phase 26 (gap closure) | Validated |
 | INVT-06 | Phase 17, Phase 26 (gap closure) | Partial |
 | GROC-01 | Phase 18 | Validated |
-| GROC-02 | Phase 18 | Partial |
-| GROC-03 | Phase 18 | Partial |
-| GROC-04 | Phase 18 | Partial |
-| GROC-05 | Phase 18 | Partial |
+| GROC-02 | Phase 18 | Validated |
+| GROC-03 | Phase 18 | Validated |
+| GROC-04 | Phase 18 | Validated |
+| GROC-05 | Phase 18 | Validated |
 | PLAN-01 | Phase 19 | Validated |
 | PLAN-02 | Phase 22 | Validated |
 | PLAN-03 | Phase 19 | Validated |
