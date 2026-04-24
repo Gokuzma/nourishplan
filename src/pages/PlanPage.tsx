@@ -11,10 +11,11 @@ import { PlanGrid } from '../components/plan/PlanGrid'
 import { MemberSelector } from '../components/plan/MemberSelector'
 import { NewWeekPrompt } from '../components/plan/NewWeekPrompt'
 import { TemplateManager } from '../components/plan/TemplateManager'
-import { BudgetSummarySection } from '../components/plan/BudgetSummarySection'
+import { BudgetStrip } from '../components/plan/BudgetStrip'
 import { IssuesPanel } from '../components/plan/IssuesPanel'
 import { usePlanViolations } from '../hooks/usePlanViolations'
 import { useMonotonyWarnings } from '../hooks/useMonotonyWarnings'
+import { Nameplate, StoryHead, Folio } from '../components/editorial'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00Z')
@@ -31,8 +32,29 @@ function formatWeekRange(weekStart: string): string {
   return `${fmt(start)} – ${fmt(end)}`
 }
 
+function formatLong(weekStart: string): string {
+  const start = new Date(weekStart + 'T00:00:00Z')
+  const end = new Date(weekStart + 'T00:00:00Z')
+  end.setUTCDate(start.getUTCDate() + 6)
+  const fmt = (d: Date, withMonth = false) =>
+    d.toLocaleDateString('en-US', withMonth
+      ? { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }
+      : { weekday: 'short', day: 'numeric', timeZone: 'UTC' })
+  return `${fmt(start)} — ${fmt(end, true)}`.toUpperCase()
+}
+
+// ISO-style week number (rough, for display only)
+function weekOfYear(dateStr: string): number {
+  const d = new Date(dateStr + 'T00:00:00Z')
+  const startOfYear = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  const days = Math.floor((d.getTime() - startOfYear.getTime()) / 86400000)
+  return Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
+}
+
 /**
- * /plan route — weekly meal plan grid with week navigation, member selector, and progress rings.
+ * /plan — weekly meal plan rendered in the Sunday Supper Gazette editorial style.
+ * Mobile: nameplate.sm + day-pill scrubber inside PlanGrid.
+ * Desktop: full nameplate + 7×4 ruled grid inside PlanGrid.
  */
 export function PlanPage() {
   const queryClient = useQueryClient()
@@ -40,23 +62,17 @@ export function PlanPage() {
   const { data: membership } = useHousehold()
   const household = membership?.households
 
-  // Compute initial week start from household's week_start_day preference
   const weekStartDay = household?.week_start_day ?? 0
   const initialWeekStart = getWeekStart(new Date(), weekStartDay)
   const [weekStart, setWeekStart] = useState(initialWeekStart)
 
-  // Member selector state — default to current user
   const [selectedMemberId, setSelectedMemberId] = useState(session?.user.id ?? '')
   const [selectedMemberType, setSelectedMemberType] = useState<'user' | 'profile'>('user')
-
-  // Overflow menu state
-  const [showOverflow, setShowOverflow] = useState(false)
 
   const householdId = membership?.household_id
 
   const { data: plan, isPending: planPending } = useMealPlan(weekStart)
 
-  // Prior week for monotony detection (2-week rolling window)
   const priorWeekStart = useMemo(() => {
     const [y, m, d] = weekStart.split('-').map(Number)
     const date = new Date(Date.UTC(y, m - 1, d))
@@ -84,7 +100,6 @@ export function PlanPage() {
   const { violations, hasAllergyViolation } = usePlanViolations(householdId, slots, members)
   const monotonyWarnings = useMonotonyWarnings(slots, weekStart, priorWeekSlots)
 
-  // Build per-day, per-slot violation counts for SlotCard badges
   const slotViolationsByDay = useMemo(() => {
     const byDay = new Map<number, Map<string, { count: number; hasAllergy: boolean }>>()
     for (const v of violations) {
@@ -100,6 +115,7 @@ export function PlanPage() {
     }
     return byDay
   }, [violations])
+
   const createPlan = useCreateMealPlan()
   const repeatLastWeek = useRepeatLastWeek()
   const loadTemplate = useLoadTemplate()
@@ -119,7 +135,6 @@ export function PlanPage() {
   }
 
   async function handleEditBudget(newBudget: number | null) {
-    const householdId = membership?.household_id
     if (!householdId) return
     await supabase.from('households').update({ weekly_budget: newBudget }).eq('id', householdId)
     queryClient.invalidateQueries({ queryKey: ['household'] })
@@ -140,80 +155,84 @@ export function PlanPage() {
     }
   }
 
+  const wk = weekOfYear(weekStart)
+  const filledCount = slots.filter(s => s.meal_id != null).length
+  const lockedCount = slots.filter(s => s.is_locked).length
+
   return (
-    <div className="px-4 py-8 font-sans pb-24">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary mb-1">Meal Plan</h1>
-        <p className="text-sm text-text/60">Plan your household's meals for the week.</p>
+    <div className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8 font-sans">
+      {/* Nameplate — full on desktop, compact on mobile */}
+      <div className="hidden md:block">
+        <Nameplate
+          left={formatLong(weekStart)}
+          title={<>The <span className="amp">Week</span></>}
+          right={`${filledCount} of 28 slots · ${lockedCount} locked`}
+        />
+      </div>
+      <div className="md:hidden">
+        <Nameplate
+          left={`WK ${wk}`}
+          title="The Week"
+          right={`${filledCount} · ${lockedCount}L`}
+          size="sm"
+        />
       </div>
 
-      {/* Week navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={handlePrevWeek}
-          className="no-print p-2 rounded-full text-text/50 hover:text-text hover:bg-accent/10 transition-colors"
-          aria-label="Previous week"
-        >
-          &larr;
-        </button>
-        <span className="text-sm font-medium text-text font-sans">{formatWeekRange(weekStart)}</span>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleNextWeek}
-            className="no-print p-2 rounded-full text-text/50 hover:text-text hover:bg-accent/10 transition-colors"
-            aria-label="Next week"
-          >
-            &rarr;
+      {/* Story head */}
+      <StoryHead
+        kicker="SECTION · 04 — THE PLAN"
+        headline="A week,"
+        headlineAccent="composed."
+        byline={household?.name ? `Filed by the household\n${household.name}` : null}
+        size="sm"
+      />
+
+      {/* Toolbar — week segment + member selector */}
+      <div className="flex items-center justify-between gap-3 flex-wrap mt-4 mb-4 no-print">
+        <div className="seg">
+          <button type="button" onClick={handlePrevWeek} aria-label="Previous week">← Prev</button>
+          <button type="button" className="active" aria-current="page" title={formatLong(weekStart)}>
+            {formatWeekRange(weekStart)}
           </button>
-          {/* Overflow menu - ⋮ button */}
-          <div className="relative no-print">
-            <button
-              onClick={() => setShowOverflow(prev => !prev)}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-accent/10 transition-colors text-text/50 hover:text-text"
-              aria-label="More options"
-              title="More options"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
-              </svg>
-            </button>
-            {showOverflow && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowOverflow(false)} />
-                <div className="absolute right-0 top-full mt-1 z-20 bg-surface border border-secondary rounded-[--radius-card] shadow-lg py-1 min-w-[180px]">
-                  <button
-                    onClick={() => { window.print(); setShowOverflow(false) }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-text hover:bg-accent/10 transition-colors flex items-center gap-2"
-                  >
-                    Print meal plan
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          <button type="button" onClick={handleNextWeek} aria-label="Next week">Next →</button>
         </div>
-      </div>
-
-      {/* Member selector */}
-      <div className="mb-6 no-print">
-        <MemberSelector selectedMemberId={selectedMemberId} onSelect={handleMemberSelect} />
+        {session?.user.id && (
+          <MemberSelector
+            selectedMemberId={selectedMemberId}
+            onSelect={handleMemberSelect}
+          />
+        )}
       </div>
 
       {/* Plan content */}
       {planPending ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 mt-6">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-48 rounded-[--radius-card] bg-secondary/50 animate-pulse" />
+            <div key={i} className="h-48 bg-paper-2 animate-pulse" style={{ border: '1px solid var(--rule-soft)' }} />
           ))}
         </div>
       ) : !plan ? (
-        <NewWeekPrompt weekStart={weekStart} onChoice={handleNewWeekChoice} />
+        <div className="mt-6">
+          <NewWeekPrompt weekStart={weekStart} onChoice={handleNewWeekChoice} />
+        </div>
       ) : (
         <>
-          <div className="no-print">
+          {/* Budget strip — ticket stub */}
+          <div className="mb-6">
+            <BudgetStrip
+              weeklyBudget={household?.weekly_budget ?? null}
+              weekStart={weekStart}
+              householdId={householdId}
+              onEditBudget={handleEditBudget}
+            />
+          </div>
+
+          {/* Template manager — Save/Load */}
+          <div className="no-print mb-4">
             <TemplateManager planId={plan.id} />
           </div>
+
+          {/* The grid */}
           <PlanGrid
             planId={plan.id}
             weekStart={weekStart}
@@ -225,6 +244,7 @@ export function PlanPage() {
             selectedMemberType={selectedMemberType}
             slotViolationsByDay={slotViolationsByDay}
           />
+
           <div className="mt-4 no-print">
             <IssuesPanel
               violations={violations}
@@ -232,14 +252,19 @@ export function PlanPage() {
               hasAllergyViolation={hasAllergyViolation}
             />
           </div>
-          <BudgetSummarySection
-            weeklyBudget={household?.weekly_budget ?? null}
-            weekStart={weekStart}
-            householdId={householdId}
-            onEditBudget={handleEditBudget}
-          />
+
           <div className="print-only mt-4">
             <p className="text-xs font-semibold">Meal plan for week of {formatWeekRange(weekStart)}</p>
+          </div>
+
+          {/* Folio — page footer */}
+          <div className="hidden md:block">
+            <Folio
+              num="04"
+              title="The Plan"
+              tagline={household?.name ? `A week, composed — for ${household.name}.` : 'A week, composed.'}
+              pageOf="PAGE 4 OF 10"
+            />
           </div>
         </>
       )}

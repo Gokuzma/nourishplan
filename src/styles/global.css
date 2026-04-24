@@ -641,21 +641,38 @@
 }
 .slot.empty::before { content: "+ "; color: var(--tomato); }
 
-/* Budget strip — ticket stub */
+/* Budget strip — ticket stub. 2x2 on mobile, 4-col on tablet+. */
 .budget-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   border-top: 2px solid var(--rule-c);
   border-bottom: 2px solid var(--rule-c);
   background: var(--paper-2);
-  background-image: repeating-linear-gradient(90deg, transparent 0 120px, var(--rule-soft) 120px 121px);
   position: relative;
 }
-.budget-strip > div {
-  padding: 16px 20px;
-  border-right: 1px dashed var(--rule-soft);
+@media (min-width: 640px) {
+  .budget-strip {
+    grid-template-columns: repeat(4, 1fr);
+    background-image: repeating-linear-gradient(90deg, transparent 0 120px, var(--rule-soft) 120px 121px);
+  }
 }
-.budget-strip > div:last-child { border-right: 0; }
+.budget-strip > div {
+  padding: 14px 16px;
+  border-right: 1px dashed var(--rule-soft);
+  border-bottom: 1px dashed var(--rule-soft);
+  min-width: 0;
+}
+.budget-strip > div:nth-child(2n) { border-right: 0; }
+.budget-strip > div:nth-last-child(-n+2) { border-bottom: 0; }
+@media (min-width: 640px) {
+  .budget-strip > div {
+    padding: 16px 20px;
+    border-right: 1px dashed var(--rule-soft);
+    border-bottom: 0;
+  }
+  .budget-strip > div:nth-child(2n) { border-right: 1px dashed var(--rule-soft); }
+  .budget-strip > div:last-child { border-right: 0; }
+}
 .budget-strip .blabel {
   font-family: var(--font-mono);
   font-size: 9px;
@@ -666,17 +683,28 @@
 .budget-strip .bnum {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 32px;
+  font-size: 24px;
   line-height: 1;
   color: var(--ink);
   margin-top: 8px;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (min-width: 640px) {
+  .budget-strip .bnum { font-size: 32px; }
 }
 .budget-strip .bnum .of {
   font-family: var(--font-mono);
   font-style: normal;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 11px;
+  display: block;
+  margin-top: 2px;
+}
+@media (min-width: 640px) {
+  .budget-strip .bnum .of { display: inline; font-size: 14px; margin-top: 0; }
 }
 .budget-strip .bnum.accent { color: var(--tomato); }
 .budget-strip .bnum.chart { color: var(--chartreuse); }

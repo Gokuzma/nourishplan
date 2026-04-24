@@ -25,7 +25,8 @@ import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutritio
 import { computeSwapSuggestions } from '../../utils/swapSuggestions'
 import { LogMealModal } from '../log/LogMealModal'
 import { DayCard } from './DayCard'
-import { DayCarousel } from './DayCarousel'
+import { DayPills } from './DayPills'
+import { DesktopPlanGrid } from './DesktopPlanGrid'
 import { SlotCard } from './SlotCard'
 import { SlotShimmer } from './SlotShimmer'
 import { GeneratePlanButton } from './GeneratePlanButton'
@@ -45,6 +46,30 @@ import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
 import type { SwapSuggestion } from './NutritionGapCard'
 
 const DAY_COUNT = 7
+
+function todayString(): string {
+  const now = new Date()
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`
+}
+
+function weekOfYear(dateStr: string): number {
+  const d = new Date(dateStr + 'T00:00:00Z')
+  const startOfYear = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  const days = Math.floor((d.getTime() - startOfYear.getTime()) / 86400000)
+  return Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
+}
+
+function shortWeekRange(weekStart: string): string {
+  const start = new Date(weekStart + 'T00:00:00Z')
+  const end = new Date(weekStart + 'T00:00:00Z')
+  end.setUTCDate(start.getUTCDate() + 6)
+  const startMonth = start.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
+  const endMonth = end.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
+  if (startMonth === endMonth) {
+    return `${startMonth} ${start.getUTCDate()}—${end.getUTCDate()}`
+  }
+  return `${startMonth} ${start.getUTCDate()} — ${endMonth} ${end.getUTCDate()}`
+}
 
 interface MealPickerProps {
   meals: Meal[]
@@ -652,50 +677,24 @@ export function PlanGrid({
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {/* Mobile: horizontal carousel with scroll-snap */}
+        {/* MOBILE — day-pill scrubber + DayCard for the selected day */}
         <div className="md:hidden">
-          <DayCarousel currentDayIndex={currentDayIndex} onDayChange={setCurrentDayIndex}>
-            {isGenerating
-              ? Array.from({ length: DAY_COUNT }, (_, i) => (
-                <div
-                  key={i}
-                  data-testid={`shimmer-day-${i}`}
-                  className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4"
-                >
-                  {DEFAULT_SLOTS.map(slotName => {
-                    const slot = displaySlots.find(s => s.day_index === i && s.slot_name === slotName)
-                    if (slot?.is_locked && slot.meal_id) {
-                      return (
-                        <SlotCard
-                          key={slotName}
-                          slotName={slotName}
-                          slot={slot}
-                          isLocked
-                          onAssign={() => {}}
-                          onClear={() => {}}
-                          onSwap={() => {}}
-                        />
-                      )
-                    }
-                    return <SlotShimmer key={slotName} />
-                  })}
-                </div>
-              ))
-              : dayCards}
-          </DayCarousel>
-        </div>
-
-        {/* Desktop: scrollable stack */}
-        <div className="hidden md:flex flex-col gap-4">
-          {isGenerating
-            ? Array.from({ length: DAY_COUNT }, (_, i) => (
+          <DayPills
+            weekStart={weekStart}
+            weekStartDay={weekStartDay}
+            todayDateStr={todayString()}
+            currentDayIndex={currentDayIndex}
+            onSelect={setCurrentDayIndex}
+          />
+          <div className="mt-4">
+            {isGenerating ? (
               <div
-                key={i}
-                data-testid={`shimmer-day-${i}-desktop`}
-                className="flex flex-col gap-2 rounded-[--radius-card] border border-accent/30 bg-surface shadow-sm p-4"
+                data-testid={`shimmer-day-${currentDayIndex}`}
+                className="flex flex-col gap-2 p-4 bg-paper-2"
+                style={{ border: '1px solid var(--rule-soft)' }}
               >
                 {DEFAULT_SLOTS.map(slotName => {
-                  const slot = displaySlots.find(s => s.day_index === i && s.slot_name === slotName)
+                  const slot = displaySlots.find(s => s.day_index === currentDayIndex && s.slot_name === slotName)
                   if (slot?.is_locked && slot.meal_id) {
                     return (
                       <SlotCard
@@ -712,13 +711,69 @@ export function PlanGrid({
                   return <SlotShimmer key={slotName} />
                 })}
               </div>
-            ))
-            : dayCards}
+            ) : (
+              dayCards[currentDayIndex]
+            )}
+          </div>
+        </div>
+
+        {/* DESKTOP — 7×4 ruled plan grid */}
+        <div className="hidden md:block">
+          {isGenerating ? (
+            <div
+              className="grid"
+              style={{ gridTemplateColumns: '72px repeat(7, 1fr)', borderTop: '2px solid var(--rule-c)', borderBottom: '2px solid var(--rule-c)' }}
+            >
+              {Array.from({ length: 8 }, (_, i) => (
+                <div
+                  key={`gh-${i}`}
+                  className="ghead"
+                  data-testid={`shimmer-day-${Math.max(0, i - 1)}-desktop`}
+                  style={i === 0 ? { borderRight: '2px solid var(--rule-c)' } : undefined}
+                >
+                  &nbsp;
+                </div>
+              ))}
+              {DEFAULT_SLOTS.map((slotName, mi) => (
+                <>
+                  <div key={`lab-${slotName}`} className="gmeal-label">
+                    <div className="lab">{slotName}</div>
+                  </div>
+                  {Array.from({ length: 7 }, (_, di) => (
+                    <div key={`shim-${mi}-${di}`} className="gcell">
+                      <SlotShimmer />
+                    </div>
+                  ))}
+                </>
+              ))}
+            </div>
+          ) : (
+            <DesktopPlanGrid
+              weekStart={weekStart}
+              weekStartDay={weekStartDay}
+              slotsByDay={slotsByDay}
+              todayDateStr={todayString()}
+              weekNumber={weekOfYear(weekStart)}
+              weekRange={shortWeekRange(weekStart)}
+              slotSchedulesByDay={slotSchedulesByDay}
+              slotTooltipsByDay={slotTooltipsByDay}
+              slotViolationsByDay={slotViolationsByDay}
+              getSlotFreezerFriendly={getSlotFreezerFriendly}
+              pendingDropSlotKey={pendingDropSlotKey}
+              onAssign={(di, sn) => openPicker(di, sn, false)}
+              onSwap={(di, sn) => openPicker(di, sn, true)}
+              onClear={(slotId) => clearSlot.mutate({ slotId, planId })}
+              onToggleLock={handleToggleLock}
+              onDropSwap={executeSwap}
+              onDropReplace={executeReplace}
+              onDropCancel={handleDropCancel}
+            />
+          )}
         </div>
 
         <DragOverlay dropAnimation={{ duration: 200, easing: 'ease-in' }}>
           {activeSlot ? (
-            <div className="shadow-xl scale-105 opacity-95 rounded-lg">
+            <div className="shadow-xl scale-105 opacity-95">
               <SlotCard
                 slotName={activeSlot.slot_name}
                 slot={activeSlot}
