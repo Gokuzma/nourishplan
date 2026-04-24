@@ -2,27 +2,15 @@
 
 ## What This Is
 
-A configurable meal planning platform for households with varying calorie targets, dietary goals, budgets, and schedules. The system collects inputs (preferences, constraints, inventory), generates optimized plans, validates outputs (nutrition, cost, feasibility), learns from feedback, and iterates weekly. Mobile-first PWA with a minimalist pastel design.
+A constraint-solving meal planning platform for multi-member households. Users configure budgets, inventory, schedules, dietary restrictions, and portion targets per household member; the system generates weekly meal plans optimised against all of those axes, auto-aggregates grocery lists that subtract pantry inventory, tracks cooking → inventory deduction + spend in real time, and supports granular admin/member role management. Mobile-first PWA with a minimalist pastel design, deployed at `nourishplan.gregok.ca`.
 
 ## Core Value
 
 Families can plan meals that optimize nutrition, cost, time, and satisfaction for every household member under real-world constraints.
 
-## Current Milestone: v2.0 Adaptive Meal Planning System (AMPS)
+## Current Milestone: (planning next)
 
-**Goal:** Transform NourishPlan from a meal tracking app into a constraint-solving meal planning platform that optimizes nutrition, cost, time, and satisfaction for multi-user households.
-
-**Target features:**
-- Budget Engine — cost per recipe/serving, weekly budget tracking and optimization
-- Inventory Engine — pantry/fridge/freezer tracking with expiry priority, influences recipe selection
-- Grocery Aggregation — auto-generated grocery lists from meal plans, categorized, flags existing inventory
-- Prep Optimization — prep schedules, task sequencing, batch efficiency, equipment usage
-- Schedule Model — work schedules, eating patterns, prep availability as planning constraints
-- Feedback & Learning — recipe ratings, satiety tracking, repeat rate, adaptive future plans
-- Constraint-based Planning Engine — weekly plan generation optimized against all constraints
-- Dynamic Portioning — advanced portioning models beyond current suggestions
-- Drag-and-drop Planner — UX upgrade for meal plan editing
-- Child/selective eater support — expanded dietary accommodation
+v2.0 AMPS shipped 2026-04-24. Next milestone to be defined via `/gsd-new-milestone`.
 
 ## Requirements
 
@@ -40,29 +28,39 @@ Families can plan meals that optimize nutrition, cost, time, and satisfaction fo
 - ✓ Daily nutrition summary per person (calories, macros, micros, custom goals) — v1.0
 - ✓ Mobile-first responsive PWA design — v1.0
 - ✓ Minimalist UI with pastel colour scheme and dark mode — v1.1
+- ✓ Budget tracking — cost per recipe, weekly budget, cost per serving — v2.0
+- ✓ Inventory management — pantry/fridge/freezer with quantities, expiry priority, barcode scanning — v2.0
+- ✓ Grocery list generation — auto-aggregated from meal plan, categorised, subtracts inventory, household-shared with realtime sync — v2.0
+- ✓ Prep optimization — batch prep summary, day-of sequencing, freezer-friendly flagging — v2.0
+- ✓ Schedule-aware planning — per-member availability windows as planning constraints — v2.0
+- ✓ Feedback & learning — recipe ratings, dietary restrictions, won't-eat tags, monotony warnings — v2.0
+- ✓ Constraint-based planning engine — async generate-plan edge function with nutrition-gap detection and swap suggestions — v2.0
+- ✓ Drag-and-drop meal planner — dnd-kit desktop + mobile with lock-badge — v2.0
+- ✓ Tier-aware recipe selection (RecipeMixPanel) — v2.0 (D-02 pivot: replaced dynamic portioning with recipe tier weighting; portions remain calorie-target-driven)
+- ✓ Universal recipe import — paste URL (blog or YouTube) or raw text → AI-extracted recipe — v2.0
+- ✓ Cook Mode → inventory deduction + spend log + leftover save prompt — v2.0 (Phase 26 wiring)
+- ✓ Schedule badges on PlanGrid (peach=consume, amber=quick, red=away) — v2.0 (Phase 27 wiring)
+- ✓ Granular household permissions — admin/member roles with promotion, demotion, remove, self-leave, invite-time role selection, DB-enforced last-admin protection — v2.0 (Phase 30)
 
 ### Active
 
-- [ ] Budget tracking — cost per recipe, weekly budget, cost per serving
-- [ ] Inventory management — pantry/fridge/freezer with quantities and expiry priority
-- [ ] Grocery list generation — auto-aggregated from meal plan, categorized, flags existing inventory
-- [ ] Prep optimization — prep schedules, task sequencing, batch efficiency
-- [ ] Schedule-aware planning — work schedules, eating patterns, prep availability as constraints
-- [ ] Feedback & learning — recipe ratings, satiety, repeat rate, adaptive plan generation
-- [ ] Constraint-based planning engine — generate plans optimized for nutrition + cost + time + satisfaction
-- [ ] Dynamic portioning models — advanced per-person portion optimization
-- [ ] Drag-and-drop meal planner — UX upgrade for plan editing
-- [ ] Child/selective eater support — expanded dietary accommodation
+(None — next milestone pending.)
 
 ### Out of Scope
 
 - Native iOS/Android apps — mobile-first web (PWA) is sufficient
 - Social/public recipe sharing — household-only; public content creates moderation burden
-- Barcode scanning — deferred to future
-- AI-driven optimization — requires preference signal accumulation; not useful on day one
-- Cost-aware ingredient substitutions — future enhancement after budget engine is stable
-- Smart prep automation — future enhancement after prep optimization is stable
-- Learning system personalization — future enhancement after feedback engine has data
+- Real-time collaborative editing — last-write-wins is sufficient; families rarely edit simultaneously
+- TDEE auto-calculation — users set their own targets; avoids liability and misinterpretation
+- Weight/body tracking — outside core value
+- AI-driven adaptive optimization — requires accumulated feedback signal; deferred to v3+
+- Grocery delivery integration — external API dependency; out of scope for self-hosted PWA
+- Grocery price API — recipe costs are user-entered; no real-time price feeds in v2.0
+- Receipt scanning — complex OCR; barcode scanning covers the inventory entry use case
+- Cost-aware ingredient substitutions — future enhancement after budget engine validates usage
+- Smart prep automation — future enhancement after prep optimization validates usage
+- Tier-based role hierarchy (admin / editor / viewer) — binary admin/member proved sufficient for 2–5-person families; per-feature capability scopes deferred
+- Audit log / notifications for role changes — families are small; query-refetch gives visibility; no notification infrastructure
 
 ## Context
 
@@ -71,27 +69,37 @@ Families can plan meals that optimize nutrition, cost, time, and satisfaction fo
 - The food hierarchy (Foods → Recipes → Meals → Meal Plans) is the core data model that everything else builds on
 - USDA FoodData Central + Canadian Nutrient File are the food data sources
 - PWA deployed at nourishplan.gregok.ca via Vercel with Supabase backend
-- v1.0 and v1.1 complete — 15 phases shipped, 66 requirements fulfilled
-- v2.0 transforms this from a tracking app into a constraint-solving planning platform
+- v1.0 (7 phases) → v1.1 (8 phases) → v2.0 (15 phases) shipped — 30 total phases, ~110 requirements fulfilled
+- **Current codebase (post v2.0):** ~24,500 LOC TypeScript across `src/`; 30 Supabase migrations; Vite 8 + React 19 + Supabase + TanStack Query + Tailwind CSS 4 + dnd-kit; PWA via vite-plugin-pwa/workbox; Playwright E2E infrastructure introduced in Phase 30
 - The system is NOT a recipe app — it is a constraint solver optimizing nutrition, cost, time, and satisfaction
+- Known tech debt carrying into next milestone: 22 deferred live-browser UATs (DnD gestures, touch drag, schedule grid picker, recipe-mix sliders, Cook Mode reconciliation live demo); IMPORT-03 YouTube transcript success rate unmeasured; 4 phases (27, 28, 29, 30) without VALIDATION.md (Nyquist sampling not enforced mid-milestone)
 
 ## Constraints
 
-- **Tech stack**: Vite + React 19 + Supabase + TanStack Query + Tailwind CSS 4 (established)
+- **Tech stack**: Vite 8 + React 19 + Supabase + TanStack Query + Tailwind CSS 4 (established)
 - **Data source**: USDA FoodData Central + Canadian Nutrient File
 - **Design**: Minimalist, pastel colours, mobile-first responsive, dark mode supported
 - **Platform**: Web-based PWA, no native mobile apps
-- **Budget data**: Recipe cost estimates are user-entered (no real-time grocery price API in MVP)
-- **Inventory**: Manual entry — no barcode scanning or receipt parsing in MVP
+- **Budget data**: Recipe cost estimates are user-entered (no real-time grocery price API)
+- **Inventory**: Manual entry + barcode scanning (OFF API) — no receipt parsing
+- **AI import**: URL import has bot-block fallback to paste-text; YouTube transcripts can fall through to D-10 fallback when captions are missing
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Household-only sharing (no public) | Keeps v1 focused on the core family use case | — Pending |
-| Full food hierarchy from day one | Core data model — retrofitting would be painful | — Pending |
-| USDA + manual entry for nutrition data | USDA is free and comprehensive; manual covers custom/local foods | — Pending |
-| Mobile-first PWA over native apps | Faster to ship, no app store gatekeeping, still installable | — Pending |
+| Household-only sharing (no public) | Keeps focus on the core family use case | ✓ Good — validated across v1+v2 |
+| Full food hierarchy from day one | Core data model — retrofitting would be painful | ✓ Good — all v2.0 features build on it cleanly |
+| USDA + CNF + manual entry for nutrition data | Free, comprehensive; manual covers custom/local foods | ✓ Good — imported recipes slot in via same shape |
+| Mobile-first PWA over native apps | Faster to ship, no app store gatekeeping, still installable | ✓ Good — PWA install works on iOS + Android |
+| Centralised queryKeys.ts (Phase 16) | Prevents cache incoherence as hook count grew | ✓ Good — every v2.0 feature uses it, zero cache bugs |
+| Ledger-based inventory with FIFO deduct (Phase 17) | Matches real-world pantry rotation; supports leftovers + expiry | ✓ Good — Phase 26 wired Cook Mode into it cleanly |
+| Async plan generation via edge function (Phase 22) | UI returns immediately; long-running optimisation stays server-side | ✓ Good — works under real DB latency |
+| D-02 pivot: tier-aware recipe selection instead of dynamic portioning (Phase 24) | Shipped value is recipe-mix tiers, not satiety-based portion-size adaptation; portions stay calorie-target-driven (PORT-01) | ✓ Good — simpler to reason about; RecipeMixPanel adopted |
+| Binary admin/member roles, no tier hierarchy (Phase 30) | 2–5-person families don't need editor/viewer; reuses 17 existing admin RLS policies unchanged | ✓ Good — Playwright E2E proves promoted-admin equivalence |
+| Last-admin protection at DB trigger level, not just RPC (Phase 30) | Any future code path that bypasses the RPC still can't brick a household | ✓ Good — "At least one admin required" enforced DB-side |
+| Function-based unique indexes require manual upsert pattern (L-032) | `onConflict` PostgREST targets must match plain column lists; function indexes like `coalesce(member_user_id, member_profile_id)` cannot be targeted by column name | ⚠️ Revisit — scan remaining upsert call sites for similar mismatches |
+| Retrospective VERIFICATION.md for skipped phases (Phase 29) | Treat docs as artifacts like code — reconcile during milestone close, not lose state | ✓ Good — audit-friendly trail |
 
 ## Evolution
 
@@ -111,4 +119,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-15 after Phase 24 (dynamic portioning / tier-aware recipe selection) completion*
+*Last updated: 2026-04-24 after v2.0 AMPS milestone completion (30 phases shipped across v1.0 + v1.1 + v2.0)*
