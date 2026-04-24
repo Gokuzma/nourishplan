@@ -74,6 +74,7 @@ completed: 2026-04-24
 1. **Task 1: Install Playwright + scaffold playwright.config.ts + add Vitest exclusion** — `168e0b0` (chore)
 2. **Task 2: Create tests/e2e/helpers/login.ts reusable login fn** — `1a31549` (feat)
 3. **Task 3 (script artifact only): scripts/seed-test-member.ts authored** — `2fc3191` (feat) — execution gated on human key-paste, checkpoint returned
+4. **Task 3 execution (post-merge, orchestrator 2026-04-23):** user pasted `SUPABASE_SERVICE_ROLE_KEY` into `.env.local`; `npx -y tsx scripts/seed-test-member.ts` exited 0 with output `Created user claude-test-member@nourishplan.test (id=b280c90e-b9af-4cd0-858d-9f2a49c5ce53)` + `UPSERTed profiles.display_name for 2 accounts` + `Wrote CLAUDE_TEST_MEMBER_PASSWORD to .env.local`. Auth smoke test via `/auth/v1/token?grant_type=password` returned a valid JWT access_token for the new account. Test-account memory file (`reference_test_account.md`) updated with the new member credentials block.
 
 **Plan metadata commit:** (this SUMMARY.md commit hash — appended after write)
 

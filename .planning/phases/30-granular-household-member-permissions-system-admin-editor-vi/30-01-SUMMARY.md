@@ -34,7 +34,7 @@ decisions:
   - Live RPC smoke test deferred to Plan 07 Playwright spec (service role key not available at Wave 1 per checker W-12)
 metrics:
   duration_minutes: 3
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   completed_date: 2026-04-24
 ---
@@ -152,7 +152,7 @@ None. All work committed is production-bound — migration is an executable SQL 
 |------|--------|-------|-------------|
 | 1 | `49359ea` | supabase/migrations/031_household_permissions.sql | Migration: column + trigger + 3 RPCs + RLS policies |
 | 2 | `4f1c5d0` | src/types/database.ts | HouseholdInvite.role + Insert helper |
-| 3 | — (blocking checkpoint) | — | `supabase db push` — human-verify gate |
+| 3 | (orchestrator, post-merge 2026-04-23) | — | `npx supabase db push` applied migration 031; `npx supabase migration list` confirms `031 | 031 | 031` (Local/Remote/Time match) |
 
 ## Self-Check: PASSED
 
