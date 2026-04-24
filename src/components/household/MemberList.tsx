@@ -1,21 +1,26 @@
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
+import {
+  useHouseholdMembers,
+  useMemberProfiles,
+  useHousehold,
+  useChangeMemberRole,
+  useRemoveHouseholdMember,
+  useLeaveHousehold,
+} from '../../hooks/useHousehold'
 import { useAuth } from '../../hooks/useAuth'
+import { RoleBadge } from './RoleBadge'
+import { ConfirmDialog } from './ConfirmDialog'
+import { MemberActionMenu, type MemberActionMenuItemProps } from './MemberActionMenu'
 
-function RoleBadge({ role }: { role: 'admin' | 'member' }) {
-  const isAdmin = role === 'admin'
-  return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-        isAdmin
-          ? 'bg-primary/20 text-primary'
-          : 'bg-secondary text-text/60'
-      }`}
-    >
-      {isAdmin ? 'Admin' : 'Member'}
-    </span>
-  )
-}
+const LAST_ADMIN_TOOLTIP = 'Promote another member to admin first.'
+
+type PendingAction =
+  | { kind: 'promote'; memberRowId: string; displayName: string }
+  | { kind: 'demote-other'; memberRowId: string; displayName: string }
+  | { kind: 'demote-self'; memberRowId: string }
+  | { kind: 'remove'; memberRowId: string; displayName: string }
+  | { kind: 'leave' }
 
 export function MemberList() {
   const { session } = useAuth()
