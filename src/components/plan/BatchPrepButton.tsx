@@ -24,7 +24,8 @@ export function BatchPrepButton({ onClick, disabled, isLoading }: BatchPrepButto
       aria-disabled={disabled || isLoading}
       aria-label="View batch prep summary for this week's plan"
       title={disabled ? 'Generate a plan first' : undefined}
-      className="bg-secondary border border-primary/30 text-primary rounded-[--radius-btn] px-4 py-2.5 text-sm font-semibold flex items-center justify-center gap-2 w-full sm:w-[180px] disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary/50 transition-colors font-sans"
+      className="btn"
+      style={{ minWidth: 180, color: 'var(--tomato)' }}
     >
       {isLoading ? (
         <>

@@ -46,16 +46,10 @@ export function TemplateManager({ planId }: TemplateManagerProps) {
   return (
     <>
       <div className="flex items-center gap-2 mb-4">
-        <button
-          onClick={() => setShowSaveModal(true)}
-          className="rounded-[--radius-btn] border border-accent/40 bg-surface px-3 py-1.5 text-xs font-medium text-text/70 hover:text-text hover:border-accent transition-colors"
-        >
+        <button type="button" onClick={() => setShowSaveModal(true)} className="btn btn-sm">
           Save as template
         </button>
-        <button
-          onClick={() => setShowLoadModal(true)}
-          className="rounded-[--radius-btn] border border-accent/40 bg-surface px-3 py-1.5 text-xs font-medium text-text/70 hover:text-text hover:border-accent transition-colors"
-        >
+        <button type="button" onClick={() => setShowLoadModal(true)} className="btn btn-sm">
           Load template
         </button>
       </div>

@@ -29,7 +29,8 @@ export function GeneratePlanButton({ onGenerate, isGenerating, isComplete }: Gen
       disabled={isGenerating}
       aria-busy={isGenerating}
       aria-label="Generate weekly meal plan"
-      className="w-full sm:w-[180px] bg-primary text-white rounded-[--radius-btn] px-4 py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition-opacity"
+      className="btn btn-primary"
+      style={{ minWidth: 180 }}
     >
       {isGenerating && (
         <svg

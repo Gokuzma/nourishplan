@@ -547,7 +547,7 @@
 /* Planner grid — ruled + hand-numbered */
 .plan-grid {
   display: grid;
-  grid-template-columns: 72px repeat(7, 1fr);
+  grid-template-columns: 88px repeat(7, 1fr);
   border-top: 2px solid var(--rule-c);
   border-bottom: 2px solid var(--rule-c);
   background: var(--paper);
@@ -598,9 +598,12 @@
 .plan-grid .gmeal-label .lab {
   font-family: var(--font-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .plan-grid .gcell {
   border-right: 1px solid var(--rule-soft);
@@ -653,7 +656,6 @@
 @media (min-width: 640px) {
   .budget-strip {
     grid-template-columns: repeat(4, 1fr);
-    background-image: repeating-linear-gradient(90deg, transparent 0 120px, var(--rule-soft) 120px 121px);
   }
 }
 .budget-strip > div {
