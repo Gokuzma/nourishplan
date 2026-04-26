@@ -116,83 +116,96 @@ export function QuickScanMode({ isOpen, onClose }: QuickScanModeProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black" role="dialog" aria-modal="true" aria-label="Quick scan mode">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-black">
-        <div>
-          <span className="text-white font-medium">Quick Scan</span>
-          {scannedItems.length > 0 && (
-            <span className="ml-2 text-white/60 text-sm">
-              Scanned: {scannedItems.reduce((sum, e) => sum + e.count, 0)} items
-            </span>
-          )}
-        </div>
-        <button
-          onClick={onClose}
-          className="bg-primary text-white px-4 py-1.5 rounded-[--radius-btn] text-sm font-medium"
-        >
-          Done
-        </button>
-      </div>
+    <>
+      <div
+        className="fixed inset-0 bg-black/60 z-50"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Quick scan mode"
+      >
+        <div className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-secondary">
+            <div>
+              <span className="text-text font-medium">Quick scan</span>
+              {scannedItems.length > 0 && (
+                <span className="ml-2 text-text/50 text-sm">
+                  {scannedItems.reduce((sum, e) => sum + e.count, 0)} added
+                </span>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="bg-primary text-white px-4 py-1.5 rounded-[--radius-btn] text-sm font-medium"
+            >
+              Done
+            </button>
+          </div>
 
-      {/* Camera viewfinder — top half */}
-      <div className="flex-none h-1/2 relative bg-black flex items-center justify-center">
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          playsInline
-          muted
-        />
-        {/* Corner guides */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="relative w-48 h-48">
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary animate-pulse" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary animate-pulse" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary animate-pulse" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary animate-pulse" />
-          </div>
-        </div>
-        {isLookingUp && (
-          <div className="absolute bottom-2 inset-x-0 text-center">
-            <span className="text-white/80 text-sm">Looking up item…</span>
-          </div>
-        )}
-      </div>
-
-      {/* Scanned items list — bottom half */}
-      <div className="flex-1 bg-surface overflow-y-auto">
-        {scannedItems.length === 0 ? (
-          <div className="flex items-center justify-center h-full px-4">
-            <p className="text-text/50 text-sm text-center">
-              Point your camera at barcodes. Items will be added automatically.
-            </p>
-          </div>
-        ) : (
-          <ul className="divide-y divide-secondary">
-            {scannedItems.map(entry => (
-              <li key={entry.barcode} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text truncate">
-                    {entry.product?.food_name || entry.barcode}
-                  </p>
-                  {entry.product?.brand && (
-                    <p className="text-xs text-text/50">{entry.product.brand}</p>
-                  )}
-                  {!entry.product?.food_name && (
-                    <p className="text-xs text-text/50">Barcode: {entry.barcode}</p>
-                  )}
+          {/* Camera viewfinder */}
+          <div className="px-4 pt-4">
+            <div className="relative w-full aspect-video bg-black rounded overflow-hidden">
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                playsInline
+                muted
+              />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="relative w-32 h-32">
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary animate-pulse" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary animate-pulse" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary animate-pulse" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary animate-pulse" />
                 </div>
-                {entry.count > 1 && (
-                  <span className="flex-none bg-primary/20 text-primary text-xs font-medium px-2 py-0.5 rounded-full">
-                    ×{entry.count}
-                  </span>
-                )}
-                <span className="flex-none text-xs text-green-600">Added</span>
-              </li>
-            ))}
-          </ul>
-        )}
+              </div>
+              {isLookingUp && (
+                <div className="absolute bottom-2 inset-x-0 text-center">
+                  <span className="text-white/80 text-sm bg-black/60 px-2 py-0.5 rounded">Looking up item…</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Scanned items list */}
+          <div className="flex-1 overflow-y-auto px-4 py-3">
+            {scannedItems.length === 0 ? (
+              <p className="text-text/50 text-sm text-center py-6">
+                Point your camera at barcodes. Items will be added automatically.
+              </p>
+            ) : (
+              <ul className="divide-y divide-secondary">
+                {scannedItems.map(entry => (
+                  <li key={entry.barcode} className="flex items-center gap-3 py-2.5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text truncate">
+                        {entry.product?.food_name || entry.barcode}
+                      </p>
+                      {entry.product?.brand && (
+                        <p className="text-xs text-text/50">{entry.product.brand}</p>
+                      )}
+                      {!entry.product?.food_name && (
+                        <p className="text-xs text-text/50">Barcode: {entry.barcode}</p>
+                      )}
+                    </div>
+                    {entry.count > 1 && (
+                      <span className="flex-none bg-primary/20 text-primary text-xs font-medium px-2 py-0.5 rounded-full">
+                        ×{entry.count}
+                      </span>
+                    )}
+                    <span className="flex-none text-xs text-primary">Added</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
