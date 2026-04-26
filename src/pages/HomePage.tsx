@@ -298,15 +298,6 @@ export function HomePage() {
           right="Meal planning for the household"
         />
       </div>
-      <div className="md:hidden">
-        <Nameplate
-          left={formatDateShort(selectedDate)}
-          title="The Daily"
-          right={formatDateShort(selectedDate)}
-          size="sm"
-        />
-      </div>
-
       {/* Story head */}
       <StoryHead
         kicker="HOME"

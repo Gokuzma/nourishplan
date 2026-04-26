@@ -119,15 +119,6 @@ export function GroceryPage() {
           right={items.length > 0 ? `${needToBuy.length} items · ${categories.length} aisles` : '—'}
         />
       </div>
-      <div className="md:hidden">
-        <Nameplate
-          left="SHOP"
-          title="The List"
-          right={String(needToBuy.length)}
-          size="sm"
-        />
-      </div>
-
       <StoryHead
         kicker="GROCERY"
         headline="The List"

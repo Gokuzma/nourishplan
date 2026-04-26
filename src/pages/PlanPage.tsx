@@ -169,15 +169,6 @@ export function PlanPage() {
           right={`${filledCount} of 28 slots · ${lockedCount} locked`}
         />
       </div>
-      <div className="md:hidden">
-        <Nameplate
-          left={`WK ${wk}`}
-          title="The Week"
-          right={`${filledCount} · ${lockedCount}L`}
-          size="sm"
-        />
-      </div>
-
       {/* Story head */}
       <StoryHead
         kicker="PLAN"

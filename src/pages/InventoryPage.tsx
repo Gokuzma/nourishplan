@@ -85,15 +85,6 @@ export function InventoryPage() {
           right={`Pantry ${counts.pantry} · Fridge ${counts.fridge} · Freezer ${counts.freezer}`}
         />
       </div>
-      <div className="md:hidden">
-        <Nameplate
-          left="STOCK"
-          title="Pantry"
-          right={String(total)}
-          size="sm"
-        />
-      </div>
-
       {/* Story head */}
       <StoryHead
         kicker="INVENTORY"
