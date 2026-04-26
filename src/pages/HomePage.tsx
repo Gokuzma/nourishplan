@@ -9,7 +9,6 @@ import { MemberSelector } from '../components/plan/MemberSelector'
 import { DailyLogList } from '../components/log/DailyLogList'
 import { NutrientBreakdown } from '../components/log/NutrientBreakdown'
 import { LogMealModal } from '../components/log/LogMealModal'
-import { FoodSearchOverlay } from '../components/food/FoodSearchOverlay'
 import { PortionStepper } from '../components/log/PortionStepper'
 import {
   calcLogEntryNutrition,
@@ -23,7 +22,6 @@ import { getUnloggedSlots } from '../utils/foodLogs'
 import { InventorySummaryWidget } from '../components/inventory/InventorySummaryWidget'
 import { RateMealsCard } from '../components/feedback/RateMealsCard'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule } from '../components/editorial'
-import { Icon } from '../components/Icon'
 import type { FoodLog } from '../types/database'
 import type { SlotWithMeal } from '../hooks/useMealPlan'
 
@@ -204,7 +202,6 @@ export function HomePage() {
 
   const [logMealSlot, setLogMealSlot] = useState<SlotWithMeal | null>(null)
   const [editLog, setEditLog] = useState<FoodLog | null>(null)
-  const [searchOverlayOpen, setSearchOverlayOpen] = useState(false)
   const [showMicroDetail, setShowMicroDetail] = useState(false)
 
   const weekStart = getWeekStart(new Date(`${selectedDate}T00:00:00Z`), weekStartDay)
@@ -394,30 +391,15 @@ export function HomePage() {
             )}
           </div>
 
-          {/* COL 2 — Log + journal */}
+          {/* COL 2 — Journal */}
           <div style={{ borderLeft: '1px solid var(--rule-soft)', borderRight: '1px solid var(--rule-soft)', paddingLeft: 24, paddingRight: 24 }}>
-            <SectionHead label="Log a bite" aux={isOnline ? '' : 'OFFLINE'} />
-            <button
-              type="button"
-              onClick={() => setSearchOverlayOpen(true)}
-              disabled={!isOnline}
-              className="search"
-              style={{ marginTop: 8, width: '100%', cursor: isOnline ? 'pointer' : 'not-allowed', opacity: isOnline ? 1 : 0.5 }}
-              aria-label="Search foods to log"
-            >
-              <Icon name="search" size={18} />
-              <span className="serif-italic" style={{ fontSize: 16, color: 'var(--ink-soft)', flex: 1, textAlign: 'left' }}>
-                What have you eaten?
-              </span>
-              <span className="mono" style={{ fontSize: 9, color: 'var(--ink-soft)', letterSpacing: '0.14em' }}>USDA · MINE</span>
-            </button>
             {unloggedSlots.length > 0 && (
               <button
                 type="button"
                 onClick={handleLogAll}
                 disabled={!isOnline || bulkInsert.isPending}
                 className="btn btn-sm"
-                style={{ marginTop: 12, color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
+                style={{ marginBottom: 12, color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
               >
                 {bulkInsert.isPending ? 'Logging…' : `Log all planned (${unloggedSlots.length})`}
               </button>
@@ -488,27 +470,13 @@ export function HomePage() {
           </div>
           <Rule />
 
-          <SectionHead label="Log a bite" aux={isOnline ? '' : 'OFFLINE'} />
-          <button
-            type="button"
-            onClick={() => setSearchOverlayOpen(true)}
-            disabled={!isOnline}
-            className="search"
-            style={{ marginTop: 8, width: '100%', cursor: isOnline ? 'pointer' : 'not-allowed', opacity: isOnline ? 1 : 0.5 }}
-            aria-label="Search foods to log"
-          >
-            <Icon name="search" size={18} />
-            <span className="serif-italic" style={{ fontSize: 16, color: 'var(--ink-soft)', flex: 1, textAlign: 'left' }}>
-              What have you eaten?
-            </span>
-          </button>
           {unloggedSlots.length > 0 && (
             <button
               type="button"
               onClick={handleLogAll}
               disabled={!isOnline || bulkInsert.isPending}
               className="btn btn-sm"
-              style={{ marginTop: 12, color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
+              style={{ marginTop: 12, marginBottom: 12, color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
             >
               {bulkInsert.isPending ? 'Logging…' : `Log all planned (${unloggedSlots.length})`}
             </button>
@@ -599,16 +567,6 @@ export function HomePage() {
           logDate={selectedDate}
           memberId={selectedMemberId}
           memberType={selectedMemberType}
-        />
-      )}
-
-      {searchOverlayOpen && (
-        <FoodSearchOverlay
-          mode="log"
-          logDate={selectedDate}
-          memberId={selectedMemberId}
-          memberType={selectedMemberType}
-          onClose={() => setSearchOverlayOpen(false)}
         />
       )}
 
