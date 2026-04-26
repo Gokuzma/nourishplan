@@ -341,7 +341,6 @@ export function HomePage() {
           {/* COL 1 — Nutrition lead */}
           <div>
             <SectionHead
-              no="01"
               label="Nutrition"
               aux={calPct != null ? `${calPct}% to target` : 'no target set'}
             />
@@ -397,7 +396,7 @@ export function HomePage() {
 
           {/* COL 2 — Log + journal */}
           <div style={{ borderLeft: '1px solid var(--rule-soft)', borderRight: '1px solid var(--rule-soft)', paddingLeft: 24, paddingRight: 24 }}>
-            <SectionHead no="02" label="Log a bite" aux={isOnline ? '' : 'OFFLINE'} />
+            <SectionHead label="Log a bite" aux={isOnline ? '' : 'OFFLINE'} />
             <button
               type="button"
               onClick={() => setSearchOverlayOpen(true)}
@@ -424,7 +423,7 @@ export function HomePage() {
               </button>
             )}
 
-            <SectionHead no="03" label="Today's journal" aux={`${logs.length} ${logs.length === 1 ? 'entry' : 'entries'}`} />
+            <SectionHead label="Today's journal" aux={`${logs.length} ${logs.length === 1 ? 'entry' : 'entries'}`} />
             <Rule />
             <div className="py-2">
               <DailyLogList
@@ -446,7 +445,7 @@ export function HomePage() {
           <div>
             {tonightSlot && (
               <>
-                <SectionHead no="04" label="Tonight" aux={tonightSlot.slot_name.toUpperCase()} />
+                <SectionHead label="Tonight" aux={tonightSlot.slot_name.toUpperCase()} />
                 <Rule />
                 <div className="py-3">
                   <div className="eyebrow" style={{ marginBottom: 6 }}>{tonightSlot.is_locked ? 'Locked in —' : 'Planned —'}</div>
@@ -462,7 +461,7 @@ export function HomePage() {
               </>
             )}
 
-            <SectionHead no={tonightSlot ? '05' : '04'} label="Inventory pulse" />
+            <SectionHead label="Inventory pulse" />
             <Rule />
             <div className="py-2">
               <InventorySummaryWidget />
@@ -477,7 +476,6 @@ export function HomePage() {
         {/* MOBILE — single stack */}
         <div className="md:hidden">
           <SectionHead
-            no="01"
             label="Nutrition"
             aux={calPct != null ? `${calPct}% to target` : ''}
           />
@@ -490,7 +488,7 @@ export function HomePage() {
           </div>
           <Rule />
 
-          <SectionHead no="02" label="Log a bite" aux={isOnline ? '' : 'OFFLINE'} />
+          <SectionHead label="Log a bite" aux={isOnline ? '' : 'OFFLINE'} />
           <button
             type="button"
             onClick={() => setSearchOverlayOpen(true)}
@@ -516,7 +514,7 @@ export function HomePage() {
             </button>
           )}
 
-          <SectionHead no="03" label="Today's journal" aux={`${logs.length}`} />
+          <SectionHead label="Today's journal" aux={`${logs.length}`} />
           <Rule />
           <div className="py-2">
             <DailyLogList
@@ -530,7 +528,7 @@ export function HomePage() {
 
           {tonightSlot && (
             <>
-              <SectionHead no="04" label="Tonight" aux={tonightSlot.slot_name.toUpperCase()} />
+              <SectionHead label="Tonight" aux={tonightSlot.slot_name.toUpperCase()} />
               <Rule />
               <div className="py-3">
                 <div className="serif" style={{ fontSize: 22, lineHeight: 1.05 }}>
@@ -540,7 +538,7 @@ export function HomePage() {
             </>
           )}
 
-          <SectionHead no={tonightSlot ? '05' : '04'} label="Inventory pulse" />
+          <SectionHead label="Inventory pulse" />
           <Rule />
           <div className="py-2">
             <InventorySummaryWidget />

@@ -56,7 +56,7 @@ export function StoryHead({ kicker, headline, headlineAccent, byline, size = 'lg
 }
 
 interface SectionHeadProps {
-  no: string
+  no?: string
   label: string
   aux?: string
   className?: string
@@ -65,7 +65,7 @@ interface SectionHeadProps {
 export function SectionHead({ no, label, aux, className }: SectionHeadProps) {
   return (
     <div className={`section-head ${className ?? ''}`}>
-      <span className="no">{no}</span>
+      {no && <span className="no">{no}</span>}
       <span className="label">{label}</span>
       {aux && <span className="aux">{aux}</span>}
     </div>
