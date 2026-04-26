@@ -70,9 +70,8 @@
     </style>
 
     <script>
-      const stored = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
+      // Cookbook palette is canonical; force light until a deliberate dark theme exists.
+      document.documentElement.classList.remove('dark');
     </script>
   </head>
   <body>
