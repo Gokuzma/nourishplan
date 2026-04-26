@@ -13,20 +13,19 @@ interface NavItem {
 const NAV_DAILY: NavItem[] = [
   { label: 'Home', to: '/', icon: 'home', num: '01' },
   { label: 'Recipes', to: '/recipes', icon: 'book', num: '02' },
-  { label: 'Meals', to: '/meals', icon: 'plate', num: '03' },
 ]
 
 const NAV_WORKBENCH: NavItem[] = [
-  { label: 'Plan', to: '/plan', icon: 'calendar', num: '04' },
-  { label: 'Inventory', to: '/inventory', icon: 'box', num: '05' },
-  { label: 'Grocery', to: '/grocery', icon: 'cart', num: '06' },
+  { label: 'Plan', to: '/plan', icon: 'calendar', num: '03' },
+  { label: 'Inventory', to: '/inventory', icon: 'box', num: '04' },
+  { label: 'Grocery', to: '/grocery', icon: 'cart', num: '05' },
 ]
 
 const NAV_LEDGER: NavItem[] = [
-  { label: 'Insights', to: '/insights', icon: 'chart', num: '07' },
-  { label: 'Household', to: '/household', icon: 'users', num: '08' },
-  { label: 'Settings', to: '/settings', icon: 'gear', num: '09' },
-  { label: 'User Guide', to: '/guide', icon: 'compass', num: '10' },
+  { label: 'Insights', to: '/insights', icon: 'chart', num: '06' },
+  { label: 'Household', to: '/household', icon: 'users', num: '07' },
+  { label: 'Settings', to: '/settings', icon: 'gear', num: '08' },
+  { label: 'User Guide', to: '/guide', icon: 'compass', num: '09' },
 ]
 
 function NavGroup({ label, items }: { label: string; items: NavItem[] }) {

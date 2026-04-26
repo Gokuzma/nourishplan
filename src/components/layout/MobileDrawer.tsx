@@ -6,17 +6,15 @@ interface DrawerItem {
   label: string
   to: string
   icon: IconName
-  num: string
 }
 
 const drawerItems: DrawerItem[] = [
-  { label: 'Meals', to: '/meals', icon: 'plate', num: '03' },
-  { label: 'Inventory', to: '/inventory', icon: 'box', num: '05' },
-  { label: 'Grocery', to: '/grocery', icon: 'cart', num: '06' },
-  { label: 'Insights', to: '/insights', icon: 'chart', num: '07' },
-  { label: 'Household', to: '/household', icon: 'users', num: '08' },
-  { label: 'Settings', to: '/settings', icon: 'gear', num: '09' },
-  { label: 'User Guide', to: '/guide', icon: 'compass', num: '10' },
+  { label: 'Inventory', to: '/inventory', icon: 'box' },
+  { label: 'Grocery', to: '/grocery', icon: 'cart' },
+  { label: 'Insights', to: '/insights', icon: 'chart' },
+  { label: 'Household', to: '/household', icon: 'users' },
+  { label: 'Settings', to: '/settings', icon: 'gear' },
+  { label: 'User Guide', to: '/guide', icon: 'compass' },
 ]
 
 interface MobileDrawerProps {
@@ -53,7 +51,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             className="serif-italic mt-1 text-[28px] font-normal leading-[0.9] tracking-[-0.03em] text-[var(--ink)]"
             aria-hidden="true"
           >
-            More<span className="not-italic text-[var(--tomato)]"> ·</span>
+            More
           </div>
           <span className="sr-only">More navigation options</span>
         </div>
@@ -67,7 +65,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               onClick={onClose}
               className={({ isActive }) =>
                 [
-                  'grid grid-cols-[20px_1fr_auto] items-center gap-3 px-[18px] py-[11px] text-[14px]',
+                  'grid grid-cols-[20px_1fr] items-center gap-3 px-[18px] py-[11px] text-[14px]',
                   isActive
                     ? 'bg-[var(--tomato)] text-[var(--on-accent)]'
                     : 'text-[var(--ink)] hover:bg-[rgba(40,34,32,0.04)]',
@@ -76,9 +74,6 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             >
               <Icon name={item.icon} size={18} />
               <span>{item.label}</span>
-              <span className="mono text-[10px] opacity-65" style={{ color: 'inherit' }}>
-                {item.num}
-              </span>
             </NavLink>
           ))}
         </nav>
