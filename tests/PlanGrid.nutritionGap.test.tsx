@@ -116,6 +116,7 @@ vi.mock('../src/hooks/useMeals', () => ({
     isPending: false,
     isError: false,
   })),
+  useGetOrCreateMealForRecipe: vi.fn(() => ({ mutateAsync: vi.fn().mockResolvedValue('meal-id'), isPending: false })),
 }))
 
 vi.mock('../src/hooks/useFoodLogs', () => ({

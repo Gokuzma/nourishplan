@@ -48,7 +48,11 @@ describe('theme', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(true)
   })
 
-  it('toggleTheme function updates localStorage and class', async () => {
+  it('toggleTheme persists the preference but always renders light', async () => {
+    // Cookbook palette is the canonical look — auto-dark was removed because
+    // it produced inconsistent rendering across pages. toggleTheme still
+    // accepts the preference (so SettingsPage UI compiles) but always
+    // strips the .dark class.
     const { toggleTheme } = await import('../src/utils/theme')
 
     document.documentElement.classList.remove('dark')
@@ -56,7 +60,7 @@ describe('theme', () => {
 
     toggleTheme('dark')
     expect(localStorage.getItem('theme')).toBe('dark')
-    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
 
     toggleTheme('light')
     expect(localStorage.getItem('theme')).toBe('light')
