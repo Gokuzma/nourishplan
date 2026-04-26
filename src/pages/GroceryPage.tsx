@@ -6,9 +6,11 @@ import { useGroceryItems } from '../hooks/useGroceryItems'
 import { useGenerateGroceryList } from '../hooks/useGenerateGroceryList'
 import { useToggleGroceryItem } from '../hooks/useToggleGroceryItem'
 import { useAddManualGroceryItem } from '../hooks/useAddManualGroceryItem'
+import { useUpdateGroceryItem, useDeleteGroceryItem } from '../hooks/useUpdateGroceryItem'
 import { useMealPlan } from '../hooks/useMealPlan'
 import { getWeekStart } from '../utils/mealPlan'
 import { formatCost } from '../utils/cost'
+import { STORE_CATEGORIES } from '../utils/groceryGeneration'
 import { ManualAddItemInput } from '../components/grocery/ManualAddItemInput'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule, Chip } from '../components/editorial'
 import { Icon } from '../components/Icon'
@@ -33,11 +35,14 @@ export function GroceryPage() {
   const generateMutation = useGenerateGroceryList()
   const toggleItem = useToggleGroceryItem()
   const addManualItem = useAddManualGroceryItem()
+  const updateItem = useUpdateGroceryItem()
+  const deleteItem = useDeleteGroceryItem()
 
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
   const [collapseHave, setCollapseHave] = useState(true)
   const [undoToast, setUndoToast] = useState<UndoToast | null>(null)
   const [undoTimerId, setUndoTimerId] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const needToBuy = items.filter((i: GroceryItem) => i.notes !== 'inventory-covered')
   const alreadyHave = items.filter((i: GroceryItem) => i.notes === 'inventory-covered')
@@ -223,40 +228,61 @@ export function GroceryPage() {
                       <Rule />
                       {sorted.map(item => {
                         const isDone = item.is_checked
+                        const isEditing = editingId === item.id
                         return (
-                          <div
-                            key={item.id}
-                            className="grid items-baseline"
-                            style={{
-                              gridTemplateColumns: '28px 1fr auto auto',
-                              gap: 14,
-                              padding: '12px 0',
-                              borderBottom: '1px dashed var(--rule-softer)',
-                              opacity: isDone ? 0.45 : 1,
-                              textDecoration: isDone ? 'line-through' : 'none',
-                            }}
-                          >
-                            <button
-                              type="button"
-                              className={`check ${isDone ? 'on' : ''}`}
-                              onClick={() => handleToggle(item.id)}
-                              aria-label={isDone ? `Uncheck ${item.food_name}` : `Check ${item.food_name}`}
-                              aria-pressed={isDone}
+                          <div key={item.id} style={{ borderBottom: '1px dashed var(--rule-softer)' }}>
+                            <div
+                              className="grid items-baseline"
+                              style={{
+                                gridTemplateColumns: '28px 1fr auto auto',
+                                gap: 14,
+                                padding: '12px 0',
+                                opacity: isDone ? 0.45 : 1,
+                                textDecoration: isDone ? 'line-through' : 'none',
+                              }}
                             >
-                              {isDone && <Icon name="check" size={14} />}
-                            </button>
-                            <div style={{ minWidth: 0 }}>
-                              <div className="serif" style={{ fontSize: 16 }}>{item.food_name}</div>
-                              {item.notes && item.notes !== 'inventory-covered' && (
-                                <div className="serif-italic" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 2 }}>— {item.notes}</div>
-                              )}
+                              <button
+                                type="button"
+                                className={`check ${isDone ? 'on' : ''}`}
+                                onClick={() => handleToggle(item.id)}
+                                aria-label={isDone ? `Uncheck ${item.food_name}` : `Check ${item.food_name}`}
+                                aria-pressed={isDone}
+                              >
+                                {isDone && <Icon name="check" size={14} />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingId(isEditing ? null : item.id)}
+                                aria-expanded={isEditing}
+                                aria-label={`Edit ${item.food_name}`}
+                                style={{ minWidth: 0, textAlign: 'left', background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
+                              >
+                                <div className="serif" style={{ fontSize: 16 }}>{item.food_name}</div>
+                                {item.notes && item.notes !== 'inventory-covered' && (
+                                  <div className="serif-italic" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 2 }}>— {item.notes}</div>
+                                )}
+                              </button>
+                              <span className="mono tnum" style={{ fontSize: 11, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>
+                                {item.quantity}{item.unit ? ` ${item.unit}` : ''}
+                              </span>
+                              <span className="mono tnum" style={{ fontSize: 14, color: 'var(--tomato)', minWidth: 54, textAlign: 'right' }}>
+                                {item.estimated_cost != null ? formatCost(item.estimated_cost) : '—'}
+                              </span>
                             </div>
-                            <span className="mono tnum" style={{ fontSize: 11, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>
-                              {item.quantity}{item.unit ? ` ${item.unit}` : ''}
-                            </span>
-                            <span className="mono tnum" style={{ fontSize: 14, color: 'var(--tomato)', minWidth: 54, textAlign: 'right' }}>
-                              {item.estimated_cost != null ? formatCost(item.estimated_cost) : '—'}
-                            </span>
+                            {isEditing && (
+                              <GroceryItemEdit
+                                item={item}
+                                onSave={(patch) => {
+                                  updateItem.mutate({ id: item.id, list_id: item.list_id, ...patch })
+                                  setEditingId(null)
+                                }}
+                                onDelete={() => {
+                                  deleteItem.mutate({ id: item.id, list_id: item.list_id })
+                                  setEditingId(null)
+                                }}
+                                onCancel={() => setEditingId(null)}
+                              />
+                            )}
                           </div>
                         )
                       })}
@@ -458,6 +484,104 @@ function ReceiptRow({ label, value, accent }: { label: string; value: string; ac
     <div className="flex justify-between" style={{ padding: '4px 0' }}>
       <span className="mono" style={{ fontSize: 11, letterSpacing: '0.1em' }}>{label}</span>
       <span className="mono tnum" style={{ color: accent === 'chart' ? 'var(--chartreuse)' : 'var(--ink)' }}>{value}</span>
+    </div>
+  )
+}
+
+interface GroceryItemEditProps {
+  item: GroceryItem
+  onSave: (patch: { food_name?: string; quantity?: number | null; unit?: string | null; category?: string; estimated_cost?: number | null }) => void
+  onDelete: () => void
+  onCancel: () => void
+}
+
+function GroceryItemEdit({ item, onSave, onDelete, onCancel }: GroceryItemEditProps) {
+  const [name, setName] = useState(item.food_name)
+  const [quantity, setQuantity] = useState<string>(item.quantity != null ? String(item.quantity) : '')
+  const [unit, setUnit] = useState<string>(item.unit ?? '')
+  const [category, setCategory] = useState<string>(item.category)
+  const [cost, setCost] = useState<string>(item.estimated_cost != null ? String(item.estimated_cost) : '')
+
+  function handleSave() {
+    onSave({
+      food_name: name.trim() || item.food_name,
+      quantity: quantity.trim() === '' ? null : Number(quantity),
+      unit: unit.trim() === '' ? null : unit.trim(),
+      category,
+      estimated_cost: cost.trim() === '' ? null : Number(cost),
+    })
+  }
+
+  return (
+    <div style={{ background: 'var(--paper-2)', padding: 12, marginBottom: 4, border: '1px dashed var(--rule-c)' }}>
+      <div className="grid gap-2" style={{ gridTemplateColumns: '1fr' }}>
+        <label className="block">
+          <span className="eyebrow">Item</span>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="w-full mt-1"
+            style={{ background: 'transparent', border: '1px solid var(--rule-c)', padding: '6px 8px', fontSize: 14, color: 'var(--ink)' }}
+          />
+        </label>
+        <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <label className="block">
+            <span className="eyebrow">Quantity</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              value={quantity}
+              onChange={e => setQuantity(e.target.value)}
+              className="w-full mt-1 mono tnum"
+              style={{ background: 'transparent', border: '1px solid var(--rule-c)', padding: '6px 8px', fontSize: 14, color: 'var(--ink)' }}
+            />
+          </label>
+          <label className="block">
+            <span className="eyebrow">Unit</span>
+            <input
+              type="text"
+              value={unit}
+              onChange={e => setUnit(e.target.value)}
+              placeholder="g · ml · ea"
+              className="w-full mt-1 mono"
+              style={{ background: 'transparent', border: '1px solid var(--rule-c)', padding: '6px 8px', fontSize: 14, color: 'var(--ink)' }}
+            />
+          </label>
+        </div>
+        <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <label className="block">
+            <span className="eyebrow">Category</span>
+            <select
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              className="w-full mt-1"
+              style={{ background: 'transparent', border: '1px solid var(--rule-c)', padding: '6px 8px', fontSize: 14, color: 'var(--ink)' }}
+            >
+              {STORE_CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="eyebrow">Estimated cost</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              value={cost}
+              onChange={e => setCost(e.target.value)}
+              className="w-full mt-1 mono tnum"
+              style={{ background: 'transparent', border: '1px solid var(--rule-c)', padding: '6px 8px', fontSize: 14, color: 'var(--ink)' }}
+            />
+          </label>
+        </div>
+      </div>
+      <div className="flex gap-2 mt-3">
+        <button type="button" onClick={handleSave} className="btn btn-primary btn-sm">Save</button>
+        <button type="button" onClick={onCancel} className="btn btn-sm">Cancel</button>
+        <button type="button" onClick={onDelete} className="btn btn-sm" style={{ marginLeft: 'auto', color: 'var(--sky)', borderColor: 'var(--sky)' }}>Remove</button>
+      </div>
     </div>
   )
 }

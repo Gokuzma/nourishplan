@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
+import { categorizeFoodName } from '../utils/groceryGeneration'
 
 export function useAddManualGroceryItem() {
   const queryClient = useQueryClient()
@@ -21,7 +22,7 @@ export function useAddManualGroceryItem() {
           food_id: null,
           quantity: null,
           unit: null,
-          category: 'Other',
+          category: categorizeFoodName(name),
           category_source: 'auto',
           is_checked: false,
           checked_by: null,

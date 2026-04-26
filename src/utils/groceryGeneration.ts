@@ -244,6 +244,21 @@ export function subtractInventory(
 // ─── assignCategories ────────────────────────────────────────────────────────
 
 /**
+ * Classify a single food name against CATEGORY_KEYWORDS.
+ * Returns 'Other' on no match. Used by manual-add flows that
+ * don't go through the full assignCategories batch.
+ */
+export function categorizeFoodName(name: string): string {
+  const nameLower = name.toLowerCase()
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (keywords.some(kw => nameLower.includes(kw))) {
+      return category
+    }
+  }
+  return 'Other'
+}
+
+/**
  * Assigns a store category to each grocery item draft.
  * First checks previousItems for user overrides (category_source='user').
  * Falls back to keyword matching against CATEGORY_KEYWORDS.
