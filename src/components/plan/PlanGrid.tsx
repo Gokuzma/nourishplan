@@ -11,7 +11,7 @@ import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useMealPlanSlots, useAssignSlot, useClearSlot, useToggleLock } from '../../hooks/useMealPlan'
-import { useMeals } from '../../hooks/useMeals'
+import { useMeals, useGetOrCreateMealForRecipe } from '../../hooks/useMeals'
 import { useRecipes } from '../../hooks/useRecipes'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
@@ -71,19 +71,19 @@ function shortWeekRange(weekStart: string): string {
   return `${startMonth} ${start.getUTCDate()} — ${endMonth} ${end.getUTCDate()}`
 }
 
-interface MealPickerProps {
-  meals: Meal[]
-  onSelect: (mealId: string) => void
+interface RecipePickerProps {
+  recipes: { id: string; name: string; servings: number }[]
+  onSelect: (recipeId: string) => void
   onClose: () => void
 }
 
-function MealPicker({ meals, onSelect, onClose }: MealPickerProps) {
+function RecipePicker({ recipes, onSelect, onClose }: RecipePickerProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-sm max-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-accent/20">
-          <h3 className="font-semibold text-text font-sans">Choose a Meal</h3>
+          <h3 className="font-semibold text-text font-sans">Choose a Recipe</h3>
           <button
             onClick={onClose}
             className="text-text/40 hover:text-text transition-colors text-xl leading-none"
@@ -92,16 +92,19 @@ function MealPicker({ meals, onSelect, onClose }: MealPickerProps) {
           </button>
         </div>
         <div className="overflow-y-auto flex-1 p-3 space-y-1">
-          {meals.length === 0 ? (
-            <p className="text-sm text-text/50 text-center py-8 font-sans">No meals yet. Create meals first.</p>
+          {recipes.length === 0 ? (
+            <p className="text-sm text-text/50 text-center py-8 font-sans">No recipes yet. Add some on the Recipes page first.</p>
           ) : (
-            meals.map(meal => (
+            recipes.map(recipe => (
               <button
-                key={meal.id}
-                onClick={() => onSelect(meal.id)}
+                key={recipe.id}
+                onClick={() => onSelect(recipe.id)}
                 className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-primary/5 text-sm text-text font-sans transition-colors"
               >
-                {meal.name}
+                <span className="block">{recipe.name}</span>
+                <span className="block text-xs text-text/50 mt-0.5">
+                  {recipe.servings} serving{recipe.servings !== 1 ? 's' : ''}
+                </span>
               </button>
             ))
           )}
@@ -167,6 +170,7 @@ export function PlanGrid({
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
   const toggleLock = useToggleLock()
+  const getOrCreateMealForRecipe = useGetOrCreateMealForRecipe()
   const queryClient = useQueryClient()
 
   const recipeById = useMemo(() => new Map(allRecipes.map(r => [r.id, r])), [allRecipes])
@@ -357,13 +361,14 @@ export function PlanGrid({
     setPickerState({ dayIndex, slotName, isSwap })
   }
 
-  async function handleMealSelect(mealId: string) {
+  async function handleRecipeSelect(recipeId: string) {
     if (!pickerState) return
     const { dayIndex, slotName, isSwap } = pickerState
 
     const slotOrder = DEFAULT_SLOTS.indexOf(slotName as typeof DEFAULT_SLOTS[number])
     const order = slotOrder >= 0 ? slotOrder : DEFAULT_SLOTS.length
 
+    const mealId = await getOrCreateMealForRecipe.mutateAsync(recipeId)
     await assignSlot.mutateAsync({
       planId,
       dayIndex,
@@ -797,11 +802,12 @@ export function PlanGrid({
         </div>
       )}
 
-      {/* Meal picker modal — outside DndContext */}
+      {/* Recipe picker modal — outside DndContext.
+          Recipes are what get planned; meals are the eating record. */}
       {pickerState && (
-        <MealPicker
-          meals={meals}
-          onSelect={handleMealSelect}
+        <RecipePicker
+          recipes={allRecipes}
+          onSelect={handleRecipeSelect}
           onClose={() => setPickerState(null)}
         />
       )}

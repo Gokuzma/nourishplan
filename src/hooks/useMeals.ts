@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
+import { calcIngredientNutrition, calcRecipePerServing } from '../utils/nutrition'
 import type { Meal, MealItem } from '../types/database'
 
 /**
@@ -236,6 +237,78 @@ export function useRemoveMealItem() {
     },
     onSuccess: (_, { meal_id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(meal_id) })
+    },
+  })
+}
+
+/**
+ * Find-or-create a meal record that wraps a recipe, returning its id.
+ * Used by the plan-slot picker so users pick a recipe (the cookbook unit)
+ * but slots still reference meals (the schema unit). If the meal already
+ * exists by name in this household, reuse it. If we create a new one, also
+ * insert a single recipe meal_item with per-serving macros so day totals
+ * and cook-mode recipe-resolution work without further plumbing.
+ */
+export function useGetOrCreateMealForRecipe() {
+  const queryClient = useQueryClient()
+  const { session } = useAuth()
+  const { data: membership } = useHousehold()
+
+  return useMutation({
+    mutationFn: async (recipeId: string): Promise<string> => {
+      const userId = session?.user.id
+      if (!userId) throw new Error('Not authenticated')
+      const householdId = membership?.household_id
+      if (!householdId) throw new Error('No household found')
+
+      const { data: recipe, error: recipeErr } = await supabase
+        .from('recipes')
+        .select('id, name, servings, recipe_ingredients(quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)')
+        .eq('id', recipeId)
+        .single()
+      if (recipeErr || !recipe) throw new Error('Recipe not found')
+
+      const { data: existing } = await supabase
+        .from('meals')
+        .select('id')
+        .eq('household_id', householdId)
+        .eq('name', recipe.name)
+        .is('deleted_at', null)
+        .limit(1)
+      if (existing && existing.length > 0) return existing[0].id
+
+      const { data: newMeal, error: mealErr } = await supabase
+        .from('meals')
+        .insert({ household_id: householdId, name: recipe.name, created_by: userId })
+        .select('id')
+        .single()
+      if (mealErr || !newMeal) throw new Error('Failed to create meal for recipe')
+
+      const ingredients = (recipe.recipe_ingredients ?? []).map((i) => ({
+        nutrition: calcIngredientNutrition(
+          { calories: i.calories_per_100g, protein: i.protein_per_100g, fat: i.fat_per_100g, carbs: i.carbs_per_100g },
+          i.quantity_grams,
+        ),
+      }))
+      const perServing = calcRecipePerServing(ingredients, recipe.servings || 1)
+
+      await supabase
+        .from('meal_items')
+        .insert({
+          meal_id: newMeal.id,
+          item_type: 'recipe',
+          item_id: recipe.id,
+          item_name: recipe.name,
+          quantity_grams: 100,
+          calories_per_100g: perServing.calories,
+          protein_per_100g: perServing.protein,
+          fat_per_100g: perServing.fat,
+          carbs_per_100g: perServing.carbs,
+          sort_order: 0,
+        })
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.meals.list(householdId) })
+      return newMeal.id
     },
   })
 }
