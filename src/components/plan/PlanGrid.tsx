@@ -33,8 +33,8 @@ import { GeneratePlanButton } from './GeneratePlanButton'
 import { GenerationProgressBar } from './GenerationProgressBar'
 import { BatchPrepButton } from './BatchPrepButton'
 import { BatchPrepModal } from './BatchPrepModal'
-import { PriorityOrderPanel, getPriorityOrder } from './PriorityOrderPanel'
-import { RecipeMixPanel, getRecipeMix } from './RecipeMixPanel'
+import { getPriorityOrder } from './PriorityOrderPanel'
+import { getRecipeMix } from './RecipeMixPanel'
 import { NutritionGapCard } from './NutritionGapCard'
 import { RecipeSuggestionCard } from './RecipeSuggestionCard'
 import { GenerationJobBadge } from './GenerationJobBadge'
@@ -211,10 +211,10 @@ export function PlanGrid({
   const [generationError, setGenerationError] = useState<string | null>(null)
   const [batchPrepOpen, setBatchPrepOpen] = useState(false)
   const [reassignmentToast, setReassignmentToast] = useState<string | null>(null)
-  const [priorityOrder, setPriorityOrder] = useState<string[]>(() =>
+  const [priorityOrder] = useState<string[]>(() =>
     householdId ? getPriorityOrder(householdId) : []
   )
-  const [recipeMix, setRecipeMix] = useState(() =>
+  const [recipeMix] = useState(() =>
     householdId ? getRecipeMix(householdId) : { favorites: 50, liked: 30, novel: 20 }
   )
 
@@ -661,19 +661,6 @@ export function PlanGrid({
           </div>
         )}
 
-        {householdId && (
-          <PriorityOrderPanel
-            householdId={householdId}
-            onOrderChange={setPriorityOrder}
-          />
-        )}
-
-        {householdId && (
-          <RecipeMixPanel
-            householdId={householdId}
-            onMixChange={setRecipeMix}
-          />
-        )}
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
