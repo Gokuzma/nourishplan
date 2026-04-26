@@ -17,7 +17,9 @@ export function IssuesPanel({ violations, monotonyWarnings, hasAllergyViolation 
 
   if (totalCount === 0) {
     return (
-      <p className="text-sm text-text/50 py-3 px-4">No issues this week. Your plan looks great.</p>
+      <p className="serif-italic text-base py-3 px-4" style={{ color: 'var(--ink-dim)' }}>
+        No issues this week. Your plan looks great.
+      </p>
     )
   }
 
