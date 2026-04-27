@@ -249,6 +249,7 @@ export function useGenerateGroceryList() {
       if (householdId) {
         queryClient.invalidateQueries({ queryKey: ['grocery', householdId] })
       }
+      queryClient.invalidateQueries({ queryKey: ['grocery-items'] })
     },
   })
 }
