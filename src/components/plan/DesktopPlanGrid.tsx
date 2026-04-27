@@ -5,7 +5,6 @@ import type { ScheduleStatus } from '../../types/database'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 const DAY_COUNT = 7
-const ROMAN = ['i.', 'ii.', 'iii.', 'iv.'] as const
 
 interface DesktopPlanGridProps {
   weekStart: string
@@ -87,11 +86,10 @@ export function DesktopPlanGrid({
       })}
 
       {/* 4 meal rows */}
-      {DEFAULT_SLOTS.map((slotName, mi) => (
+      {DEFAULT_SLOTS.map((slotName) => (
         <Row
           key={slotName}
           slotName={slotName}
-          mealNo={ROMAN[mi]}
           weekStart={weekStart}
           weekStartDay={weekStartDay}
           slotsByDay={slotsByDay}
@@ -116,7 +114,6 @@ export function DesktopPlanGrid({
 
 interface RowProps {
   slotName: string
-  mealNo: string
   weekStart: string
   weekStartDay: number
   slotsByDay: Record<number, SlotWithMeal[]>
@@ -137,7 +134,6 @@ interface RowProps {
 
 function Row({
   slotName,
-  mealNo,
   weekStart,
   weekStartDay,
   slotsByDay,
@@ -158,7 +154,6 @@ function Row({
   return (
     <>
       <div className="gmeal-label">
-        <div className="no">{mealNo}</div>
         <div className="lab">{slotName}</div>
       </div>
       {Array.from({ length: DAY_COUNT }, (_, di) => {

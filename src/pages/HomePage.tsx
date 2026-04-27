@@ -10,6 +10,7 @@ import { DailyLogList } from '../components/log/DailyLogList'
 import { NutrientBreakdown } from '../components/log/NutrientBreakdown'
 import { LogMealModal } from '../components/log/LogMealModal'
 import { PortionStepper } from '../components/log/PortionStepper'
+import { FoodSearchOverlay } from '../components/food/FoodSearchOverlay'
 import {
   calcLogEntryNutrition,
   calcDayNutrition,
@@ -202,6 +203,7 @@ export function HomePage() {
 
   const [logMealSlot, setLogMealSlot] = useState<SlotWithMeal | null>(null)
   const [editLog, setEditLog] = useState<FoodLog | null>(null)
+  const [searchOverlayOpen, setSearchOverlayOpen] = useState(false)
   const [showMicroDetail, setShowMicroDetail] = useState(false)
 
   const weekStart = getWeekStart(new Date(`${selectedDate}T00:00:00Z`), weekStartDay)
@@ -407,6 +409,15 @@ export function HomePage() {
 
             <SectionHead label="Today's journal" aux={`${logs.length} ${logs.length === 1 ? 'entry' : 'entries'}`} />
             <Rule />
+            <button
+              type="button"
+              onClick={() => setSearchOverlayOpen(true)}
+              disabled={!isOnline}
+              className="btn btn-sm"
+              style={{ marginTop: 10, color: 'var(--tomato)', borderColor: 'var(--tomato)', cursor: isOnline ? 'pointer' : 'not-allowed', opacity: isOnline ? 1 : 0.5 }}
+            >
+              + Log a meal
+            </button>
             <div className="py-2">
               <DailyLogList
                 logs={logs}
@@ -484,6 +495,15 @@ export function HomePage() {
 
           <SectionHead label="Today's journal" aux={`${logs.length}`} />
           <Rule />
+          <button
+            type="button"
+            onClick={() => setSearchOverlayOpen(true)}
+            disabled={!isOnline}
+            className="btn btn-sm"
+            style={{ marginTop: 10, color: 'var(--tomato)', borderColor: 'var(--tomato)', cursor: isOnline ? 'pointer' : 'not-allowed', opacity: isOnline ? 1 : 0.5 }}
+          >
+            + Log a meal
+          </button>
           <div className="py-2">
             <DailyLogList
               logs={logs}
@@ -572,6 +592,16 @@ export function HomePage() {
 
       {editLog && (
         <EditLogModal log={editLog} onClose={() => setEditLog(null)} />
+      )}
+
+      {searchOverlayOpen && (
+        <FoodSearchOverlay
+          mode="log"
+          logDate={selectedDate}
+          memberId={selectedMemberId}
+          memberType={selectedMemberType}
+          onClose={() => setSearchOverlayOpen(false)}
+        />
       )}
     </div>
   )

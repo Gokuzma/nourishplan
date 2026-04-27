@@ -73,18 +73,16 @@ export function SectionHead({ no, label, aux, className }: SectionHeadProps) {
 }
 
 interface FolioProps {
-  num: string
+  num?: string
   title: string
   tagline: string
-  pageOf: string
+  pageOf?: string
 }
 
-export function Folio({ num, title, tagline }: FolioProps) {
+export function Folio({ title, tagline }: FolioProps) {
   return (
     <div className="folio">
-      <span>
-        <span className="num">{num}</span> · {title}
-      </span>
+      <span>{title}</span>
       <span>{tagline}</span>
       <span aria-hidden="true">—</span>
     </div>

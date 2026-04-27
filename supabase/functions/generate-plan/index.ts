@@ -20,7 +20,7 @@ interface RecipeRow {
   servings: number;
   recipe_ingredients: {
     ingredient_name: string;
-    food_id: string | null;
+    ingredient_id: string | null;
     quantity_grams: number;
     calories_per_100g: number;
     protein_per_100g: number;
@@ -286,7 +286,7 @@ serve(async (req) => {
       ] = await Promise.all([
         adminClient
           .from("recipes")
-          .select("id, name, servings, recipe_ingredients(ingredient_name, food_id, quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)")
+          .select("id, name, servings, recipe_ingredients(ingredient_name, ingredient_id, quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)")
           .eq("household_id", householdId)
           .is("deleted_at", null),
         adminClient
@@ -467,7 +467,7 @@ serve(async (req) => {
         const ings = r.recipe_ingredients ?? [];
         const ingsWithPrice = ings.map((i) => ({
           quantity_grams: i.quantity_grams,
-          cost_per_100g: i.food_id ? priceByFoodId.get(i.food_id) ?? null : null,
+          cost_per_100g: i.ingredient_id ? priceByFoodId.get(i.ingredient_id) ?? null : null,
         }));
         const { costPerServing } = computeRecipeCostPerServing(ingsWithPrice, r.servings || 1);
 

@@ -165,13 +165,12 @@ export function InventoryPage() {
       <div
         className="hidden md:grid mt-4"
         style={{
-          gridTemplateColumns: '36px 2fr 1fr 1fr 120px',
+          gridTemplateColumns: '2fr 1fr 1fr 120px',
           gap: 16,
           padding: '14px 4px 8px',
           borderBottom: '1px solid var(--rule-c)',
         }}
       >
-        <span className="eyebrow">#</span>
         <span className="eyebrow">Item</span>
         <span className="eyebrow">Quantity</span>
         <span className="eyebrow">Location</span>
@@ -188,31 +187,20 @@ export function InventoryPage() {
           </div>
         ) : items && items.length > 0 ? (
           <div className="flex flex-col">
-            {items.map((item, idx) => (
+            {items.map((item) => (
               <div
                 key={item.id}
-                className="grid items-baseline"
                 style={{
-                  gridTemplateColumns: '36px 1fr',
-                  gap: 12,
                   borderBottom: '1px dashed var(--rule-softer)',
                   padding: '8px 0',
                 }}
               >
-                <span
-                  className="mono tnum"
-                  style={{ fontSize: 11, color: 'var(--ink-soft)', letterSpacing: '0.04em', alignSelf: 'start', paddingTop: 16 }}
-                >
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <div style={{ minWidth: 0 }}>
-                  <InventoryItemRow
-                    item={item}
-                    onEdit={handleEdit}
-                    onRemove={handleRemove}
-                    isRemoving={removeItem.isPending && removeItem.variables?.id === item.id}
-                  />
-                </div>
+                <InventoryItemRow
+                  item={item}
+                  onEdit={handleEdit}
+                  onRemove={handleRemove}
+                  isRemoving={removeItem.isPending && removeItem.variables?.id === item.id}
+                />
               </div>
             ))}
           </div>
