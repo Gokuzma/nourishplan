@@ -104,14 +104,13 @@ export function RecipesPage() {
         </p>
       ) : (
         <div role="list" className="mt-1">
-          {recipes.map((recipe, idx) => (
+          {recipes.map((recipe) => (
             <div key={recipe.id} role="listitem">
               <div
                 className="grid items-center gap-4 py-3 px-1 cursor-pointer hover:bg-paper-2 transition-colors"
-                style={{ gridTemplateColumns: '36px 1fr auto' }}
+                style={{ gridTemplateColumns: '1fr auto' }}
                 onClick={() => navigate(`/recipes/${recipe.id}`)}
               >
-                <span className="eyebrow tnum">{String(idx + 1).padStart(2, '0')}</span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="serif text-lg" style={{ letterSpacing: '-0.01em' }}>{recipe.name}</span>
