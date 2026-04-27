@@ -7,25 +7,24 @@ interface NavItem {
   label: string
   to: string
   icon: IconName
-  num: string
 }
 
 const NAV_DAILY: NavItem[] = [
-  { label: 'Home', to: '/', icon: 'home', num: '01' },
-  { label: 'Recipes', to: '/recipes', icon: 'book', num: '02' },
+  { label: 'Home', to: '/', icon: 'home' },
+  { label: 'Recipes', to: '/recipes', icon: 'book' },
 ]
 
 const NAV_WORKBENCH: NavItem[] = [
-  { label: 'Plan', to: '/plan', icon: 'calendar', num: '03' },
-  { label: 'Inventory', to: '/inventory', icon: 'box', num: '04' },
-  { label: 'Grocery', to: '/grocery', icon: 'cart', num: '05' },
+  { label: 'Plan', to: '/plan', icon: 'calendar' },
+  { label: 'Inventory', to: '/inventory', icon: 'box' },
+  { label: 'Grocery', to: '/grocery', icon: 'cart' },
 ]
 
 const NAV_LEDGER: NavItem[] = [
-  { label: 'Insights', to: '/insights', icon: 'chart', num: '06' },
-  { label: 'Household', to: '/household', icon: 'users', num: '07' },
-  { label: 'Settings', to: '/settings', icon: 'gear', num: '08' },
-  { label: 'User Guide', to: '/guide', icon: 'compass', num: '09' },
+  { label: 'Insights', to: '/insights', icon: 'chart' },
+  { label: 'Household', to: '/household', icon: 'users' },
+  { label: 'Settings', to: '/settings', icon: 'gear' },
+  { label: 'User Guide', to: '/guide', icon: 'compass' },
 ]
 
 function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
@@ -41,7 +40,7 @@ function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
           end={item.to === '/'}
           className={({ isActive }) =>
             [
-              'relative grid grid-cols-[20px_1fr_auto] items-center gap-3 px-[18px] py-[9px] text-[14px]',
+              'relative grid grid-cols-[20px_1fr] items-center gap-3 px-[18px] py-[9px] text-[14px]',
               isActive
                 ? 'bg-[var(--tomato)] text-[var(--on-accent)] before:content-["→"] before:absolute before:-left-2.5 before:top-1/2 before:-translate-y-1/2 before:text-[var(--tomato)] before:font-[var(--font-display)] before:text-[20px] before:leading-none'
                 : 'text-[var(--ink)] hover:bg-[rgba(255,245,225,0.04)]',
@@ -50,15 +49,6 @@ function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
         >
           <Icon name={item.icon} size={18} />
           <span className="tracking-[-0.005em]">{item.label}</span>
-          <span
-            className={[
-              'mono text-[10px]',
-              'group-[.active]:text-[var(--on-accent)]',
-            ].join(' ')}
-            style={{ color: 'inherit', opacity: 0.65 }}
-          >
-            {item.num}
-          </span>
         </NavLink>
       ))}
     </>
