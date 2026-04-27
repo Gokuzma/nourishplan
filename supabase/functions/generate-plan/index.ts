@@ -18,6 +18,7 @@ interface RecipeRow {
   id: string;
   name: string;
   servings: number;
+  meal_types: string[] | null;
   recipe_ingredients: {
     ingredient_name: string;
     ingredient_id: string | null;
@@ -286,7 +287,7 @@ serve(async (req) => {
       ] = await Promise.all([
         adminClient
           .from("recipes")
-          .select("id, name, servings, recipe_ingredients(ingredient_name, ingredient_id, quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)")
+          .select("id, name, servings, meal_types, recipe_ingredients(ingredient_name, ingredient_id, quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)")
           .eq("household_id", householdId)
           .is("deleted_at", null),
         adminClient
@@ -461,6 +462,7 @@ serve(async (req) => {
         cost_per_serving: number;
         tier_hint: "favorite" | "liked" | "novel";
         servings: number;
+        meal_types: string[];
       };
 
       const recipeEnriched: EnrichedRecipe[] = recipes.map((r) => {
@@ -497,16 +499,18 @@ serve(async (req) => {
           cost_per_serving: costPerServing,
           tier_hint: tierHint,
           servings: r.servings,
+          meal_types: Array.isArray(r.meal_types) ? r.meal_types : [],
         };
       });
 
-      // Recipe catalog for AI shortlist (Pass 1) — LEAN shape + tier_hint only.
+      // Recipe catalog for AI shortlist (Pass 1) — LEAN shape + tier_hint + meal_types.
       const recipeCatalog = recipeEnriched.map((r) => ({
         id: r.id,
         name: r.name,
         ingredient_names: r.ingredient_names,
         avg_rating: r.avg_rating,
         tier_hint: r.tier_hint,
+        meal_types: r.meal_types,
       }));
 
       // Pass 1 — Shortlist (Haiku)
@@ -590,7 +594,7 @@ serve(async (req) => {
             model: assignModel,
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -690,7 +694,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -866,6 +870,60 @@ serve(async (req) => {
             .select("id")
             .single();
           if (newMeal) mealIdByRecipeId[recipe.id] = newMeal.id;
+        }
+      }
+
+      // Ensure each meal has a recipe meal_item with per-serving macros so plan
+      // slot cards render kcal (mirrors useGetOrCreateMealForRecipe). Idempotent:
+      // skips meals that already have a recipe meal_item for the same recipe id.
+      const meal_ids_for_items = Object.values(mealIdByRecipeId);
+      const existingItemKeys = new Set<string>();
+      if (meal_ids_for_items.length > 0) {
+        const { data: existingItems } = await adminClient
+          .from("meal_items")
+          .select("meal_id, item_id, item_type")
+          .in("meal_id", meal_ids_for_items)
+          .eq("item_type", "recipe");
+        for (const it of existingItems ?? []) {
+          existingItemKeys.add(`${it.meal_id}|${it.item_id}`);
+        }
+      }
+      const itemsToInsert: Array<Record<string, unknown>> = [];
+      for (const recipe of recipes) {
+        const mealId = mealIdByRecipeId[recipe.id];
+        if (!mealId) continue;
+        if (existingItemKeys.has(`${mealId}|${recipe.id}`)) continue;
+        const ings = recipe.recipe_ingredients ?? [];
+        const totals = ings.reduce(
+          (acc, i) => {
+            const f = (i.quantity_grams ?? 0) / 100;
+            return {
+              calories: acc.calories + (i.calories_per_100g ?? 0) * f,
+              protein: acc.protein + (i.protein_per_100g ?? 0) * f,
+              fat: acc.fat + (i.fat_per_100g ?? 0) * f,
+              carbs: acc.carbs + (i.carbs_per_100g ?? 0) * f,
+            };
+          },
+          { calories: 0, protein: 0, fat: 0, carbs: 0 },
+        );
+        const servings = recipe.servings || 1;
+        itemsToInsert.push({
+          meal_id: mealId,
+          item_type: "recipe",
+          item_id: recipe.id,
+          item_name: recipe.name,
+          quantity_grams: 100,
+          calories_per_100g: totals.calories / servings,
+          protein_per_100g: totals.protein / servings,
+          fat_per_100g: totals.fat / servings,
+          carbs_per_100g: totals.carbs / servings,
+          sort_order: 0,
+        });
+      }
+      if (itemsToInsert.length > 0) {
+        const { error: miErr } = await adminClient.from("meal_items").insert(itemsToInsert);
+        if (miErr) {
+          console.error("[generate-plan] meal_items insert failed:", miErr);
         }
       }
 
