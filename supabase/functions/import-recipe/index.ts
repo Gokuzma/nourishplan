@@ -6,7 +6,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const FETCH_TIMEOUT_MS = 10000;
+const FETCH_TIMEOUT_MS = 30000;
 const MAX_CONTENT_CHARS = 12000;
 const MIN_USABLE_TEXT_CHARS = 200;
 const FETCH_FAILURE_MSG =
@@ -284,7 +284,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5",
-        max_tokens: 2048,
+        max_tokens: 8192,
         system: SYSTEM_PROMPT,
         messages: [
           {
