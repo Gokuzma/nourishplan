@@ -66,7 +66,6 @@ export function HouseholdPage() {
           {/* LEFT — members ledger */}
           <div>
             <SectionHead
-              no="a"
               label="At the table"
               aux={`${total} ${total === 1 ? 'person' : 'people'} · your role: ${membership.role}`}
             />
@@ -78,7 +77,7 @@ export function HouseholdPage() {
             {/* Invite block — admins only */}
             {isAdmin && (
               <>
-                <SectionHead no="b" label="Invite to the household" />
+                <SectionHead label="Invite to the household" />
                 <Rule />
                 <div
                   className="mt-4"
@@ -91,7 +90,7 @@ export function HouseholdPage() {
                   <InviteLink />
                 </div>
 
-                <SectionHead no="c" label="Managed profiles" aux="children & dependents" />
+                <SectionHead label="Managed profiles" aux="children & dependents" />
                 <Rule />
                 <p className="serif-italic mt-3" style={{ fontSize: 14, color: 'var(--ink-dim)' }}>
                   Add children or other members whose nutrition you manage.
@@ -105,7 +104,7 @@ export function HouseholdPage() {
 
           {/* RIGHT — household ledger (desktop only) */}
           <div className="hidden md:block">
-            <SectionHead no={isAdmin ? 'd' : 'b'} label="Household ledger" />
+            <SectionHead label="Household ledger" />
             <Rule />
             <div className="py-3">
               <LedgerRow k="Established" v={household?.created_at ? new Date(household.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'} />

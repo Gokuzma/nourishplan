@@ -212,7 +212,7 @@ export function GroceryPage() {
 
               {/* Aisle sections */}
               {categories.length > 0 ? (
-                categories.map(([category, categoryItems], ai) => {
+                categories.map(([category, categoryItems]) => {
                   const sorted = [...categoryItems].sort((a, b) => {
                     if (a.is_checked !== b.is_checked) return a.is_checked ? 1 : -1
                     return a.food_name.localeCompare(b.food_name)
@@ -221,7 +221,6 @@ export function GroceryPage() {
                   return (
                     <div key={category} id={`aisle-${category}`} className="pt-2">
                       <SectionHead
-                        no={String.fromCharCode(97 + ai)}
                         label={category}
                         aux={`${categoryItems.length} item${categoryItems.length === 1 ? '' : 's'} · ${formatCost(aisleSubtotal)}`}
                       />
