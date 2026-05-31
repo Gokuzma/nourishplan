@@ -927,6 +927,50 @@ serve(async (req) => {
         }
       }
 
+      // ── Hard slot-matching guardrail (deterministic) ─────────────────────────
+      // Pass 2 only *prefers* slot-appropriate recipes and the model does not
+      // reliably honor it (observed: a Dinner-only recipe placed at Breakfast even
+      // when breakfast recipes were available). Enforce it: any assignment whose
+      // recipe is tagged for specific slots that EXCLUDE the target slot is replaced
+      // with a slot-appropriate, restriction-safe recipe (least-used in that slot for
+      // variety), or left empty rather than misplaced.
+      const capSlot = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+      const mealTypesByRecipeId = new Map<string, string[]>(
+        recipes.map((r) => [r.id, Array.isArray(r.meal_types) ? r.meal_types : []]),
+      );
+      const fitsSlot = (recipeId: string, slotName: string): boolean => {
+        const mt = mealTypesByRecipeId.get(recipeId) ?? [];
+        return mt.length === 0 || mt.includes(capSlot(slotName));
+      };
+      const bannedIngredient = [...allergenNames, ...wontEatNames]
+        .map((s) => s.toLowerCase())
+        .filter((s) => s.length > 0);
+      const isSafeRecipe = (ingredientNames: string[]) =>
+        !ingredientNames.some((n) => bannedIngredient.some((b) => n.toLowerCase().includes(b)));
+      const poolForSlot = (slotName: string): string[] =>
+        recipeEnriched
+          .filter((r) => (r.meal_types ?? []).includes(capSlot(slotName)) && isSafeRecipe(r.ingredient_names))
+          .map((r) => r.id);
+
+      let guardrailRepairs = 0;
+      for (const slot of bestResult.slots) {
+        if (!slot.recipe_id || fitsSlot(slot.recipe_id, slot.slot_name)) continue;
+        const usage: Record<string, number> = {};
+        for (const s2 of bestResult.slots) {
+          if (capSlot(s2.slot_name) === capSlot(slot.slot_name) && s2.recipe_id) {
+            usage[s2.recipe_id] = (usage[s2.recipe_id] ?? 0) + 1;
+          }
+        }
+        const pool = poolForSlot(slot.slot_name).sort((a, b) => (usage[a] ?? 0) - (usage[b] ?? 0));
+        const replacement = pool[0] ?? null;
+        slot.recipe_id = replacement ?? "";
+        if (replacement) slot.rationale = `Slot-corrected to a ${capSlot(slot.slot_name)} recipe`;
+        guardrailRepairs++;
+      }
+      if (guardrailRepairs > 0) {
+        console.log(`[generate-plan] slot guardrail repaired ${guardrailRepairs} assignment(s)`);
+      }
+
       // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
       const slotOrderMap: Record<string, number> = { "Breakfast": 0, "Lunch": 1, "Dinner": 2, "Snacks": 3 };
       const upsertRows = bestResult.slots

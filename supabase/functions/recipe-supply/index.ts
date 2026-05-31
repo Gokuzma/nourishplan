@@ -232,7 +232,7 @@ serve(async (req) => {
       }));
 
       const system =
-        `You classify recipes into meal slots. For each recipe, pick the slot(s) it naturally fits from: Breakfast, Lunch, Dinner, Snacks. Most recipes get exactly one (a soup is Dinner, oatmeal is Breakfast). Allow two only when genuinely flexible: a salad -> ["Lunch","Dinner"], a frittata -> ["Breakfast","Lunch"], hummus -> ["Snacks","Lunch"]. NEVER put soups, stews, curries, or chili in Breakfast. Every recipe must get at least one slot. Return ONLY a JSON object mapping recipe id -> array of slot strings, e.g. {"<id>":["Dinner"]}. No prose.`;
+        `You classify recipes into meal slots. For each recipe, pick the slot(s) it naturally fits from: Breakfast, Lunch, Dinner, Snacks. Assign EXACTLY ONE slot for most recipes; assign two ONLY when genuinely flexible (a salad -> ["Lunch","Dinner"], a frittata -> ["Breakfast","Lunch"], hummus -> ["Snacks","Lunch"]). NEVER assign three slots. Breakfast is STRICT: tag a recipe Breakfast ONLY if it is a genuine breakfast food — eggs, oatmeal/porridge, yogurt or smoothie bowls, smoothies, pancakes/waffles/French toast, breakfast pastries, breakfast wraps/burritos, cereal/granola. Breads and flatbreads (roti, naan, biscuits, dinner rolls), plain sides, mains, soups, stews, curries, and chili are NEVER Breakfast. Every recipe must get at least one slot. Return ONLY a JSON object mapping recipe id -> array of slot strings, e.g. {"<id>":["Dinner"]}. No prose.`;
 
       const text = await callAnthropic(apiKey, 8192, system, JSON.stringify({ recipes: catalog }));
       if (!text) return json({ success: false, error: "AI classification failed" });
