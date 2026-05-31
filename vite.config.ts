@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       manifest: {
         name: 'NourishPlan',
         short_name: 'NourishPlan',
