@@ -80,6 +80,7 @@ export interface Recipe {
   servings: number
   notes: string | null
   source_url: string | null
+  meal_types: string[]                            // Phase 32 — slots this recipe fits; [] = unrestricted
   instructions: RecipeStep[] | null              // Phase 23 D-01 — null until AI generates
   freezer_friendly: boolean | null               // Phase 23 D-02, D-09 — null until classified
   freezer_shelf_life_weeks: number | null        // Phase 23 D-02

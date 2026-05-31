@@ -27,7 +27,12 @@ serve(async (req) => {
   }
 
   try {
-    const { name, description } = await req.json();
+    const { name, description, mealTypes } = await req.json();
+
+    const VALID_MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snacks"];
+    const cleanMealTypes = Array.isArray(mealTypes)
+      ? mealTypes.filter((t: unknown): t is string => typeof t === "string" && VALID_MEAL_TYPES.includes(t))
+      : [];
 
     if (!name) {
       return new Response(
@@ -139,6 +144,7 @@ serve(async (req) => {
         created_by: user.id,
         servings: generated.servings || 4,
         notes: generated.instructions || null,
+        meal_types: cleanMealTypes,
       })
       .select("id")
       .single();

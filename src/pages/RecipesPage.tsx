@@ -5,6 +5,7 @@ import { useHousehold } from '../hooks/useHousehold'
 import { useRecipes, useCreateRecipe, useDeleteRecipe } from '../hooks/useRecipes'
 import { FreezerBadge } from '../components/plan/FreezerBadge'
 import { ImportRecipeModal } from '../components/recipe/ImportRecipeModal'
+import { FillGapsModal } from '../components/recipe/FillGapsModal'
 import { Nameplate, StoryHead, Rule } from '../components/editorial'
 
 function relativeTime(isoString: string): string {
@@ -27,6 +28,7 @@ export function RecipesPage() {
   const deleteRecipe = useDeleteRecipe()
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [fillGapsOpen, setFillGapsOpen] = useState(false)
 
   const isAdmin = membership?.role === 'admin'
   const recipeCount = recipes?.length ?? 0
@@ -74,6 +76,12 @@ export function RecipesPage() {
 
       {/* Toolbar */}
       <div className="flex items-center justify-end gap-2 flex-wrap mt-4 mb-2 no-print">
+        <button
+          onClick={() => setFillGapsOpen(true)}
+          className="btn btn-sm"
+        >
+          Fill recipe gaps
+        </button>
         <button
           onClick={() => setImportModalOpen(true)}
           className="btn btn-sm"
@@ -155,6 +163,10 @@ export function RecipesPage() {
         onClose={() => setImportModalOpen(false)}
         onSuccess={handleImportSuccess}
       />
+
+      {fillGapsOpen && (
+        <FillGapsModal recipes={recipes ?? []} onClose={() => setFillGapsOpen(false)} />
+      )}
     </div>
   )
 }
