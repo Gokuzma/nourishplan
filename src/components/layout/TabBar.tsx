@@ -11,6 +11,7 @@ interface TabItem {
 
 const tabs: TabItem[] = [
   { label: 'Home', to: '/', icon: 'home' },
+  { label: 'Today', to: '/today', icon: 'sun' },
   { label: 'Recipes', to: '/recipes', icon: 'book' },
   { label: 'Plan', to: '/plan', icon: 'calendar' },
 ]
@@ -25,7 +26,7 @@ export function TabBar() {
     <>
       <nav
         role="tabbar"
-        className="fixed bottom-0 left-0 right-0 grid grid-cols-4 bg-[var(--paper-2)] border-t-2 border-[var(--rule-c)] md:hidden z-40"
+        className="fixed bottom-0 left-0 right-0 grid grid-cols-5 bg-[var(--paper-2)] border-t-2 border-[var(--rule-c)] md:hidden z-40"
       >
         {tabs.map((tab) => (
           <NavLink

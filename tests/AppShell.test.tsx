@@ -41,7 +41,7 @@ describe('AppShell', () => {
     expect(screen.queryByText('Foods')).toBeNull()
   })
 
-  it('Sidebar renders 9 navigation items (Meals removed; recipes are what get planned)', async () => {
+  it('Sidebar renders 10 navigation items (Meals removed; recipes are what get planned)', async () => {
     const { Sidebar } = await import('../src/components/layout/Sidebar')
 
     render(
@@ -51,6 +51,7 @@ describe('AppShell', () => {
     )
 
     expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.getByText('Today')).toBeInTheDocument()
     expect(screen.getByText('Recipes')).toBeInTheDocument()
     expect(screen.queryByText('Meals')).toBeNull()
     expect(screen.getByText('Plan')).toBeInTheDocument()

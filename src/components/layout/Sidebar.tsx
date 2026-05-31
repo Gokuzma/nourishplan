@@ -11,6 +11,7 @@ interface NavItem {
 
 const NAV_DAILY: NavItem[] = [
   { label: 'Home', to: '/', icon: 'home' },
+  { label: 'Today', to: '/today', icon: 'sun' },
   { label: 'Recipes', to: '/recipes', icon: 'book' },
 ]
 

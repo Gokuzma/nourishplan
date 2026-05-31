@@ -6,6 +6,7 @@ import { useHousehold } from './hooks/useHousehold'
 import { AuthPage } from './pages/AuthPage'
 import { HouseholdSetup } from './pages/HouseholdSetup'
 import { HouseholdPage } from './pages/HouseholdPage'
+import { WelcomePage } from './pages/WelcomePage'
 import { HomePage } from './pages/HomePage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipePage } from './pages/RecipePage'
@@ -142,7 +143,8 @@ function AppRoutes() {
           </AuthGuard>
         }
       >
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/today" element={<HomePage />} />
         <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/recipes/:id" element={<RecipePage />} />
         <Route path="/meals/:id" element={<MealPage />} />
