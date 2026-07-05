@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useMealPlanSlots, useAssignSlot, useClearSlot, useToggleLock } from '../../hooks/useMealPlan'
 import { useMeals, useGetOrCreateMealForRecipe } from '../../hooks/useMeals'
-import { useRecipes } from '../../hooks/useRecipes'
+import { useRecipes, useRecipeMacros } from '../../hooks/useRecipes'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
@@ -22,6 +22,7 @@ import { useHouseholdSchedules } from '../../hooks/useSchedule'
 import { buildHouseholdGrid, buildHouseholdTooltips } from '../../utils/schedule'
 import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
+import { groupRecipesForSlot } from '../../utils/recipePicker'
 import { computeSwapSuggestions } from '../../utils/swapSuggestions'
 import { LogMealModal } from '../log/LogMealModal'
 import { DayCard } from './DayCard'
@@ -40,7 +41,7 @@ import { RecipeSuggestionCard } from './RecipeSuggestionCard'
 import { GenerationJobBadge } from './GenerationJobBadge'
 import { DEFAULT_SLOTS } from '../../utils/mealPlan'
 import { useQueryClient } from '@tanstack/react-query'
-import type { NutritionTarget, Meal, MealItem, ScheduleStatus } from '../../types/database'
+import type { NutritionTarget, Meal, MealItem, MacroSummary, ScheduleStatus } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { MemberInput, PortionResult } from '../../utils/portionSuggestions'
 import type { SwapSuggestion } from './NutritionGapCard'
@@ -72,18 +73,49 @@ function shortWeekRange(weekStart: string): string {
 }
 
 interface RecipePickerProps {
-  recipes: { id: string; name: string; servings: number }[]
+  recipes: { id: string; name: string; servings: number; meal_types: string[] }[]
+  slotName: string
+  macrosById?: Map<string, MacroSummary>
   onSelect: (recipeId: string) => void
   onClose: () => void
 }
 
-function RecipePicker({ recipes, onSelect, onClose }: RecipePickerProps) {
+function RecipePickerRow({
+  recipe,
+  macros,
+  onSelect,
+}: {
+  recipe: { id: string; name: string; servings: number }
+  macros?: MacroSummary
+  onSelect: (recipeId: string) => void
+}) {
+  return (
+    <button
+      onClick={() => onSelect(recipe.id)}
+      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-primary/5 text-sm text-text font-sans transition-colors"
+    >
+      <span className="block">{recipe.name}</span>
+      <span className="block text-xs text-text/50 mt-0.5">
+        {macros && macros.calories > 0
+          ? `${Math.round(macros.calories)} kcal · P ${Math.round(macros.protein)}g · F ${Math.round(macros.fat)}g · C ${Math.round(macros.carbs)}g / serving`
+          : `${recipe.servings} serving${recipe.servings !== 1 ? 's' : ''}`}
+      </span>
+    </button>
+  )
+}
+
+function RecipePicker({ recipes, slotName, macrosById, onSelect, onClose }: RecipePickerProps) {
+  const [query, setQuery] = useState('')
+  const groups = useMemo(() => groupRecipesForSlot(recipes, slotName, query), [recipes, slotName, query])
+  const primary = [...groups.slotMatch, ...groups.untagged]
+  const total = primary.length + groups.rest.length
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-sm max-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-accent/20">
-          <h3 className="font-semibold text-text font-sans">Choose a Recipe</h3>
+          <h3 className="font-semibold text-text font-sans">Choose a Recipe{slotName ? ` — ${slotName}` : ''}</h3>
           <button
             onClick={onClose}
             className="text-text/40 hover:text-text transition-colors text-xl leading-none"
@@ -91,22 +123,33 @@ function RecipePicker({ recipes, onSelect, onClose }: RecipePickerProps) {
             &times;
           </button>
         </div>
+        <div className="px-3 pt-3">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search recipes…"
+            autoFocus
+            className="w-full px-3 py-2 text-sm rounded-lg border border-accent/20 bg-transparent text-text font-sans"
+          />
+        </div>
         <div className="overflow-y-auto flex-1 p-3 space-y-1">
           {recipes.length === 0 ? (
             <p className="text-sm text-text/50 text-center py-8 font-sans">No recipes yet. Add some on the Recipes page first.</p>
+          ) : total === 0 ? (
+            <p className="text-sm text-text/50 text-center py-8 font-sans">No recipes match "{query}".</p>
           ) : (
-            recipes.map(recipe => (
-              <button
-                key={recipe.id}
-                onClick={() => onSelect(recipe.id)}
-                className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-primary/5 text-sm text-text font-sans transition-colors"
-              >
-                <span className="block">{recipe.name}</span>
-                <span className="block text-xs text-text/50 mt-0.5">
-                  {recipe.servings} serving{recipe.servings !== 1 ? 's' : ''}
-                </span>
-              </button>
-            ))
+            <>
+              {primary.map(recipe => (
+                <RecipePickerRow key={recipe.id} recipe={recipe} macros={macrosById?.get(recipe.id)} onSelect={onSelect} />
+              ))}
+              {primary.length > 0 && groups.rest.length > 0 && (
+                <p className="text-xs text-text/40 text-center py-1.5 font-sans select-none">— other slots —</p>
+              )}
+              {groups.rest.map(recipe => (
+                <RecipePickerRow key={recipe.id} recipe={recipe} macros={macrosById?.get(recipe.id)} onSelect={onSelect} />
+              ))}
+            </>
           )}
         </div>
       </div>
@@ -166,6 +209,7 @@ export function PlanGrid({
   const { data: slots = [] } = useMealPlanSlots(planId)
   const { data: meals = [] } = useMeals()
   const { data: allRecipes = [] } = useRecipes()
+  const { data: recipeMacros } = useRecipeMacros()
   const navigate = useNavigate()
   const assignSlot = useAssignSlot()
   const clearSlot = useClearSlot()
@@ -807,6 +851,8 @@ export function PlanGrid({
       {pickerState && (
         <RecipePicker
           recipes={allRecipes}
+          slotName={pickerState.slotName}
+          macrosById={recipeMacros}
           onSelect={handleRecipeSelect}
           onClose={() => setPickerState(null)}
         />

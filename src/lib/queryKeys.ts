@@ -13,6 +13,7 @@ export const queryKeys = {
     list: (householdId: string | undefined) => ['recipes', householdId] as const,
     detail: (id: string) => ['recipe', id] as const,
     ingredients: (recipeId: string) => ['recipe-ingredients', recipeId] as const,
+    macros: (householdId: string | undefined) => ['recipes', householdId, 'macros'] as const,
   },
   meals: {
     list: (householdId: string | undefined) => ['meals', householdId] as const,

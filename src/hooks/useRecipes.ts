@@ -3,7 +3,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
-import type { Recipe, RecipeIngredient } from '../types/database'
+import { calcPerServingMacros, type IngredientMacroRow } from '../utils/recipeMacros'
+import type { MacroSummary, Recipe, RecipeIngredient } from '../types/database'
 
 /**
  * Returns all non-deleted recipes for the current user's household, ordered by name.
@@ -24,6 +25,31 @@ export function useRecipes() {
 
       if (error) throw error
       return data ?? []
+    },
+    enabled: !!householdId,
+  })
+}
+
+/**
+ * Returns per-serving macros for every recipe in the household, keyed by
+ * recipe id, computed from the denormalized recipe_ingredients snapshots.
+ */
+export function useRecipeMacros() {
+  const { data: membership } = useHousehold()
+  const householdId = membership?.household_id
+
+  return useQuery({
+    queryKey: queryKeys.recipes.macros(householdId),
+    queryFn: async (): Promise<Map<string, MacroSummary>> => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, servings, recipe_ingredients(quantity_grams, calories_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g)')
+        .eq('household_id', householdId!)
+        .is('deleted_at', null)
+
+      if (error) throw error
+      const rows = (data ?? []) as { id: string; servings: number; recipe_ingredients: IngredientMacroRow[] }[]
+      return new Map(rows.map((r) => [r.id, calcPerServingMacros(r.recipe_ingredients ?? [], r.servings)]))
     },
     enabled: !!householdId,
   })
