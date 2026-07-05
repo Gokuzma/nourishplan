@@ -24,6 +24,7 @@ interface ProposedRecipe {
   servings: number;
   instructions: string;
   ingredients: GeneratedIngredient[];
+  description?: string;
 }
 
 function json(body: unknown, status = 200) {
@@ -155,6 +156,117 @@ serve(async (req) => {
           servings: clamp(r.servings, 24) || 4,
           instructions: typeof r.instructions === "string" ? r.instructions : "",
           ingredients,
+        });
+      }
+
+      return json({ success: true, proposals });
+    }
+
+    // ── DISCOVER ───────────────────────────────────────────────────────────────
+    // Generate personalized recipe suggestions to browse — taste-profile aware,
+    // optional craving prompt, optional slot. Returns proposals (nothing saved).
+    if (mode === "discover") {
+      const slotParam = payload.slot;
+      const targetSlot: MealSlot | null = VALID_MEAL_TYPES.includes(slotParam) ? slotParam : null;
+      const count = Math.max(1, Math.min(8, Number(payload.count) || 6));
+      const craving = typeof payload.craving === "string" ? payload.craving.trim().slice(0, 200) : "";
+
+      // Household taste profile — restrictions, won't-eats, favourites, existing names.
+      const [restrictionsRes, wontEatRes, ratingsRes, existingRes] = await Promise.all([
+        adminClient.from("dietary_restrictions")
+          .select("predefined, custom_entries")
+          .eq("household_id", householdId),
+        adminClient.from("wont_eat_entries")
+          .select("food_name, strength")
+          .eq("household_id", householdId),
+        adminClient.from("recipe_ratings")
+          .select("recipe_name, rating")
+          .eq("household_id", householdId)
+          .gte("rating", 4)
+          .limit(30),
+        adminClient.from("recipes")
+          .select("name")
+          .eq("household_id", householdId)
+          .is("deleted_at", null),
+      ]);
+
+      const restrictions = [...new Set(
+        (restrictionsRes.data ?? []).flatMap((r: { predefined: string[] | null; custom_entries: string[] | null }) =>
+          [...(r.predefined ?? []), ...(r.custom_entries ?? [])]),
+      )];
+      const allergies = [...new Set(
+        (wontEatRes.data ?? [])
+          .filter((w: { strength: string }) => w.strength === "allergy")
+          .map((w: { food_name: string }) => w.food_name),
+      )];
+      const avoids = [...new Set(
+        (wontEatRes.data ?? [])
+          .filter((w: { strength: string }) => w.strength !== "allergy")
+          .map((w: { food_name: string }) => w.food_name),
+      )].slice(0, 30);
+      const favourites = [...new Set(
+        (ratingsRes.data ?? []).map((r: { recipe_name: string }) => r.recipe_name),
+      )].slice(0, 15);
+      const existingNames = (existingRes.data ?? []).map((r: { name: string }) => r.name);
+      const existingLower = new Set(existingNames.map((n) => n.toLowerCase()));
+
+      const system =
+        `You suggest recipes a family will get EXCITED to cook this week. Generate exactly ${count} distinct, realistic, appealing recipes. ` +
+        (targetSlot
+          ? `Every recipe must genuinely suit the ${targetSlot} slot. `
+          : `Spread suggestions across Breakfast, Lunch, Dinner, and Snacks. `) +
+        `Return ONLY a JSON array of objects matching: { "name": string, "description": "one enticing sentence — why the family will love it", "meal_types": string[], "servings": number, "instructions": "numbered steps as a single string", "ingredients": [{ "name": string, "quantity_grams": number, "calories_per_100g": number, "protein_per_100g": number, "fat_per_100g": number, "carbs_per_100g": number }] }. ` +
+        `meal_types rules: pick from Breakfast, Lunch, Dinner, Snacks. Most recipes get EXACTLY ONE slot; two ONLY when genuinely flexible. NEVER three. Breakfast is STRICT — only genuine breakfast foods (eggs, oatmeal, yogurt/smoothie bowls, pancakes, breakfast wraps, granola); never soups, stews, curries, chili, mains, or plain breads. ` +
+        `Use realistic per-100g nutrition. Keep instructions concise. No prose, no markdown fences.`;
+
+      const contextLines = [
+        craving ? `The family is in the mood for: ${craving}.` : "",
+        restrictions.length ? `Dietary restrictions (MUST respect): ${restrictions.join(", ")}.` : "",
+        allergies.length ? `Allergies (NEVER include these): ${allergies.join(", ")}.` : "",
+        avoids.length ? `Foods the family avoids: ${avoids.join(", ")}.` : "",
+        favourites.length ? `Recipes they rated highly (match this taste, don't repeat them): ${favourites.join(", ")}.` : "",
+        existingNames.length ? `Already in their cookbook (suggest NEW ideas, no duplicates): ${existingNames.slice(0, 80).join(", ")}.` : "",
+        `Generate ${count} ${targetSlot ?? ""} recipe suggestions.`,
+      ].filter(Boolean);
+
+      const text = await callAnthropic(apiKey, 8192, system, contextLines.join("\n"));
+      if (!text) return json({ success: false, error: "AI generation failed" });
+
+      const match = text.match(/\[[\s\S]*\]/);
+      if (!match) return json({ success: false, error: "Failed to parse AI suggestions" });
+
+      let raw: unknown[];
+      try {
+        raw = JSON.parse(match[0]);
+      } catch {
+        return json({ success: false, error: "Invalid AI suggestion format" });
+      }
+
+      const proposals: ProposedRecipe[] = [];
+      for (const item of Array.isArray(raw) ? raw : []) {
+        if (!item || typeof item !== "object") continue;
+        const r = item as Record<string, unknown>;
+        const name = typeof r.name === "string" ? r.name.trim().slice(0, 200) : "";
+        if (!name || existingLower.has(name.toLowerCase())) continue;
+        const ingredients = (Array.isArray(r.ingredients) ? r.ingredients : [])
+          .map(sanitizeIngredient)
+          .filter((x): x is GeneratedIngredient => x !== null);
+        if (ingredients.length === 0) continue;
+        // Deterministic slot validation (L-036/L-038/L-039): valid names only,
+        // cap at 2, force the requested slot, drop rather than insert untagged.
+        let slots = (Array.isArray(r.meal_types) ? r.meal_types : [])
+          .filter((s): s is MealSlot =>
+            typeof s === "string" && (VALID_MEAL_TYPES as readonly string[]).includes(s))
+          .slice(0, 2);
+        if (targetSlot) slots = [targetSlot];
+        if (slots.length === 0) continue;
+        proposals.push({
+          name,
+          slot: slots[0],
+          servings: clamp(r.servings, 24) || 4,
+          instructions: typeof r.instructions === "string" ? r.instructions : "",
+          ingredients,
+          description: typeof r.description === "string" ? r.description.trim().slice(0, 300) : "",
         });
       }
 

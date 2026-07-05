@@ -19,6 +19,7 @@ export interface ProposedRecipe {
   servings: number
   instructions: string
   ingredients: ProposedIngredient[]
+  description?: string
 }
 
 interface PreviewResponse {
@@ -55,6 +56,24 @@ export function usePreviewGapRecipes() {
       if (!householdId) throw new Error('No household found')
       const { data, error } = await supabase.functions.invoke('recipe-supply', {
         body: { mode: 'preview', slot, count },
+      })
+      if (error) throw error
+      const res = data as PreviewResponse
+      if (!res.success || !res.proposals) throw new Error(res.error ?? 'Generation failed')
+      return res.proposals
+    },
+  })
+}
+
+/** Generate personalized recipe suggestions to browse (nothing saved). */
+export function useDiscoverRecipes() {
+  const { session, householdId } = useReady()
+  return useMutation({
+    mutationFn: async ({ slot, count, craving }: { slot?: MealSlot; count: number; craving?: string }): Promise<ProposedRecipe[]> => {
+      if (!session) throw new Error('Not authenticated')
+      if (!householdId) throw new Error('No household found')
+      const { data, error } = await supabase.functions.invoke('recipe-supply', {
+        body: { mode: 'discover', slot, count, craving },
       })
       if (error) throw error
       const res = data as PreviewResponse
