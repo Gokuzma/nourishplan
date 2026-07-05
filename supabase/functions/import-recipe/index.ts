@@ -37,8 +37,11 @@ interface ImportedRecipe {
   servings: number;
   ingredients: ImportedIngredient[];
   steps: ImportedStep[];
+  meal_types?: string[];
   error?: string;
 }
+
+const VALID_MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snacks"] as const;
 
 interface RecipeStep {
   id: string;
@@ -55,6 +58,7 @@ Return ONLY valid JSON matching this exact schema:
 {
   "name": "Recipe Name",
   "servings": <number>,
+  "meal_types": ["Breakfast" | "Lunch" | "Dinner" | "Snacks"],
   "ingredients": [
     {
       "name": "ingredient name",
@@ -81,8 +85,9 @@ Rules:
 1. Convert ALL ingredient quantities to grams.
 2. Use realistic per-100g nutritional values.
 3. For the category field, choose from: meat, poultry, fish, vegetables, legumes, grains, dairy, other.
-4. If content is too vague to extract a recipe, return { "error": "Could not extract recipe" }.
-5. Return ONLY the JSON object — no prose, no markdown fences.`;
+4. meal_types: pick the slot(s) this recipe naturally fits. Most recipes get exactly one (a soup is Dinner, oatmeal is Breakfast). Allow two only when genuinely flexible: a salad → ["Lunch", "Dinner"], a frittata → ["Breakfast", "Lunch"], hummus → ["Snacks", "Lunch"]. Return [] if truly slot-agnostic. Never put soups, stews, curries, or chili in Breakfast.
+5. If content is too vague to extract a recipe, return { "error": "Could not extract recipe" }.
+6. Return ONLY the JSON object — no prose, no markdown fences.`;
 
 function detectInputType(input: string): "youtube" | "url" | "text" {
   const trimmed = input.trim();
@@ -343,6 +348,13 @@ serve(async (req) => {
     // D-11: store the URL on source_url for attribution; raw text imports have no URL
     const sourceUrl = inputType !== "text" ? trimmedInput : null;
 
+    // Sanitize meal_types — keep only valid slot names from the AI output.
+    const mealTypes = Array.isArray(generated.meal_types)
+      ? generated.meal_types.filter((t): t is string =>
+          typeof t === "string" && (VALID_MEAL_TYPES as readonly string[]).includes(t)
+        )
+      : [];
+
     // Create recipe (instructions as RecipeStep[], not notes string)
     const { data: recipe, error: recipeError } = await adminClient
       .from("recipes")
@@ -353,6 +365,7 @@ serve(async (req) => {
         servings: generated.servings || memberCount || 4,
         source_url: sourceUrl,
         instructions: steps,
+        meal_types: mealTypes,
       })
       .select("id")
       .single();
