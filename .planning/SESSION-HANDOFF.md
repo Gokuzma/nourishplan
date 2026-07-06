@@ -1,83 +1,66 @@
-# NourishPlan — session handoff (2026-07-05/06)
+# NourishPlan — session handoff (2026-07-06)
 
-Everything below is committed and pushed through `580aa9f`; prod (`nourishplan.gregok.ca`)
-serves bundle `index-BSCv0yQt.js`. CI is green. Read this top-to-bottom before continuing.
+Everything below is committed and pushed; prod (`nourishplan.gregok.ca`) is current.
+CI green, 385 tests passing, `tsc -b` 0 errors. Read top-to-bottom before continuing.
 
-## State of the world
+## What shipped this session (2026-07-05 late / 07-06)
 
-- **Suite:** 377 tests passing, 0 failures. **Typecheck:** `tsc -b` = 0 errors (was 135) and
-  gated in CI (`.github/workflows/ci.yml`: tsc + vitest + vite build on every push).
-- **Migrations:** 31/31 in sync. **Edge functions:** all 15 deployed and current, including
-  the three that had never been deployed (`analyze-ratings`, `classify-restrictions`,
-  `delete-account` — all now with in-code caller/household verification).
-- **Security:** exposed `sb_secret` rotated (new key in `.env.local`), old key revoked,
-  hardcoded literals scrubbed; `.recipe-import/` and `.playwright-mcp/` gitignored.
-- **Prod data:** 0 wildcard recipes, 0 over-tagged, empty artifacts soft-deleted.
+1. **April mobile feedback triaged** — the untracked `NourishPlan Edits/` folder held
+   12 annotated phone screenshots from 2026-04-25. Most issues were already fixed by
+   the editorial redesign; the three still live were fixed and deployed:
+   - Scanners + Add-item modal rendered in page flow instead of overlaying — the
+     unlayered `.paper > *` rule in global.css outranked Tailwind's layered `fixed`
+     utility (lessons.md **L-045**). Fixed with `:not(.fixed)`; scanners now also
+     mutually exclusive.
+   - Inventory tab counts wrapped under a stray "·" at 390px.
+   - Today journal empty-state referenced a removed search bar.
+   Do NOT re-triage those screenshots; folder can be deleted.
+2. **Budget truth (sim finding #1)** — migration 033 (deployed) allows
+   `spend_logs.source='grocery'`. "Add purchased to pantry" logs the trip total as
+   grocery spend. `summariseWeeklySpend` (utils/cost.ts): once grocery spend exists
+   for a week, purse = grocery + takeout and cooking shows as "bought X · cooked Y"
+   (never summed — double-count); weeks with no trips keep cook + takeout.
+3. **Name-fallback pricing (sim finding #3)** — `computeItemCost` and
+   `getPriceForIngredient` fall back to case-insensitive name match when food_id
+   misses (AI recipes mint new ingredient UUIDs every generation). Covers grocery
+   costs, recipe cost/serving, cook spend.
+4. **Leftovers → lunch (sim finding #2)** — generate-plan (deployed) reads
+   `is_leftover`/`expires_at`, passes unexpired leftovers + items expiring ≤4 days
+   into all passes, and rule 10 tells the assigner to place a leftover's source
+   recipe in the earliest unlocked Lunch before expiry with rationale
+   'Uses up leftover — expires {date}'. Today page shows a "Leftover ready" nudge
+   (`LeftoverNudge`, both layouts, links to /inventory).
 
-## What shipped this session (chronological)
+## Needs validation next session
 
-1. **Codebase map** — `.planning/codebase/` (7 docs: stack, integrations, architecture,
-   structure, conventions, testing, concerns).
-2. **Recipe discovery + selector** — ✨ Discover on Recipes page (craving/slot-aware AI
-   suggestions with macros + add-to-book, via new `discover` mode in `recipe-supply`);
-   plan slot picker got search, slot-first grouping, per-serving macros
-   (`useRecipeMacros`, `queryKeys.recipes.macros`). Spec:
-   `docs/superpowers/specs/2026-07-05-recipe-discovery-and-selector.md`.
-3. **User Guide rebuilt** (`/guide`) — philosophy-first: constraint-solver framing, the
-   weekly loop (Stock → Compose → Shop → Cook → Rate), the method (Eat well / **Be
-   healthy** / Save money — per user, never say "lose weight"), operating rhythm
-   (Sunday 20 min / daily 2 min / monthly 10 min).
-4. **Full working-order audit + "do it all" execution** — `.planning/AUDIT-2026-07-05.md`
-   (with execution-status section). Highlights: Supabase types generated
-   (`src/types/database.gen.ts` feeds the client; hand-written interfaces in
-   `src/types/database.ts` remain the semantic layer with boundary casts); weekly-loop
-   CTAs added at every stage edge (Discover→Plan, Plan→Grocery "Generate grocery list",
-   Grocery→Pantry "Add purchased", Cook receipt→star rating, Today Tonight→"Cook this");
-   Insights/Settings/RecipeBuilder editorialized; dead Meals UI deleted
-   (`/meals/:id`, MealPage/MealCard/MealBuilder/MealItemRow); real bugs fixed
-   (PlanGrid `display_name`→`name`, desktop locked-slot shimmer, analyze-ratings column).
-5. **Month-of-use simulation** — `.planning/SIMULATION-2026-07-05.md` + harness
-   `scripts/sim-month.ts`. 3 bugs found & fixed & deployed:
-   - `subtractInventory` name-fallback (AI-recipe pantry matching — was "buy 197 items"
-     with a full pantry, now correct)
-   - `generate-plan` verify passes no longer wipe tier rationale
-   - Grocery add-to-pantry merges rows (was 691 inventory rows after a month)
+- **Leftover→Lunch behaviour on a real catalog.** The only live test was the
+  claude-test household (3 dinner-only recipes) — the model filled only Dinner
+  slots, so the rule wasn't meaningfully exercised. Run the Sim Family week
+  (`npx vite-node scripts/sim-month.ts -- week N`) with an unexpired leftover in
+  its inventory and check a Lunch slot picks up the matching recipe + rationale.
+- Test-household state changed tonight: its leftover now expires **2026-07-08**,
+  fridge has a plan for week 2026-07-05 (Dinners only), grocery list has one
+  checked+pantry'd item (Chicken thighs, $12.34 logged as grocery spend).
 
-## Open work — prioritized next steps
+## Open work — prioritized
 
-From the simulation (`.planning/SIMULATION-2026-07-05.md`, full reasoning there):
-1. **Budget truth**: `spend_logs` CHECK only allows `'cook'|'food_log'` — real grocery
-   spend is unrecordable; purse showed $30–75/wk while the family spent ~$180/wk.
-   Needs migration 033 + purse UI decision (show "bought vs cooked", avoid double-count).
-2. **Price by normalized ingredient NAME, not per-recipe UUID** — only ~25% of grocery
-   items ever price; AI recipes mint new ingredient_ids every generation.
-3. **Leftovers → next-day lunch**: all 6 simulated leftovers expired unconsumed. Feed
-   unexpired leftovers + expiring items into generate-plan as soft constraints.
-4. Weekly kcal-vs-target trend on Insights; generation pass-progress UI.
+1. Weekly kcal-vs-target trend on Insights; generation pass-progress UI (sim #4).
+2. Error monitoring (Sentry-vs-homegrown decision pending).
+3. Cook Mode + shared modals still old-style (see RecipesPage for the standard).
+4. 22 deferred human UATs; `BudgetSummarySection.tsx` is dead code (unused import
+   target) — delete when convenient.
 
-From the audit (still open): error monitoring (needs Sentry-vs-homegrown decision);
-Cook Mode + shared modals still old-style; 22 deferred human UATs; Folio renumbering.
+## How to operate (unchanged, see lessons L-036…L-045)
 
-## How to operate (hard-won this session — see lessons L-036…L-044)
-
-- **Deploys**: frontend `npx vercel --prod` (user is logged in). Edge fns:
+- Frontend deploy: `npx vercel deploy --prod` (plain `npx vercel --prod` now prints
+  a JSON menu — use the `deploy` subcommand). Edge fns:
   `eval "$(tr -d '\r' < .env.local | grep SUPABASE_ACCESS_TOKEN=)"` then
   `SUPABASE_ACCESS_TOKEN=… npx supabase functions deploy <fn> --project-ref qyablbzodmftobjslgri --no-verify-jwt`
-  — but ONLY with in-code auth checks (L-041). If anything says INACTIVE, restore the
-  project first (L-040).
-- **Sim harness**: `SIM_URL/SIM_SVC/SIM_ANON` env → `npx vite-node scripts/sim-month.ts -- <setup|seed|week N|audit>`;
-  idempotent, Sim Family household persists in prod as a regression fixture
-  (sim-family@nourishplan.test / SimFamily!2026). generate-plan rate limit: 10/household/24h.
-- **Test accounts**: claude-test@nourishplan.test / ClaudeTest!2026 (Test Household).
-- Kill dev servers by port, never `taskkill node.exe` (L-044). Run the L-001 worktree
-  cleanup before vitest. Playwright chromium is installed; visual-check pattern in
-  scratchpad used `@playwright/test` from the repo.
-
-## Watch-outs for the next session
-
-- `src/types/database.gen.ts` is generated — regenerate after any migration
-  (`SUPABASE_ACCESS_TOKEN=… npx supabase gen types typescript --project-id qyablbzodmftobjslgri`).
-- The editorial design system is the standard (see RecipesPage/GroceryPage); old-style
-  remnants live mostly under `src/components/cook/` and shared modals.
-- `.env.local` now holds the ROTATED service key; the platform-injected key inside edge
-  functions is separate and unchanged.
+  (in-code auth checks are present — L-041).
+- Migrations: `SUPABASE_ACCESS_TOKEN=… npx supabase db push`; regen types after:
+  `npx supabase gen types typescript --project-id qyablbzodmftobjslgri > src/types/database.gen.ts`.
+- Test accounts: claude-test@nourishplan.test / ClaudeTest!2026 (Test Household);
+  sim-family@nourishplan.test / SimFamily!2026 (Sim Family fixture).
+- L-001 worktree cleanup before vitest; kill dev servers by port (L-044).
+- A dev server may already be running on :5199 from a prior session — reuse it
+  (HMR serves current code) instead of starting another.
