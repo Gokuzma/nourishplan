@@ -105,7 +105,7 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
           ariaLabel={`Drag to reorder ${slotName}`}
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-text truncate font-sans">
+          <p className="text-sm font-medium text-text line-clamp-2 font-sans">
             {meal!.name}
             {scheduleStatus && scheduleStatus !== 'prep' && (
               <span
@@ -133,8 +133,8 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
             {currentUserSuggestion && (
               <span className="text-xs text-primary/80 font-sans">
                 You: {currentUserSuggestion.percentage !== null
-                  ? `${Math.round(currentUserSuggestion.percentage)}% (${currentUserSuggestion.servings.toFixed(1)} svg)`
-                  : `${currentUserSuggestion.servings.toFixed(1)} svg`}
+                  ? `${Math.round(currentUserSuggestion.percentage)}% (${currentUserSuggestion.servings.toFixed(1)} serv)`
+                  : `${currentUserSuggestion.servings.toFixed(1)} serv`}
                 {currentUserSuggestion.hasMacroWarning && (
                   <span className="ml-1 inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-400 text-white text-[8px] font-bold leading-none align-middle">!</span>
                 )}
