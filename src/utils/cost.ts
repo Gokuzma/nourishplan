@@ -46,3 +46,35 @@ export function computeRecipeCostPerServing(
 export function formatCost(amount: number): string {
   return `$${amount.toFixed(2)}`
 }
+
+/**
+ * Summarises a week of spend rows into what the purse displays.
+ *
+ * Receipts are the truth: once any grocery spend is recorded for the week,
+ * the budget tracks money out the door (grocery + takeout) and cooking is
+ * informational — counting both grocery and cook would double-count, since
+ * cooked meals consume ingredients that were already paid for at the store.
+ * Weeks with no recorded grocery spend fall back to cook + takeout so
+ * households that never log purchases keep a meaningful purse.
+ */
+export function summariseWeeklySpend(
+  spendRows: { amount: number | null; source: string }[],
+  foodLogCosts: (number | null)[]
+): {
+  totalSpend: number
+  cookSpend: number
+  grocerySpend: number
+  foodLogSpend: number
+} {
+  let cookSpend = 0
+  let grocerySpend = 0
+  for (const row of spendRows) {
+    if (row.source === 'grocery') grocerySpend += row.amount ?? 0
+    else cookSpend += row.amount ?? 0
+  }
+  const foodLogSpend = foodLogCosts.reduce((sum: number, c) => sum + (c ?? 0), 0)
+  const totalSpend = grocerySpend > 0
+    ? grocerySpend + foodLogSpend
+    : cookSpend + foodLogSpend
+  return { totalSpend, cookSpend, grocerySpend, foodLogSpend }
+}

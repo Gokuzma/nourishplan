@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { queryKeys } from '../lib/queryKeys'
+import { summariseWeeklySpend } from '../utils/cost'
 
 export function useWeeklySpend(
   householdId: string | undefined,
@@ -11,14 +12,15 @@ export function useWeeklySpend(
     queryFn: async (): Promise<{
       totalSpend: number
       cookSpend: number
+      grocerySpend: number
       foodLogSpend: number
     }> => {
-      const { data: cookData, error: cookErr } = await supabase
+      const { data: spendData, error: spendErr } = await supabase
         .from('spend_logs')
-        .select('amount')
+        .select('amount, source')
         .eq('household_id', householdId!)
         .eq('week_start', weekStart!)
-      if (cookErr) throw cookErr
+      if (spendErr) throw spendErr
 
       const weekStartDate = new Date(weekStart! + 'T00:00:00Z')
       const nextWeek = new Date(weekStartDate)
@@ -34,13 +36,10 @@ export function useWeeklySpend(
         .not('cost', 'is', null)
       if (logErr) throw logErr
 
-      const cookSpend = (cookData ?? []).reduce((sum, r) => sum + (r.amount ?? 0), 0)
-      const foodLogSpend = (logData ?? []).reduce(
-        (sum, r) => sum + ((r as { cost: number | null }).cost ?? 0),
-        0
+      return summariseWeeklySpend(
+        spendData ?? [],
+        (logData ?? []).map(r => (r as { cost: number | null }).cost)
       )
-
-      return { totalSpend: cookSpend + foodLogSpend, cookSpend, foodLogSpend }
     },
     enabled: !!householdId && !!weekStart,
   })

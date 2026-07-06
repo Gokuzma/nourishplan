@@ -17,6 +17,8 @@ export function BudgetStrip({ weeklyBudget, weekStart, householdId, onEditBudget
 
   const { data: spendData } = useWeeklySpend(householdId, weekStart)
   const totalSpend = spendData?.totalSpend ?? 0
+  const grocerySpend = spendData?.grocerySpend ?? 0
+  const cookSpend = spendData?.cookSpend ?? 0
 
   function handleEditStart() {
     setEditValue(weeklyBudget != null ? String(weeklyBudget) : '')
@@ -93,7 +95,8 @@ export function BudgetStrip({ weeklyBudget, weekStart, householdId, onEditBudget
         )}
       </div>
 
-      {/* Spent */}
+      {/* Spent — once grocery spend is recorded, receipts are the truth and
+          cooking is shown as context (never added on top) */}
       <div>
         <div className="blabel">Spent</div>
         <div className="bnum tnum">
@@ -102,6 +105,11 @@ export function BudgetStrip({ weeklyBudget, weekStart, householdId, onEditBudget
             <span className="of"> / {formatCost(weeklyBudget)}</span>
           )}
         </div>
+        {grocerySpend > 0 && cookSpend > 0 && (
+          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-dim)', marginTop: 4 }}>
+            bought {formatCost(grocerySpend)} · cooked {formatCost(cookSpend)}
+          </div>
+        )}
       </div>
 
       {/* Remaining (accent red if over budget, chartreuse if comfortable) */}

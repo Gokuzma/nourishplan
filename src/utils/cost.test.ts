@@ -3,6 +3,7 @@ import {
   normaliseToCostPer100g,
   computeRecipeCostPerServing,
   formatCost,
+  summariseWeeklySpend,
 } from './cost'
 
 describe('normaliseToCostPer100g', () => {
@@ -95,5 +96,52 @@ describe('formatCost', () => {
 
   it('formats large values correctly', () => {
     expect(formatCost(12.99)).toBe('$12.99')
+  })
+})
+
+describe('summariseWeeklySpend', () => {
+  it('tracks cook + takeout when no grocery spend is recorded (legacy weeks)', () => {
+    const result = summariseWeeklySpend(
+      [
+        { amount: 12.5, source: 'cook' },
+        { amount: 8.0, source: 'cook' },
+      ],
+      [15.0, null]
+    )
+    expect(result).toEqual({ totalSpend: 35.5, cookSpend: 20.5, grocerySpend: 0, foodLogSpend: 15.0 })
+  })
+
+  it('switches to grocery + takeout once grocery spend exists — cook is informational, never double-counted', () => {
+    const result = summariseWeeklySpend(
+      [
+        { amount: 182.0, source: 'grocery' },
+        { amount: 12.5, source: 'cook' },
+        { amount: 8.0, source: 'cook' },
+      ],
+      [15.0]
+    )
+    expect(result.totalSpend).toBe(197.0)
+    expect(result.grocerySpend).toBe(182.0)
+    expect(result.cookSpend).toBe(20.5)
+    expect(result.foodLogSpend).toBe(15.0)
+  })
+
+  it('sums multiple grocery trips in the same week', () => {
+    const result = summariseWeeklySpend(
+      [
+        { amount: 120.0, source: 'grocery' },
+        { amount: 62.0, source: 'grocery' },
+      ],
+      []
+    )
+    expect(result.totalSpend).toBe(182.0)
+    expect(result.grocerySpend).toBe(182.0)
+  })
+
+  it('handles empty inputs and null amounts', () => {
+    expect(summariseWeeklySpend([], [])).toEqual({
+      totalSpend: 0, cookSpend: 0, grocerySpend: 0, foodLogSpend: 0,
+    })
+    expect(summariseWeeklySpend([{ amount: null, source: 'grocery' }], [null]).totalSpend).toBe(0)
   })
 })

@@ -269,7 +269,7 @@ export interface SpendLog {
   logged_by: string
   log_date: string
   week_start: string
-  source: 'cook' | 'food_log'
+  source: 'cook' | 'food_log' | 'grocery'
   recipe_id: string | null
   amount: number
   is_partial: boolean

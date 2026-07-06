@@ -8,6 +8,7 @@ import { useToggleGroceryItem } from '../hooks/useToggleGroceryItem'
 import { useAddManualGroceryItem } from '../hooks/useAddManualGroceryItem'
 import { useUpdateGroceryItem, useDeleteGroceryItem } from '../hooks/useUpdateGroceryItem'
 import { useAddInventoryItem, useInventoryItems, useUpdateInventoryItem } from '../hooks/useInventory'
+import { useCreateSpendLog } from '../hooks/useSpendLog'
 import { useMealPlan } from '../hooks/useMealPlan'
 import { getWeekStart } from '../utils/mealPlan'
 import { formatCost } from '../utils/cost'
@@ -42,6 +43,7 @@ export function GroceryPage() {
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
   const [pantryStatus, setPantryStatus] = useState<'idle' | 'adding' | 'done'>('idle')
   const addInventoryItem = useAddInventoryItem()
+  const createSpendLog = useCreateSpendLog()
   const updateInventoryItem = useUpdateInventoryItem()
   const { data: pantryItems = [] } = useInventoryItems()
   const [collapseHave, setCollapseHave] = useState(true)
@@ -126,6 +128,12 @@ export function GroceryPage() {
           purchase_price: item.estimated_cost ?? null,
         })
       }
+    }
+    // Record the trip as real grocery spend so the purse tracks receipts,
+    // not just what got cooked.
+    const tripTotal = purchased.reduce((s, i) => s + (i.estimated_cost ?? 0), 0)
+    if (tripTotal > 0) {
+      await createSpendLog.mutateAsync({ amount: tripTotal, is_partial: false, source: 'grocery' })
     }
     setPantryStatus('done')
   }

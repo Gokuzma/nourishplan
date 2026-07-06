@@ -16,6 +16,7 @@ export function useCreateSpendLog() {
       amount: number
       is_partial: boolean
       log_date?: string
+      source?: 'cook' | 'grocery'
     }) => {
       const userId = session?.user.id
       if (!userId) throw new Error('Not authenticated')
@@ -33,7 +34,7 @@ export function useCreateSpendLog() {
           logged_by: userId,
           log_date: logDate,
           week_start: weekStart,
-          source: 'cook' as const,
+          source: params.source ?? 'cook',
           recipe_id: params.recipe_id ?? null,
           amount: params.amount,
           is_partial: params.is_partial,
