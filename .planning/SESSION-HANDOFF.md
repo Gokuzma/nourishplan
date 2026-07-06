@@ -1,82 +1,117 @@
-# NourishPlan — session handoff (2026-07-06)
+# NourishPlan — session handoff (2026-07-06, end of day)
 
-Everything below is committed and pushed; prod (`nourishplan.gregok.ca`) is current.
-CI green, 385 tests passing, `tsc -b` 0 errors. Read top-to-bottom before continuing.
+Everything is committed and pushed through `1e14b40`; prod (`nourishplan.gregok.ca`)
+serves the latest build and all edge functions are current. Read top-to-bottom
+before continuing.
 
-## What shipped this session (2026-07-05 late / 07-06)
+## State of the world
 
-1. **April mobile feedback triaged** — the untracked `NourishPlan Edits/` folder held
-   12 annotated phone screenshots from 2026-04-25. Most issues were already fixed by
-   the editorial redesign; the three still live were fixed and deployed:
-   - Scanners + Add-item modal rendered in page flow instead of overlaying — the
-     unlayered `.paper > *` rule in global.css outranked Tailwind's layered `fixed`
-     utility (lessons.md **L-045**). Fixed with `:not(.fixed)`; scanners now also
-     mutually exclusive.
-   - Inventory tab counts wrapped under a stray "·" at 390px.
-   - Today journal empty-state referenced a removed search bar.
-   Do NOT re-triage those screenshots; folder can be deleted.
-2. **Budget truth (sim finding #1)** — migration 033 (deployed) allows
-   `spend_logs.source='grocery'`. "Add purchased to pantry" logs the trip total as
-   grocery spend. `summariseWeeklySpend` (utils/cost.ts): once grocery spend exists
-   for a week, purse = grocery + takeout and cooking shows as "bought X · cooked Y"
-   (never summed — double-count); weeks with no trips keep cook + takeout.
-3. **Name-fallback pricing (sim finding #3)** — `computeItemCost` and
-   `getPriceForIngredient` fall back to case-insensitive name match when food_id
-   misses (AI recipes mint new ingredient UUIDs every generation). Covers grocery
-   costs, recipe cost/serving, cook spend.
-4. **Leftovers → lunch (sim finding #2)** — generate-plan (deployed) reads
-   `is_leftover`/`expires_at`, passes unexpired leftovers + items expiring ≤4 days
-   into all passes, and rule 10 tells the assigner to place a leftover's source
-   recipe in the earliest unlocked Lunch before expiry with rationale
-   'Uses up leftover — expires {date}'. Today page shows a "Leftover ready" nudge
-   (`LeftoverNudge`, both layouts, links to /inventory).
+- **Suite:** 389 tests passing, 0 failures (`useCookCompletion` cost-calc test can
+  flake under heavy machine load — rerun the file in isolation before chasing it).
+- **Typecheck:** `tsc -b` = 0 errors, gated in CI (tsc + vitest + vite build).
+- **Migrations:** 34/34 in sync (033 grocery spend source, 034 'merged' removal
+  reason — both deployed). `database.gen.ts` regenerated; constraint-only changes
+  don't alter it.
+- **Edge functions:** all deployed, `generate-plan` updated 3× this session.
 
-## Validated + playtested 2026-07-06 (second pass)
+## What shipped this session (three passes)
 
-- **Leftover→Lunch VALIDATED on Sim Family** (33 recipes): first run exposed that
-  the deterministic meal_types guardrail replaced the leftover placement
-  ("Slot-corrected to a Lunch recipe") — fixed with a data-verified exemption
-  (L-046), redeployed, re-ran: salmon leftover landed on Monday Lunch with
-  'Uses up leftover — expires 2026-07-12' and survived. Note: freeing the
-  10/24h generation rate limit required aging Sim Family's plan_generations
-  timestamps (service key) — legitimate for the fixture only.
-- **Purse split verified live**: after checking off a $7.50 trip, strip shows
-  "SPENT $7.50 / $220 · BOUGHT $7.50 · COOKED $61.44".
-- **Playtest fixes shipped**: inventory "Tidy up" (690→128 rows live, migration
-  034 `removed_reason='merged'`); leftover-nudge dedupe + suffix strip; SlotCard
-  "svg"→"serv" + 2-line title clamp.
-- **All four playtest findings fixed (third pass, deployed + verified):**
-  add-to-pantry batched (one bulk insert + parallel merges, bulk price upsert);
-  deterministic monotony guardrail in generate-plan (cap 2/recipe/week, never
-  displaces leftover placements, exempt for small catalogs — validated: 28/28
-  slots, no recipe >2×, salmon still at Lunch) plus `todayDayIndex` so leftover
-  lunches aren't placed in the past (prompt-level, not yet observed live);
-  SlotCard secondary actions moved to a ⋯ menu-pop (4 controls inline, titles
-  readable); "Discard expired" band on Inventory (Sim fridge 6→2). Sim pantry
-  now also holds "Paper towels"/"Dish soap" from the batch-checkout smoke test.
-- Test-household state: leftover expires **2026-07-08**, week 2026-07-05 plan is
-  Dinners-only, $12.34 grocery spend logged. Sim Family pantry is tidied (128
-  rows); its week 2026-07-05 plan was regenerated twice today.
+### Pass 1 — April mobile feedback triage
+`NourishPlan Edits/` (12 annotated phone screenshots from 2026-04-25) fully
+triaged; most issues already fixed by the editorial redesign. Fixed the three
+still live: scanners/Add-item modal flattened into page flow by the unlayered
+`.paper > *` CSS rule (**L-045** — unlayered CSS beats Tailwind's layers;
+excluded `.fixed` children); scanners now mutually exclusive; inventory tab
+count wrap; stale Today empty-state copy. **Do not re-triage those screenshots**;
+the folder can be deleted.
+
+### Pass 2 — simulation backlog (handoff priorities 1–3)
+1. **Budget truth** — `spend_logs.source='grocery'` (migration 033). "Add
+   purchased to pantry" logs the trip total. `summariseWeeklySpend`
+   (utils/cost.ts): once grocery spend exists for a week, purse tracks
+   grocery + takeout and shows "bought X · cooked Y" (cook is never added on
+   top — double-count); no-trip weeks fall back to cook + takeout.
+2. **Name-fallback pricing** — `computeItemCost` + `getPriceForIngredient` match
+   by food_id, then case-insensitive name (AI recipes mint new ingredient UUIDs
+   every generation). Covers grocery costs, recipe cost/serving, cook spend.
+3. **Leftovers → Lunch** — generate-plan reads `is_leftover`/`expires_at`, feeds
+   unexpired leftovers + items expiring ≤4 days into every pass; rule 10 places
+   the leftover's source recipe at the earliest feasible Lunch with rationale
+   'Uses up leftover — expires {date}'. Today page shows a deduped "Leftover
+   ready" nudge (`LeftoverNudge`). **L-046**: the deterministic meal_types
+   guardrail was silently replacing these placements — leftover-consuming
+   Lunch/Dinner assignments (verified against inventory) are now exempt.
+   Validated end-to-end on Sim Family (33 recipes): salmon leftover at Lunch,
+   survived all passes.
+
+### Pass 3 — playtest fixes (usability/efficiency/feedback)
+- **Inventory "Tidy up"** — `planInventoryConsolidation` merges duplicate active
+  non-leftover rows (same name/unit/location) into the oldest row, summed
+  quantity, earliest expiry, `removed_reason='merged'` (034). Live: Sim pantry
+  690 → 128 rows in 13s.
+- **"Discard expired"** band — bulk-discards expired items (Sim fridge 6 → 2).
+- **Batched add-to-pantry** — parallel merges + one bulk INSERT + one deduped
+  food_prices upsert instead of a round trip per item.
+- **Monotony guardrail** in generate-plan — post-pass cap of 2 assignments per
+  recipe per week; swaps extras for least-used slot-fitting safe alternatives;
+  never displaces leftover placements; small catalogs exempt; keeps a repeat
+  over an empty slot. Validated: 28/28 slots, no recipe >2×.
+- **SlotCard** — secondary actions (Log/Suggest/Change/Remove) moved into a
+  `.menu-pop` overflow menu (first use of that CSS); inline: chevron, lock,
+  cook, ⋯. Titles clamp to 2 lines; "svg" → "serv".
+- **`todayDayIndex`** passed to the assign prompt so leftover lunches aren't
+  placed on past days. **Prompt-level and NOT yet observed live** — check on the
+  next generation that the leftover lands on day_index ≥ today.
 
 ## Open work — prioritized
 
-1. Weekly kcal-vs-target trend on Insights; generation pass-progress UI (sim #4).
-2. Error monitoring (Sentry-vs-homegrown decision pending).
-3. Cook Mode + shared modals still old-style (see RecipesPage for the standard).
-4. 22 deferred human UATs; `BudgetSummarySection.tsx` is dead code (unused import
-   target) — delete when convenient.
+1. Weekly kcal-vs-target trend on Insights; generation pass-progress UI.
+2. Error monitoring (Sentry-vs-homegrown decision still pending).
+3. Cook Mode + shared modals still old-style (editorial standard: RecipesPage).
+4. 22 deferred human UATs; `BudgetSummarySection.tsx` is dead code — delete when
+   convenient. Old-style SlotCard visuals (rounded/SaaS) could move to editorial.
+5. Consider auto-suggesting "Tidy up" after checkout, or virtualizing the
+   inventory list if large households stay slow.
 
-## How to operate (unchanged, see lessons L-036…L-045)
+## Fixture state (changed today — don't be surprised)
 
-- Frontend deploy: `npx vercel deploy --prod` (plain `npx vercel --prod` now prints
-  a JSON menu — use the `deploy` subcommand). Edge fns:
+- **Sim Family** (sim-family@nourishplan.test / SimFamily!2026): pantry tidied to
+  ~130 rows (+ "Paper towels", "Dish soap" from a batch-checkout smoke test);
+  fridge has 2 unexpired salmon-leftover containers (expire 2026-07-12); expired
+  leftovers discarded. Week 2026-07-05 plan regenerated 3× today — current plan:
+  28/28 filled, salmon at Sunday Lunch (day 0 — placed before the todayDayIndex
+  fix). Grocery list fully checked; $7.50 grocery spend logged; purse shows
+  "bought $7.50 · cooked $61.44". **plan_generations timestamps for rows before
+  2026-07-06T21:30Z were aged to 2026-07-04** to free the 10/24h rate limit —
+  fixture-only surgery; the audit's per-week spend numbers are unaffected but
+  generation-history timestamps are not trustworthy.
+- **Test Household** (claude-test@nourishplan.test / ClaudeTest!2026): leftover
+  expires 2026-07-08; week 2026-07-05 plan is Dinners-only (3-recipe catalog);
+  $12.34 grocery spend logged; chicken thighs merged into pantry.
+
+## How to operate (see lessons L-001…L-046, auto-injected)
+
+- **Frontend deploy:** `npx vercel deploy --prod` (plain `npx vercel --prod`
+  prints a JSON menu now). **Edge fns:**
   `eval "$(tr -d '\r' < .env.local | grep SUPABASE_ACCESS_TOKEN=)"` then
-  `SUPABASE_ACCESS_TOKEN=… npx supabase functions deploy <fn> --project-ref qyablbzodmftobjslgri --no-verify-jwt`
-  (in-code auth checks are present — L-041).
-- Migrations: `SUPABASE_ACCESS_TOKEN=… npx supabase db push`; regen types after:
-  `npx supabase gen types typescript --project-id qyablbzodmftobjslgri > src/types/database.gen.ts`.
-- Test accounts: claude-test@nourishplan.test / ClaudeTest!2026 (Test Household);
-  sim-family@nourishplan.test / SimFamily!2026 (Sim Family fixture).
-- L-001 worktree cleanup before vitest; kill dev servers by port (L-044).
-- A dev server may already be running on :5199 from a prior session — reuse it
-  (HMR serves current code) instead of starting another.
+  `SUPABASE_ACCESS_TOKEN=… npx supabase functions deploy generate-plan --project-ref qyablbzodmftobjslgri --no-verify-jwt`
+  (in-code auth checks present — L-041).
+- **Migrations:** same token, `npx supabase db push`; regen types after schema
+  changes: `npx supabase gen types typescript --project-id qyablbzodmftobjslgri > src/types/database.gen.ts`.
+- **generate-plan invocations often return 502 at the gateway but complete in
+  the background** — poll `plan_generations.status`, don't retry on 502 (a retry
+  burns a rate-limit slot). Rate limit: 10/household/24h.
+- **L-046 discipline:** any new prompt-level planning rule must be checked
+  against every post-pass mutation of `bestResult.slots` (slot guardrail,
+  monotony guardrail, rationale merge) and validated on Sim Family, not
+  claude-test (3-recipe catalog can't exercise slot competition).
+- Sim harness: `SIM_URL/SIM_SVC/SIM_ANON` env →
+  `npx vite-node scripts/sim-month.ts -- <setup|seed|week N|audit>`; week 4 =
+  current week; `week N` skips generation if ≥20 slots already filled.
+- L-001 worktree cleanup before vitest; kill dev servers by port (L-044);
+  a Vite server may already be running on :5199 — reuse it (HMR serves current
+  code).
+- Playwright: log out via `localStorage.clear()` then reload /auth; full-page
+  screenshots show the off-canvas More drawer as a right-edge strip (artifact,
+  not a bug). Em-dash "â€"" in curl/python terminal dumps is a Git-Bash decoding
+  artifact — verify in the rendered UI before "fixing" encoding.
