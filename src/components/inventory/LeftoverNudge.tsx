@@ -27,7 +27,7 @@ export function LeftoverNudge() {
           className="no-underline"
           style={{ display: 'block', padding: '8px 0', borderBottom: '1px dashed var(--rule-softer)' }}
         >
-          <span className="pip warn">
+          <span className="pip warn" style={{ color: 'var(--ink-dim)' }}>
             Leftover ready — {l.food_name.replace(/^Leftover:\s*/i, '')}
             {l.expires_at ? ` · use by ${formatShortDate(l.expires_at)}` : ''}
           </span>
