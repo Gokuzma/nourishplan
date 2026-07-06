@@ -166,10 +166,12 @@ describe('PlanGrid shimmer rendering during generation (Gap D)', () => {
     const mobileShimmers = mobileDay0!.querySelectorAll('[aria-hidden="true"].animate-pulse')
     expect(mobileShimmers.length).toBe(4)
 
-    // Desktop container for day 0
-    const desktopDay0 = screen.queryByTestId('shimmer-day-0-desktop')
-    expect(desktopDay0).not.toBeNull()
-    const desktopShimmers = desktopDay0!.querySelectorAll('[aria-hidden="true"].animate-pulse')
+    // Desktop cells for day 0 — one per slot row in the 7×4 grid
+    const desktopCells = screen.queryAllByTestId('shimmer-cell-0-desktop')
+    expect(desktopCells.length).toBe(4)
+    const desktopShimmers = desktopCells.flatMap(cell =>
+      Array.from(cell.querySelectorAll('[aria-hidden="true"].animate-pulse')),
+    )
     expect(desktopShimmers.length).toBe(4)
   })
 
@@ -177,18 +179,19 @@ describe('PlanGrid shimmer rendering during generation (Gap D)', () => {
     mockSlots = [makeLockedSlot(1, 'Dinner', 'Chicken Rice Bowl')]
     await renderPlanGrid()
 
-    // Desktop day 1 container should have:
+    // Desktop day 1 cells should have:
     //   - 3 SlotShimmer elements (Breakfast, Lunch, Snacks)
     //   - 1 real SlotCard referring to "Chicken Rice Bowl"
-    //   - NO dayCards[i] substitution (would cause 6+ elements)
-    const desktopDay1 = screen.queryByTestId('shimmer-day-1-desktop')
-    expect(desktopDay1).not.toBeNull()
+    const desktopCells = screen.queryAllByTestId('shimmer-cell-1-desktop')
+    expect(desktopCells.length).toBe(4)
 
-    const shimmers = desktopDay1!.querySelectorAll('[aria-hidden="true"].animate-pulse')
+    const shimmers = desktopCells.flatMap(cell =>
+      Array.from(cell.querySelectorAll('[aria-hidden="true"].animate-pulse')),
+    )
     expect(shimmers.length).toBe(3)
 
-    // The locked meal name should appear exactly once inside this day container
-    const dayText = desktopDay1!.textContent || ''
+    // The locked meal name should appear exactly once across this day's cells
+    const dayText = desktopCells.map(cell => cell.textContent || '').join('')
     const occurrences = dayText.split('Chicken Rice Bowl').length - 1
     expect(occurrences).toBe(1)
   })
@@ -202,14 +205,16 @@ describe('PlanGrid shimmer rendering during generation (Gap D)', () => {
     ]
     await renderPlanGrid()
 
-    const desktopDay2 = screen.queryByTestId('shimmer-day-2-desktop')
-    expect(desktopDay2).not.toBeNull()
+    const desktopCells = screen.queryAllByTestId('shimmer-cell-2-desktop')
+    expect(desktopCells.length).toBe(4)
 
-    const shimmers = desktopDay2!.querySelectorAll('[aria-hidden="true"].animate-pulse')
+    const shimmers = desktopCells.flatMap(cell =>
+      Array.from(cell.querySelectorAll('[aria-hidden="true"].animate-pulse')),
+    )
     expect(shimmers.length).toBe(0)
 
-    // All 4 locked meal names should appear within this day's container
-    const dayText = desktopDay2!.textContent || ''
+    // All 4 locked meal names should appear within this day's cells
+    const dayText = desktopCells.map(cell => cell.textContent || '').join('')
     expect(dayText).toContain('Vegetable Omelette')
     expect(dayText).toContain('Greek Salad')
     expect(dayText).toContain('Pasta Primavera')

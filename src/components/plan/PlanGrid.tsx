@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { Fragment, useState, useMemo, useCallback, useEffect } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -337,7 +337,7 @@ export function PlanGrid({
       map.set(hm.user_id, name)
     }
     for (const mp of memberProfiles ?? []) {
-      map.set(mp.id, mp.display_name ?? mp.id.slice(0, 8))
+      map.set(mp.id, mp.name ?? mp.id.slice(0, 8))
     }
     return map
   }, [householdMembers, memberProfiles])
@@ -764,23 +764,36 @@ export function PlanGrid({
                 <div
                   key={`gh-${i}`}
                   className="ghead"
-                  data-testid={`shimmer-day-${Math.max(0, i - 1)}-desktop`}
                   style={i === 0 ? { borderRight: '2px solid var(--rule-c)' } : undefined}
                 >
                   &nbsp;
                 </div>
               ))}
-              {DEFAULT_SLOTS.map((slotName, mi) => (
-                <>
-                  <div key={`lab-${slotName}`} className="gmeal-label">
+              {DEFAULT_SLOTS.map(slotName => (
+                <Fragment key={`row-${slotName}`}>
+                  <div className="gmeal-label">
                     <div className="lab">{slotName}</div>
                   </div>
-                  {Array.from({ length: 7 }, (_, di) => (
-                    <div key={`shim-${mi}-${di}`} className="gcell">
-                      <SlotShimmer />
-                    </div>
-                  ))}
-                </>
+                  {Array.from({ length: 7 }, (_, di) => {
+                    const slot = displaySlots.find(s => s.day_index === di && s.slot_name === slotName)
+                    return (
+                      <div key={`shim-${slotName}-${di}`} className="gcell" data-testid={`shimmer-cell-${di}-desktop`}>
+                        {slot?.is_locked && slot.meal_id ? (
+                          <SlotCard
+                            slotName={slotName}
+                            slot={slot}
+                            isLocked
+                            onAssign={() => {}}
+                            onClear={() => {}}
+                            onSwap={() => {}}
+                          />
+                        ) : (
+                          <SlotShimmer />
+                        )}
+                      </div>
+                    )
+                  })}
+                </Fragment>
               ))}
             </div>
           ) : (
