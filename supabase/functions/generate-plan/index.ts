@@ -744,6 +744,17 @@ serve(async (req) => {
               }
               parsed.slots = validVerifySlots;
               if ((parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
+                // The verify prompt has no tier-rationale rules, so its slots come
+                // back with empty rationale. Preserve the prior pass's rationale for
+                // any slot whose recipe assignment did not change.
+                const prevRationale = new Map(
+                  (bestResult.slots ?? []).map((s) => [`${s.day_index}|${s.slot_name}|${s.recipe_id}`, s.rationale]),
+                );
+                for (const s of parsed.slots) {
+                  if (!s.rationale) {
+                    s.rationale = prevRationale.get(`${s.day_index}|${s.slot_name}|${s.recipe_id}`) ?? s.rationale;
+                  }
+                }
                 bestResult = parsed;
                 suggestedRecipes = parsed.suggestedRecipes;
               }
