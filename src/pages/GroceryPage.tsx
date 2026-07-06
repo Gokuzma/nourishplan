@@ -7,7 +7,7 @@ import { useGenerateGroceryList } from '../hooks/useGenerateGroceryList'
 import { useToggleGroceryItem } from '../hooks/useToggleGroceryItem'
 import { useAddManualGroceryItem } from '../hooks/useAddManualGroceryItem'
 import { useUpdateGroceryItem, useDeleteGroceryItem } from '../hooks/useUpdateGroceryItem'
-import { useAddInventoryItem, useInventoryItems, useUpdateInventoryItem } from '../hooks/useInventory'
+import { useBulkAddInventoryItems, useInventoryItems, useUpdateInventoryItem } from '../hooks/useInventory'
 import { useCreateSpendLog } from '../hooks/useSpendLog'
 import { useMealPlan } from '../hooks/useMealPlan'
 import { getWeekStart } from '../utils/mealPlan'
@@ -16,7 +16,7 @@ import { STORE_CATEGORIES } from '../utils/groceryGeneration'
 import { ManualAddItemInput } from '../components/grocery/ManualAddItemInput'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule, Chip } from '../components/editorial'
 import { Icon } from '../components/Icon'
-import type { GroceryItem, InventoryUnit } from '../types/database'
+import type { GroceryItem, InventoryItem, InventoryUnit } from '../types/database'
 
 interface UndoToast {
   itemId: string
@@ -42,7 +42,7 @@ export function GroceryPage() {
 
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
   const [pantryStatus, setPantryStatus] = useState<'idle' | 'adding' | 'done'>('idle')
-  const addInventoryItem = useAddInventoryItem()
+  const bulkAddInventoryItems = useBulkAddInventoryItems()
   const createSpendLog = useCreateSpendLog()
   const updateInventoryItem = useUpdateInventoryItem()
   const { data: pantryItems = [] } = useInventoryItems()
@@ -102,11 +102,15 @@ export function GroceryPage() {
     if (purchased.length === 0) return
     setPantryStatus('adding')
     const validUnits: InventoryUnit[] = ['g', 'kg', 'ml', 'L', 'units']
+    // Merge into an existing pantry row of the same food instead of stacking
+    // a new row every shopping trip — keeps the inventory list readable.
+    // Batched: parallel merges + one bulk insert, not a round trip per item.
+    const today = new Date().toISOString().slice(0, 10)
+    const merges: { id: string; updates: Partial<InventoryItem> }[] = []
+    const newRows: Parameters<typeof bulkAddInventoryItems.mutateAsync>[0] = []
     for (const item of purchased) {
       const unit = validUnits.includes(item.unit as InventoryUnit) ? (item.unit as InventoryUnit) : 'units'
       const quantity = item.quantity ?? 1
-      // Merge into an existing pantry row of the same food instead of stacking
-      // a new row every shopping trip — keeps the inventory list readable.
       const existing = pantryItems.find(p =>
         p.food_name.toLowerCase() === item.food_name.toLowerCase() &&
         p.unit === unit &&
@@ -114,12 +118,12 @@ export function GroceryPage() {
         !p.is_leftover,
       )
       if (existing) {
-        await updateInventoryItem.mutateAsync({
+        merges.push({
           id: existing.id,
-          updates: { quantity_remaining: existing.quantity_remaining + quantity, purchased_at: new Date().toISOString().slice(0, 10) },
+          updates: { quantity_remaining: existing.quantity_remaining + quantity, purchased_at: today },
         })
       } else {
-        await addInventoryItem.mutateAsync({
+        newRows.push({
           food_name: item.food_name,
           food_id: item.food_id ?? undefined,
           quantity_remaining: quantity,
@@ -128,6 +132,10 @@ export function GroceryPage() {
           purchase_price: item.estimated_cost ?? null,
         })
       }
+    }
+    await Promise.all(merges.map(m => updateInventoryItem.mutateAsync(m)))
+    if (newRows.length > 0) {
+      await bulkAddInventoryItems.mutateAsync(newRows)
     }
     // Record the trip as real grocery spend so the purse tracks receipts,
     // not just what got cooked.
