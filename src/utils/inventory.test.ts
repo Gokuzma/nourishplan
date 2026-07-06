@@ -7,6 +7,7 @@ import {
   getLowStockStaples,
   getExpiringSoonItems,
   getPurchaseHistory,
+  planInventoryConsolidation,
 } from './inventory'
 import type { InventoryItem } from '../types/database'
 
@@ -240,5 +241,50 @@ describe('getPurchaseHistory', () => {
     expect(result).toHaveLength(2)
     expect(result[0]).toMatchObject({ purchased_at: '2026-03-01', purchase_price: 3.50, unit: 'kg' })
     expect(result[1]).toMatchObject({ purchased_at: '2026-03-15', purchase_price: 4.00, unit: 'kg' })
+  })
+})
+
+// ─── planInventoryConsolidation ──────────────────────────────────────────────
+
+describe('planInventoryConsolidation', () => {
+  it('merges same name/unit/location rows into the oldest, summing quantities', () => {
+    const items = [
+      makeItem({ id: 'a', food_name: 'Butter', unit: 'g', storage_location: 'pantry', purchased_at: '2026-06-01', quantity_remaining: 100 }),
+      makeItem({ id: 'b', food_name: 'butter', unit: 'g', storage_location: 'pantry', purchased_at: '2026-05-01', quantity_remaining: 200 }),
+      makeItem({ id: 'c', food_name: 'Butter', unit: 'g', storage_location: 'pantry', purchased_at: '2026-07-01', quantity_remaining: 50 }),
+    ]
+    const plan = planInventoryConsolidation(items)
+    expect(plan.duplicateCount).toBe(2)
+    expect(plan.survivors).toEqual([
+      { id: 'b', quantity_remaining: 350, expires_at: null, purchased_at: '2026-05-01' },
+    ])
+    expect(plan.removeIds.sort()).toEqual(['a', 'c'])
+  })
+
+  it('keeps the earliest expiry across merged rows', () => {
+    const items = [
+      makeItem({ id: 'a', food_name: 'Milk', purchased_at: '2026-06-01', expires_at: '2026-07-10' }),
+      makeItem({ id: 'b', food_name: 'Milk', purchased_at: '2026-06-05', expires_at: '2026-07-03' }),
+    ]
+    const plan = planInventoryConsolidation(items)
+    expect(plan.survivors[0]).toMatchObject({ id: 'a', expires_at: '2026-07-03' })
+  })
+
+  it('does not merge across unit, location, leftover flag, or removed rows', () => {
+    const items = [
+      makeItem({ id: 'a', food_name: 'Rice', unit: 'g', storage_location: 'pantry' }),
+      makeItem({ id: 'b', food_name: 'Rice', unit: 'kg', storage_location: 'pantry' }),
+      makeItem({ id: 'c', food_name: 'Rice', unit: 'g', storage_location: 'fridge' }),
+      makeItem({ id: 'd', food_name: 'Rice', unit: 'g', storage_location: 'pantry', is_leftover: true }),
+      makeItem({ id: 'e', food_name: 'Rice', unit: 'g', storage_location: 'pantry', removed_at: '2026-06-01T00:00:00Z' }),
+    ]
+    const plan = planInventoryConsolidation(items)
+    expect(plan.duplicateCount).toBe(0)
+    expect(plan.survivors).toEqual([])
+  })
+
+  it('returns an empty plan when there are no duplicates', () => {
+    const plan = planInventoryConsolidation([makeItem({ id: 'a' }), makeItem({ id: 'b', food_name: 'Other' })])
+    expect(plan).toEqual({ survivors: [], removeIds: [], duplicateCount: 0 })
   })
 })

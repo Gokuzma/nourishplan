@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
 import type { StorageLocation, InventoryItem, RemovalReason } from '../types/database'
 import type { BarcodeProduct } from '../utils/barcodeLookup'
-import { useInventoryItems, useRemoveInventoryItem } from '../hooks/useInventory'
-import { getExpiryUrgency } from '../utils/inventory'
+import { useInventoryItems, useRemoveInventoryItem, useConsolidateInventory } from '../hooks/useInventory'
+import { getExpiryUrgency, planInventoryConsolidation } from '../utils/inventory'
 import { InventoryItemRow } from '../components/inventory/InventoryItemRow'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
 import { BarcodeScanner } from '../components/inventory/BarcodeScanner'
@@ -29,6 +29,12 @@ export function InventoryPage() {
   const { data: fridgeItems = [] } = useInventoryItems('fridge')
   const { data: freezerItems = [] } = useInventoryItems('freezer')
   const removeItem = useRemoveInventoryItem()
+  const consolidate = useConsolidateInventory()
+
+  const consolidationPlan = useMemo(
+    () => planInventoryConsolidation([...pantryItems, ...fridgeItems, ...freezerItems]),
+    [pantryItems, fridgeItems, freezerItems]
+  )
 
   const counts = {
     pantry: pantryItems.length,
@@ -121,6 +127,27 @@ export function InventoryPage() {
           >
             {urgent.map(u => u.food_name).join(' · ')} — expiring within 2 days
           </div>
+        </div>
+      )}
+
+      {/* Duplicate rows band — repeated shopping trips used to stack one row
+          per purchase; offer a one-tap merge */}
+      {consolidationPlan.duplicateCount >= 2 && (
+        <div
+          className="flex items-center justify-between gap-3 flex-wrap no-print"
+          style={{ padding: '12px 16px', border: '1.5px dashed var(--rule-c)', marginTop: 14 }}
+        >
+          <span className="mono" style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-dim)' }}>
+            {consolidationPlan.duplicateCount} duplicate rows of the same items
+          </span>
+          <button
+            type="button"
+            onClick={() => consolidate.mutate(consolidationPlan)}
+            disabled={consolidate.isPending}
+            className="btn btn-sm"
+          >
+            {consolidate.isPending ? 'Tidying…' : 'Tidy up'}
+          </button>
         </div>
       )}
 

@@ -543,7 +543,7 @@ export type Database = {
 
 export type StorageLocation = 'pantry' | 'fridge' | 'freezer'
 export type InventoryUnit = 'g' | 'kg' | 'ml' | 'L' | 'units'
-export type RemovalReason = 'used' | 'discarded'
+export type RemovalReason = 'used' | 'discarded' | 'merged'
 
 export interface InventoryItem {
   id: string

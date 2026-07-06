@@ -150,6 +150,47 @@ export function getExpiringSoonItems(items: InventoryItem[], _withinDays = 7): I
   })
 }
 
+export interface ConsolidationPlan {
+  survivors: { id: string; quantity_remaining: number; expires_at: string | null; purchased_at: string }[]
+  removeIds: string[]
+  duplicateCount: number
+}
+
+/**
+ * Plans a merge of duplicate inventory rows: active, non-leftover items sharing
+ * (name, unit, location) collapse into the oldest row (FIFO-conservative) with
+ * summed quantity and the earliest known expiry. Repeated shopping trips used
+ * to stack a new row per purchase, leaving hundreds of duplicates.
+ */
+export function planInventoryConsolidation(items: InventoryItem[]): ConsolidationPlan {
+  const groups = new Map<string, InventoryItem[]>()
+  for (const item of items) {
+    if (item.removed_at !== null || item.is_leftover) continue
+    const key = `${item.food_name.toLowerCase()}|${item.unit}|${item.storage_location}`
+    const group = groups.get(key) ?? []
+    group.push(item)
+    groups.set(key, group)
+  }
+
+  const survivors: ConsolidationPlan['survivors'] = []
+  const removeIds: string[] = []
+  for (const group of groups.values()) {
+    if (group.length < 2) continue
+    const sorted = [...group].sort((a, b) => a.purchased_at.localeCompare(b.purchased_at))
+    const [survivor, ...rest] = sorted
+    const expiries = group.map(i => i.expires_at).filter((e): e is string => e !== null)
+    survivors.push({
+      id: survivor.id,
+      quantity_remaining: group.reduce((sum, i) => sum + i.quantity_remaining, 0),
+      expires_at: expiries.length > 0 ? expiries.sort()[0] : null,
+      purchased_at: survivor.purchased_at,
+    })
+    removeIds.push(...rest.map(i => i.id))
+  }
+
+  return { survivors, removeIds, duplicateCount: removeIds.length }
+}
+
 /**
  * Returns the purchase history for items matching a food_id (includes removed items).
  */

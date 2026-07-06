@@ -5,6 +5,7 @@ import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
 import type { InventoryItem, StorageLocation, InventoryUnit, RemovalReason } from '../types/database'
 import { normaliseToCostPer100g } from '../utils/cost'
+import type { ConsolidationPlan } from '../utils/inventory'
 import { useSaveFoodPrice } from './useFoodPrices'
 
 export function useInventoryItems(location?: StorageLocation) {
@@ -125,6 +126,35 @@ export function useUpdateInventoryItem() {
         .single()
       if (error) throw error
       return data
+    },
+    onSuccess: () => {
+      const householdId = membership?.household_id
+      queryClient.invalidateQueries({ queryKey: ['inventory', householdId] })
+    },
+  })
+}
+
+export function useConsolidateInventory() {
+  const queryClient = useQueryClient()
+  const { data: membership } = useHousehold()
+
+  return useMutation({
+    mutationFn: async (plan: ConsolidationPlan) => {
+      for (const survivor of plan.survivors) {
+        const { error } = await supabase
+          .from('inventory_items')
+          .update({ quantity_remaining: survivor.quantity_remaining, expires_at: survivor.expires_at })
+          .eq('id', survivor.id)
+        if (error) throw error
+      }
+      if (plan.removeIds.length > 0) {
+        const { error } = await supabase
+          .from('inventory_items')
+          .update({ removed_at: new Date().toISOString(), removed_reason: 'merged' })
+          .in('id', plan.removeIds)
+        if (error) throw error
+      }
+      return plan.duplicateCount
     },
     onSuccess: () => {
       const householdId = membership?.household_id
