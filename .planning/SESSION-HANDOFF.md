@@ -31,16 +31,29 @@ CI green, 385 tests passing, `tsc -b` 0 errors. Read top-to-bottom before contin
    'Uses up leftover — expires {date}'. Today page shows a "Leftover ready" nudge
    (`LeftoverNudge`, both layouts, links to /inventory).
 
-## Needs validation next session
+## Validated + playtested 2026-07-06 (second pass)
 
-- **Leftover→Lunch behaviour on a real catalog.** The only live test was the
-  claude-test household (3 dinner-only recipes) — the model filled only Dinner
-  slots, so the rule wasn't meaningfully exercised. Run the Sim Family week
-  (`npx vite-node scripts/sim-month.ts -- week N`) with an unexpired leftover in
-  its inventory and check a Lunch slot picks up the matching recipe + rationale.
-- Test-household state changed tonight: its leftover now expires **2026-07-08**,
-  fridge has a plan for week 2026-07-05 (Dinners only), grocery list has one
-  checked+pantry'd item (Chicken thighs, $12.34 logged as grocery spend).
+- **Leftover→Lunch VALIDATED on Sim Family** (33 recipes): first run exposed that
+  the deterministic meal_types guardrail replaced the leftover placement
+  ("Slot-corrected to a Lunch recipe") — fixed with a data-verified exemption
+  (L-046), redeployed, re-ran: salmon leftover landed on Monday Lunch with
+  'Uses up leftover — expires 2026-07-12' and survived. Note: freeing the
+  10/24h generation rate limit required aging Sim Family's plan_generations
+  timestamps (service key) — legitimate for the fixture only.
+- **Purse split verified live**: after checking off a $7.50 trip, strip shows
+  "SPENT $7.50 / $220 · BOUGHT $7.50 · COOKED $61.44".
+- **Playtest fixes shipped**: inventory "Tidy up" (690→128 rows live, migration
+  034 `removed_reason='merged'`); leftover-nudge dedupe + suffix strip; SlotCard
+  "svg"→"serv" + 2-line title clamp.
+- Playtest findings NOT yet fixed (candidates): add-to-pantry does sequential
+  per-item mutations (slow for big trips — batch it); plan monotony (model
+  repeated Penne Arrabbiata 4× despite rule 6 — consider a deterministic repeat
+  guardrail); mobile SlotCard still shows 6 icon buttons per row (consider an
+  overflow menu); Sim Family fridge holds 4 expired-but-active leftovers
+  (no cleanup path for expired items beyond manual remove).
+- Test-household state: leftover expires **2026-07-08**, week 2026-07-05 plan is
+  Dinners-only, $12.34 grocery spend logged. Sim Family pantry is tidied (128
+  rows); its week 2026-07-05 plan was regenerated twice today.
 
 ## Open work — prioritized
 
