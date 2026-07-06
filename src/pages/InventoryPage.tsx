@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import type { StorageLocation, InventoryItem, RemovalReason } from '../types/database'
 import type { BarcodeProduct } from '../utils/barcodeLookup'
-import { useInventoryItems, useRemoveInventoryItem, useConsolidateInventory } from '../hooks/useInventory'
+import { useInventoryItems, useRemoveInventoryItem, useConsolidateInventory, useDiscardInventoryItems } from '../hooks/useInventory'
 import { getExpiryUrgency, planInventoryConsolidation } from '../utils/inventory'
 import { InventoryItemRow } from '../components/inventory/InventoryItemRow'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
@@ -30,9 +30,17 @@ export function InventoryPage() {
   const { data: freezerItems = [] } = useInventoryItems('freezer')
   const removeItem = useRemoveInventoryItem()
   const consolidate = useConsolidateInventory()
+  const discardItems = useDiscardInventoryItems()
 
   const consolidationPlan = useMemo(
     () => planInventoryConsolidation([...pantryItems, ...fridgeItems, ...freezerItems]),
+    [pantryItems, fridgeItems, freezerItems]
+  )
+
+  const expiredItems = useMemo(
+    () => [...pantryItems, ...fridgeItems, ...freezerItems].filter(
+      i => getExpiryUrgency(i.expires_at ?? null) === 'expired'
+    ),
     [pantryItems, fridgeItems, freezerItems]
   )
 
@@ -147,6 +155,27 @@ export function InventoryPage() {
             className="btn btn-sm"
           >
             {consolidate.isPending ? 'Tidying…' : 'Tidy up'}
+          </button>
+        </div>
+      )}
+
+      {/* Expired items band — expired food otherwise sits on the books forever */}
+      {expiredItems.length > 0 && (
+        <div
+          className="flex items-center justify-between gap-3 flex-wrap no-print"
+          style={{ padding: '12px 16px', border: '1.5px dashed var(--tomato)', marginTop: 14 }}
+        >
+          <span className="mono" style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-dim)' }}>
+            {expiredItems.length} expired item{expiredItems.length === 1 ? '' : 's'} still on the books
+          </span>
+          <button
+            type="button"
+            onClick={() => discardItems.mutate(expiredItems.map(i => i.id))}
+            disabled={discardItems.isPending}
+            className="btn btn-sm"
+            style={{ color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
+          >
+            {discardItems.isPending ? 'Discarding…' : 'Discard expired'}
           </button>
         </div>
       )}
