@@ -53,6 +53,7 @@ function calcSlotNutrition(meal: (Meal & { meal_items: MealItem[] }) | null) {
 
 function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, onSuggestAlternative, suggestions, currentUserId, memberTarget, isLocked, onToggleLock, violationCount, hasAllergyViolation, scheduleStatus, scheduleTooltip, isFreezerFriendly, onCook }: SlotCardProps & { slot: SlotWithMeal }) {
   const [expanded, setExpanded] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const tooltipId = `rationale-${slot.id}`
   const generation_rationale = slot.generation_rationale ?? null
@@ -177,41 +178,6 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
           {onToggleLock && (
             <LockBadge isLocked={!!isLocked} onToggle={onToggleLock} />
           )}
-          {onLog && (
-            <button
-              onClick={e => { e.stopPropagation(); onLog() }}
-              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
-              aria-label="Log meal"
-              title="Log meal"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M8 2v12M2 8h12" />
-              </svg>
-            </button>
-          )}
-          {onSuggestAlternative && (
-            <button
-              onClick={e => { e.stopPropagation(); onSuggestAlternative() }}
-              className="p-1 rounded text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
-              aria-label="Suggest alternative"
-              title="Suggest alternative"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M2 8a6 6 0 1 0 12 0" strokeLinecap="round" />
-                <path d="M12 4l2 2-2 2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          )}
-          <button
-            onClick={e => { e.stopPropagation(); onSwap() }}
-            className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
-            aria-label="Change meal"
-            title="Change meal"
-          >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M11 2l3 3-8 8H3v-3L11 2z" />
-            </svg>
-          </button>
           {onCook && (
             <button
               type="button"
@@ -226,16 +192,50 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
               </svg>
             </button>
           )}
-          <button
-            onClick={e => { e.stopPropagation(); onClear() }}
-            className="p-1 rounded text-text/30 hover:text-red-500 hover:bg-red-50 transition-colors"
-            aria-label="Remove meal"
-            title="Remove meal"
-          >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M3 3l10 10M13 3L3 13" />
-            </svg>
-          </button>
+          {/* Overflow — secondary actions live here so the title keeps its room */}
+          <div className="relative">
+            <button
+              onClick={e => { e.stopPropagation(); setMenuOpen(o => !o) }}
+              className="p-1 rounded text-text/40 hover:text-primary hover:bg-primary/10 transition-colors"
+              aria-label={`More actions for ${slotName}`}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              title="More actions"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="3" cy="8" r="1.3" />
+                <circle cx="8" cy="8" r="1.3" />
+                <circle cx="13" cy="8" r="1.3" />
+              </svg>
+            </button>
+            {menuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={e => { e.stopPropagation(); setMenuOpen(false) }}
+                  aria-hidden="true"
+                />
+                <div className="menu-pop" role="menu">
+                  {onLog && (
+                    <button role="menuitem" onClick={e => { e.stopPropagation(); setMenuOpen(false); onLog() }}>
+                      Log meal
+                    </button>
+                  )}
+                  {onSuggestAlternative && (
+                    <button role="menuitem" onClick={e => { e.stopPropagation(); setMenuOpen(false); onSuggestAlternative() }}>
+                      Suggest alternative
+                    </button>
+                  )}
+                  <button role="menuitem" onClick={e => { e.stopPropagation(); setMenuOpen(false); onSwap() }}>
+                    Change meal
+                  </button>
+                  <button role="menuitem" className="danger" onClick={e => { e.stopPropagation(); setMenuOpen(false); onClear() }}>
+                    Remove meal
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       {generation_rationale && (
