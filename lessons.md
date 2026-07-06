@@ -322,3 +322,15 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** Node runtime global takes precedence over the jsdom environment global; the stub has no `clear`/`setItem` methods.
 **Rule:** `tests/setup.ts` defines a Map-backed `localStorage` on `globalThis` (mirroring the existing `matchMedia` mock). If storage-related tests fail with "not a function" after a Node upgrade, suspect runtime-global shadowing before blaming the test or source.
 **Applies to:** `tests/setup.ts`, vitest runs after Node version changes.
+
+### L-043: Supabase Management API returns secret DIGESTS, not values; per-household edge-fn work needs admin-minted sessions
+**Bug:** Planned to read `ANTHROPIC_API_KEY` via `GET /v1/projects/<ref>/secrets` to run a cross-household backfill locally — the endpoint returns SHA-256 digests (64-hex), not plaintext, so the plan was impossible.
+**Root cause:** The secrets endpoint is for existence/rotation checks, not retrieval; secret values are only available inside deployed functions via `Deno.env`.
+**Rule:** For admin work that must run per-household through an edge function (e.g. `recipe-supply` classify), mint a session for a member of that household instead: `POST /auth/v1/admin/generate_link` (type `magiclink`, service key auth) → take `hashed_token` → `POST /auth/v1/verify` (`{type:'magiclink', token_hash}`, anon key) → use the returned `access_token` to invoke the function. Works for any household without exposing secrets.
+**Applies to:** cross-household data backfills, admin scripts, any "run this AI function for every household" task.
+
+### L-044: Never `taskkill //IM node.exe` on this machine — the Claude Code harness itself runs on node
+**Bug:** Attempted to stop a dev server with a broad `taskkill //F //IM node.exe` — which, had the filter matched, would have killed the harness session mid-task.
+**Root cause:** Vite, vitest, edge tooling AND the agent harness are all node processes; image-name kills are indiscriminate.
+**Rule:** Kill dev servers by port, never by image name: `Get-NetTCPConnection -LocalPort <port> -State Listen` → `Stop-Process -Id (…OwningProcess)`. Same for any long-running local server.
+**Applies to:** stopping `npx vite`, vitest watchers, preview servers on Windows.
