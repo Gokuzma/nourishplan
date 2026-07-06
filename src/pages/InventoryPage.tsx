@@ -140,15 +140,15 @@ export function InventoryPage() {
             >
               <Icon name={tab.icon} size={16} />
               <span>{tab.label}</span>
-              <span className="n">· {counts[tab.value]}</span>
+              <span className="n">{counts[tab.value]}</span>
             </button>
           ))}
         </div>
         <div className="flex items-center gap-2 no-print pb-2">
-          <button type="button" onClick={() => setShowScanner(true)} className="btn btn-sm" aria-label="Scan barcode">
+          <button type="button" onClick={() => { setShowQuickScan(false); setShowScanner(true) }} className="btn btn-sm" aria-label="Scan barcode">
             <Icon name="search" size={14} /> Scan
           </button>
-          <button type="button" onClick={() => setShowQuickScan(true)} className="btn btn-sm">
+          <button type="button" onClick={() => { setShowScanner(false); setShowQuickScan(true) }} className="btn btn-sm">
             Quick scan
           </button>
           <button

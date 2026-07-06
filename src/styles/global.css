@@ -134,7 +134,9 @@
   opacity: var(--grain-opacity);
   z-index: 0;
 }
-.paper > * { position: relative; z-index: 1; }
+/* Lift children above the grain — but never flatten fixed overlays (modals,
+   scanners): this unlayered rule outranks Tailwind's layered `fixed` utility. */
+.paper > *:not(.fixed) { position: relative; z-index: 1; }
 
 /* Typography helpers */
 .serif { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.015em; }
@@ -725,6 +727,7 @@
 }
 .tabs .t {
   padding: 14px 18px;
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
@@ -745,6 +748,10 @@
   margin-left: 6px;
   color: var(--ink-soft);
   font-family: var(--font-mono);
+}
+@media (max-width: 480px) {
+  .tabs .t { padding: 14px 8px; }
+  .tabs .t .n { margin-left: 4px; }
 }
 .tabs .t.active {
   color: var(--tomato);
