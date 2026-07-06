@@ -41,6 +41,35 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // Verify the caller belongs to the household they are writing to.
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Authorization required" }),
+        { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid auth token" }),
+        { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+    const { data: callerMembership } = await adminClient
+      .from("household_members")
+      .select("household_id")
+      .eq("user_id", user.id)
+      .eq("household_id", householdId)
+      .limit(1)
+      .single();
+    if (!callerMembership) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not a member of this household" }),
+        { status: 403, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+
     // Validate that memberId belongs to the caller's household
     if (memberType === "user") {
       const { data: member } = await adminClient

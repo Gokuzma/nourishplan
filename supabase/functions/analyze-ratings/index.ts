@@ -34,10 +34,39 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // Verify the caller belongs to the household they are analyzing.
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Authorization required" }),
+        { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid auth token" }),
+        { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+    const { data: callerMembership } = await adminClient
+      .from("household_members")
+      .select("household_id")
+      .eq("user_id", user.id)
+      .eq("household_id", householdId)
+      .limit(1)
+      .single();
+    if (!callerMembership) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not a member of this household" }),
+        { status: 403, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
+
     // Fetch ratings for the household
     const { data: ratings, error: ratingsError } = await adminClient
       .from("recipe_ratings")
-      .select("recipe_id, recipe_name, rating, member_user_id")
+      .select("recipe_id, recipe_name, rating, rated_by_user_id, rated_by_member_profile_id")
       .eq("household_id", householdId);
 
     if (ratingsError) throw ratingsError;
@@ -88,10 +117,12 @@ serve(async (req) => {
 
     const aiResult = await anthropicResponse.json();
     const content = aiResult.content?.[0]?.text ?? "{}";
+    // The model may wrap JSON in prose or markdown fences — extract the object.
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
 
     let parsed: { tags?: { recipe_id: string; tag: string; confidence: number }[] } = {};
     try {
-      parsed = JSON.parse(content);
+      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : content);
     } catch {
       return new Response(
         JSON.stringify({ success: false, error: "Failed to parse AI response" }),
@@ -127,8 +158,11 @@ serve(async (req) => {
       { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
     );
   } catch (err) {
+    const message = err instanceof Error
+      ? err.message
+      : (err as { message?: string })?.message ?? JSON.stringify(err);
     return new Response(
-      JSON.stringify({ success: false, error: String(err) }),
+      JSON.stringify({ success: false, error: message }),
       { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
     );
   }
