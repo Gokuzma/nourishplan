@@ -85,7 +85,7 @@ Rules:
 1. Convert ALL ingredient quantities to grams.
 2. Use realistic per-100g nutritional values.
 3. For the category field, choose from: meat, poultry, fish, vegetables, legumes, grains, dairy, other.
-4. meal_types: pick the slot(s) this recipe naturally fits. Most recipes get exactly one (a soup is Dinner, oatmeal is Breakfast). Allow two only when genuinely flexible: a salad → ["Lunch", "Dinner"], a frittata → ["Breakfast", "Lunch"], hummus → ["Snacks", "Lunch"]. Return [] if truly slot-agnostic. Never put soups, stews, curries, or chili in Breakfast.
+4. meal_types: pick the slot(s) this recipe naturally fits. Most recipes get EXACTLY ONE slot; allow two ONLY when genuinely flexible: a salad → ["Lunch", "Dinner"], a frittata → ["Breakfast", "Lunch"], hummus → ["Snacks", "Lunch"]. NEVER three. Breakfast is STRICT: tag Breakfast ONLY for genuine breakfast foods — eggs, oatmeal/porridge, yogurt or smoothie bowls, smoothies, pancakes/waffles/French toast, breakfast pastries, breakfast wraps/burritos, cereal/granola. Breads and flatbreads (roti, naan, biscuits, rolls), plain sides, mains, soups, stews, curries, and chili are NEVER Breakfast. Return [] only if truly slot-agnostic.
 5. If content is too vague to extract a recipe, return { "error": "Could not extract recipe" }.
 6. Return ONLY the JSON object — no prose, no markdown fences.`;
 
