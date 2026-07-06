@@ -270,7 +270,8 @@ describe('useCookCompletion (Phase 26, INVT-05/INVT-06/BUDG-03)', () => {
         servings: 1,
         ingredients: [
           makeIngredient({ id: 'ri-1', ingredient_id: 'ing-1', quantity_grams: 100 }),  // priced
-          makeIngredient({ id: 'ri-2', ingredient_id: 'ing-unknown', quantity_grams: 50 }), // unpriced
+          // unpriced: unknown id AND unknown name (name fallback would price a same-name ingredient)
+          makeIngredient({ id: 'ri-2', ingredient_id: 'ing-unknown', ingredient_name: 'Saffron', quantity_grams: 50 }),
         ],
       })
     })
