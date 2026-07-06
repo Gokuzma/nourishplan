@@ -22,6 +22,8 @@ import type { RecipeStep } from '../types/database'
 import { useRecipe, useRecipeIngredients } from '../hooks/useRecipes'
 import { useMeal } from '../hooks/useMeals'
 import { useCookCompletion } from '../hooks/useCookCompletion'
+import { useRateMeal } from '../hooks/useRatings'
+import { useHousehold } from '../hooks/useHousehold'
 import { CookDeductionReceipt } from '../components/inventory/CookDeductionReceipt'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
 import type { DeductionResult } from '../hooks/useInventoryDeduct'
@@ -98,6 +100,9 @@ export function CookModePage() {
   const [deductionResult, setDeductionResult] = useState<DeductionResult | null>(null)
   const [showLeftoverModal, setShowLeftoverModal] = useState(false)
   const [leftoverContext, setLeftoverContext] = useState<{ recipeName: string; recipeId: string } | null>(null)
+  const [hasRated, setHasRated] = useState(false)
+  const rateMeal = useRateMeal()
+  const { data: cookMembership } = useHousehold()
   const { data: recipeStepsData } = useRecipeSteps(recipeIdForSteps)
   const liveSteps: RecipeStep[] = recipeStepsData?.instructions ?? []
 
@@ -603,6 +608,21 @@ export function CookModePage() {
           if (!showLeftoverModal) navigate(-1)
         }}
         onSaveLeftover={() => setShowLeftoverModal(true)}
+        rated={hasRated}
+        onRate={
+          cookMembership?.household_id && authSession?.user.id
+            ? (rating) => {
+                setHasRated(true)
+                rateMeal.mutate({
+                  householdId: cookMembership.household_id,
+                  recipeId: leftoverContext.recipeId,
+                  recipeName: leftoverContext.recipeName,
+                  rating,
+                  userId: authSession.user.id,
+                })
+              }
+            : undefined
+        }
       />
     )}
     {showLeftoverModal && leftoverContext && (

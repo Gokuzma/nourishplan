@@ -694,6 +694,14 @@ export function PlanGrid({
           {latestGeneration?.completed_at && (
             <GenerationJobBadge completedAt={latestGeneration.completed_at} />
           )}
+          {!isGenerating && slots.some(s => s.meal_id) && (
+            <button
+              onClick={() => navigate('/grocery')}
+              className="btn btn-sm"
+            >
+              Generate grocery list →
+            </button>
+          )}
         </div>
 
         {(isGenerating || isTimeout) && (

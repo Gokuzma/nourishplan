@@ -6,14 +6,16 @@ interface CookDeductionReceiptProps {
   result: DeductionResult
   onClose: () => void
   onSaveLeftover?: () => void
+  onRate?: (rating: number) => void
+  rated?: boolean
 }
 
-export function CookDeductionReceipt({ mealName, result, onClose, onSaveLeftover }: CookDeductionReceiptProps) {
-  // Auto-dismiss after 8 seconds
+export function CookDeductionReceipt({ mealName, result, onClose, onSaveLeftover, onRate, rated }: CookDeductionReceiptProps) {
+  // Auto-dismiss — longer when a rating is being offered so there's time to tap
   useEffect(() => {
-    const timer = setTimeout(onClose, 8000)
+    const timer = setTimeout(onClose, onRate && !rated ? 20000 : 8000)
     return () => clearTimeout(timer)
-  }, [onClose])
+  }, [onClose, onRate, rated])
 
   return (
     <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] inset-x-0 mx-4 bg-surface border border-secondary rounded-[--radius-card] p-4 shadow-xl z-50">
@@ -49,6 +51,30 @@ export function CookDeductionReceipt({ mealName, result, onClose, onSaveLeftover
             </li>
           ))}
         </ul>
+      )}
+
+      {onRate && (
+        <div className="mb-2 pt-2 border-t border-secondary">
+          {rated ? (
+            <p className="text-sm text-text/60">Thanks — noted for next week's plan.</p>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-text/60">How was it?</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    onClick={() => onRate(star)}
+                    className="text-xl leading-none text-primary/40 hover:text-primary transition-colors"
+                    aria-label={`Rate ${star} star${star === 1 ? '' : 's'}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="flex justify-end gap-2 mt-2">

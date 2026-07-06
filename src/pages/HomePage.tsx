@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useHousehold } from '../hooks/useHousehold'
 import { useFoodLogs, useBulkInsertFoodLogs, useUpdateFoodLog, useDeleteFoodLog } from '../hooks/useFoodLogs'
@@ -47,23 +48,6 @@ function formatDateLong(dateStr: string): string {
   const month = date.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' })
   const year = date.getUTCFullYear()
   return `${day} · ${dayN} ${month} ${year}`.toUpperCase()
-}
-
-function formatDateShort(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(Date.UTC(y, m - 1, d))
-  const day = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })
-  const dayN = date.getUTCDate()
-  const month = date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
-  return `${day} · ${dayN} ${month}`.toUpperCase()
-}
-
-// Issue number — purely decorative, derived from days since 2024-01-01.
-function issueNumber(dateStr: string): number {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = Date.UTC(y, m - 1, d)
-  const epoch = Date.UTC(2024, 0, 1)
-  return Math.max(1, Math.floor((date - epoch) / 86400000))
 }
 
 interface NBarProps {
@@ -299,9 +283,9 @@ export function HomePage() {
       </div>
       {/* Story head */}
       <StoryHead
-        kicker="HOME"
+        kicker="TODAY"
         headline="The Daily"
-        byline={calPct != null ? `${Math.round(totals.calories).toLocaleString()} of ${Math.round(target!.calories).toLocaleString()} kcal\n${calPct}% to target` : null}
+        byline={calPct != null ? `${Math.round(totals.calories).toLocaleString()} of ${Math.round(target?.calories ?? 0).toLocaleString()} kcal\n${calPct}% to target` : null}
         size="sm"
       />
 
@@ -450,6 +434,11 @@ export function HomePage() {
                       {Math.round(tonightSlot.meals.meal_items.reduce((s, i) => s + i.calories_per_100g * i.quantity_grams / 100, 0))} kcal
                     </div>
                   )}
+                  {tonightSlot.meal_id && (
+                    <Link to={`/cook/${tonightSlot.meal_id}`} className="btn btn-primary btn-sm mt-3 inline-flex no-underline">
+                      Cook this →
+                    </Link>
+                  )}
                 </div>
               </>
             )}
@@ -522,6 +511,11 @@ export function HomePage() {
                 <div className="serif" style={{ fontSize: 22, lineHeight: 1.05 }}>
                   {tonightSlot.meals?.name ?? '—'}
                 </div>
+                {tonightSlot.meal_id && (
+                  <Link to={`/cook/${tonightSlot.meal_id}`} className="btn btn-primary btn-sm mt-3 inline-flex no-underline">
+                    Cook this →
+                  </Link>
+                )}
               </div>
             </>
           )}

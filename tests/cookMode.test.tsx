@@ -206,6 +206,7 @@ describe('CookDeductionReceipt leftover button (Phase 26, INVT-06)', () => {
 
   it('preserves the existing Done button and auto-dismiss timer', () => {
     expect(source).toContain('Done')
-    expect(source).toContain('setTimeout(onClose, 8000)')
+    // Timer extends to 20s while a rating is offered, 8s otherwise
+    expect(source).toContain("setTimeout(onClose, onRate && !rated ? 20000 : 8000)")
   })
 })

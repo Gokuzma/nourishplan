@@ -7,6 +7,7 @@ import { useGenerateGroceryList } from '../hooks/useGenerateGroceryList'
 import { useToggleGroceryItem } from '../hooks/useToggleGroceryItem'
 import { useAddManualGroceryItem } from '../hooks/useAddManualGroceryItem'
 import { useUpdateGroceryItem, useDeleteGroceryItem } from '../hooks/useUpdateGroceryItem'
+import { useAddInventoryItem } from '../hooks/useInventory'
 import { useMealPlan } from '../hooks/useMealPlan'
 import { getWeekStart } from '../utils/mealPlan'
 import { formatCost } from '../utils/cost'
@@ -14,7 +15,7 @@ import { STORE_CATEGORIES } from '../utils/groceryGeneration'
 import { ManualAddItemInput } from '../components/grocery/ManualAddItemInput'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule, Chip } from '../components/editorial'
 import { Icon } from '../components/Icon'
-import type { GroceryItem } from '../types/database'
+import type { GroceryItem, InventoryUnit } from '../types/database'
 
 interface UndoToast {
   itemId: string
@@ -39,6 +40,8 @@ export function GroceryPage() {
   const deleteItem = useDeleteGroceryItem()
 
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
+  const [pantryStatus, setPantryStatus] = useState<'idle' | 'adding' | 'done'>('idle')
+  const addInventoryItem = useAddInventoryItem()
   const [collapseHave, setCollapseHave] = useState(true)
   const [undoToast, setUndoToast] = useState<UndoToast | null>(null)
   const [undoTimerId, setUndoTimerId] = useState<ReturnType<typeof setTimeout> | null>(null)
@@ -88,6 +91,24 @@ export function GroceryPage() {
 
   function handleGenerate() {
     generateMutation.mutate()
+  }
+
+  async function handleAddToPantry() {
+    const purchased = needToBuy.filter(i => i.is_checked)
+    if (purchased.length === 0) return
+    setPantryStatus('adding')
+    const validUnits: InventoryUnit[] = ['g', 'kg', 'ml', 'L', 'units']
+    for (const item of purchased) {
+      await addInventoryItem.mutateAsync({
+        food_name: item.food_name,
+        food_id: item.food_id ?? undefined,
+        quantity_remaining: item.quantity ?? 1,
+        unit: validUnits.includes(item.unit as InventoryUnit) ? (item.unit as InventoryUnit) : 'units',
+        storage_location: 'pantry',
+        purchase_price: item.estimated_cost ?? null,
+      })
+    }
+    setPantryStatus('done')
   }
 
   function handleRegenerate() {
@@ -198,7 +219,22 @@ export function GroceryPage() {
 
               {/* Regenerate button (top right) */}
               {!showRegenerateConfirm && (
-                <div className="flex justify-end mt-3">
+                <div className="flex justify-end gap-2 mt-3">
+                  {checkedCount > 0 && pantryStatus !== 'done' && (
+                    <button
+                      type="button"
+                      onClick={handleAddToPantry}
+                      disabled={pantryStatus === 'adding'}
+                      className="btn btn-sm"
+                    >
+                      {pantryStatus === 'adding' ? 'Adding…' : `Add ${checkedCount} purchased to pantry`}
+                    </button>
+                  )}
+                  {pantryStatus === 'done' && (
+                    <span className="mono self-center" style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>
+                      Added to pantry ✓
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => setShowRegenerateConfirm(true)}

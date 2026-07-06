@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { MEAL_SLOTS, type MealSlot } from '../../utils/recipeSupply'
 import { calcPerServingMacros } from '../../utils/recipeMacros'
 import {
@@ -187,6 +188,15 @@ export function DiscoverRecipesModal({ onClose }: DiscoverRecipesModalProps) {
             >
               {busy ? 'Dreaming up recipes…' : 'Suggest more'}
             </button>
+            {addedNames.size > 0 && (
+              <Link
+                to="/plan"
+                className="btn btn-primary btn-sm mt-2 w-full no-underline"
+                style={{ justifyContent: 'center' }}
+              >
+                {addedNames.size} added — go plan the week →
+              </Link>
+            )}
           </>
         )}
       </div>
