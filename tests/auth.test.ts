@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 
 // Mock supabase module
 vi.mock('../src/lib/supabase', () => ({
@@ -35,7 +36,7 @@ describe('signup', () => {
       error: null,
     } as any)
 
-    render(React.createElement(AuthForm, null))
+    render(React.createElement(MemoryRouter, null, React.createElement(AuthForm, null)))
 
     // Should start in login mode — toggle to signup
     const toggleBtn = screen.getByRole('button', { name: /sign up/i })
@@ -67,7 +68,7 @@ describe('signup', () => {
       error: null,
     } as any)
 
-    render(React.createElement(AuthForm, null))
+    render(React.createElement(MemoryRouter, null, React.createElement(AuthForm, null)))
 
     const emailInput = screen.getByPlaceholderText(/email/i)
     const passwordInput = screen.getByPlaceholderText(/password/i)
@@ -92,7 +93,7 @@ describe('signup', () => {
       error: null,
     } as any)
 
-    render(React.createElement(AuthForm, null))
+    render(React.createElement(MemoryRouter, null, React.createElement(AuthForm, null)))
 
     const googleBtn = screen.getByRole('button', { name: /google/i })
     await userEvent.click(googleBtn)

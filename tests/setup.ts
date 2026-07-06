@@ -15,6 +15,21 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 })
 
+// Replace Node 25's built-in localStorage stub (broken without --localstorage-file)
+// with a working Map-backed implementation so jsdom tests can use it.
+const storageBacking = new Map<string, string>()
+Object.defineProperty(globalThis, 'localStorage', {
+  writable: true,
+  value: {
+    getItem: (key: string) => storageBacking.get(key) ?? null,
+    setItem: (key: string, value: string) => { storageBacking.set(key, String(value)) },
+    removeItem: (key: string) => { storageBacking.delete(key) },
+    clear: () => { storageBacking.clear() },
+    key: (i: number) => [...storageBacking.keys()][i] ?? null,
+    get length() { return storageBacking.size },
+  },
+})
+
 // Mock IntersectionObserver — not implemented in jsdom (used by DayCarousel)
 global.IntersectionObserver = class IntersectionObserver {
   observe() {}
