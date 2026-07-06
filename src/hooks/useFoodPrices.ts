@@ -74,14 +74,21 @@ export function useDeleteFoodPrice() {
 
 /**
  * Helper: find the price for a given ingredient from the loaded prices list.
+ * Matches by food_id first, then by name — AI-generated recipes mint a new
+ * ingredient_id every generation, so an id-only match loses saved prices.
  * Returns null if no price exists. If multiple stores have prices, returns the first.
  */
 export function getPriceForIngredient(
   prices: FoodPrice[],
   ingredientId: string,
-  preferredStore?: string
+  preferredStore?: string,
+  ingredientName?: string | null
 ): number | null {
-  const matching = prices.filter(p => p.food_id === ingredientId)
+  let matching = prices.filter(p => p.food_id === ingredientId)
+  if (matching.length === 0 && ingredientName) {
+    const nameLower = ingredientName.toLowerCase()
+    matching = prices.filter(p => p.food_name.toLowerCase() === nameLower)
+  }
   if (matching.length === 0) return null
   if (preferredStore) {
     const storeMatch = matching.find(p => p.store === preferredStore)

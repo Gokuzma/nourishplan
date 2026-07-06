@@ -356,4 +356,28 @@ describe('computeItemCost', () => {
     const cost = computeItemCost(400, null, prices)
     expect(cost).toBeNull()
   })
+
+  it('falls back to case-insensitive name match when food_id is unknown (AI recipes mint new ids)', () => {
+    const cost = computeItemCost(400, 'freshly-minted-uuid', prices, 'banana')
+    expect(cost).toBe(2.0)
+  })
+
+  it('prices items with null food_id by name', () => {
+    const cost = computeItemCost(200, null, prices, 'Banana')
+    expect(cost).toBe(1.0)
+  })
+
+  it('prefers the food_id match over a name match', () => {
+    const twoPrices: FoodPrice[] = [
+      ...prices,
+      { ...prices[0], id: 'price-2', food_id: 'banana-organic-id', food_name: 'Banana', cost_per_100g: 0.80 },
+    ]
+    const cost = computeItemCost(100, 'banana-organic-id', twoPrices, 'Banana')
+    expect(cost).toBe(0.80)
+  })
+
+  it('returns null when neither id nor name matches', () => {
+    const cost = computeItemCost(400, 'unknown-id', prices, 'Dragonfruit')
+    expect(cost).toBeNull()
+  })
 })

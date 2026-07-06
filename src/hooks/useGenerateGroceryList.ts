@@ -172,7 +172,7 @@ export function useGenerateGroceryList() {
       const allNeedToBuy = [...categorizedNeedToBuy, ...categorizedRestock]
       const needToBuyInserts = allNeedToBuy.map(item => {
         const { display_quantity, display_unit } = formatDisplayQuantity(item.quantity_grams)
-        const estimatedCost = computeItemCost(item.quantity_grams, item.food_id, foodPrices ?? [])
+        const estimatedCost = computeItemCost(item.quantity_grams, item.food_id, foodPrices ?? [], item.food_name)
         return {
           list_id: listId,
           household_id: householdId,

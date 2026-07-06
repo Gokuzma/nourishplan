@@ -32,7 +32,7 @@ export function useCookCompletion() {
     // Cost calc — mirrors RecipeBuilder.tsx:578-588 exactly (per D-11)
     const ingredientsWithCost = input.ingredients.map(ing => ({
       quantity_grams: ing.quantity_grams,
-      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id),
+      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id, undefined, ing.ingredient_name),
     }))
     const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(
       ingredientsWithCost,

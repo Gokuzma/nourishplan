@@ -354,16 +354,22 @@ export function addRestockStaples(
 
 /**
  * Computes estimated cost for a grocery item based on food_prices.
- * Returns null if no price found or food_id is null.
+ * Matches by food_id first, then by name — AI-generated recipes mint a new
+ * ingredient_id every generation, so a saved price would otherwise never
+ * match again (mirrors the subtractInventory name fallback).
+ * Returns null if no price found.
  */
 export function computeItemCost(
   quantity_grams: number,
   food_id: string | null,
-  foodPrices: FoodPrice[]
+  foodPrices: FoodPrice[],
+  food_name?: string | null
 ): number | null {
-  if (food_id === null) return null
-
-  const price = foodPrices.find(p => p.food_id === food_id)
+  let price = food_id !== null ? foodPrices.find(p => p.food_id === food_id) : undefined
+  if (!price && food_name) {
+    const nameLower = food_name.toLowerCase()
+    price = foodPrices.find(p => p.food_name.toLowerCase() === nameLower)
+  }
   if (!price) return null
 
   return (quantity_grams / 100) * price.cost_per_100g

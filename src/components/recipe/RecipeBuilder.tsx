@@ -808,7 +808,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           {(() => {
             const ingredientsWithCost = (ingredients ?? []).map(ing => ({
               quantity_grams: ing.quantity_grams,
-              cost_per_100g: getPriceForIngredient(foodPrices ?? [], ing.ingredient_id),
+              cost_per_100g: getPriceForIngredient(foodPrices ?? [], ing.ingredient_id, undefined, ing.ingredient_name),
             }))
             const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(ingredientsWithCost, recipe.servings)
             const isPartial = pricedCount < totalCount && pricedCount > 0
@@ -881,7 +881,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
                     onEdit={() => setEditingIngredient(ing)}
                     onRemove={() => handleRemove(ing)}
                     onToggleWeightState={() => handleToggleWeightState(ing)}
-                    price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id)}
+                    price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id, undefined, ing.ingredient_name)}
                     onSavePrice={(amount, qty, unit, store) => handleSavePrice(ing, amount, qty, unit, store)}
                   />
                 </div>
