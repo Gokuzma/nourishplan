@@ -7,7 +7,7 @@ import { useGenerateGroceryList } from '../hooks/useGenerateGroceryList'
 import { useToggleGroceryItem } from '../hooks/useToggleGroceryItem'
 import { useAddManualGroceryItem } from '../hooks/useAddManualGroceryItem'
 import { useUpdateGroceryItem, useDeleteGroceryItem } from '../hooks/useUpdateGroceryItem'
-import { useAddInventoryItem } from '../hooks/useInventory'
+import { useAddInventoryItem, useInventoryItems, useUpdateInventoryItem } from '../hooks/useInventory'
 import { useMealPlan } from '../hooks/useMealPlan'
 import { getWeekStart } from '../utils/mealPlan'
 import { formatCost } from '../utils/cost'
@@ -42,6 +42,8 @@ export function GroceryPage() {
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
   const [pantryStatus, setPantryStatus] = useState<'idle' | 'adding' | 'done'>('idle')
   const addInventoryItem = useAddInventoryItem()
+  const updateInventoryItem = useUpdateInventoryItem()
+  const { data: pantryItems = [] } = useInventoryItems()
   const [collapseHave, setCollapseHave] = useState(true)
   const [undoToast, setUndoToast] = useState<UndoToast | null>(null)
   const [undoTimerId, setUndoTimerId] = useState<ReturnType<typeof setTimeout> | null>(null)
@@ -99,14 +101,31 @@ export function GroceryPage() {
     setPantryStatus('adding')
     const validUnits: InventoryUnit[] = ['g', 'kg', 'ml', 'L', 'units']
     for (const item of purchased) {
-      await addInventoryItem.mutateAsync({
-        food_name: item.food_name,
-        food_id: item.food_id ?? undefined,
-        quantity_remaining: item.quantity ?? 1,
-        unit: validUnits.includes(item.unit as InventoryUnit) ? (item.unit as InventoryUnit) : 'units',
-        storage_location: 'pantry',
-        purchase_price: item.estimated_cost ?? null,
-      })
+      const unit = validUnits.includes(item.unit as InventoryUnit) ? (item.unit as InventoryUnit) : 'units'
+      const quantity = item.quantity ?? 1
+      // Merge into an existing pantry row of the same food instead of stacking
+      // a new row every shopping trip — keeps the inventory list readable.
+      const existing = pantryItems.find(p =>
+        p.food_name.toLowerCase() === item.food_name.toLowerCase() &&
+        p.unit === unit &&
+        p.storage_location === 'pantry' &&
+        !p.is_leftover,
+      )
+      if (existing) {
+        await updateInventoryItem.mutateAsync({
+          id: existing.id,
+          updates: { quantity_remaining: existing.quantity_remaining + quantity, purchased_at: new Date().toISOString().slice(0, 10) },
+        })
+      } else {
+        await addInventoryItem.mutateAsync({
+          food_name: item.food_name,
+          food_id: item.food_id ?? undefined,
+          quantity_remaining: quantity,
+          unit,
+          storage_location: 'pantry',
+          purchase_price: item.estimated_cost ?? null,
+        })
+      }
     }
     setPantryStatus('done')
   }
