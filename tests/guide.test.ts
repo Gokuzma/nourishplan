@@ -36,7 +36,7 @@ describe('User Guide (DOCS-01)', () => {
   it('GuidePage has deep-link hash support', async () => {
     const fs = await import('fs');
     const src = fs.readFileSync('src/pages/GuidePage.tsx', 'utf8');
-    expect(src).toContain('window.location.hash');
+    expect(src).toContain('location.hash');
     expect(src).toContain('scrollIntoView');
   });
 

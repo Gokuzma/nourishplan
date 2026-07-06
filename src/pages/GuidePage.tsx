@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { Nameplate, StoryHead, SectionHead, Rule } from '../components/editorial'
 
 interface GuideSection {
   id: string
@@ -10,216 +11,236 @@ interface GuideSection {
 }
 
 const QUICK_START_STEPS = [
-  'Sign in or create your account',
-  'Add foods to your food library',
-  'Build a recipe, or import one from a URL or pasted text',
-  'Put your recipes into a weekly meal plan',
-  'Generate an AI-optimised plan or drag-and-drop meals yourself',
-  'Log what you eat today',
+  'Create your account and household, and invite your family from the Household page.',
+  'Teach it your reality: set each member\'s nutrition targets, dietary restrictions, weekly schedule, and the household budget.',
+  'Stock the cookbook — tap ✨ Discover on the Recipes page for suggestions matched to your tastes, import favourites from the web, or build your own.',
+  'Compose the week on the Plan page: pick the recipes you\'re excited about, lock them, then Generate Plan to fill the rest within your constraints.',
+  'Shop from the auto-built grocery list, cook with Cook Mode, and rate meals — every rating makes next week\'s plan smarter.',
+]
+
+const WEEKLY_LOOP = [
+  {
+    step: 'Stock',
+    detail: 'Keep the cookbook alive. Discover AI suggestions tuned to your tastes, import from blogs or videos, build your own. Aim for 7+ recipes per meal slot so no week has to repeat itself.',
+  },
+  {
+    step: 'Compose',
+    detail: 'Pick the meals you\'re genuinely excited to eat and lock them into the week. Then let Generate Plan fill the remaining slots against everyone\'s targets, schedules, and the budget.',
+  },
+  {
+    step: 'Shop',
+    detail: 'One grocery list, built from the plan, minus what\'s already in the pantry, sorted by aisle, synced live across the household.',
+  },
+  {
+    step: 'Cook',
+    detail: 'Cook Mode walks the steps with timers. Finishing deducts ingredients from inventory, logs the spend, and offers to save leftovers — bookkeeping as a side effect of dinner.',
+  },
+  {
+    step: 'Rate',
+    detail: 'One tap after eating. Ratings sort recipes into Favorites, Liked, and Novel tiers — the planner\'s memory of what your family actually loves.',
+  },
 ]
 
 const GUIDE_SECTIONS: GuideSection[] = [
   {
     id: 'getting-started',
     title: 'Getting Started',
-    intro: 'NourishPlan helps your family plan meals and track nutrition together. Everyone in your household shares the same meal plan, and each person gets personalized portion suggestions based on their own targets.',
+    intro: 'One household, one shared plan, personal portions for everyone. Setup is mostly about teaching NourishPlan your family\'s constraints — it pays off every week after.',
     steps: [
-      'Head to the app and tap "Sign up" to create your account, or "Log in" if you already have one.',
-      'After signing in, you\'ll be asked to create a household — give it a name and tap "Create".',
-      'You\'re now the household admin. Head to the Household page to invite family members.',
-      'Share your invite link with the people you want to join. They\'ll use it to join your household.',
+      'Sign up, then create your household — give it a name and you become its admin.',
+      'Invite family members from the Household page by sharing the invite link.',
+      'Add managed profiles for children or anyone who won\'t log in themselves — they still get their own targets and portions.',
+      'Set each member\'s nutrition targets (calories, protein, carbs, fat) from the Household page — tap a member to open their targets.',
+      'Record dietary restrictions and won\'t-eat foods for each member — the planner treats allergies as hard rules and dislikes as strong preferences.',
+      'Set each member\'s weekly schedule on the Plan page (who\'s home for which meals) and the weekly budget — both become constraints the planner respects.',
     ],
     tips: [
-      'Tip: You can find your invite link on the Household page. Share it via text, email, or any messaging app.',
+      'Tip: You don\'t have to finish setup before using the app. Start anywhere — the plan ties it together.',
     ],
   },
   {
-    id: 'adding-foods',
-    title: 'Adding Foods',
-    intro: 'Your food library is where all your foods live. You can search two major food databases or create your own custom foods — great for recipes with specific branded ingredients.',
+    id: 'discover',
+    title: 'Discovering Recipes',
+    intro: 'The cookbook is the planner\'s pantry of ideas — the more good options it holds, the better your weeks get. Discover is the fastest way to stock it with meals your family will actually want.',
     steps: [
-      'Head to the Home page and tap the search bar at the top to open food search.',
-      'Type a food name to search both the USDA and CNF (Canadian Nutrient File) databases at once.',
-      'Tap a result to see its nutrition details, then tap "Add" to log it.',
-      'To add a custom food, switch to the "My Foods" tab and tap "Add Custom Food".',
-      'Fill in the food name, serving size, and macros (calories, protein, carbs, fat), then save.',
-      'To edit or delete a custom food, find it in the "My Foods" tab and tap on it.',
+      'Head to the Recipes page and tap "✨ Discover".',
+      'Type what you\'re in the mood for — "cozy soups", "high-protein, kid-friendly", "15-minute dinners" — and optionally pick a meal slot.',
+      'Tap "Suggest recipes". Suggestions are tailored to your household: they respect dietary restrictions and allergies, avoid won\'t-eat foods, lean toward the tastes of your highly-rated recipes, and never duplicate what you already have.',
+      'Each card shows why the family will love it, per-serving calories and macros, and an expandable ingredient list.',
+      'Tap "+ Add to book" on anything that sparks something — it lands in your cookbook tagged with the right meal slot, ready to plan.',
+      'Not feeling the batch? "Suggest more" or change the craving and go again.',
+      'For coverage rather than inspiration, use "Fill recipe gaps" instead — it finds under-stocked meal slots and generates enough slot-appropriate recipes to fill a week.',
     ],
     tips: [
-      'Tip: Custom foods are shared with your whole household, so everyone can use them.',
-    ],
-  },
-  {
-    id: 'recipes',
-    title: 'Building Recipes',
-    intro: 'Combine foods into recipes and NourishPlan automatically calculates the nutrition for each serving. Great for meals you make regularly.',
-    steps: [
-      'Head to the Recipes page and tap "New Recipe".',
-      'Your new recipe opens in edit mode — give it a name and set the number of servings.',
-      'Tap "Add Ingredient" to search your food library and add ingredients.',
-      'Set the quantity for each ingredient using the input field next to it.',
-      'The per-serving nutrition updates automatically as you add ingredients.',
-      'Add optional notes or variations at the bottom to help you remember how to make it.',
-      'Imported recipes also land here ready to edit — see "Importing a Recipe" below.',
-    ],
-    tips: [
-      'Tip: You can use another recipe as an ingredient — useful for things like a sauce you make separately.',
+      'Tip: Do a Discover pass before planning each week — adding two or three exciting recipes keeps the rotation fresh and gives the generator better material.',
     ],
   },
   {
     id: 'recipe-import',
     title: 'Importing a Recipe',
-    intro: 'Skip the manual typing — paste a recipe URL or raw text and NourishPlan extracts the name, ingredients, servings, and instructions for you. Great for saving recipes from blogs, videos, or a friend\'s message.',
+    intro: 'Found something online? Paste a URL or raw text and NourishPlan extracts the name, servings, ingredients with nutrition, steps, and meal slot for you.',
     steps: [
-      'Head to the Recipes page and tap "Import Recipe" beside the "+ New Recipe" button.',
-      'Paste a blog URL, a YouTube cooking video URL, or the raw recipe text into the box.',
-      'Tap "Import" and wait a few seconds for the AI to extract the recipe.',
-      'The imported recipe opens in the recipe builder ready to edit — adjust ingredients, servings, or steps as needed.',
-      'If the URL can\'t be fetched (some big recipe sites block automated requests), copy the recipe text from the page and paste it instead.',
-      'Imported recipes keep a link back to the source URL when one was provided — you\'ll see it attributed at the top of the recipe.',
+      'Head to the Recipes page and tap "Import recipe".',
+      'Paste a blog URL, a YouTube cooking video URL, or raw recipe text.',
+      'Tap "Import" — the recipe opens in the builder ready to review and adjust.',
+      'If a site blocks automated fetching, copy the recipe text from the page and paste that instead — raw text is the most reliable path.',
+      'Imported recipes keep a link back to their source URL when one was provided.',
     ],
     tips: [
-      'Tip: Raw text paste is the most reliable path — it works for any recipe you can copy, including DMs, PDFs, or hand-typed notes.',
+      'Tip: Raw text paste works for anything you can copy — DMs, PDFs, a grandmother\'s hand-typed classic.',
     ],
   },
   {
-    id: 'inventory',
-    title: 'Inventory',
-    intro: 'Track what\'s in your pantry, fridge, and freezer so you know what you already have when you cook or shop. NourishPlan can deduct ingredients as you cook and warn you about items nearing their expiry.',
+    id: 'recipes',
+    title: 'Building Recipes',
+    intro: 'Recipes are where nutrition, cost, and planning meet: ingredients carry per-100g macros, so every recipe knows its per-serving numbers, and every plan built from it knows them too.',
     steps: [
-      'Head to the Inventory page from the sidebar or mobile menu.',
-      'Switch between Pantry, Fridge, and Freezer with the tabs across the top.',
-      'Tap "Add Item" to add something manually — fill in name, quantity, unit, storage location, optional expiry date, and price.',
-      'Tap "Scan" to add an item by barcode using your device camera (with a manual barcode entry fallback).',
-      'Tap any item to expand it — from there you can Edit the details or Remove it (with a reason like "Used" or "Discarded").',
-      'Items nearing expiry show a warning badge; the Home page shows a summary card with expiring-soon items.',
-      'When you cook a recipe, NourishPlan deducts the ingredients from inventory (oldest batches first) and shows a receipt listing what was deducted and anything that was missing.',
+      'On the Recipes page, tap "+ New recipe", then name it and set the servings.',
+      'Add ingredients by searching the USDA and Canadian food databases, your custom foods, or your other recipes (a sauce can be an ingredient).',
+      'Set each ingredient\'s quantity — per-serving nutrition updates as you go.',
+      'Set the meal slots this recipe fits (Breakfast, Lunch, Dinner, Snacks) so the planner places it sensibly.',
+      'Add notes or let the AI generate structured cooking steps for Cook Mode.',
+      'Mark freezer-friendly recipes — batch-prep suggestions and leftover handling use it.',
     ],
     tips: [
-      'Tip: After cooking, tap "Save leftover portion" on the receipt to log an uneaten portion as a new inventory item with a 3-day fridge expiry.',
+      'Tip: Enter an ingredient\'s price once and it\'s remembered — recipe cost per serving and the weekly budget both build on it.',
+    ],
+  },
+  {
+    id: 'adding-foods',
+    title: 'Adding Foods',
+    intro: 'The food library underpins everything: recipes are made of foods, and foods carry the nutrition data. Search two national databases or add your own.',
+    steps: [
+      'Open food search from the Today page search bar, or from any ingredient picker.',
+      'Type a name to search the USDA and CNF (Canadian Nutrient File) databases at once.',
+      'Tap a result to see nutrition details and add it.',
+      'For branded or homemade items, switch to "My Foods" and tap "Add Custom Food" — name, serving size, and macros.',
+    ],
+    tips: [
+      'Tip: Custom foods are shared with your whole household, so everyone can build recipes with them.',
     ],
   },
   {
     id: 'meal-plan',
-    title: 'Creating a Meal Plan',
-    intro: 'Organize your meals into a weekly plan shared with your whole household. Everyone sees the same plan and can check portion suggestions based on their own targets. You can place meals yourself, drag-and-drop them around, or generate a plan with AI.',
+    title: 'Composing the Week',
+    intro: 'This is the heart of NourishPlan. The Plan page holds one shared weekly grid — days across, meal slots down. Your job is to bring the excitement; the generator\'s job is to make the whole week add up.',
     steps: [
-      'Head to the Meals page to create a meal first. Tap "New Meal" and give it a name.',
-      'Add recipes or individual foods to your meal from the ingredient search.',
-      'Once you have meals ready, head to the Plan page.',
-      'You\'ll see a weekly grid with days across the top and meal slots (Breakfast, Lunch, Dinner, Snacks) below.',
-      'Tap a day slot to assign a meal to it — search your meals and tap one to add it.',
-      'To rearrange, drag a meal by its grip handle to another slot. On mobile, press and hold the handle then drag.',
-      'Dropping onto an occupied slot offers Swap or Replace.',
-      'To keep a meal fixed during AI generation, tap the lock badge on its slot — locked meals are preserved when you regenerate.',
-      'Tap "Generate Plan" to let the AI fill empty slots using your recipes, nutrition targets, schedule, and budget. Locked slots stay put.',
-      'After generation, a Nutrition Gaps card may appear below the grid with swap suggestions for any member falling short of their targets.',
-      'To save your plan as a reusable template, tap the menu and choose "Save as Template".',
-      'To start a new week, tap "New Week" and pick a start date.',
+      'Head to the Plan page and start the week: fresh, repeat last week, or from a saved template.',
+      'Tap "+ add" on any slot to open the recipe picker — search by name, with recipes that fit the slot listed first and per-serving calories and macros on every row.',
+      'Fill the slots you already have opinions about — the Sunday roast, taco Tuesday — and tap the lock badge on each so generation can\'t touch them.',
+      'Expand the Recipe Mix panel if you want to steer the balance of Favorites, Liked, and Novel recipes.',
+      'Tap "Generate Plan" — the AI fills every remaining slot using your cookbook, each member\'s targets and restrictions, the schedule, and the budget, with a rationale for every placement.',
+      'Review the result: a Nutrition Gaps card appears if someone falls short of their targets, with one-tap swap suggestions.',
+      'Rearrange freely — drag meals between slots (press and hold on mobile); dropping on an occupied slot offers Swap or Replace.',
+      'Happy with the shape of the week? Save it as a template to reuse later.',
     ],
     tips: [
-      'Tip: You can print your meal plan — tap the three-dot menu and choose "Print".',
+      'Tip: Lock generously. Generation is at its best filling gaps around your choices, not overriding them.',
     ],
   },
   {
-    id: 'grocery-list',
-    title: 'Grocery List',
-    intro: 'Generate a shopping list from your active meal plan. NourishPlan subtracts anything you already have in inventory, groups items by store section, and keeps the list in sync across everyone in your household in real time.',
+    id: 'recipe-mix',
+    title: 'The Recipe Mix',
+    intro: 'Every household needs a different balance of comfort and novelty. The Recipe Mix panel sets the proportion of Favorites (loved and often cooked), Liked, and Novel (rarely tried) recipes in the next generated plan.',
     steps: [
-      'Head to the Grocery page from the sidebar or mobile menu.',
-      'Tap "Generate from meal plan" to build a list from the current week\'s plan.',
-      'Items you already have in inventory are marked "Already have" and split from the items you need to buy.',
-      'Items are grouped by store section (Produce, Dairy, Meat, Pantry, etc.) so you can shop aisle by aisle.',
-      'Tap an item to check it off as you shop — checked items stay visible but greyed out.',
-      'Everyone in your household sees the same list and check-offs update live across devices.',
+      'On the Plan page, expand the Recipe Mix panel.',
+      'Adjust the three sliders — they auto-normalise to 100%.',
+      'Generate: each placed slot is labelled with its tier in the plan rationale.',
+      'Your ratings after cooking move recipes between tiers over time — the mix stays honest to your family\'s actual taste.',
     ],
     tips: [
-      'Tip: Generating a grocery list after you\'ve cooked updates the list with the remaining ingredients — items you already used drop off automatically.',
-    ],
-  },
-  {
-    id: 'tracking',
-    title: 'Tracking Your Day',
-    intro: 'Log what you eat and see how you\'re doing against your nutrition targets. Your daily progress rings update in real time as you log, and you can cook a planned meal step by step with built-in timers.',
-    steps: [
-      'Head to the Home page. Your daily progress rings for calories and macros are at the top.',
-      'Tap the search bar to find a food and log it — set your portion size and tap "Log".',
-      'You can also log a planned meal by tapping "Log Meal" next to a meal slot in your plan.',
-      'Set the portion size (you\'ll see a suggestion based on your targets) and tap "Log".',
-      'Scroll down to see the micronutrient breakdown for the day.',
-      'To cook a planned recipe, tap "Cook" on the slot — Cook Mode opens with step-by-step instructions, timers, and completion tracking.',
-      'Finishing Cook Mode deducts ingredients from inventory, logs the spend to your weekly budget, and offers to save leftovers.',
-      'After cooking, a "Rate today\'s meals" card appears on the Home page — tap a star (1-5) to rate the recipe. Ratings influence which recipes appear in future AI-generated plans.',
-      'To edit or delete a log entry, tap it in the list below and use the Edit or Delete buttons.',
-      'To set your personal nutrition targets, head to Settings and tap your name to open Member Targets.',
-    ],
-    tips: [
-      'Tip: Portion suggestions show how much each family member should eat based on their individual targets.',
+      'Tip: Exhausted week ahead? Set Novel to 0% and coast on favourites. Feeling adventurous? Push it up and let Discover keep the cookbook supplied.',
     ],
   },
   {
     id: 'prep-schedule',
-    title: 'Prep & Schedule',
-    intro: 'Tell NourishPlan when each household member is available to eat and cook, and it will suggest batch-prep opportunities for the week. Perfect for busy families who want to cook once and eat several times.',
+    title: 'Schedule & Batch Prep',
+    intro: 'Real weeks have soccer practice and late meetings. Tell NourishPlan who is home when, and it plans around your life instead of an ideal one.',
     steps: [
-      'Head to the Plan page and find the Schedule section.',
-      'For each household member, mark each day slot as Prep (available to cook), Consume (eating only), Quick (quick meal only), or Away.',
-      'Save the schedule — the AI plan generator respects these constraints (no big cook on a Quick day, no meals for members who are Away).',
-      'Slots with a set schedule show a coloured dot on the Plan grid: peach for Consume, amber for Quick, red for Away.',
-      'On the Plan page, tap the Batch Prep button to see which recipes share ingredients or prep steps across the week.',
-      'Freezer-friendly recipes are flagged so you can cook a double batch and freeze half for later.',
-      'When you tap Cook on a prep-slot meal with multiple recipes, NourishPlan generates an AI-optimised combined prep sequence (interleaves steps across recipes). For a reheat-slot, it generates a simple reheat sequence.',
+      'On the Plan page, set each member\'s weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
+      'The generator respects it — no slow braise on a Quick night, nothing planned for someone who\'s Away.',
+      'Schedule badges appear on the grid: peach for use-up/consume, amber for quick, red for away.',
+      'Tap "Batch prep" to see which of the week\'s recipes share ingredients or steps — cook once, eat twice.',
+      'Cooking multiple recipes in one session? Cook Mode generates a combined, interleaved prep sequence; reheat slots get a simple reheat sequence.',
     ],
     tips: [
-      'Tip: Setting one Prep day and several Consume days per week is a common pattern — batch cook once, eat leftovers the rest of the week.',
+      'Tip: One Prep day plus several Consume days is the classic pattern — batch cook Sunday, coast to Wednesday.',
     ],
   },
   {
     id: 'budget',
     title: 'Budget',
-    intro: 'Set a weekly food budget and NourishPlan tracks your spend as you cook. Recipe cost is computed from the ingredient prices you\'ve entered — no receipt scanning required.',
+    intro: 'The weekly purse keeps food spending visible without receipts. Prices you enter once flow into recipe costs, plan generation, and the running weekly total.',
     steps: [
-      'Head to the Plan page and tap the budget amount in the Budget Summary section to edit your weekly household budget.',
-      'Enter ingredient prices as you add them to recipes or inventory — NourishPlan normalises to cost per 100g automatically regardless of the unit you entered.',
-      'Each recipe shows a computed cost per serving in the recipe builder.',
-      'When you cook a recipe, the spend is logged against the current week and the Budget Summary on the Plan page updates.',
-      'The summary shows weekly spend, remaining balance, and highlights if you\'re over budget.',
-      'Over time, the AI plan generator uses cost per serving as one signal when picking recipes — so recipes with cheaper ingredients can get prioritised when the budget is tight.',
+      'On the Plan page, tap the budget amount in "This week\'s purse" to set your weekly budget.',
+      'Enter ingredient prices as you add them to recipes or inventory — normalised to cost per 100g automatically.',
+      'Recipes show cost per serving; the plan generator uses it as a signal when the budget is tight.',
+      'Cooking a meal logs its cost against the week — the purse shows spent, remaining, and per-meal pace.',
     ],
     tips: [
-      'Tip: You only need to enter prices once per ingredient — they\'re remembered for future recipes and inventory items.',
+      'Tip: You don\'t need every price. Even a handful of staples priced makes the weekly picture useful.',
     ],
   },
   {
-    id: 'recipe-mix',
-    title: 'Tier-aware Recipe Mix',
-    intro: 'Control how often the AI plan generator picks your favourite, liked, or novel recipes. The three-slider Recipe Mix panel sets the percentage of each tier in your next generated plan.',
+    id: 'inventory',
+    title: 'Inventory',
+    intro: 'The pantry, fridge, and freezer are part of the plan. Inventory feeds the grocery list (buy only what\'s missing), flags expiring food, and drains automatically as you cook.',
     steps: [
-      'Head to the Plan page and expand the Recipe Mix panel.',
-      'Three sliders control the mix: Favorites (highly rated or frequently cooked), Liked (moderately rated), and Novel (rarely or never cooked).',
-      'Adjust the sliders — the total auto-normalises to 100%.',
-      'Your choice is saved per household in your browser, so you don\'t have to reset it each week.',
-      'Tap "Generate Plan" — the AI picks recipes in the proportions you set and labels each slot in the plan rationale as "Favorite — ...", "Liked — ...", or "Novel — ...".',
-      'Ratings you add after cooking (see "Tracking Your Day") influence which tier each recipe ends up in for future plans.',
+      'On the Inventory page, switch between Pantry, Fridge, and Freezer tabs.',
+      'Add items manually or by barcode scan — name, quantity, location, optional expiry and price.',
+      'Items nearing expiry get a warning badge, and the planner nudges use-it-up meals into the schedule.',
+      'Cooking deducts ingredients automatically (oldest first) and shows a receipt of what was used and what was missing.',
+      'After cooking, save an uneaten portion as a leftover — it lands back in the fridge with a 3-day expiry.',
     ],
     tips: [
-      'Tip: Set Novel to 0% for a week if you want familiar comfort meals; bump it back up when you\'re in an adventurous mood.',
+      'Tip: Inventory doesn\'t need to be perfect to be useful — even a rough pantry picture shrinks the grocery list.',
+    ],
+  },
+  {
+    id: 'grocery-list',
+    title: 'Grocery List',
+    intro: 'The list is a consequence of the plan: everything the week needs, minus everything you have, grouped the way stores are laid out.',
+    steps: [
+      'On the Grocery page, generate the list from the current week\'s plan.',
+      'Items you already have in inventory are split out as "Already have".',
+      'Shop aisle by aisle — items are grouped by store section (Produce, Dairy, Meat, Pantry…).',
+      'Check items off as you shop; the list syncs live, so two people can split the store.',
+      'Regenerate after plan changes — cooked or removed meals drop their ingredients automatically.',
+    ],
+    tips: [
+      'Tip: Generate the list after locking in the plan, not before — it\'s always a mirror of the current week.',
+    ],
+  },
+  {
+    id: 'tracking',
+    title: 'Cooking & Tracking Your Day',
+    intro: 'The Today page is where plans meet reality: log what you actually eat, cook with guidance, and close the loop with a rating.',
+    steps: [
+      'The Today page shows your daily progress rings for calories and macros, updating as you log.',
+      'Log a planned meal from its slot — you\'ll see a suggested portion based on your personal targets, adjustable before saving.',
+      'Log anything else via food search; edit or delete entries from the day\'s list.',
+      'Tap "Cook" on a planned slot to enter Cook Mode: step-by-step instructions, timers, and per-member lanes for shared cooking.',
+      'Finishing Cook Mode deducts inventory, logs spend to the weekly purse, and offers to save leftovers.',
+      'Afterwards, the "Rate today\'s meals" card appears — one tap, 1 to 5 stars. This is the single highest-leverage habit in the app: ratings drive the recipe tiers that shape every future plan.',
+      'Scroll down for the day\'s micronutrient breakdown.',
+    ],
+    tips: [
+      'Tip: Portions are personal — the same planned meal suggests different amounts to each family member based on their own targets.',
     ],
   },
   {
     id: 'household-admin',
-    title: 'Household Admin Tasks',
-    intro: 'These options are only visible to household admins.',
+    title: 'Household Admin',
+    intro: 'Admins manage membership and roles. Households need at least one admin at all times — the system enforces it.',
     steps: [
-      'To invite new members, head to the Household page and copy the invite link from the "Invite Link" section.',
-      'To view all current household members and their roles, check the Members section on the Household page.',
-      'To edit your household name, head to Settings — admins see an editable name field at the top.',
-      'To add a managed profile (e.g. a child), head to the Household page and use the "Managed Profiles" section.',
-      'To transfer the admin role, head to Settings, scroll to the Danger Zone, and use the admin transfer option before deleting your account.',
-      'To delete your account, head to Settings and scroll to the Danger Zone — you\'ll be asked to transfer admin or confirm the household will be deleted.',
+      'Invite members from the Household page; choose their role (admin or member) when creating the invite.',
+      'Promote, demote, or remove members from the Members list — the last admin can\'t be demoted or removed.',
+      'Add managed profiles for children — they get targets, portions, and schedules without an account.',
+      'Edit the household name in Settings.',
+      'Leaving or deleting your account walks you through transferring admin first if you\'re the last one.',
     ],
     tips: [
-      'Tip: Transferring admin rights lets someone else manage the household if you leave.',
+      'Tip: Two admins is a good default for couples — either can manage the household if the other is away.',
     ],
   },
 ]
@@ -241,49 +262,107 @@ export function GuidePage() {
   const toggle = (id: string) => setOpenSection(prev => prev === id ? null : id)
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8 font-sans">
-      <div className="mx-auto max-w-lg flex flex-col gap-6">
-        <h1 className="text-2xl font-bold text-text">User Guide</h1>
+    <div className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8 font-sans">
+      {/* Nameplate — desktop only */}
+      <div className="hidden md:block">
+        <Nameplate
+          left="The user's manual"
+          title={<>The <span className="amp">Guide</span></>}
+          right="Read once, plan forever"
+        />
+      </div>
+
+      <StoryHead
+        kicker="HOW TO USE NOURISHPLAN"
+        headline="The Guide"
+        byline="Philosophy first, buttons second"
+        size="sm"
+      />
+
+      <div className="mx-auto max-w-2xl flex flex-col gap-6 mt-4">
+        {/* Philosophy */}
+        <div>
+          <SectionHead label="How NourishPlan thinks" />
+          <Rule />
+          <p className="serif mt-3" style={{ fontSize: 17, lineHeight: 1.55 }}>
+            NourishPlan is not a recipe app. It’s a constraint solver for the hardest recurring
+            puzzle in family life: <em>what should everyone eat this week</em> — given different
+            nutritional needs per person, a real schedule, one budget, and whatever is already in
+            the freezer.
+          </p>
+          <p className="text-sm mt-3" style={{ color: 'var(--ink-dim)', lineHeight: 1.6 }}>
+            You teach it your household’s reality once — who needs what, who’s home when, what
+            no one will eat, what you can spend. From then on, planning stops being a nightly
+            scramble and becomes a short weekly ritual. You bring the excitement; the solver makes
+            the week add up. One shared plan, personal portions for every member.
+          </p>
+        </div>
+
+        {/* The weekly loop */}
+        <div>
+          <SectionHead label="The weekly loop" />
+          <Rule />
+          <div className="mt-2">
+            {WEEKLY_LOOP.map((item, i) => (
+              <div key={item.step} className="py-2.5" style={{ borderBottom: '1px dashed var(--rule-soft)' }}>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono tnum" style={{ fontSize: 11, color: 'var(--tomato)' }}>{i + 1}</span>
+                  <span className="serif" style={{ fontSize: 17 }}>{item.step}</span>
+                </div>
+                <p className="text-sm mt-1 ml-6" style={{ color: 'var(--ink-dim)', lineHeight: 1.55 }}>{item.detail}</p>
+              </div>
+            ))}
+          </div>
+          <p className="serif-italic text-sm mt-3" style={{ color: 'var(--ink-dim)' }}>
+            Each pass around the loop improves the next: ratings shape what gets suggested and
+            generated, cooking keeps the pantry and budget true, and the grocery list is always a
+            mirror of the plan. The plan is the hub — everything else feeds it.
+          </p>
+        </div>
 
         {/* Quick-start card */}
-        <div className="bg-surface rounded-[--radius-card] p-4 shadow-sm">
-          <h2 className="font-bold text-text mb-2">Get started in 6 steps</h2>
-          <ol className="list-decimal list-inside flex flex-col gap-2 text-sm text-text/80">
+        <div className="bg-paper-2 p-4" style={{ border: '1.5px solid var(--rule-c)' }}>
+          <h2 className="serif mb-2" style={{ fontSize: 19 }}>Get started in 5 steps</h2>
+          <ol className="list-decimal list-inside flex flex-col gap-2 text-sm" style={{ color: 'var(--ink-dim)' }}>
             {QUICK_START_STEPS.map((step, i) => <li key={i}>{step}</li>)}
           </ol>
         </div>
 
         {/* Accordion sections */}
-        <div className="flex flex-col gap-2">
-          {GUIDE_SECTIONS.map(section => (
-            <div key={section.id} id={section.id}>
-              <button
-                onClick={() => toggle(section.id)}
-                aria-expanded={openSection === section.id}
-                aria-controls={`${section.id}-body`}
-                className="w-full flex justify-between items-center py-2 px-4 bg-surface rounded-[--radius-card] text-left font-bold text-text min-h-[44px]"
-              >
-                <span>{section.title}</span>
-                <span className={`transition-transform ${openSection === section.id ? 'rotate-180' : ''}`}>
-                  ▼
-                </span>
-              </button>
-              <div
-                id={`${section.id}-body`}
-                className={openSection === section.id ? 'p-4 flex flex-col gap-2' : 'hidden'}
-              >
-                <p className="text-sm text-text/80">{section.intro}</p>
-                <ol className="list-decimal list-inside flex flex-col gap-2 text-sm text-text">
-                  {section.steps.map((step, i) => <li key={i}>{step}</li>)}
-                </ol>
-                {section.tips?.map((tip, i) => (
-                  <div key={i} className="mt-1 rounded-[--radius-btn] bg-accent/20 px-4 py-2 text-sm font-bold text-text">
-                    {tip}
-                  </div>
-                ))}
+        <div>
+          <SectionHead label="The details" />
+          <Rule />
+          <div className="flex flex-col mt-2">
+            {GUIDE_SECTIONS.map(section => (
+              <div key={section.id} id={section.id} style={{ borderBottom: '1px solid var(--rule-soft)' }}>
+                <button
+                  onClick={() => toggle(section.id)}
+                  aria-expanded={openSection === section.id}
+                  aria-controls={`${section.id}-body`}
+                  className="w-full flex justify-between items-center py-3 px-1 text-left min-h-[44px] hover:bg-paper-2 transition-colors"
+                >
+                  <span className="serif" style={{ fontSize: 17 }}>{section.title}</span>
+                  <span className={`transition-transform text-xs ${openSection === section.id ? 'rotate-180' : ''}`} style={{ color: 'var(--ink-soft)' }}>
+                    ▼
+                  </span>
+                </button>
+                <div
+                  id={`${section.id}-body`}
+                  className={openSection === section.id ? 'px-1 pb-4 flex flex-col gap-2' : 'hidden'}
+                >
+                  <p className="text-sm" style={{ color: 'var(--ink-dim)', lineHeight: 1.55 }}>{section.intro}</p>
+                  <ol className="list-decimal list-inside flex flex-col gap-2 text-sm mt-1">
+                    {section.steps.map((step, i) => <li key={i}>{step}</li>)}
+                  </ol>
+                  {section.tips?.map((tip, i) => (
+                    <div key={i} className="mt-1 px-3 py-2 text-sm" style={{ background: 'var(--paper-2)', borderLeft: '2px solid var(--tomato)' }}>
+                      {tip}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
