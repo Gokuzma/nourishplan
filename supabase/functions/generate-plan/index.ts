@@ -611,12 +611,15 @@ serve(async (req) => {
             model: assignModel,
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon — using food before it expires beats perfect variety. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. 10) If leftovers lists an unexpired leftover whose name matches a candidate recipe (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), STRONGLY prefer assigning that recipe to the earliest unlocked Lunch slot before the leftover's expiry date, with rationale 'Uses up leftover — expires {date}' (this format overrides the tier formats in rule 9). Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon — using food before it expires beats perfect variety. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. 10) If leftovers lists an unexpired leftover whose name matches a candidate recipe (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), STRONGLY prefer assigning that recipe to the earliest unlocked Lunch slot with day_index >= todayDayIndex and a date before the leftover's expiry (a slot in the past cannot be eaten), with rationale 'Uses up leftover — expires {date}' (this format overrides the tier formats in rule 9). Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
                 content: JSON.stringify({
                   candidates: shortlistedRecipes,
+                  todayDayIndex: Math.max(0, Math.min(6, Math.floor(
+                    (Date.parse(todayStr) - Date.parse(weekStart)) / 86400000,
+                  ))),
                   slotsToFill,
                   lockedSlots: lockedSlots.map((s) => ({ day_index: s.day_index, slot_name: s.slot_name })),
                   inventory: inventoryNames,
@@ -1014,6 +1017,47 @@ serve(async (req) => {
       }
       if (guardrailRepairs > 0) {
         console.log(`[generate-plan] slot guardrail repaired ${guardrailRepairs} assignment(s)`);
+      }
+
+      // ── Monotony guardrail (deterministic) ───────────────────────────────────
+      // Rule 6 asks the model to avoid >2 repeats per week; observed 4x repeats
+      // in practice. Cap each recipe at 2 assignments by swapping extras for the
+      // least-used slot-appropriate safe alternative. Leftover placements are
+      // never displaced; small catalogs are exempt (repeats are unavoidable);
+      // a repeat is kept over an empty slot when no alternative exists.
+      let monotonyRepairs = 0;
+      if (!smallCatalog) {
+        const nameByRecipeId = new Map<string, string>(recipes.map((r) => [r.id, sanitizeString(r.name)]));
+        const usageByRecipe: Record<string, number> = {};
+        for (const s of bestResult.slots) {
+          if (s.recipe_id) usageByRecipe[s.recipe_id] = (usageByRecipe[s.recipe_id] ?? 0) + 1;
+        }
+        const overused = Object.keys(usageByRecipe).filter((rid) => usageByRecipe[rid] > 2);
+        for (const rid of overused) {
+          const occurrences = bestResult.slots
+            .filter((s) => s.recipe_id === rid)
+            .sort((a, b) => {
+              const aKeep = isLeftoverPlacement(rid, a.slot_name) ? 0 : 1;
+              const bKeep = isLeftoverPlacement(rid, b.slot_name) ? 0 : 1;
+              return aKeep - bKeep || a.day_index - b.day_index;
+            });
+          for (const slot of occurrences.slice(2)) {
+            if (isLeftoverPlacement(rid, slot.slot_name)) continue;
+            const pool = poolForSlot(slot.slot_name)
+              .filter((id) => id !== rid && (usageByRecipe[id] ?? 0) < 2)
+              .sort((a, b) => (usageByRecipe[a] ?? 0) - (usageByRecipe[b] ?? 0));
+            const replacement = pool[0];
+            if (!replacement) continue;
+            usageByRecipe[rid]--;
+            usageByRecipe[replacement] = (usageByRecipe[replacement] ?? 0) + 1;
+            slot.recipe_id = replacement;
+            slot.rationale = `Swapped for variety — ${nameByRecipeId.get(rid) ?? "this recipe"} was planned more than twice`;
+            monotonyRepairs++;
+          }
+        }
+      }
+      if (monotonyRepairs > 0) {
+        console.log(`[generate-plan] monotony guardrail swapped ${monotonyRepairs} repeat assignment(s)`);
       }
 
       // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
