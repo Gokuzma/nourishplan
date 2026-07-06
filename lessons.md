@@ -334,3 +334,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** Vite, vitest, edge tooling AND the agent harness are all node processes; image-name kills are indiscriminate.
 **Rule:** Kill dev servers by port, never by image name: `Get-NetTCPConnection -LocalPort <port> -State Listen` → `Stop-Process -Id (…OwningProcess)`. Same for any long-running local server.
 **Applies to:** stopping `npx vite`, vitest watchers, preview servers on Windows.
+
+### L-045: Unlayered CSS in global.css silently overrides ALL Tailwind utilities — `.paper > *` flattened every fixed overlay
+**Bug:** BarcodeScanner, QuickScanMode, and AddInventoryItemModal used `fixed inset-0 z-50` but rendered in document flow at the bottom of the page (computed `position: relative; z-index: 1`), because they were direct children of the page's `.paper` div.
+**Root cause:** Tailwind 4 puts utilities in a cascade `@layer`; the raw rules in `global.css` are unlayered, and unlayered CSS beats layered CSS regardless of specificity or source order. `.paper > * { position: relative; z-index: 1 }` (the grain-lift rule) therefore outranked the `fixed` utility on direct children. Modals nested deeper in the page were unaffected, which made the bug look component-specific.
+**Rule:** Any raw rule in `global.css` that sets a property Tailwind utilities also set (position, z-index, color, display …) must either be scoped to exclude utility carriers (e.g. `.paper > *:not(.fixed)`) or moved into an `@layer`. When a Tailwind class "doesn't work", check computed styles for an unlayered override before touching the component.
+**Applies to:** `src/styles/global.css`, any modal/overlay rendered as a direct child of a `.paper` page container.
