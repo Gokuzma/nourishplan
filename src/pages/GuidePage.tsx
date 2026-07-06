@@ -49,7 +49,7 @@ interface OutcomePlay {
 
 const OUTCOME_PLAYS: OutcomePlay[] = [
   {
-    goal: 'Eat healthily',
+    goal: 'Eat well',
     promise: 'One dinner, four right answers. The plan is composed against every member\'s targets, so healthy stops being a separate menu.',
     plays: [
       'Set honest targets per person — a 9-year-old and an adult should not share calorie or protein numbers. Targets live on each member\'s page.',
@@ -60,15 +60,15 @@ const OUTCOME_PLAYS: OutcomePlay[] = [
     ],
   },
   {
-    goal: 'Lose weight',
-    promise: 'A calorie deficit you don\'t have to think about at 6pm. Same family dinner, personal portions — no separate diet meals, no willpower architecture.',
+    goal: 'Be healthy',
+    promise: 'Personal goals you don\'t have to think about at 6pm. Same family dinner, personal portions — everyone works toward their own targets without separate meals or willpower architecture.',
     plays: [
-      'Set your calorie target modestly below maintenance (300–500 kcal) and your protein target high. NourishPlan deliberately doesn\'t compute this for you — use any TDEE calculator or ask a professional, then enter the number.',
-      'Let portion suggestions size your plate. Every planned meal suggests an amount per member from their targets — the person losing weight simply gets a different portion of the same meal.',
+      'Set calorie and protein targets that match each person\'s goals — growing kids, maintenance, or a gentler intake for someone working toward a change. NourishPlan deliberately doesn\'t compute this for you — use any TDEE calculator or ask a professional, then enter the numbers.',
+      'Let portion suggestions size your plate. Every planned meal suggests an amount per member from their own targets — different goals, same dinner table.',
       'Log everything, especially snacks, when you eat it. The rings tell you the truth by mid-afternoon — adjust tonight\'s portion, not the whole plan.',
-      'Never let hungry-you decide dinner. That\'s the plan\'s job: Sunday-you already composed a week that fits the deficit.',
+      'Never let hungry-you decide dinner. That\'s the plan\'s job: Sunday-you already composed a week that fits everyone\'s targets.',
       'Rate filling, high-protein meals up. Favorites drift toward what satisfies, and generated weeks quietly get easier to stick to.',
-      'Weigh weekly, review monthly: if the scale stalls for 3–4 weeks with honest logging, lower the calorie target slightly and regenerate.',
+      'Check in monthly: if progress toward a goal stalls despite honest logging, adjust that member\'s targets slightly and regenerate.',
     ],
   },
   {
@@ -96,7 +96,7 @@ const OPERATING_RHYTHM = [
   },
   {
     when: 'Monthly · 10 minutes',
-    what: 'Review: are targets still right? Weight trending? Purse realistic? Prune won\'t-eats that changed, top up thin slots with Fill gaps, and retire recipes nobody rates above 3.',
+    what: 'Review: are targets still right? Goals on track? Purse realistic? Prune won\'t-eats that changed, top up thin slots with Fill gaps, and retire recipes nobody rates above 3.',
   },
 ]
 
@@ -384,7 +384,7 @@ export function GuidePage() {
           <SectionHead label="The method — one family, three outcomes" />
           <Rule />
           <p className="text-sm mt-3" style={{ color: 'var(--ink-dim)', lineHeight: 1.6 }}>
-            Eating well, losing weight, and saving money are usually three competing projects.
+            Eating well, being healthy, and saving money are usually three competing projects.
             Run through the loop, they become one: the same plan is composed against everyone’s
             targets, sized per person, and costed against the pantry and the purse. Here is the
             playbook for each outcome.
