@@ -22,6 +22,7 @@ import {
 import { getWeekStart } from '../utils/mealPlan'
 import { getUnloggedSlots } from '../utils/foodLogs'
 import { InventorySummaryWidget } from '../components/inventory/InventorySummaryWidget'
+import { LeftoverNudge } from '../components/inventory/LeftoverNudge'
 import { RateMealsCard } from '../components/feedback/RateMealsCard'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule } from '../components/editorial'
 import type { FoodLog } from '../types/database'
@@ -443,6 +444,8 @@ export function HomePage() {
               </>
             )}
 
+            <LeftoverNudge />
+
             <SectionHead label="Inventory pulse" />
             <Rule />
             <div className="py-2">
@@ -519,6 +522,8 @@ export function HomePage() {
               </div>
             </>
           )}
+
+          <LeftoverNudge />
 
           <SectionHead label="Inventory pulse" />
           <Rule />

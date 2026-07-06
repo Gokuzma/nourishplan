@@ -51,6 +51,8 @@ interface InventoryItemRow {
   food_id: string | null;
   quantity_remaining: number;
   unit: string;
+  is_leftover: boolean;
+  expires_at: string | null;
 }
 
 interface RatingRow {
@@ -304,7 +306,7 @@ serve(async (req) => {
           .eq("household_id", householdId),
         adminClient
           .from("inventory_items")
-          .select("food_name, food_id, quantity_remaining, unit")
+          .select("food_name, food_id, quantity_remaining, unit, is_leftover, expires_at")
           .eq("household_id", householdId)
           .is("removed_at", null),
         adminClient
@@ -440,6 +442,19 @@ serve(async (req) => {
       // Inventory ingredient names for AI context
       const inventoryNames = inventory.map((i) => sanitizeString(i.food_name));
 
+      // Leftovers and soon-to-expire items — soft constraints so food gets
+      // eaten instead of dying in the fridge (sim finding #2).
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const soonCutoff = new Date();
+      soonCutoff.setUTCDate(soonCutoff.getUTCDate() + 4);
+      const soonStr = soonCutoff.toISOString().slice(0, 10);
+      const leftoverNames = inventory
+        .filter((i) => i.is_leftover && (!i.expires_at || i.expires_at >= todayStr))
+        .map((i) => sanitizeString(i.food_name) + (i.expires_at ? ` (expires ${i.expires_at})` : ""));
+      const expiringSoonNames = inventory
+        .filter((i) => !i.is_leftover && i.expires_at && i.expires_at >= todayStr && i.expires_at <= soonStr)
+        .map((i) => `${sanitizeString(i.food_name)} (expires ${i.expires_at})`);
+
       // Won't-eat and restriction ingredient lists
       const wontEatNames = wontEat.map((w) => sanitizeString(w.food_name));
       const allergenNames = wontEat.filter((w) => w.strength === "allergy").map((w) => sanitizeString(w.food_name));
@@ -529,7 +544,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 1024,
             system:
-              "You are a household meal planner. Given a recipe catalog and household constraints, return a JSON array of recipe IDs that are good candidates for this week's plan. Consider dietary restrictions (HARD constraint — never include recipes with allergen ingredients), won't-eat lists (HARD — never include), member preferences (ratings), schedule complexity requirements, inventory availability (prefer recipes using ingredients the household has), and budget awareness. Return approximately 30 candidates. Select candidates with tier balance roughly matching the provided recipeMix ratios (favorites/liked/novel percentages). Include enough novel candidates (tier_hint='novel') to support the novel quota. Prefer recipes whose tier_hint matches the tier you are filling. Return ONLY a JSON array of ID strings, nothing else.",
+              "You are a household meal planner. Given a recipe catalog and household constraints, return a JSON array of recipe IDs that are good candidates for this week's plan. Consider dietary restrictions (HARD constraint — never include recipes with allergen ingredients), won't-eat lists (HARD — never include), member preferences (ratings), schedule complexity requirements, inventory availability (prefer recipes using ingredients the household has), and budget awareness. ALWAYS include any recipe whose name matches an unexpired leftover in constraints.leftovers (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), and favor recipes that use items in constraints.expiringSoon. Return approximately 30 candidates. Select candidates with tier balance roughly matching the provided recipeMix ratios (favorites/liked/novel percentages). Include enough novel candidates (tier_hint='novel') to support the novel quota. Prefer recipes whose tier_hint matches the tier you are filling. Return ONLY a JSON array of ID strings, nothing else.",
             messages: [
               {
                 role: "user",
@@ -541,6 +556,8 @@ serve(async (req) => {
                     allergens: allergenNames,
                     wontEat: wontEatNames,
                     inventory: inventoryNames,
+                    leftovers: leftoverNames,
+                    expiringSoon: expiringSoonNames,
                     priorityOrder: priorityOrder ?? [],
                   },
                   recipeMix,
@@ -594,7 +611,7 @@ serve(async (req) => {
             model: assignModel,
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon — using food before it expires beats perfect variety. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. 10) If leftovers lists an unexpired leftover whose name matches a candidate recipe (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), STRONGLY prefer assigning that recipe to the earliest unlocked Lunch slot before the leftover's expiry date, with rationale 'Uses up leftover — expires {date}' (this format overrides the tier formats in rule 9). Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -603,6 +620,8 @@ serve(async (req) => {
                   slotsToFill,
                   lockedSlots: lockedSlots.map((s) => ({ day_index: s.day_index, slot_name: s.slot_name })),
                   inventory: inventoryNames,
+                  leftovers: leftoverNames,
+                  expiringSoon: expiringSoonNames,
                   nutritionTargets,
                   priorityOrder: priorityOrder ?? [],
                   recipeMix,
@@ -694,7 +713,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get complex recipes, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon; when a leftover in leftovers matches a candidate recipe name, keep or place that recipe in the earliest unlocked Lunch slot before the leftover expires. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
             messages: [
               {
                 role: "user",
@@ -711,6 +730,8 @@ serve(async (req) => {
                     wontEat: wontEatNames,
                     restrictions: allPredefined,
                     inventory: inventoryNames,
+                    leftovers: leftoverNames,
+                    expiringSoon: expiringSoonNames,
                     priorityOrder: priorityOrder ?? [],
                   },
                   instruction: "Fix these violations while preserving as many good assignments as possible.",
