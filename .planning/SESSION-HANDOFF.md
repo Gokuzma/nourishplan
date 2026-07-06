@@ -1,49 +1,83 @@
-# NourishPlan — open work handoff
+# NourishPlan — session handoff (2026-07-05/06)
 
-## Status (2026-04-27)
+Everything below is committed and pushed through `580aa9f`; prod (`nourishplan.gregok.ca`)
+serves bundle `index-BSCv0yQt.js`. CI is green. Read this top-to-bottom before continuing.
 
-All five "broken flow" surfaces from the prior handoff are green in prod (`nourishplan.gregok.ca`):
+## State of the world
 
-| Flow | Status | Fix |
-|---|---|---|
-| Generate plan | ✅ working | already fixed prior session (column rename) |
-| Slot kcal display | ✅ fixed | edge fn now also inserts the recipe `meal_items` row (commit `5007ebf`) |
-| Grocery list | ✅ working | backend was fine; cache invalidation gap fixed (commit `9c8ddbd`) |
-| Batch prep | ✅ fixed | function deployed (was missing); `max_tokens` 4096→8192 (commit `0278946`) |
-| Cook from slot | ✅ working | navigation, recipe load, resume/start prompt all functional |
+- **Suite:** 377 tests passing, 0 failures. **Typecheck:** `tsc -b` = 0 errors (was 135) and
+  gated in CI (`.github/workflows/ci.yml`: tsc + vitest + vite build on every push).
+- **Migrations:** 31/31 in sync. **Edge functions:** all 15 deployed and current, including
+  the three that had never been deployed (`analyze-ratings`, `classify-restrictions`,
+  `delete-account` — all now with in-code caller/household verification).
+- **Security:** exposed `sb_secret` rotated (new key in `.env.local`), old key revoked,
+  hardcoded literals scrubbed; `.recipe-import/` and `.playwright-mcp/` gitignored.
+- **Prod data:** 0 wildcard recipes, 0 over-tagged, empty artifacts soft-deleted.
 
-Stacy's Apr 26 plan was regenerated end-to-end after the meal_items fix; every slot card now shows real kcal numbers (125 / 306 / 607 / 1234 etc.).
+## What shipped this session (chronological)
 
-Lessons logged: `L-033` (meals must wrap recipe meal_items), `L-034` (edge fn CORS = undeployed), `L-035` (TanStack invalidations must cover every prefix).
+1. **Codebase map** — `.planning/codebase/` (7 docs: stack, integrations, architecture,
+   structure, conventions, testing, concerns).
+2. **Recipe discovery + selector** — ✨ Discover on Recipes page (craving/slot-aware AI
+   suggestions with macros + add-to-book, via new `discover` mode in `recipe-supply`);
+   plan slot picker got search, slot-first grouping, per-serving macros
+   (`useRecipeMacros`, `queryKeys.recipes.macros`). Spec:
+   `docs/superpowers/specs/2026-07-05-recipe-discovery-and-selector.md`.
+3. **User Guide rebuilt** (`/guide`) — philosophy-first: constraint-solver framing, the
+   weekly loop (Stock → Compose → Shop → Cook → Rate), the method (Eat well / **Be
+   healthy** / Save money — per user, never say "lose weight"), operating rhythm
+   (Sunday 20 min / daily 2 min / monthly 10 min).
+4. **Full working-order audit + "do it all" execution** — `.planning/AUDIT-2026-07-05.md`
+   (with execution-status section). Highlights: Supabase types generated
+   (`src/types/database.gen.ts` feeds the client; hand-written interfaces in
+   `src/types/database.ts` remain the semantic layer with boundary casts); weekly-loop
+   CTAs added at every stage edge (Discover→Plan, Plan→Grocery "Generate grocery list",
+   Grocery→Pantry "Add purchased", Cook receipt→star rating, Today Tonight→"Cook this");
+   Insights/Settings/RecipeBuilder editorialized; dead Meals UI deleted
+   (`/meals/:id`, MealPage/MealCard/MealBuilder/MealItemRow); real bugs fixed
+   (PlanGrid `display_name`→`name`, desktop locked-slot shimmer, analyze-ratings column).
+5. **Month-of-use simulation** — `.planning/SIMULATION-2026-07-05.md` + harness
+   `scripts/sim-month.ts`. 3 bugs found & fixed & deployed:
+   - `subtractInventory` name-fallback (AI-recipe pantry matching — was "buy 197 items"
+     with a full pantry, now correct)
+   - `generate-plan` verify passes no longer wipe tier rationale
+   - Grocery add-to-pantry merges rows (was 691 inventory rows after a month)
 
----
+## Open work — prioritized next steps
 
-## Still open — feature work (not bugs)
+From the simulation (`.planning/SIMULATION-2026-07-05.md`, full reasoning there):
+1. **Budget truth**: `spend_logs` CHECK only allows `'cook'|'food_log'` — real grocery
+   spend is unrecordable; purse showed $30–75/wk while the family spent ~$180/wk.
+   Needs migration 033 + purse UI decision (show "bought vs cooked", avoid double-count).
+2. **Price by normalized ingredient NAME, not per-recipe UUID** — only ~25% of grocery
+   items ever price; AI recipes mint new ingredient_ids every generation.
+3. **Leftovers → next-day lunch**: all 6 simulated leftovers expired unconsumed. Feed
+   unexpired leftovers + expiring items into generate-plan as soft constraints.
+4. Weekly kcal-vs-target trend on Insights; generation pass-progress UI.
 
-### A. Searchable + slot-prioritized recipe picker — ✅ DONE 2026-07-05
+From the audit (still open): error monitoring (needs Sentry-vs-homegrown decision);
+Cook Mode + shared modals still old-style; 22 deferred human UATs; Folio renumbering.
 
-Shipped as part of the recipe discovery + selector work (commit `5383f96`), with
-per-serving macros on each row via `useRecipeMacros`. See
-`docs/superpowers/specs/2026-07-05-recipe-discovery-and-selector.md`.
-**Deploy note**: `recipe-supply` edge fn (new `discover` mode) is deployed; the
-frontend still needs `npx vercel --prod` — the stored Vercel token expired and
-needs an interactive `npx vercel login` first.
+## How to operate (hard-won this session — see lessons L-036…L-044)
 
-### B. View-and-cook a planned recipe (scaled to household + per-member nutrition)
+- **Deploys**: frontend `npx vercel --prod` (user is logged in). Edge fns:
+  `eval "$(tr -d '\r' < .env.local | grep SUPABASE_ACCESS_TOKEN=)"` then
+  `SUPABASE_ACCESS_TOKEN=… npx supabase functions deploy <fn> --project-ref qyablbzodmftobjslgri --no-verify-jwt`
+  — but ONLY with in-code auth checks (L-041). If anything says INACTIVE, restore the
+  project first (L-040).
+- **Sim harness**: `SIM_URL/SIM_SVC/SIM_ANON` env → `npx vite-node scripts/sim-month.ts -- <setup|seed|week N|audit>`;
+  idempotent, Sim Family household persists in prod as a regression fixture
+  (sim-family@nourishplan.test / SimFamily!2026). generate-plan rate limit: 10/household/24h.
+- **Test accounts**: claude-test@nourishplan.test / ClaudeTest!2026 (Test Household).
+- Kill dev servers by port, never `taskkill node.exe` (L-044). Run the L-001 worktree
+  cleanup before vitest. Playwright chromium is installed; visual-check pattern in
+  scratchpad used `@playwright/test` from the repo.
 
-**Current state**: filled SlotCard already has a "Cook this meal" icon (works). User wants a separate "View recipe" affordance: see the recipe's ingredients/steps, scaled from `recipe.servings` to `household.member_count`, with a per-member nutrition card.
+## Watch-outs for the next session
 
-**Changes**:
-1. Add a "View recipe" button to `OccupiedSlotCard` (in `src/components/plan/SlotCard.tsx`, near the existing Cook icon at line 215). Resolve the recipe id via `slot.meals?.meal_items?.find(mi => mi.item_type === 'recipe')?.item_id` and `navigate(\`/recipes/\${recipeId}\`)`.
-2. On `RecipePage.tsx`, add a "scale to household" toggle that multiplies `recipe_ingredients[].quantity_grams` by `household.member_count / recipe.servings`.
-3. Add a per-member nutrition card showing each member's per-serving calories/macros against their `nutrition_targets`.
-
----
-
-## Reference
-
-- Test account: `claude-test@nourishplan.test` / `ClaudeTest!2026`
-- Stacy's household ID: `b7322b95-4917-43bf-a3a9-10f4378f7524`
-- Schema: `supabase/migrations/`
-- Lessons: `lessons.md` (project root)
-- Last deploy: `dpl_H4j3KgPEfcfs2PxzTxzkyQNtT6wC` (Vercel) + `generate-plan` v18, `compute-batch-prep` v2 (Supabase Functions)
+- `src/types/database.gen.ts` is generated — regenerate after any migration
+  (`SUPABASE_ACCESS_TOKEN=… npx supabase gen types typescript --project-id qyablbzodmftobjslgri`).
+- The editorial design system is the standard (see RecipesPage/GroceryPage); old-style
+  remnants live mostly under `src/components/cook/` and shared modals.
+- `.env.local` now holds the ROTATED service key; the platform-injected key inside edge
+  functions is separate and unchanged.
