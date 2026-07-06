@@ -1,4 +1,4 @@
-import { getAvailableQuantity, getLowStockStaples } from './inventory'
+import { getAvailableQuantity, getLowStockStaples, convertToGrams } from './inventory'
 import type { InventoryItem, FoodPrice } from '../types/database'
 
 const MAX_RECIPE_DEPTH = 5
@@ -202,9 +202,20 @@ export function subtractInventory(
   const alreadyHave: GroceryItemDraft[] = []
 
   for (const ingredient of ingredients) {
-    const available = ingredient.food_id
+    // Match by food_id first; fall back to case-insensitive name so AI-imported
+    // recipe ingredients (random UUIDs, never in inventory) still see the pantry.
+    let available = ingredient.food_id
       ? getAvailableQuantity(inventoryItems, ingredient.food_id)
       : 0
+    if (available === 0) {
+      const nameLower = ingredient.food_name.toLowerCase()
+      available = inventoryItems
+        .filter(item => item.removed_at === null && item.food_name.toLowerCase() === nameLower)
+        .reduce((sum, item) => {
+          const grams = convertToGrams(item.quantity_remaining, item.unit)
+          return grams === null ? sum : sum + grams
+        }, 0)
+    }
 
     if (available === 0) {
       needToBuy.push({

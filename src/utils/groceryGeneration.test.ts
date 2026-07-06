@@ -196,6 +196,28 @@ describe('subtractInventory', () => {
     expect(alreadyHave).toHaveLength(1)
     expect(alreadyHave[0].covered_grams).toBe(200)
   })
+
+  it('falls back to case-insensitive name matching when food_id finds nothing (AI recipes)', () => {
+    // AI-generated recipe ingredients carry random UUIDs that never match
+    // inventory food_ids — availability must fall back to the name.
+    const ingredients = [{ food_id: 'random-uuid-xyz', food_name: 'Olive oil', total_grams: 60 }]
+    const inventory = [makeInventoryItem({ food_id: null, food_name: 'olive oil', quantity_remaining: 750, unit: 'g' })]
+
+    const { needToBuy, alreadyHave } = subtractInventory(ingredients, inventory)
+
+    expect(needToBuy).toHaveLength(0)
+    expect(alreadyHave).toHaveLength(1)
+  })
+
+  it('name fallback also applies when the ingredient has no food_id at all', () => {
+    const ingredients = [{ food_id: null, food_name: 'Rolled Oats', total_grams: 100 }]
+    const inventory = [makeInventoryItem({ food_id: null, food_name: 'rolled oats', quantity_remaining: 900, unit: 'g' })]
+
+    const { needToBuy, alreadyHave } = subtractInventory(ingredients, inventory)
+
+    expect(needToBuy).toHaveLength(0)
+    expect(alreadyHave).toHaveLength(1)
+  })
 })
 
 // ─── assignCategories ────────────────────────────────────────────────────────
