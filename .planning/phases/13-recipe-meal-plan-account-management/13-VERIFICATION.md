@@ -1,17 +1,18 @@
 ---
 phase: 13-recipe-meal-plan-account-management
 verified: 2026-03-16T21:20:00Z
-status: gaps_found
-score: 5/6 truths verified
-gaps:
-  - truth: "Test stubs for ACCTM-01 updated to green after implementation"
-    status: failed
-    reason: "tests/settings.test.tsx still contains 3 expect(true).toBe(false) stubs from Wave 0; Plan 13-03 implemented the feature but never updated the tests to reflect actual behavior"
-    artifacts:
-      - path: "tests/settings.test.tsx"
-        issue: "All 3 ACCTM-01 test cases use expect(true).toBe(false) — tests fail red even though SettingsPage Danger Zone is fully implemented"
-    missing:
-      - "Update settings.test.tsx stubs to source-check or behavioral assertions matching the implemented SettingsPage Danger Zone (follow the same pattern used in tests/meal-plan.test.ts after Plan 13-02)"
+re_verified: 2026-04-23T03:15:00Z
+status: passed
+score: 6/6 truths verified
+re_verification:
+  previous_status: gaps_found
+  previous_score: 5/6
+  gap_closed:
+    - truth: "Test stubs for ACCTM-01 updated to green after implementation"
+      closed_by: "commit b327ef1 — fix(13-03): update ACCTM-01 test stubs with source-check assertions"
+      evidence: "npx vitest run tests/settings.test.tsx → Test Files 1 passed / Tests 3 passed (verified 2026-04-23T03:14:31Z)"
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 13: Recipe, Meal Plan & Account Management Verification Report

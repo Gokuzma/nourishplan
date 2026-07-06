@@ -1,16 +1,25 @@
 ---
-status: diagnosed
+status: complete
 phase: 22-constraint-based-planning-engine
 source: [22-01-SUMMARY.md, 22-02-SUMMARY.md, 22-03-SUMMARY.md, 22-04-SUMMARY.md, 22-05-SUMMARY.md]
 started: 2026-04-06T23:42:00Z
-updated: 2026-04-10T17:01:00Z
+updated: 2026-04-23T03:10:00Z
+closed: 2026-04-23T03:10:00Z
 tested_by: claude-playwright
 test_account: UAT Test Family (plan c182b991-4ea6-48b0-b665-5112771903a4)
+resolution:
+  closed_by:
+    - 22-06 (Gap B: wall-clock budget + partial status)
+    - 22-07 (Gap A: snack fallback + droppedAssignments logging)
+    - 22-08 (Gap D: per-slot shimmer refactor)
+    - 22-09 (Gap C: NutritionGapCard integration test + seed SQL)
+  verification: 22-VERIFICATION.md (status=passed; re_verification.previous_status=human_needed → all 4 gaps closed, 0 gaps_remaining)
+  note: "Three issue-tagged tests below are retained as historical UAT log; their gaps are closed in code per VERIFICATION re_verification section. Fresh live-browser UAT items for the corrected code now live in 22-VERIFICATION.md human_verification frontmatter."
 ---
 
 ## Current Test
 
-[testing complete]
+[testing complete — all diagnosed gaps closed by plans 22-06..22-09; see frontmatter resolution block]
 
 ## Tests
 

@@ -28,3 +28,13 @@ dist-ssr
 
 # Claude Code per-session state (Stop hook flag files)
 .claude/.stop-hook-state/
+
+# Session/debug artifacts
+.playwright-mcp/
+test-results/
+/*.png
+/*.jpeg
+/*.jpg
+
+# Local import scripts with credentials — never commit
+.recipe-import/
