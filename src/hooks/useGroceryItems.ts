@@ -17,7 +17,7 @@ export function useGroceryItems(listId: string | undefined) {
         .order('category')
         .order('food_name')
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as GroceryItem[]
     },
     enabled: !!listId,
   })

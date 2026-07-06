@@ -20,7 +20,7 @@ export function useSchedule(
         .eq('household_id', householdId!)
         .eq(column, memberId!)
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as MemberScheduleSlot[]
     },
     enabled: !!householdId && !!memberId,
   })
@@ -52,7 +52,15 @@ export function useSaveSchedule() {
       const rows = days.flatMap(day =>
         SLOT_NAMES.map(slot => {
           const status: ScheduleStatus = grid.get(`${day}:${slot}`) ?? 'prep'
-          const row: Record<string, unknown> = {
+          const row: {
+            household_id: string
+            day_of_week: number
+            slot_name: string
+            status: ScheduleStatus
+            updated_at: string
+            member_user_id?: string
+            member_profile_id?: string
+          } = {
             household_id: householdId,
             day_of_week: day,
             slot_name: slot,
@@ -87,7 +95,7 @@ export function useHouseholdSchedules(householdId: string | undefined) {
         .select('*')
         .eq('household_id', householdId!)
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as MemberScheduleSlot[]
     },
     enabled: !!householdId,
   })

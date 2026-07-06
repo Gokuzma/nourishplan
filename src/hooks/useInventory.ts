@@ -26,7 +26,7 @@ export function useInventoryItems(location?: StorageLocation) {
       }
       const { data, error } = await query
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as InventoryItem[]
     },
     enabled: !!householdId,
   })

@@ -17,7 +17,7 @@ export function useNutritionTargets(householdId: string | undefined) {
         .eq('household_id', householdId!)
 
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as NutritionTarget[]
     },
     enabled: !!householdId,
   })
@@ -45,7 +45,7 @@ export function useNutritionTarget(
         .maybeSingle()
 
       if (error) throw error
-      return data
+      return data as unknown as NutritionTarget | null
     },
     enabled: !!householdId && !!memberId,
   })
@@ -86,7 +86,7 @@ export function useUpsertNutritionTargets() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as NutritionTarget
     },
     onSuccess: (_, params) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.list(params.householdId) })

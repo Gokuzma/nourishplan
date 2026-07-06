@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { detectMonotony, SlotEntry } from './monotonyDetection'
+import { detectMonotony, type SlotEntry } from './monotonyDetection'
 
 describe('detectMonotony', () => {
   const currentWeek = '2026-04-06'

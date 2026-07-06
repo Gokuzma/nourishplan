@@ -70,7 +70,7 @@ export function buildHouseholdTooltips(
   }
   const tooltips = new Map<string, string>()
   // High->low precedence order for tooltip display
-  const DISPLAY_ORDER: ScheduleStatus[] = ['away', 'quick', 'consume']
+  const DISPLAY_ORDER: Exclude<ScheduleStatus, 'prep'>[] = ['away', 'quick', 'consume']
   const TITLE_CASE: Record<Exclude<ScheduleStatus, 'prep'>, string> = {
     away: 'Away',
     quick: 'Quick',

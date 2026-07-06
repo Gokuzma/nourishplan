@@ -5,6 +5,7 @@ import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
 import type { CookSession, CookSessionStepState, RecipeStep } from '../types/database'
+import type { Json } from '../types/database.gen'
 
 // ============================================================
 // useCookSession — fetch + realtime subscribe for a single row
@@ -69,7 +70,7 @@ export function useActiveCookSessions() {
         .eq('status', 'in_progress')
         .order('started_at', { ascending: false })
       if (error) throw error
-      return (data ?? []) as CookSession[]
+      return (data ?? []) as unknown as CookSession[]
     },
     enabled: !!householdId,
   })
@@ -152,7 +153,7 @@ export function useCreateCookSession() {
           recipe_id: params.recipe_id ?? null,
           recipe_ids: params.recipe_ids,
           batch_prep_session_key: params.batch_prep_session_key ?? null,
-          step_state: { steps, order },
+          step_state: { steps, order } as unknown as Json,
           status: 'in_progress',
           mode: params.mode,
         })
@@ -160,7 +161,7 @@ export function useCreateCookSession() {
         .single()
 
       if (error) throw error
-      return data as CookSession
+      return data as unknown as CookSession
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cookSession.detail(data.id) })
@@ -199,7 +200,7 @@ export function useUpdateCookStep() {
         .eq('id', params.sessionId)
         .single()
       if (readErr) throw readErr
-      const currentState = current.step_state as CookSession['step_state']
+      const currentState = current.step_state as unknown as CookSession['step_state']
       const existing = currentState.steps[params.stepId] ?? ({
         completed_at: null,
         completed_by: null,
@@ -216,7 +217,7 @@ export function useUpdateCookStep() {
       }
       const { error } = await supabase
         .from('cook_sessions')
-        .update({ step_state: merged, updated_at: new Date().toISOString() })
+        .update({ step_state: merged as unknown as Json, updated_at: new Date().toISOString() })
         .eq('id', params.sessionId)
       if (error) throw error
     },

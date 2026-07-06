@@ -19,7 +19,7 @@ export function useWontEatEntries(
         .eq(column, memberId!)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as WontEatEntry[]
     },
     enabled: !!householdId && !!memberId,
   })
@@ -37,7 +37,14 @@ export function useAddWontEat() {
   return useMutation({
     mutationFn: async (params: AddWontEatParams) => {
       const { householdId, memberId, memberType, foodName } = params
-      const row: Record<string, unknown> = {
+      const row: {
+        household_id: string
+        food_name: string
+        strength: string
+        source: string
+        member_user_id?: string
+        member_profile_id?: string
+      } = {
         household_id: householdId,
         food_name: foodName,
         strength: 'dislikes',

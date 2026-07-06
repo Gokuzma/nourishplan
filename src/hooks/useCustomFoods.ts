@@ -38,7 +38,7 @@ export function useCustomFoods() {
         .order('name')
 
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as CustomFood[]
     },
     enabled: !!householdId,
   })
@@ -72,7 +72,7 @@ export function useCreateCustomFood() {
 
       if (error) throw error
       if (!data) throw new Error('Save failed — food was not created.')
-      return data
+      return data as unknown as CustomFood
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-foods'] })
@@ -102,7 +102,7 @@ export function useUpdateCustomFood() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as CustomFood
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-foods'] })

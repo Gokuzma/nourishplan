@@ -6,6 +6,8 @@ import {
   formatDisplayQuantity,
   addRestockStaples,
   computeItemCost,
+  type MealItemNode,
+  type ResolvedSlot,
 } from './groceryGeneration'
 import type { InventoryItem, FoodPrice } from '../types/database'
 
@@ -40,22 +42,8 @@ function makeInventoryItem(overrides: Partial<InventoryItem> = {}): InventoryIte
 // Represents a "resolved slot" — the structure aggregateIngredients receives
 function makeResolvedSlot(overrides: {
   meal_id?: string | null
-  meal_items?: {
-    id: string
-    item_type: 'food' | 'recipe'
-    item_id: string
-    quantity_grams: number
-    item_name?: string | null
-    recipe_ingredients?: {
-      id: string
-      ingredient_type: 'food' | 'recipe'
-      ingredient_id: string
-      quantity_grams: number
-      ingredient_name?: string | null
-      recipe_ingredients?: unknown[]
-    }[]
-  }[]
-} = {}) {
+  meal_items?: MealItemNode[]
+} = {}): ResolvedSlot {
   return {
     meal_id: 'meal_id' in overrides ? (overrides.meal_id ?? null) : 'meal-1',
     meal_items: overrides.meal_items ?? [],

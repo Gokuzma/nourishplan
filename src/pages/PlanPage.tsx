@@ -43,14 +43,6 @@ function formatLong(weekStart: string): string {
   return `${fmt(start)} — ${fmt(end, true)}`.toUpperCase()
 }
 
-// ISO-style week number (rough, for display only)
-function weekOfYear(dateStr: string): number {
-  const d = new Date(dateStr + 'T00:00:00Z')
-  const startOfYear = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  const days = Math.floor((d.getTime() - startOfYear.getTime()) / 86400000)
-  return Math.ceil((days + startOfYear.getUTCDay() + 1) / 7)
-}
-
 /**
  * /plan — weekly meal plan rendered in the Sunday Supper Gazette editorial style.
  * Mobile: nameplate.sm + day-pill scrubber inside PlanGrid.
@@ -155,7 +147,6 @@ export function PlanPage() {
     }
   }
 
-  const wk = weekOfYear(weekStart)
   const filledCount = slots.filter(s => s.meal_id != null).length
   const lockedCount = slots.filter(s => s.is_locked).length
 

@@ -52,7 +52,7 @@ export function useFoodLogs(
 
       const { data, error } = await query
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as FoodLog[]
     },
     enabled: !!householdId && !!logDate && !!memberId,
   })
@@ -100,7 +100,7 @@ export function useInsertFoodLog() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as FoodLog
     },
     onSuccess: (data) => {
       const householdId = membership?.household_id
@@ -150,7 +150,7 @@ export function useUpdateFoodLog() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as FoodLog
     },
     onSuccess: (data) => {
       const householdId = membership?.household_id
@@ -198,7 +198,7 @@ export function useHouseholdDayLogs(
         .order('created_at', { ascending: true })
 
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as FoodLog[]
     },
     enabled: !!householdId && !!logDate,
   })
@@ -246,7 +246,7 @@ export function useBulkInsertFoodLogs() {
         .select()
 
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as FoodLog[]
     },
     onSuccess: (data) => {
       const householdId = membership?.household_id

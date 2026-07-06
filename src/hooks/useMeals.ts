@@ -185,7 +185,7 @@ export function useAddMealItem() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as MealItem
     },
     onSuccess: (_, { meal_id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(meal_id) })
@@ -216,7 +216,7 @@ export function useUpdateMealItem() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as MealItem
     },
     onSuccess: (_, { meal_id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.meals.detail(meal_id) })
@@ -286,7 +286,7 @@ export function useGetOrCreateMealForRecipe() {
 
       const ingredients = (recipe.recipe_ingredients ?? []).map((i) => ({
         nutrition: calcIngredientNutrition(
-          { calories: i.calories_per_100g, protein: i.protein_per_100g, fat: i.fat_per_100g, carbs: i.carbs_per_100g },
+          { calories: i.calories_per_100g ?? 0, protein: i.protein_per_100g ?? 0, fat: i.fat_per_100g ?? 0, carbs: i.carbs_per_100g ?? 0 },
           i.quantity_grams,
         ),
       }))

@@ -148,6 +148,7 @@ export interface MealItem {
   meal_id: string
   item_type: 'food' | 'recipe'
   item_id: string
+  item_name: string
   quantity_grams: number
   calories_per_100g: number
   protein_per_100g: number
@@ -362,6 +363,7 @@ export interface NormalizedFoodResult {
   sodium?: number
   micronutrients?: Record<string, number>
   portions?: { description: string; grams: number }[]
+  dataType?: string
 }
 
 export type Database = {

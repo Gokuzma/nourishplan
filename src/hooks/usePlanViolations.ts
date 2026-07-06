@@ -33,7 +33,7 @@ export function usePlanViolations(
         .select('*')
         .eq('household_id', householdId!)
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as WontEatEntry[]
     },
     enabled: !!householdId,
   })

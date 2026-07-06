@@ -91,7 +91,7 @@ export interface GroceryItemDraft {
 }
 
 // Internal recursive ingredient type
-interface RecipeIngredientNode {
+export interface RecipeIngredientNode {
   id: string
   ingredient_type: 'food' | 'recipe'
   ingredient_id: string
@@ -100,7 +100,7 @@ interface RecipeIngredientNode {
   recipe_ingredients?: RecipeIngredientNode[]
 }
 
-interface MealItemNode {
+export interface MealItemNode {
   id: string
   item_type: 'food' | 'recipe'
   item_id: string
@@ -109,7 +109,7 @@ interface MealItemNode {
   recipe_ingredients?: RecipeIngredientNode[]
 }
 
-interface ResolvedSlot {
+export interface ResolvedSlot {
   meal_id: string | null
   meal_items: MealItemNode[]
 }

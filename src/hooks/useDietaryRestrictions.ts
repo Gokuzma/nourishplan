@@ -38,7 +38,14 @@ export function useSaveRestrictions() {
   return useMutation({
     mutationFn: async (params: SaveRestrictionsParams) => {
       const { householdId, memberId, memberType, predefined, customEntries } = params
-      const row: Record<string, unknown> = {
+      const row: {
+        household_id: string
+        predefined: string[]
+        custom_entries: string[]
+        updated_at: string
+        member_user_id?: string
+        member_profile_id?: string
+      } = {
         household_id: householdId,
         predefined,
         custom_entries: customEntries,

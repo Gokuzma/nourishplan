@@ -39,7 +39,6 @@ export function useGeneratePlan() {
 export function useGenerationJob(jobId: string | null) {
   const { data: membership } = useHousehold()
   const householdId = membership?.household_id
-  const queryClient = useQueryClient()
 
   return useQuery({
     queryKey: queryKeys.planGeneration.job(jobId, householdId),

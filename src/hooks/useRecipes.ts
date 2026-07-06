@@ -24,7 +24,7 @@ export function useRecipes() {
         .order('name')
 
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as Recipe[]
     },
     enabled: !!householdId,
   })
@@ -69,7 +69,7 @@ export function useRecipe(id: string) {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as Recipe
     },
     enabled: !!id,
   })
@@ -89,7 +89,7 @@ export function useRecipeIngredients(recipeId: string) {
         .order('sort_order')
 
       if (error) throw error
-      return data ?? []
+      return (data ?? []) as unknown as RecipeIngredient[]
     },
     enabled: !!recipeId,
   })
@@ -117,7 +117,7 @@ export function useCreateRecipe() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as Recipe
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] })
@@ -147,7 +147,7 @@ export function useUpdateRecipe() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as Recipe
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] })
@@ -228,12 +228,12 @@ export function useAddIngredient() {
           fat_per_100g: fat_per_100g ?? null,
           carbs_per_100g: carbs_per_100g ?? null,
           micronutrients: micronutrients ?? null,
-        } as never)
+        })
         .select()
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as RecipeIngredient
     },
     onSuccess: (_, { recipe_id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.ingredients(recipe_id) })
@@ -264,7 +264,7 @@ export function useUpdateIngredient() {
         .single()
 
       if (error) throw error
-      return data
+      return data as unknown as RecipeIngredient
     },
     onSuccess: (_, { recipe_id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.ingredients(recipe_id) })

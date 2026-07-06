@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildHouseholdGrid, buildHouseholdTooltips } from './schedule'
-import type { MemberScheduleSlot, ScheduleStatus } from '../types/database'
+import type { MemberScheduleSlot } from '../types/database'
 
 function makeRow(overrides: Partial<MemberScheduleSlot> = {}): MemberScheduleSlot {
   return {

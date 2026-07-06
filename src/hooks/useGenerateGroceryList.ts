@@ -10,7 +10,10 @@ import {
   addRestockStaples,
   computeItemCost,
   formatDisplayQuantity,
+  type RecipeIngredientNode,
+  type ResolvedSlot,
 } from '../utils/groceryGeneration'
+import type { InventoryItem } from '../types/database'
 
 export function useGenerateGroceryList() {
   const queryClient = useQueryClient()
@@ -37,24 +40,7 @@ export function useGenerateGroceryList() {
       if (planError) throw planError
 
       // 2. Fetch slots with meals and meal_items
-      let slots: {
-        meal_id: string | null
-        meal_items: {
-          id: string
-          item_type: 'food' | 'recipe'
-          item_id: string
-          quantity_grams: number
-          item_name: string
-          recipe_ingredients?: {
-            id: string
-            ingredient_type: 'food' | 'recipe'
-            ingredient_id: string
-            quantity_grams: number
-            ingredient_name?: string | null
-            recipe_ingredients?: unknown[]
-          }[]
-        }[]
-      }[] = []
+      let slots: ResolvedSlot[] = []
 
       if (mealPlan) {
         const { data: slotsData, error: slotsError } = await supabase
@@ -76,13 +62,7 @@ export function useGenerateGroceryList() {
         }
 
         // Fetch recipe_ingredients for all recipes (single query)
-        const recipeIngredientsMap = new Map<string, {
-          id: string
-          ingredient_type: 'food' | 'recipe'
-          ingredient_id: string
-          quantity_grams: number
-          ingredient_name?: string | null
-        }[]>()
+        const recipeIngredientsMap = new Map<string, RecipeIngredientNode[]>()
 
         if (recipeIds.size > 0) {
           const { data: allIngredients, error: ingError } = await supabase
@@ -93,7 +73,7 @@ export function useGenerateGroceryList() {
 
           for (const ing of allIngredients ?? []) {
             const existing = recipeIngredientsMap.get(ing.recipe_id) ?? []
-            existing.push(ing)
+            existing.push(ing as unknown as RecipeIngredientNode)
             recipeIngredientsMap.set(ing.recipe_id, existing)
           }
         }
@@ -152,14 +132,14 @@ export function useGenerateGroceryList() {
 
       // 7. Run generation algorithm
       const aggregated = aggregateIngredients(slots, cookedRecipeIds)
-      const { needToBuy, alreadyHave } = subtractInventory(aggregated, inventoryItems ?? [])
+      const { needToBuy, alreadyHave } = subtractInventory(aggregated, (inventoryItems ?? []) as unknown as InventoryItem[])
       const categorizedNeedToBuy = assignCategories(needToBuy, previousItems ?? [])
 
       // 8. Add restock staples
       const existingFoodIds = new Set<string>(
         needToBuy.map(i => i.food_id).filter((id): id is string => id !== null)
       )
-      const restockItems = addRestockStaples(existingFoodIds, inventoryItems ?? [])
+      const restockItems = addRestockStaples(existingFoodIds, (inventoryItems ?? []) as unknown as InventoryItem[])
       const categorizedRestock = assignCategories(restockItems, previousItems ?? [])
 
       // 9. Upsert grocery_lists row

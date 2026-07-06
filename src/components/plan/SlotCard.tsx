@@ -101,7 +101,7 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
       >
         <DragHandle
           listeners={listeners as Record<string, Function>}
-          attributes={attributes as Record<string, unknown>}
+          attributes={attributes as unknown as Record<string, unknown>}
           ariaLabel={`Drag to reorder ${slotName}`}
         />
         <div className="flex-1 min-w-0">
