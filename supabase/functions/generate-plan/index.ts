@@ -984,9 +984,22 @@ serve(async (req) => {
           .filter((r) => (r.meal_types ?? []).includes(capSlot(slotName)) && isSafeRecipe(r.ingredient_names))
           .map((r) => r.id);
 
+      // A leftover-consuming assignment at Lunch/Dinner is exempt: eating up an
+      // unexpired leftover outranks meal_types tags (the source recipe is usually
+      // Dinner-tagged, which is exactly why it needs the exemption). Verified
+      // against inventory, not the model's rationale.
+      const leftoverRecipeIds = new Set(
+        recipeEnriched
+          .filter((r) => leftoverNames.some((ln) => ln.toLowerCase().includes(r.name.toLowerCase())))
+          .map((r) => r.id),
+      );
+      const isLeftoverPlacement = (recipeId: string, slotName: string): boolean =>
+        leftoverRecipeIds.has(recipeId) && ["Lunch", "Dinner"].includes(capSlot(slotName));
+
       let guardrailRepairs = 0;
       for (const slot of bestResult.slots) {
         if (!slot.recipe_id || fitsSlot(slot.recipe_id, slot.slot_name)) continue;
+        if (isLeftoverPlacement(slot.recipe_id, slot.slot_name)) continue;
         const usage: Record<string, number> = {};
         for (const s2 of bestResult.slots) {
           if (capSlot(s2.slot_name) === capSlot(slot.slot_name) && s2.recipe_id) {
