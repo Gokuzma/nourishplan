@@ -41,6 +41,65 @@ const WEEKLY_LOOP = [
   },
 ]
 
+interface OutcomePlay {
+  goal: string
+  promise: string
+  plays: string[]
+}
+
+const OUTCOME_PLAYS: OutcomePlay[] = [
+  {
+    goal: 'Eat healthily',
+    promise: 'One dinner, four right answers. The plan is composed against every member\'s targets, so healthy stops being a separate menu.',
+    plays: [
+      'Set honest targets per person — a 9-year-old and an adult should not share calorie or protein numbers. Targets live on each member\'s page.',
+      'Record restrictions and won\'t-eats per member, then trust the generator: it treats allergies as law and dislikes as strong preferences, so healthy food that actually gets eaten wins over perfect food that doesn\'t.',
+      'After generating, act on the Nutrition Gaps card — it names who is short on what and offers one-tap swaps.',
+      'Keep breakfast and snack supply stocked (Discover or Fill gaps). Thin slots are how weeks drift into heavy, repetitive dinners.',
+      'Log real portions on Today and glance at the micronutrient breakdown a couple of times a week — patterns show up fast.',
+    ],
+  },
+  {
+    goal: 'Lose weight',
+    promise: 'A calorie deficit you don\'t have to think about at 6pm. Same family dinner, personal portions — no separate diet meals, no willpower architecture.',
+    plays: [
+      'Set your calorie target modestly below maintenance (300–500 kcal) and your protein target high. NourishPlan deliberately doesn\'t compute this for you — use any TDEE calculator or ask a professional, then enter the number.',
+      'Let portion suggestions size your plate. Every planned meal suggests an amount per member from their targets — the person losing weight simply gets a different portion of the same meal.',
+      'Log everything, especially snacks, when you eat it. The rings tell you the truth by mid-afternoon — adjust tonight\'s portion, not the whole plan.',
+      'Never let hungry-you decide dinner. That\'s the plan\'s job: Sunday-you already composed a week that fits the deficit.',
+      'Rate filling, high-protein meals up. Favorites drift toward what satisfies, and generated weeks quietly get easier to stick to.',
+      'Weigh weekly, review monthly: if the scale stalls for 3–4 weeks with honest logging, lower the calorie target slightly and regenerate.',
+    ],
+  },
+  {
+    goal: 'Save money',
+    promise: 'The plan starts from what you already own and ends at a list you actually stick to. Takeout is expensive improvisation — the plan removes the improvising.',
+    plays: [
+      'Inventory first: keep a rough picture of pantry, fridge, and freezer. Use-up badges push expiring food into the plan instead of the bin.',
+      'Price your ~20 staples once. Cost per serving appears on recipes, and the generator leans cheaper when the budget is tight.',
+      'Set the weekly purse and watch the per-meal pace on the Plan page — drift shows up on Tuesday, not at month-end.',
+      'Shop only the generated list. It already subtracted your inventory; everything added at the store is impulse by definition.',
+      'Cook doubles of freezer-friendly recipes on your Prep day — cheaper per serving, and the freezer becomes your defence against the takeout night.',
+      'Treat leftovers as planned lunches, not accidents: save the leftover portion after cooking and schedule it into tomorrow.',
+    ],
+  },
+]
+
+const OPERATING_RHYTHM = [
+  {
+    when: 'Sunday · 20 minutes',
+    what: 'The planning ritual: a 5-minute Discover pass with the family (let the kids pick a card), fill and lock the meals you\'re excited about, Generate Plan, skim the Gaps card and the purse, regenerate the grocery list. Week solved.',
+  },
+  {
+    when: 'Daily · 2 minutes',
+    what: 'Log food when you eat it. Cook from the slot so inventory and spend track themselves. Rate dinner with one tap — it\'s the single highest-leverage habit in the app.',
+  },
+  {
+    when: 'Monthly · 10 minutes',
+    what: 'Review: are targets still right? Weight trending? Purse realistic? Prune won\'t-eats that changed, top up thin slots with Fill gaps, and retire recipes nobody rates above 3.',
+  },
+]
+
 const GUIDE_SECTIONS: GuideSection[] = [
   {
     id: 'getting-started',
@@ -317,6 +376,54 @@ export function GuidePage() {
             Each pass around the loop improves the next: ratings shape what gets suggested and
             generated, cooking keeps the pantry and budget true, and the grocery list is always a
             mirror of the plan. The plan is the hub — everything else feeds it.
+          </p>
+        </div>
+
+        {/* The method — outcomes */}
+        <div id="method">
+          <SectionHead label="The method — one family, three outcomes" />
+          <Rule />
+          <p className="text-sm mt-3" style={{ color: 'var(--ink-dim)', lineHeight: 1.6 }}>
+            Eating well, losing weight, and saving money are usually three competing projects.
+            Run through the loop, they become one: the same plan is composed against everyone’s
+            targets, sized per person, and costed against the pantry and the purse. Here is the
+            playbook for each outcome.
+          </p>
+          <div className="flex flex-col gap-4 mt-4">
+            {OUTCOME_PLAYS.map(outcome => (
+              <div key={outcome.goal} className="bg-paper-2 p-4" style={{ border: '1px solid var(--rule-soft)' }}>
+                <h3 className="serif" style={{ fontSize: 19 }}>{outcome.goal}</h3>
+                <p className="serif-italic text-sm mt-1" style={{ color: 'var(--ink-dim)' }}>{outcome.promise}</p>
+                <ul className="flex flex-col gap-2 text-sm mt-3">
+                  {outcome.plays.map((play, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="mono" style={{ fontSize: 10, color: 'var(--tomato)', marginTop: 3 }}>▸</span>
+                      <span style={{ lineHeight: 1.5 }}>{play}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Operating rhythm */}
+        <div id="rhythm">
+          <SectionHead label="The operating rhythm" />
+          <Rule />
+          <div className="mt-2">
+            {OPERATING_RHYTHM.map(item => (
+              <div key={item.when} className="py-2.5" style={{ borderBottom: '1px dashed var(--rule-soft)' }}>
+                <div className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--tomato)' }}>
+                  {item.when}
+                </div>
+                <p className="text-sm mt-1" style={{ color: 'var(--ink-dim)', lineHeight: 1.55 }}>{item.what}</p>
+              </div>
+            ))}
+          </div>
+          <p className="serif-italic text-sm mt-3" style={{ color: 'var(--ink-dim)' }}>
+            The app can only optimise what it knows. Honest logs, real prices, true schedules —
+            twenty minutes on Sunday and two a day buy back every 6pm scramble.
           </p>
         </div>
 
