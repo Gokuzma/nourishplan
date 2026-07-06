@@ -45,12 +45,15 @@ CI green, 385 tests passing, `tsc -b` 0 errors. Read top-to-bottom before contin
 - **Playtest fixes shipped**: inventory "Tidy up" (690→128 rows live, migration
   034 `removed_reason='merged'`); leftover-nudge dedupe + suffix strip; SlotCard
   "svg"→"serv" + 2-line title clamp.
-- Playtest findings NOT yet fixed (candidates): add-to-pantry does sequential
-  per-item mutations (slow for big trips — batch it); plan monotony (model
-  repeated Penne Arrabbiata 4× despite rule 6 — consider a deterministic repeat
-  guardrail); mobile SlotCard still shows 6 icon buttons per row (consider an
-  overflow menu); Sim Family fridge holds 4 expired-but-active leftovers
-  (no cleanup path for expired items beyond manual remove).
+- **All four playtest findings fixed (third pass, deployed + verified):**
+  add-to-pantry batched (one bulk insert + parallel merges, bulk price upsert);
+  deterministic monotony guardrail in generate-plan (cap 2/recipe/week, never
+  displaces leftover placements, exempt for small catalogs — validated: 28/28
+  slots, no recipe >2×, salmon still at Lunch) plus `todayDayIndex` so leftover
+  lunches aren't placed in the past (prompt-level, not yet observed live);
+  SlotCard secondary actions moved to a ⋯ menu-pop (4 controls inline, titles
+  readable); "Discard expired" band on Inventory (Sim fridge 6→2). Sim pantry
+  now also holds "Paper towels"/"Dish soap" from the batch-checkout smoke test.
 - Test-household state: leftover expires **2026-07-08**, week 2026-07-05 plan is
   Dinners-only, $12.34 grocery spend logged. Sim Family pantry is tidied (128
   rows); its week 2026-07-05 plan was regenerated twice today.
