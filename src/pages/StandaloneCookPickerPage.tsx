@@ -100,7 +100,7 @@ export function StandaloneCookPickerPage() {
                   <p className="text-text/60 font-sans mb-2">No recipes yet.</p>
                   <button
                     type="button"
-                    onClick={() => navigate('/recipes/new')}
+                    onClick={() => navigate('/recipes')}
                     className="text-primary underline text-sm font-sans"
                   >
                     Create a recipe first.

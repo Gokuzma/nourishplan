@@ -27,6 +27,7 @@ import { MicronutrientPanel } from '../plan/MicronutrientPanel'
 import { CookDeductionReceipt } from '../inventory/CookDeductionReceipt'
 import { AddInventoryItemModal } from '../inventory/AddInventoryItemModal'
 import type { NormalizedFoodResult, MacroSummary, RecipeIngredient, Recipe } from '../../types/database'
+import { StoryHead, SectionHead, Rule } from '../editorial'
 import { RecipeStepsSection } from './RecipeStepsSection'
 import { RecipeFreezerToggle } from './RecipeFreezerToggle'
 import { useRecipeSteps, useRegenerateRecipeSteps } from '../../hooks/useRecipeSteps'
@@ -89,17 +90,21 @@ function QuantityModal({ food, onConfirm, onCancel }: QuantityModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-sm p-5 mx-0 sm:mx-4">
-        <h2 className="font-bold text-lg text-primary mb-1">Set quantity</h2>
-        <p className="text-sm text-text/60 mb-4 truncate">{food.name}</p>
+      <div
+        className="relative w-full max-w-sm p-5 mx-0 sm:mx-4"
+        style={{ background: 'var(--paper-2)', border: '1.5px solid var(--rule-c)', boxShadow: '4px 4px 0 var(--tomato)' }}
+      >
+        <h2 className="serif text-lg mb-1" style={{ color: 'var(--ink)' }}>Set quantity</h2>
+        <p className="serif-italic text-sm mb-4 truncate" style={{ color: 'var(--ink-dim)' }}>{food.name}</p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {food.portions && food.portions.length > 0 && (
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-text/60">Portion</label>
+              <label className="eyebrow">Portion</label>
               <select
                 value={selectedPortion}
                 onChange={e => handlePortionChange(e.target.value)}
-                className="rounded-[--radius-btn] border border-accent/30 bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="px-3 py-2 text-sm"
+                style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
               >
                 {food.portions.map(p => (
                   <option key={p.description} value={p.description}>
@@ -111,14 +116,15 @@ function QuantityModal({ food, onConfirm, onCancel }: QuantityModalProps) {
             </div>
           )}
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-text/60">Grams</label>
+            <label className="eyebrow">Grams</label>
             <input
               type="number"
               min="0.1"
               step="0.1"
               value={grams}
               onChange={e => { setSelectedPortion('custom'); setGrams(e.target.value) }}
-              className="rounded-[--radius-btn] border border-accent/30 bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="mono tnum px-3 py-2 text-sm"
+              style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
               autoFocus
             />
           </div>
@@ -126,13 +132,13 @@ function QuantityModal({ food, onConfirm, onCancel }: QuantityModalProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
+              className="flex-1 btn btn-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-[--radius-btn] bg-primary py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
+              className="flex-1 btn btn-primary btn-sm"
             >
               Add
             </button>
@@ -163,18 +169,22 @@ function EditQuantityModal({ ingredient, onConfirm, onCancel }: EditQuantityModa
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-sm p-5 mx-0 sm:mx-4">
-        <h2 className="font-bold text-lg text-primary mb-4">Edit quantity</h2>
+      <div
+        className="relative w-full max-w-sm p-5 mx-0 sm:mx-4"
+        style={{ background: 'var(--paper-2)', border: '1.5px solid var(--rule-c)', boxShadow: '4px 4px 0 var(--tomato)' }}
+      >
+        <h2 className="serif text-lg mb-4" style={{ color: 'var(--ink)' }}>Edit quantity</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-text/60">Grams</label>
+            <label className="eyebrow">Grams</label>
             <input
               type="number"
               min="0.1"
               step="0.1"
               value={grams}
               onChange={e => setGrams(e.target.value)}
-              className="rounded-[--radius-btn] border border-accent/30 bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="mono tnum px-3 py-2 text-sm"
+              style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
               autoFocus
             />
           </div>
@@ -182,13 +192,13 @@ function EditQuantityModal({ ingredient, onConfirm, onCancel }: EditQuantityModa
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
+              className="flex-1 btn btn-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-[--radius-btn] bg-primary py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
+              className="flex-1 btn btn-primary btn-sm"
             >
               Save
             </button>
@@ -226,16 +236,16 @@ function RecipePicker({ currentRecipeId, recipes, onSelect, cycleError }: Recipe
 
   if (available.length === 0) {
     return (
-      <p className="text-sm text-text/50 text-center py-4">
+      <p className="serif-italic text-sm text-center py-4" style={{ color: 'var(--ink-dim)' }}>
         No other recipes available to add.
       </p>
     )
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col">
       {cycleError && (
-        <p className="text-sm text-red-500 bg-red-50 rounded-[--radius-btn] px-3 py-2">
+        <p className="serif-italic text-sm px-3 py-2 mb-2" style={{ color: 'var(--tomato)', border: '1px dashed var(--rule-c)', background: 'var(--paper-2)' }}>
           {cycleError}
         </p>
       )}
@@ -243,11 +253,12 @@ function RecipePicker({ currentRecipeId, recipes, onSelect, cycleError }: Recipe
         <button
           key={recipe.id}
           onClick={() => onSelect(recipe)}
-          className="flex items-center gap-2 px-3 py-2.5 rounded-[--radius-btn] border border-secondary/50 bg-surface hover:border-accent/40 transition-colors text-left w-full"
+          className="flex items-center gap-2 px-1 py-2.5 text-left w-full hover:bg-paper-2 transition-colors"
+          style={{ background: 'transparent', border: 0, borderBottom: '1px dashed var(--rule-soft)', cursor: 'pointer' }}
         >
-          <span className="text-xs bg-accent/20 text-accent font-medium px-1.5 py-0.5 rounded shrink-0">R</span>
-          <span className="text-sm text-text truncate flex-1">{recipe.name}</span>
-          <span className="text-xs text-text/40 shrink-0">{recipe.servings} srv</span>
+          <span className="mono shrink-0" style={{ fontSize: 10, letterSpacing: '0.1em', color: 'var(--butter)', border: '1px solid var(--rule-soft)', padding: '1px 5px' }}>R</span>
+          <span className="serif text-sm truncate flex-1" style={{ color: 'var(--ink)' }}>{recipe.name}</span>
+          <span className="mono tnum shrink-0" style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>{recipe.servings} srv</span>
         </button>
       ))}
     </div>
@@ -339,7 +350,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             fat: f.fat_per_100g,
             carbs: f.carbs_per_100g,
           },
-          micronutrients: f.micronutrients ?? null,
+          micronutrients: (f.micronutrients ?? null) as Record<string, number> | null,
         }
       }
 
@@ -661,20 +672,20 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   if (recipePending && ingredientsPending) {
     return (
       <div
-        className="px-4 py-6 font-sans pb-[64px]"
+        className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8 font-sans"
         aria-live="polite"
         aria-label="Importing recipe, please wait…"
       >
         <div className="flex flex-col gap-4">
-          <div className="h-9 w-3/4 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-9 w-1/4 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-5 w-24 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-14 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-14 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-14 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-5 w-16 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-12 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
-          <div className="h-12 animate-pulse bg-secondary/50 rounded-[--radius-btn]" aria-hidden="true" />
+          <div className="h-9 w-3/4 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-9 w-1/4 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-5 w-24 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-14 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-14 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-14 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-5 w-16 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-12 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
+          <div className="h-12 animate-pulse bg-paper-2" style={{ border: '1px solid var(--rule-soft)' }} aria-hidden="true" />
         </div>
       </div>
     )
@@ -682,16 +693,16 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
   if (recipePending) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <p className="text-text/50 font-sans text-sm">Loading recipe…</p>
+      <div className="paper flex items-center justify-center py-16">
+        <p className="serif-italic text-base" style={{ color: 'var(--ink-soft)' }}>Loading recipe…</p>
       </div>
     )
   }
 
   if (!recipe) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <p className="text-text/50 font-sans text-sm">Recipe not found.</p>
+      <div className="paper flex items-center justify-center py-16">
+        <p className="serif-italic text-base" style={{ color: 'var(--ink-soft)' }}>Recipe not found.</p>
       </div>
     )
   }
@@ -711,16 +722,25 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
   return (
     <>
-      <div className="px-4 py-6 pb-28 font-sans max-w-2xl mx-auto">
+      <div className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8 font-sans">
+        {/* Story head */}
+        <StoryHead
+          kicker="RECIPE"
+          headline="The Recipe"
+          byline={recipe?.servings ? `Serves ${recipe.servings}` : null}
+          size="sm"
+        />
+
         {/* Recipe header */}
-        <div className="mb-6 flex flex-col gap-3">
+        <div className="mb-6 mt-4 flex flex-col gap-3">
           <input
             type="text"
             value={displayName}
             onChange={e => setLocalName(e.target.value)}
             onBlur={handleNameBlur}
             placeholder="Recipe name"
-            className="text-2xl font-bold text-primary bg-transparent border-b border-secondary focus:border-primary focus:outline-none py-1 w-full"
+            className="serif text-2xl py-1 w-full focus:outline-none"
+            style={{ background: 'transparent', border: 0, borderBottom: '1px solid var(--rule-soft)', color: 'var(--ink)', letterSpacing: '-0.01em' }}
           />
           <textarea
             value={localNotes ?? recipe?.notes ?? ''}
@@ -737,19 +757,21 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
               setLocalNotes(null)
             }}
             placeholder="Add notes or variations..."
-            className="w-full text-sm text-text/50 bg-transparent border-none focus:outline-none resize-none overflow-hidden"
+            className="serif-italic w-full text-sm focus:outline-none resize-none overflow-hidden"
+            style={{ background: 'transparent', border: 'none', color: 'var(--ink-dim)' }}
             rows={1}
           />
           {recipe?.created_at && (
             <span
-              className="text-xs text-text/40"
+              className="mono"
+              style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}
               title={new Date(recipe.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
             >
               Created {relativeTime(recipe.created_at)}
             </span>
           )}
           <div className="flex items-center gap-2">
-            <label className="text-sm text-text/60 shrink-0">Servings:</label>
+            <label className="eyebrow shrink-0">Servings:</label>
             <input
               type="number"
               min="1"
@@ -757,13 +779,14 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
               value={displayServings}
               onChange={e => setLocalServings(e.target.value)}
               onBlur={handleServingsBlur}
-              className="w-20 rounded-[--radius-btn] border border-accent/30 bg-surface px-2 py-1 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="mono tnum w-20 px-2 py-1 text-sm focus:outline-none"
+              style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
             />
           </div>
 
           {/* Source URL attribution (D-13) — shown only for imported recipes */}
           {recipe?.source_url && (
-            <p className="text-xs text-text/40">
+            <p className="serif-italic text-xs" style={{ color: 'var(--ink-soft)' }}>
               <a
                 href={recipe.source_url}
                 target="_blank"
@@ -792,7 +815,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             const hasAnyPrice = pricedCount > 0
             if (!hasAnyPrice) return null
             return (
-              <p className="text-xs text-text/50 font-sans">
+              <p className="mono tnum" style={{ fontSize: 11, letterSpacing: '0.08em', color: 'var(--tomato)' }}>
                 {isPartial
                   ? `${formatCost(costPerServing)}+/serving · (${pricedCount} of ${totalCount} priced)`
                   : `${formatCost(costPerServing)}/serving · ${recipe.servings} servings`}
@@ -817,12 +840,12 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             <button
               onClick={handleMarkAsCooked}
               disabled={cookPending}
-              className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="btn btn-primary btn-sm"
             >
               {cookPending ? 'Recording...' : 'Mark as Cooked'}
             </button>
             {cookConfirmation && (
-              <span className="text-xs text-primary">{cookConfirmation}</span>
+              <span className="mono" style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--chartreuse)' }}>{cookConfirmation}</span>
             )}
           </div>
 
@@ -836,30 +859,32 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
         {/* Ingredient list */}
         <div className="mb-4">
-          <h2 className="text-base font-semibold text-text mb-3">Ingredients</h2>
+          <SectionHead label="Ingredients" aux={ingredients ? `${ingredients.length} item${ingredients.length === 1 ? '' : 's'}` : undefined} />
+          <Rule />
           {ingredientsPending ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mt-2">
               {[1, 2].map(i => (
-                <div key={i} className="h-14 rounded-[--radius-btn] bg-secondary/50 animate-pulse" />
+                <div key={i} className="h-14 bg-paper-2 animate-pulse" style={{ border: '1px solid var(--rule-soft)' }} />
               ))}
             </div>
           ) : !ingredients || ingredients.length === 0 ? (
-            <p className="text-sm text-text/50 text-center py-8">
+            <p className="serif-italic text-sm text-center py-8" style={{ color: 'var(--ink-dim)' }}>
               No ingredients yet. Add one below.
             </p>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col">
               {ingredients.map(ing => (
-                <IngredientRow
-                  key={ing.id}
-                  ingredient={ing}
-                  foodData={foodDataMap[ing.ingredient_id] ?? null}
-                  onEdit={() => setEditingIngredient(ing)}
-                  onRemove={() => handleRemove(ing)}
-                  onToggleWeightState={() => handleToggleWeightState(ing)}
-                  price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id)}
-                  onSavePrice={(amount, qty, unit, store) => handleSavePrice(ing, amount, qty, unit, store)}
-                />
+                <div key={ing.id} style={{ borderBottom: '1px dashed var(--rule-soft)', padding: '4px 0' }}>
+                  <IngredientRow
+                    ingredient={ing}
+                    foodData={foodDataMap[ing.ingredient_id] ?? null}
+                    onEdit={() => setEditingIngredient(ing)}
+                    onRemove={() => handleRemove(ing)}
+                    onToggleWeightState={() => handleToggleWeightState(ing)}
+                    price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id)}
+                    onSavePrice={(amount, qty, unit, store) => handleSavePrice(ing, amount, qty, unit, store)}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -879,19 +904,20 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
         {/* Search ingredients trigger */}
         <button
           onClick={handleOpenFoodSearch}
-          className="w-full rounded-[--radius-card] bg-surface border border-secondary px-4 py-3 flex items-center gap-2 text-left hover:border-primary/40 transition-colors"
+          className="w-full px-4 py-3 flex items-center gap-2 text-left hover:bg-paper-2 transition-colors"
+          style={{ background: 'transparent', border: '1.5px dashed var(--rule-c)', cursor: 'pointer' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text/40 shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" style={{ color: 'var(--ink-soft)' }}>
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <span className="text-sm text-text/40">Search ingredients</span>
+          <span className="serif-italic text-sm" style={{ color: 'var(--ink-soft)' }}>Search ingredients</span>
         </button>
 
         {/* Add recipe ingredient button */}
         <button
           onClick={handleOpenRecipeSearch}
-          className="w-full rounded-[--radius-btn] border border-primary/40 text-primary hover:bg-primary/5 py-2.5 text-sm font-medium transition-colors"
+          className="btn btn-sm w-full mt-2"
         >
           + Add Recipe as Ingredient
         </button>
@@ -902,7 +928,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
       {/* Micronutrient panel — shown below macro summary when ingredient data is available */}
       {perServingMicronutrients && (
-        <div className="px-4 pb-4 max-w-2xl mx-auto w-full">
+        <div className="px-4 md:px-8 pb-4 w-full">
           <MicronutrientPanel micronutrients={perServingMicronutrients} />
         </div>
       )}
@@ -920,24 +946,25 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
 
       {/* Recipe picker panel (recipe-as-ingredient) */}
       {showFoodSearch && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-background">
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-secondary/60">
+        <div className="fixed inset-0 z-40 flex flex-col paper">
+          <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '2px solid var(--rule-c)' }}>
             <button
               onClick={() => setShowFoodSearch(false)}
-              className="text-text/60 hover:text-text transition-colors p-1"
+              className="transition-colors p-1"
+              style={{ background: 'transparent', border: 0, color: 'var(--ink-dim)', cursor: 'pointer' }}
               aria-label="Close search"
             >
               ←
             </button>
-            <h2 className="font-semibold text-text">Add Recipe as Ingredient</h2>
+            <h2 className="serif" style={{ color: 'var(--ink)', letterSpacing: '-0.01em' }}>Add Recipe as Ingredient</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-4">
-            <p className="text-xs text-text/50 mb-3">
+            <p className="serif-italic text-xs mb-3" style={{ color: 'var(--ink-dim)' }}>
               Add an existing recipe as an ingredient. Circular references are prevented.
             </p>
             {cycleCheckInProgress && (
-              <p className="text-sm text-text/50 mb-2">Checking for circular references…</p>
+              <p className="serif-italic text-sm mb-2" style={{ color: 'var(--ink-dim)' }}>Checking for circular references…</p>
             )}
             <RecipePicker
               currentRecipeId={recipeId}
@@ -1047,7 +1074,7 @@ async function resolveRecipeNutrition(
       if (ing.ingredient_type !== 'food') continue
       const m = foodMacroMap[ing.ingredient_id]
       if (!m) continue
-      const effectiveGrams = applyYieldFactor(ing.quantity_grams, ing.weight_state, DEFAULT_YIELD_FACTOR)
+      const effectiveGrams = applyYieldFactor(ing.quantity_grams, ing.weight_state as 'raw' | 'cooked', DEFAULT_YIELD_FACTOR)
       const contrib = calcIngredientNutrition(m, effectiveGrams)
       totalCal += contrib.calories
       totalProt += contrib.protein

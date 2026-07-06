@@ -11,6 +11,15 @@ import type { ThemePreference } from '../utils/theme'
 import { DietaryRestrictionsSection } from '../components/settings/DietaryRestrictionsSection'
 import { WontEatSection } from '../components/settings/WontEatSection'
 import { ScheduleSection } from '../components/settings/ScheduleSection'
+import { Nameplate, StoryHead, SectionHead, Rule } from '../components/editorial'
+
+const fieldStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: '1px solid var(--rule-c)',
+  padding: '8px 10px',
+  fontSize: 14,
+  color: 'var(--ink)',
+}
 
 export function SettingsPage() {
   const { session, signOut } = useAuth()
@@ -198,31 +207,50 @@ export function SettingsPage() {
     .toUpperCase()
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8 font-sans">
-      <h1 className="text-2xl font-bold text-primary mb-6">Settings</h1>
+    <div className="paper px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8 font-sans">
+      {/* Nameplate — desktop only */}
+      <div className="hidden md:block">
+        <Nameplate
+          left={membership?.households?.name ?? 'Your account'}
+          title={<>The <span className="amp">Masthead</span></>}
+          right={session?.user.email ?? '—'}
+        />
+      </div>
+
+      {/* Story head */}
+      <StoryHead
+        kicker="SETTINGS"
+        headline="The Masthead"
+        byline="Account & household"
+        size="sm"
+      />
 
       {/* Profile section */}
-      <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
-        <h2 className="font-semibold text-text mb-4">Profile</h2>
+      <section className="mt-6">
+        <SectionHead no="01" label="Profile" aux={session?.user.email ?? undefined} />
+        <Rule />
 
         {/* Avatar */}
-        <div className="flex items-center gap-4 mb-5">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="flex items-center gap-4" style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0"
+            style={{ background: 'var(--paper-2)', border: '1px solid var(--rule-c)' }}
+          >
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-2xl font-bold text-primary">{initials}</span>
+              <span className="serif" style={{ fontSize: 26, color: 'var(--tomato)' }}>{initials}</span>
             )}
           </div>
           <div>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={avatarUploading}
-              className="px-3 py-1.5 rounded-[--radius-btn] text-sm border border-secondary text-text/70 hover:border-primary/50 hover:text-text transition-colors disabled:opacity-50"
+              className="btn btn-sm"
             >
               {avatarUploading ? 'Uploading...' : 'Change Photo'}
             </button>
-            {avatarError && <p className="text-xs text-red-500 mt-1">{avatarError}</p>}
+            {avatarError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{avatarError}</p>}
           </div>
           <input
             ref={fileInputRef}
@@ -234,42 +262,44 @@ export function SettingsPage() {
         </div>
 
         {/* Display name */}
-        <div className="mb-3">
-          <label className="block text-sm text-text/60 mb-1">Display Name</label>
+        <div style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
+          <label className="eyebrow block mb-1">Display Name</label>
           <div className="flex gap-2">
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your name"
-              className="flex-1 px-3 py-2 rounded-[--radius-btn] border border-secondary bg-background text-text text-sm focus:outline-none focus:border-primary"
+              className="flex-1"
+              style={fieldStyle}
             />
             <button
               onClick={handleSaveDisplayName}
               disabled={nameSaving}
-              className="px-4 py-2 rounded-[--radius-btn] text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="btn btn-primary btn-sm"
             >
               {nameSaving ? 'Saving...' : nameSaved ? 'Saved!' : 'Save'}
             </button>
           </div>
-          {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
+          {nameError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{nameError}</p>}
         </div>
 
         {/* Email (read-only) */}
         {session && (
-          <div>
-            <label className="block text-sm text-text/60 mb-1">Email</label>
-            <p className="text-sm text-text">{session.user.email}</p>
+          <div style={{ padding: '14px 0' }}>
+            <label className="eyebrow block mb-1">Email</label>
+            <p className="serif" style={{ fontSize: 15 }}>{session.user.email}</p>
           </div>
         )}
       </section>
 
       {/* Household section */}
       {membership && (
-        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
-          <h2 className="font-semibold text-text mb-4">Household</h2>
-          <div>
-            <label className="block text-sm text-text/60 mb-1">Household Name</label>
+        <section className="mt-6">
+          <SectionHead no="02" label="Household" aux={isAdmin ? 'admin' : membership.role ?? undefined} />
+          <Rule />
+          <div style={{ padding: '14px 0', borderBottom: isAdmin ? '1px dashed var(--rule-soft)' : 'none' }}>
+            <label className="eyebrow block mb-1">Household Name</label>
             {isAdmin ? (
               <>
                 <div className="flex gap-2">
@@ -277,28 +307,29 @@ export function SettingsPage() {
                     type="text"
                     value={householdName}
                     onChange={(e) => setHouseholdName(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-[--radius-btn] border border-secondary bg-background text-text text-sm focus:outline-none focus:border-primary"
+                    className="flex-1"
+                    style={fieldStyle}
                   />
                   <button
                     onClick={handleSaveHouseholdName}
                     disabled={householdSaving}
-                    className="px-4 py-2 rounded-[--radius-btn] text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    className="btn btn-primary btn-sm"
                   >
                     {householdSaving ? 'Saving...' : householdSaved ? 'Saved!' : 'Save'}
                   </button>
                 </div>
-                {householdError && <p className="text-xs text-red-500 mt-1">{householdError}</p>}
+                {householdError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{householdError}</p>}
               </>
             ) : (
-              <p className="text-sm text-text">{membership.households?.name}</p>
+              <p className="serif" style={{ fontSize: 15 }}>{membership.households?.name}</p>
             )}
           </div>
 
           {isAdmin && (
-            <div className="mt-4">
-              <label className="block text-sm text-text/60 mb-1">Weekly Budget</label>
+            <div style={{ padding: '14px 0' }}>
+              <label className="eyebrow block mb-1">Weekly Budget</label>
               <div className="flex gap-2 items-center">
-                <span className="text-sm text-text/60">$</span>
+                <span className="mono" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>$</span>
                 <input
                   type="number"
                   min="0"
@@ -306,17 +337,18 @@ export function SettingsPage() {
                   placeholder="0.00"
                   value={weeklyBudget}
                   onChange={(e) => setWeeklyBudget(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-[--radius-btn] border border-secondary bg-background text-text text-sm focus:outline-none focus:border-primary"
+                  className="flex-1 mono tnum"
+                  style={fieldStyle}
                 />
                 <button
                   onClick={handleSaveWeeklyBudget}
                   disabled={budgetSaving}
-                  className="px-4 py-2 rounded-[--radius-btn] text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="btn btn-primary btn-sm"
                 >
                   {budgetSaving ? 'Saving...' : budgetSaved ? 'Saved!' : 'Save'}
                 </button>
               </div>
-              {budgetError && <p className="text-xs text-red-500 mt-1">{budgetError}</p>}
+              {budgetError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{budgetError}</p>}
             </div>
           )}
         </section>
@@ -324,46 +356,59 @@ export function SettingsPage() {
 
       {/* Food Prices section */}
       {membership && (
-        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
-          <h2 className="text-base font-semibold text-text mb-3">Food Prices</h2>
+        <section className="mt-6">
+          <SectionHead
+            no="03"
+            label="Food Prices"
+            aux={foodPrices && foodPrices.length > 0 ? `${foodPrices.length} on file` : undefined}
+          />
+          <Rule />
           {!foodPrices || foodPrices.length === 0 ? (
-            <p className="text-sm text-text/50">
+            <p className="serif-italic" style={{ fontSize: 14, color: 'var(--ink-dim)', padding: '14px 0' }}>
               No ingredient prices yet. Add prices in the recipe builder or manage them here.
             </p>
           ) : (
             <div>
               {foodPrices.map(price => (
                 <div key={price.id}>
-                  <div className="flex items-center justify-between py-3 border-b border-accent/10">
-                    <div>
-                      <span className="text-sm text-text">{price.food_name}</span>
+                  <div
+                    className="flex items-baseline justify-between"
+                    style={{ padding: '12px 0', borderBottom: '1px dashed var(--rule-soft)' }}
+                  >
+                    <div className="min-w-0">
+                      <span className="serif" style={{ fontSize: 15 }}>{price.food_name}</span>
                       {price.store && (
-                        <span className="text-xs text-text/40 ml-1">{price.store}</span>
+                        <span className="mono ml-2" style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>{price.store}</span>
                       )}
-                      <span className="text-xs text-text/50 ml-2">{formatCost(price.cost_per_100g)}/100g</span>
+                      <span className="mono tnum ml-2" style={{ fontSize: 11, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>{formatCost(price.cost_per_100g)}/100g</span>
                     </div>
                     <button
                       onClick={() => setConfirmDeletePriceId(price.id)}
-                      className="text-xs text-red-500 hover:text-red-700 transition-colors ml-4"
+                      className="mono ml-4"
+                      style={{ background: 'none', border: 0, cursor: 'pointer', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--tomato)' }}
                     >
                       Remove
                     </button>
                   </div>
                   {confirmDeletePriceId === price.id && (
-                    <div className="flex items-center gap-3 py-2 px-3 bg-red-50 dark:bg-red-900/10 border-b border-accent/10">
-                      <span className="text-xs text-text/60 flex-1">Remove this price entry?</span>
+                    <div
+                      className="flex items-center gap-3"
+                      style={{ padding: '8px 12px', background: 'var(--paper-2)', borderBottom: '1px dashed var(--rule-soft)', borderLeft: '2px solid var(--tomato)' }}
+                    >
+                      <span className="serif-italic flex-1" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>Remove this price entry?</span>
                       <button
                         onClick={() => {
                           deleteFoodPrice.mutate(price.id)
                           setConfirmDeletePriceId(null)
                         }}
-                        className="text-xs font-medium text-red-600 hover:text-red-800 transition-colors"
+                        className="btn btn-sm"
+                        style={{ color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
                       >
                         Remove
                       </button>
                       <button
                         onClick={() => setConfirmDeletePriceId(null)}
-                        className="text-xs text-text/40 hover:text-text transition-colors"
+                        className="btn btn-sm"
                       >
                         Cancel
                       </button>
@@ -378,42 +423,48 @@ export function SettingsPage() {
 
       {/* Nutrition & Dietary section */}
       {session && membership && (
-        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
-          <h2 className="font-semibold text-text mb-3">Nutrition</h2>
-          <a
-            href={`/members/${session.user.id}/targets`}
-            className="text-sm text-primary hover:underline"
-          >
-            Edit Nutrition Targets
-          </a>
-          <DietaryRestrictionsSection
-            householdId={membership.household_id}
-            memberId={session.user.id}
-            memberType="user"
-          />
-          <WontEatSection
-            householdId={membership.household_id}
-            memberId={session.user.id}
-            memberType="user"
-          />
-          <ScheduleSection
-            householdId={membership.household_id}
-            memberId={session.user.id}
-            memberType="user"
-            weekStartDay={membership.households?.week_start_day}
-          />
+        <section className="mt-6">
+          <SectionHead no="04" label="Nutrition" />
+          <Rule />
+          <div style={{ padding: '14px 0' }}>
+            <a
+              href={`/members/${session.user.id}/targets`}
+              className="serif"
+              style={{ fontSize: 15, color: 'var(--tomato)', textDecorationColor: 'var(--rule-c)' }}
+            >
+              Edit Nutrition Targets
+            </a>
+            <DietaryRestrictionsSection
+              householdId={membership.household_id}
+              memberId={session.user.id}
+              memberType="user"
+            />
+            <WontEatSection
+              householdId={membership.household_id}
+              memberId={session.user.id}
+              memberType="user"
+            />
+            <ScheduleSection
+              householdId={membership.household_id}
+              memberId={session.user.id}
+              memberType="user"
+              weekStartDay={membership.households?.week_start_day}
+            />
+          </div>
         </section>
       )}
 
       {/* Child member profiles — dietary restrictions and won't-eat */}
       {membership && memberProfiles && memberProfiles.length > 0 && (
-        <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
-          <h2 className="font-semibold text-text mb-3">Member Dietary Preferences</h2>
+        <section className="mt-6">
+          <SectionHead no="05" label="Member Dietary Preferences" aux={`${memberProfiles.length} member${memberProfiles.length === 1 ? '' : 's'}`} />
+          <Rule />
           {memberProfiles.map(profile => (
-            <div key={profile.id} className="border-t border-secondary pt-4 first:border-t-0 first:pt-0 mt-4 first:mt-0">
+            <div key={profile.id} style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
               <a
                 href={`/members/${profile.id}/targets`}
-                className="text-sm text-primary hover:underline"
+                className="serif"
+                style={{ fontSize: 15, color: 'var(--tomato)', textDecorationColor: 'var(--rule-c)' }}
               >
                 Edit {profile.name}&apos;s Nutrition Targets
               </a>
@@ -442,18 +493,15 @@ export function SettingsPage() {
       )}
 
       {/* Appearance section */}
-      <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm mb-4">
-        <h2 className="font-semibold text-text mb-3">Appearance</h2>
-        <div className="flex gap-2">
+      <section className="mt-6">
+        <SectionHead no="06" label="Appearance" aux={theme} />
+        <Rule />
+        <div className="flex gap-2" style={{ padding: '14px 0' }}>
           {(['light', 'dark', 'system'] as ThemePreference[]).map((option) => (
             <button
               key={option}
               onClick={() => handleThemeChange(option)}
-              className={`px-3 py-1.5 rounded-[--radius-btn] text-sm capitalize border transition-colors ${
-                theme === option
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-surface text-text/70 border-secondary hover:border-primary/50'
-              }`}
+              className={`btn btn-sm capitalize ${theme === option ? 'btn-primary' : ''}`}
             >
               {option}
             </button>
@@ -462,64 +510,84 @@ export function SettingsPage() {
       </section>
 
       {/* Account section */}
-      <section className="bg-surface rounded-[--radius-card] p-5 border border-secondary shadow-sm">
-        <h2 className="font-semibold text-text mb-3">Account</h2>
-        <button
-          onClick={signOut}
-          className="rounded-[--radius-btn] bg-accent/20 text-text font-semibold py-2 px-4 hover:bg-accent/40 transition-colors"
-        >
-          Log Out
-        </button>
+      <section className="mt-6">
+        <SectionHead no="07" label="Account" />
+        <Rule />
+        <div style={{ padding: '14px 0' }}>
+          <button
+            onClick={signOut}
+            className="btn btn-sm"
+          >
+            Log Out
+          </button>
+        </div>
       </section>
 
       {/* Danger Zone */}
-      <section className="bg-surface rounded-[--radius-card] p-5 border border-red-200 dark:border-red-900/30 shadow-sm mt-8">
-        <h2 className="font-semibold text-red-600 mb-1">Danger Zone</h2>
-        <p className="text-xs text-text/50 mb-4">These actions are permanent and cannot be undone.</p>
-        <button
-          onClick={() => {
-            setShowDeleteModal(true)
-            setDeleteStep(isAdmin && !isLastMember ? 'transfer' : 'confirm')
-            setDeleteConfirmText('')
-            setSelectedNewAdmin(null)
-            setDeleteError(null)
-          }}
-          className="rounded-[--radius-btn] border border-red-300 text-red-600 font-semibold py-2 px-4 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm"
-        >
-          Delete my account
-        </button>
+      <section className="mt-10" style={{ borderLeft: '2px solid var(--tomato)', paddingLeft: 14 }}>
+        <SectionHead no="08" label="Danger Zone" aux="permanent" />
+        <Rule />
+        <div style={{ padding: '14px 0' }}>
+          <p className="serif-italic mb-3" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>These actions are permanent and cannot be undone.</p>
+          <button
+            onClick={() => {
+              setShowDeleteModal(true)
+              setDeleteStep(isAdmin && !isLastMember ? 'transfer' : 'confirm')
+              setDeleteConfirmText('')
+              setSelectedNewAdmin(null)
+              setDeleteError(null)
+            }}
+            className="btn btn-sm"
+            style={{ color: 'var(--tomato)', borderColor: 'var(--tomato)' }}
+          >
+            Delete my account
+          </button>
+        </div>
       </section>
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !isDeleting && setShowDeleteModal(false)} />
-          <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5 mx-0 sm:mx-4">
+          <div
+            className="relative w-full max-w-md max-h-[90vh] overflow-y-auto p-5 mx-0 sm:mx-4"
+            style={{ background: 'var(--paper-2)', border: '1.5px solid var(--rule-c)', borderLeft: '2px solid var(--tomato)' }}
+          >
 
             {/* Step 1: Admin transfer (admin with other members only) */}
             {deleteStep === 'transfer' && isAdmin && !isLastMember && (
               <>
-                <h3 className="font-semibold text-text mb-1">Transfer admin before leaving</h3>
-                <p className="text-sm text-text/60 mb-4">Choose a new household admin. They will have full control over the household.</p>
+                <div className="mono" style={{ color: 'var(--tomato)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                  Danger zone
+                </div>
+                <h3 className="serif" style={{ fontSize: 22, marginTop: 4, marginBottom: 4 }}>Transfer admin before leaving</h3>
+                <p className="serif-italic mb-4" style={{ fontSize: 14, color: 'var(--ink-dim)' }}>Choose a new household admin. They will have full control over the household.</p>
                 <div className="flex flex-col gap-2 mb-4">
                   {otherMembers.map(member => (
                     <button
                       key={member.user_id}
                       onClick={() => setSelectedNewAdmin(member.user_id)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-[--radius-btn] border transition-colors text-left ${
-                        selectedNewAdmin === member.user_id
-                          ? 'border-primary bg-primary/10'
-                          : 'border-secondary hover:border-primary/40'
-                      }`}
+                      className="flex items-center gap-3 text-left"
+                      style={{
+                        padding: '10px 12px',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        border: selectedNewAdmin === member.user_id
+                          ? '1.5px solid var(--tomato)'
+                          : '1px dashed var(--rule-c)',
+                      }}
                     >
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary flex-shrink-0">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 serif"
+                        style={{ fontSize: 14, background: 'var(--paper)', border: '1px solid var(--rule-c)', color: 'var(--tomato)' }}
+                      >
                         {(member.profiles?.display_name ?? member.profiles?.id ?? '?').charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-text truncate">{member.profiles?.display_name ?? 'Member'}</p>
-                        <p className="text-xs text-text/40">{member.role}</p>
+                        <p className="serif truncate" style={{ fontSize: 15 }}>{member.profiles?.display_name ?? 'Member'}</p>
+                        <p className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>{member.role}</p>
                       </div>
                       {selectedNewAdmin === member.user_id && (
-                        <span className="text-primary text-sm">✓</span>
+                        <span style={{ color: 'var(--tomato)', fontSize: 14 }}>✓</span>
                       )}
                     </button>
                   ))}
@@ -527,14 +595,14 @@ export function SettingsPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
+                    className="flex-1 btn btn-sm"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => setDeleteStep('confirm')}
                     disabled={!selectedNewAdmin}
-                    className="flex-1 rounded-[--radius-btn] bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                    className="flex-1 btn btn-primary btn-sm"
                   >
                     Transfer admin &amp; continue
                   </button>
@@ -545,8 +613,11 @@ export function SettingsPage() {
             {/* Step 2: Typed confirmation (all paths converge here) */}
             {deleteStep === 'confirm' && (
               <>
-                <h3 className="font-semibold text-text mb-1">Delete account</h3>
-                <p className="text-sm text-text/60 mb-4">
+                <div className="mono" style={{ color: 'var(--tomato)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                  Danger zone
+                </div>
+                <h3 className="serif" style={{ fontSize: 22, marginTop: 4, marginBottom: 4 }}>Delete account</h3>
+                <p className="serif-italic mb-4" style={{ fontSize: 14, color: 'var(--ink-dim)' }}>
                   {isLastMember
                     ? `You are the only member. Deleting your account will permanently delete the ${householdDisplayName} household and all its data.`
                     : isAdmin
@@ -554,19 +625,22 @@ export function SettingsPage() {
                       : 'This will permanently delete your account. The household and all its data will remain.'}
                 </p>
                 <div className="mb-4">
-                  <label className="block text-sm text-text/60 mb-1">Type DELETE to confirm</label>
+                  <label className="eyebrow block mb-1">Type DELETE to confirm</label>
                   <input
                     type="text"
                     value={deleteConfirmText}
                     onChange={e => setDeleteConfirmText(e.target.value)}
                     placeholder="DELETE"
-                    className={`w-full px-3 py-2 rounded-[--radius-btn] border text-sm bg-background text-text focus:outline-none ${
-                      deleteConfirmText === 'DELETE' ? 'border-red-500 focus:border-red-500' : 'border-secondary focus:border-primary'
-                    }`}
+                    className="w-full mono"
+                    style={{
+                      ...fieldStyle,
+                      letterSpacing: '0.08em',
+                      border: deleteConfirmText === 'DELETE' ? '1.5px solid var(--tomato)' : '1px solid var(--rule-c)',
+                    }}
                     autoComplete="off"
                   />
                 </div>
-                {deleteError && <p className="text-xs text-red-500 mb-3">{deleteError}</p>}
+                {deleteError && <p className="serif-italic mb-3" style={{ fontSize: 12, color: 'var(--tomato)' }}>{deleteError}</p>}
                 <div className="flex gap-3">
                   <button
                     onClick={() => {
@@ -578,14 +652,15 @@ export function SettingsPage() {
                       setDeleteConfirmText('')
                     }}
                     disabled={isDeleting}
-                    className="flex-1 rounded-[--radius-btn] border border-secondary py-2 text-sm text-text/60 hover:text-text transition-colors"
+                    className="flex-1 btn btn-sm"
                   >
                     {isAdmin && !isLastMember ? 'Back' : 'Cancel'}
                   </button>
                   <button
                     onClick={handleDeleteAccount}
                     disabled={deleteConfirmText !== 'DELETE' || isDeleting}
-                    className="flex-1 rounded-[--radius-btn] bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                    className="flex-1 btn btn-sm"
+                    style={{ background: 'var(--tomato)', borderColor: 'var(--tomato)', color: 'var(--on-accent)' }}
                   >
                     {isDeleting ? 'Deleting...' : isLastMember ? 'Delete household and account' : 'Delete my account'}
                   </button>

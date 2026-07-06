@@ -44,8 +44,8 @@ const DESTINATIONS: Destination[] = [
   {
     to: '/insights',
     icon: 'chart',
-    title: 'See the trends',
-    blurb: "Track how your household's nutrition and spending trend over time.",
+    title: 'See what the family loves',
+    blurb: "Rating patterns and AI taste tags from your household's cooked meals.",
   },
 ]
 
