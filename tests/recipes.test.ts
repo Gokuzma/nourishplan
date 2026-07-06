@@ -56,16 +56,14 @@ describe('Inline delete confirmation (DELMG-01)', () => {
     expect(true).toBe(true) // GREEN — implemented in 13-01
   });
 
-  it('only shows delete button for creator or admin (MealCard permission gate)', async () => {
+  it('orphaned Meals UI stays removed (recipes are what get planned)', async () => {
     const fs = await import('fs');
-    const mealCardSrc = fs.readFileSync('src/components/meal/MealCard.tsx', 'utf8');
 
-    // MealCard accepts canDelete prop and renders delete button conditionally.
-    // (MealsPage was removed — recipes are what get planned, meals are the
-    // eating record. The MealCard component is retained but no longer rendered
-    // in a list page.)
-    expect(mealCardSrc).toContain('canDelete');
-    expect(mealCardSrc).toContain('Yes, delete');
-    expect(mealCardSrc).toContain('Keep it');
+    // The Meals concept was retired: MealPage/MealCard/MealBuilder were dead
+    // code with no inbound navigation, contradicting the recipe-first model.
+    expect(fs.existsSync('src/components/meal/MealCard.tsx')).toBe(false);
+    expect(fs.existsSync('src/pages/MealPage.tsx')).toBe(false);
+    const appSrc = fs.readFileSync('src/App.tsx', 'utf8');
+    expect(appSrc).not.toContain('/meals/:id');
   });
 });

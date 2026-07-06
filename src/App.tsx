@@ -10,7 +10,6 @@ import { WelcomePage } from './pages/WelcomePage'
 import { HomePage } from './pages/HomePage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipePage } from './pages/RecipePage'
-import { MealPage } from './pages/MealPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { MemberTargetsPage } from './pages/MemberTargetsPage'
 import { PlanPage } from './pages/PlanPage'
@@ -147,7 +146,6 @@ function AppRoutes() {
         <Route path="/today" element={<HomePage />} />
         <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/recipes/:id" element={<RecipePage />} />
-        <Route path="/meals/:id" element={<MealPage />} />
         <Route path="/household" element={<HouseholdPage />} />
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/settings" element={<SettingsPage />} />
