@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query'
+import { reportError } from './lib/errorReporting'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useHousehold } from './hooks/useHousehold'
 import { AuthPage } from './pages/AuthPage'
@@ -27,6 +28,13 @@ import { JoinHousehold } from './components/household/JoinHousehold'
 import { InstallPrompt } from './components/log/InstallPrompt'
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => reportError('query', error, { queryKey: query.queryKey }),
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) =>
+      reportError('mutation', error, { mutationKey: mutation.options.mutationKey }),
+  }),
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,

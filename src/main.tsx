@@ -4,6 +4,9 @@ import { registerSW } from 'virtual:pwa-register'
 import '@fontsource-variable/nunito'
 import './styles/global.css'
 import App from './App.tsx'
+import { installGlobalErrorReporting } from './lib/errorReporting'
+
+installGlobalErrorReporting()
 
 // Force immediate update when new SW is available — no stale cache
 registerSW({

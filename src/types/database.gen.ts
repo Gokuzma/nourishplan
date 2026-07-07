@@ -56,6 +56,45 @@ export type Database = {
           },
         ]
       }
+      client_errors: {
+        Row: {
+          context: Json
+          created_at: string
+          household_id: string | null
+          id: string
+          message: string
+          source: string
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          household_id?: string | null
+          id?: string
+          message: string
+          source?: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          household_id?: string | null
+          id?: string
+          message?: string
+          source?: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cook_sessions: {
         Row: {
           batch_prep_session_key: string | null
