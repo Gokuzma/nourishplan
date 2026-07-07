@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useHousehold } from '../hooks/useHousehold'
 import { useHouseholdInsights, useTriggerAnalysis } from '../hooks/useAITags'
 import { RecipeAITagPill } from '../components/feedback/RecipeAITagPill'
@@ -96,9 +97,14 @@ export function InsightsPage() {
           ))}
         </div>
       ) : !hasData ? (
-        <p className="serif-italic text-base py-12 text-center" style={{ color: 'var(--ink-dim)' }}>
-          Not enough data yet. Rate a few meals and check back.
-        </p>
+        <div className="py-12 text-center">
+          <p className="serif-italic text-base" style={{ color: 'var(--ink-dim)' }}>
+            Not enough data yet. Rate a few meals and check back.
+          </p>
+          <Link to="/today" className="btn btn-primary btn-sm mt-4 inline-flex no-underline">
+            Rate today&apos;s meals
+          </Link>
+        </div>
       ) : (
         <div role="list" className="mt-1">
           {summaries.map(s => (

@@ -294,6 +294,18 @@ export function HomePage() {
       <div className="flex items-center justify-between gap-3 flex-wrap mt-4 mb-2 no-print">
         <div className="flex items-center gap-3">
           <label className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-dim)' }}>Date</label>
+          <button
+            type="button"
+            onClick={() => {
+              const d = new Date(selectedDate + 'T00:00:00Z')
+              d.setUTCDate(d.getUTCDate() - 1)
+              setSelectedDate(d.toISOString().slice(0, 10))
+            }}
+            aria-label="Previous day"
+            className="btn btn-sm"
+          >
+            ‹
+          </button>
           <input
             type="date"
             value={selectedDate}
@@ -310,6 +322,18 @@ export function HomePage() {
             }}
             aria-label="Select date"
           />
+          <button
+            type="button"
+            onClick={() => {
+              const d = new Date(selectedDate + 'T00:00:00Z')
+              d.setUTCDate(d.getUTCDate() + 1)
+              setSelectedDate(d.toISOString().slice(0, 10))
+            }}
+            aria-label="Next day"
+            className="btn btn-sm"
+          >
+            ›
+          </button>
         </div>
         {session?.user.id && (
           <MemberSelector selectedMemberId={selectedMemberId} onSelect={handleMemberSelect} />
@@ -329,6 +353,11 @@ export function HomePage() {
               aux={calPct != null ? `${calPct}% to target` : 'no target set'}
             />
             <Rule />
+            {calPct == null && selectedMemberId && (
+              <Link to={`/members/${selectedMemberId}/targets`} className="text-sm no-underline block mt-2" style={{ color: 'var(--tomato)' }}>
+                Set this member&apos;s targets →
+              </Link>
+            )}
             <div className="py-3">
               <NBar label="CAL" value={totals.calories} target={target?.calories ?? 0} unit="kcal" />
               <NBar label="PRO" value={totals.protein} target={target?.protein_g ?? 0} unit="g" />
@@ -465,6 +494,11 @@ export function HomePage() {
             aux={calPct != null ? `${calPct}% to target` : ''}
           />
           <Rule />
+          {calPct == null && selectedMemberId && (
+            <Link to={`/members/${selectedMemberId}/targets`} className="text-sm no-underline block mt-2" style={{ color: 'var(--tomato)' }}>
+              Set this member&apos;s targets →
+            </Link>
+          )}
           <div className="py-3">
             <NBar label="CAL" value={totals.calories} target={target?.calories ?? 0} unit="kcal" />
             <NBar label="PRO" value={totals.protein} target={target?.protein_g ?? 0} unit="g" />

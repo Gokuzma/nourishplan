@@ -345,6 +345,9 @@ export function FoodSearchOverlay({
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [loggingId, setLoggingId] = useState<string | null>(null)
+  const [loggedName, setLoggedName] = useState<string | null>(null)
+  const loggedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (loggedTimerRef.current) clearTimeout(loggedTimerRef.current) }, [])
   const [logErrorId, setLogErrorId] = useState<string | null>(null)
   const [detailFood, setDetailFood] = useState<NormalizedFoodResult | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -421,6 +424,11 @@ export function FoodSearchOverlay({
         is_private: false,
       })
       setExpandedId(null)
+      // Visible confirmation — without it users can't tell the log saved and
+      // may log the same food twice.
+      setLoggedName(food.name)
+      if (loggedTimerRef.current) clearTimeout(loggedTimerRef.current)
+      loggedTimerRef.current = setTimeout(() => setLoggedName(null), 2500)
     } catch {
       setLogErrorId(food.id)
     } finally {
@@ -444,8 +452,17 @@ export function FoodSearchOverlay({
     <div
       className="fixed inset-0 z-50 bg-background flex flex-col transition-opacity duration-150"
       role="dialog"
-      aria-label="Add Food"
+      aria-label="Log Food"
     >
+      {/* Logged confirmation toast */}
+      {loggedName && (
+        <div
+          role="status"
+          className="absolute top-14 left-1/2 -translate-x-1/2 z-10 rounded-[--radius-btn] bg-primary text-white text-sm px-4 py-2 shadow-lg"
+        >
+          Logged {loggedName} ✓
+        </div>
+      )}
       {/* Header */}
       <div className="bg-surface border-b border-secondary px-4 py-3 flex items-center gap-3">
         <button
@@ -457,7 +474,7 @@ export function FoodSearchOverlay({
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <span className="text-base font-semibold text-text flex-1">Add Food</span>
+        <span className="text-base font-semibold text-text flex-1">Log Food</span>
         {mode === 'select' && (
           <button
             onClick={onClose}
