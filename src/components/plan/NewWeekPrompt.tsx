@@ -5,17 +5,20 @@ import type { MealPlanTemplate } from '../../types/database'
 interface NewWeekPromptProps {
   weekStart: string
   onChoice: (choice: 'fresh' | 'repeat' | 'template', templateId?: string, planStart?: string) => void
+  hasPriorWeek?: boolean
 }
 
 /**
- * Modal shown when no meal_plan exists for the current week.
- * Offers three initialization options: fresh, repeat last week, or load template.
- * User can optionally change the plan start date before choosing.
+ * Inline card shown when no meal_plan exists for the current week.
+ * Offers initialization options: fresh, repeat last week (only when a prior
+ * week exists), or load template (only when templates exist). Rendered inline
+ * — not as a modal — so the rest of the page and nav stay usable.
  */
-export function NewWeekPrompt({ weekStart, onChoice }: NewWeekPromptProps) {
+export function NewWeekPrompt({ weekStart, onChoice, hasPriorWeek = true }: NewWeekPromptProps) {
   const [showTemplates, setShowTemplates] = useState(false)
   const [planStart, setPlanStart] = useState(weekStart)
   const { data: templates, isPending: templatesLoading } = useTemplates()
+  const hasTemplates = templatesLoading || (templates?.length ?? 0) > 0
 
   const weekLabel = new Date(weekStart + 'T00:00:00Z').toLocaleDateString('en-US', {
     month: 'short',
@@ -36,7 +39,7 @@ export function NewWeekPrompt({ weekStart, onChoice }: NewWeekPromptProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-4">
+    <div className="flex justify-center">
       <div className="w-full max-w-sm rounded-[--radius-card] border border-accent/30 bg-surface p-6 shadow-lg">
         <h2 className="text-lg font-bold text-primary mb-1">Start Week of {weekLabel}</h2>
         <p className="text-sm text-text/60 mb-4">How would you like to set up this week's plan?</p>
@@ -62,23 +65,27 @@ export function NewWeekPrompt({ weekStart, onChoice }: NewWeekPromptProps) {
               <span className="text-xs text-text/50 mt-0.5">Begin with an empty plan</span>
             </button>
 
-            {/* Repeat last week */}
-            <button
-              onClick={handleRepeat}
-              className="flex flex-col items-start rounded-[--radius-btn] border border-secondary bg-background px-4 py-3 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
-            >
-              <span className="font-semibold text-text">Repeat last week</span>
-              <span className="text-xs text-text/50 mt-0.5">Copy meals from the previous week</span>
-            </button>
+            {/* Repeat last week — pointless without a prior week */}
+            {hasPriorWeek && (
+              <button
+                onClick={handleRepeat}
+                className="flex flex-col items-start rounded-[--radius-btn] border border-secondary bg-background px-4 py-3 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                <span className="font-semibold text-text">Repeat last week</span>
+                <span className="text-xs text-text/50 mt-0.5">Copy meals from the previous week</span>
+              </button>
+            )}
 
-            {/* Load a template */}
-            <button
-              onClick={() => setShowTemplates(true)}
-              className="flex flex-col items-start rounded-[--radius-btn] border border-secondary bg-background px-4 py-3 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
-            >
-              <span className="font-semibold text-text">Load a template</span>
-              <span className="text-xs text-text/50 mt-0.5">Use a saved template</span>
-            </button>
+            {/* Load a template — hidden until one has been saved */}
+            {hasTemplates && (
+              <button
+                onClick={() => setShowTemplates(true)}
+                className="flex flex-col items-start rounded-[--radius-btn] border border-secondary bg-background px-4 py-3 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                <span className="font-semibold text-text">Load a template</span>
+                <span className="text-xs text-text/50 mt-0.5">Use a saved template</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-3">

@@ -105,6 +105,7 @@ function RecipePickerRow({
 }
 
 function RecipePicker({ recipes, slotName, macrosById, onSelect, onClose }: RecipePickerProps) {
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const groups = useMemo(() => groupRecipesForSlot(recipes, slotName, query), [recipes, slotName, query])
   const primary = [...groups.slotMatch, ...groups.untagged]
@@ -135,7 +136,16 @@ function RecipePicker({ recipes, slotName, macrosById, onSelect, onClose }: Reci
         </div>
         <div className="overflow-y-auto flex-1 p-3 space-y-1">
           {recipes.length === 0 ? (
-            <p className="text-sm text-text/50 text-center py-8 font-sans">No recipes yet. Add some on the Recipes page first.</p>
+            <div className="text-center py-8">
+              <p className="text-sm text-text/50 font-sans">No recipes yet.</p>
+              <button
+                type="button"
+                onClick={() => navigate('/recipes')}
+                className="btn btn-primary btn-sm mt-3"
+              >
+                ✨ Discover recipes
+              </button>
+            </div>
           ) : total === 0 ? (
             <p className="text-sm text-text/50 text-center py-8 font-sans">No recipes match "{query}".</p>
           ) : (

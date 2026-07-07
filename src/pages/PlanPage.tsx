@@ -194,7 +194,7 @@ export function PlanPage() {
         </div>
       ) : !plan ? (
         <div className="mt-6">
-          <NewWeekPrompt weekStart={weekStart} onChoice={handleNewWeekChoice} />
+          <NewWeekPrompt weekStart={weekStart} onChoice={handleNewWeekChoice} hasPriorWeek={!!priorWeekPlan} />
         </div>
       ) : (
         <>
