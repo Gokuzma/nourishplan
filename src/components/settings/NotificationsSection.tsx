@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getPushStatus, subscribeToPush, unsubscribeFromPush, type PushStatus } from '../../lib/push'
+import { getPushStatus, subscribeToPush, unsubscribeFromPush, refreshPushHousehold, type PushStatus } from '../../lib/push'
 
 interface NotificationsSectionProps {
   userId: string
@@ -14,10 +14,13 @@ export function NotificationsSection({ userId, householdId }: NotificationsSecti
   useEffect(() => {
     let cancelled = false
     getPushStatus().then(s => {
-      if (!cancelled) setStatus(s)
+      if (cancelled) return
+      setStatus(s)
+      // Keep the stored subscription pointed at the current household.
+      if (s === 'subscribed') refreshPushHousehold(userId, householdId).catch(() => {})
     })
     return () => { cancelled = true }
-  }, [])
+  }, [userId, householdId])
 
   async function handleEnable() {
     setBusy(true)
