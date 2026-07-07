@@ -95,6 +95,8 @@ export const queryKeys = {
   },
   insights: {
     household: (householdId: string | undefined) => ['insights', householdId] as const,
+    trends: (householdId: string | undefined, weekStart: string) =>
+      ['insights', householdId, 'trends', weekStart] as const,
   },
   planGeneration: {
     job: (jobId: string | null, householdId: string | undefined) =>

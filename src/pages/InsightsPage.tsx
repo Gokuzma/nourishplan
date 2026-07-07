@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useHousehold } from '../hooks/useHousehold'
 import { useHouseholdInsights, useTriggerAnalysis } from '../hooks/useAITags'
 import { RecipeAITagPill } from '../components/feedback/RecipeAITagPill'
+import { WeeklyTrends } from '../components/insights/WeeklyTrends'
 import { Nameplate, StoryHead, Rule } from '../components/editorial'
 import type { RecipeRating, AIRecipeTag } from '../types/database'
 
@@ -39,6 +40,8 @@ function buildRecipeSummaries(ratings: RecipeRating[], tags: AIRecipeTag[]): Rec
 export function InsightsPage() {
   const { data: membership } = useHousehold()
   const householdId = membership?.household_id
+  const weekStartDay = membership?.households?.week_start_day ?? 0
+  const weeklyBudget = membership?.households?.weekly_budget ?? null
 
   const { data: insights, isPending } = useHouseholdInsights(householdId)
   const triggerAnalysis = useTriggerAnalysis()
@@ -125,6 +128,12 @@ export function InsightsPage() {
           ))}
         </div>
       )}
+
+      <WeeklyTrends
+        householdId={householdId}
+        weekStartDay={weekStartDay}
+        weeklyBudget={weeklyBudget}
+      />
     </div>
   )
 }
