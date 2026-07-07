@@ -76,7 +76,7 @@ const OUTCOME_PLAYS: OutcomePlay[] = [
     promise: 'The plan starts from what you already own and ends at a list you actually stick to. Takeout is expensive improvisation — the plan removes the improvising.',
     plays: [
       'Inventory first: keep a rough picture of pantry, fridge, and freezer. Use-up badges push expiring food into the plan instead of the bin.',
-      'Price your ~20 staples once. Cost per serving appears on recipes, and the generator leans cheaper when the budget is tight.',
+      'Let market prices do the costing: recipes and the grocery list are estimated from Statistics Canada Ontario averages out of the box. Enter your own prices only where you want them exact — the generator leans cheaper when the budget is tight either way.',
       'Set the weekly purse and watch the per-meal pace on the Plan page — drift shows up on Tuesday, not at month-end.',
       'Shop only the generated list. It already subtracted your inventory; everything added at the store is impulse by definition.',
       'Cook doubles of freezer-friendly recipes on your Prep day — cheaper per serving, and the freezer becomes your defence against the takeout night.',
@@ -195,6 +195,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     ],
     tips: [
       'Tip: Lock generously. Generation is at its best filling gaps around your choices, not overriding them.',
+      'Tip: Turn on Auto-draft (see below) and the week is already generated when you arrive — you review and tweak instead of starting from a blank grid.',
     ],
   },
   {
@@ -218,7 +219,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     steps: [
       'On the Plan page, set each member\'s weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
       'The generator respects it — no slow braise on a Quick night, nothing planned for someone who\'s Away.',
-      'Schedule badges appear on the grid: peach for use-up/consume, amber for quick, red for away.',
+      'Schedule badges label the grid: "Use up" on consume days, "<20 min" on quick nights, "Away" when a member is out — so the shape of the week is readable at a glance.',
       'Tap "Batch prep" to see which of the week\'s recipes share ingredients or steps — cook once, eat twice.',
       'Cooking multiple recipes in one session? Cook Mode generates a combined, interleaved prep sequence; reheat slots get a simple reheat sequence.',
     ],
@@ -228,16 +229,17 @@ const GUIDE_SECTIONS: GuideSection[] = [
   },
   {
     id: 'budget',
-    title: 'Budget',
-    intro: 'The weekly purse keeps food spending visible without receipts. Prices you enter once flow into recipe costs, plan generation, and the running weekly total.',
+    title: 'Budget & Market Prices',
+    intro: 'The weekly purse keeps food spending visible without receipts. Costs come from two places: prices you enter for your own household, and an automatic Statistics Canada fallback so recipes and the grocery list are costed even before you\'ve priced anything.',
     steps: [
       'On the Plan page, tap the budget amount in "This week\'s purse" to set your weekly budget.',
-      'Enter ingredient prices as you add them to recipes or inventory — normalised to cost per 100g automatically.',
-      'Recipes show cost per serving; the plan generator uses it as a signal when the budget is tight.',
+      'Leave pricing to the app if you like — unpriced ingredients fall back to monthly Statistics Canada retail averages for Ontario, matched by name and normalised to cost per 100g. Recipe cost-per-serving, the grocery estimate, and cooked-meal spend all use this fallback.',
+      'Enter your own prices for anything you want exact (a local deal, a warehouse-club size). A household price always overrides the market average for that ingredient.',
+      'See what the market fallback knows in Settings → "Market prices" (open to expand the list). It refreshes automatically each month.',
       'Cooking a meal logs its cost against the week — the purse shows spent, remaining, and per-meal pace.',
     ],
     tips: [
-      'Tip: You don\'t need every price. Even a handful of staples priced makes the weekly picture useful.',
+      'Tip: The market fallback makes the budget useful on day one. Enter your own prices only where accuracy matters — the plan generator leans cheaper when the purse is tight, using whichever price it has.',
     ],
   },
   {
@@ -248,8 +250,9 @@ const GUIDE_SECTIONS: GuideSection[] = [
       'On the Inventory page, switch between Pantry, Fridge, and Freezer tabs.',
       'Add items manually or by barcode scan — name, quantity, location, optional expiry and price.',
       'Items nearing expiry get a warning badge, and the planner nudges use-it-up meals into the schedule.',
-      'Cooking deducts ingredients automatically (oldest first) and shows a receipt of what was used and what was missing.',
+      'Cooking a single recipe deducts its ingredients automatically — oldest purchase first — and shows a receipt of what was used and what was missing.',
       'After cooking, save an uneaten portion as a leftover — it lands back in the fridge with a 3-day expiry.',
+      'Cooking several recipes in one combined session skips the automatic deduction, spend, and leftover prompts — cook them from their own slots when you want inventory and budget to track.',
     ],
     tips: [
       'Tip: Inventory doesn\'t need to be perfect to be useful — even a rough pantry picture shrinks the grocery list.',
@@ -285,6 +288,34 @@ const GUIDE_SECTIONS: GuideSection[] = [
     ],
     tips: [
       'Tip: Portions are personal — the same planned meal suggests different amounts to each family member based on their own targets.',
+    ],
+  },
+  {
+    id: 'insights',
+    title: 'Insights & Trends',
+    intro: 'The Plan page tells you about this week; the Insights page tells you about the last two months. It\'s where patterns you can\'t see day to day become obvious.',
+    steps: [
+      'Open Insights from the sidebar (or the bottom nav on mobile).',
+      'See your recipe leaderboard — highest-rated meals first, with AI-generated taste tags describing what your family gravitates toward.',
+      'Read the 8-week calorie trend per member: average daily intake against each person\'s target, so a child quietly under-eating or an adult drifting over shows up as a trend, not a single bad day.',
+      'Track weekly spend against the purse over time — is the budget realistic, or is every week creeping over?',
+    ],
+    tips: [
+      'Tip: Check Insights during the monthly review. It\'s the fastest way to decide whether targets, the purse, or the recipe mix need adjusting.',
+    ],
+  },
+  {
+    id: 'automation',
+    title: 'Auto-draft & Notifications',
+    intro: 'Two optional conveniences that keep the weekly loop turning without you having to remember it. Both are off until you switch them on.',
+    steps: [
+      'Auto-draft (admin, in Settings): the day before a new week starts, NourishPlan generates a draft plan for it automatically — so you open the Plan page to a full week to adjust, not a blank grid. It only drafts weeks you haven\'t already started, and never overwrites a plan you\'ve worked on.',
+      'Enable notifications (Settings → Notifications, per device): opt in to web push on any device you use.',
+      'You\'ll get a nudge when an auto-drafted plan is ready to review, and when a leftover in your fridge is about to expire.',
+      'On iPhone, add NourishPlan to your Home Screen first — iOS only allows notifications for installed web apps.',
+    ],
+    tips: [
+      'Tip: Auto-draft plus a Sunday-morning notification turns planning into "review and tweak" instead of "start from scratch".',
     ],
   },
   {

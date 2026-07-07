@@ -19,6 +19,20 @@ describe('User Guide (DOCS-01)', () => {
     expect(src).toContain("id: 'household-admin'");
   });
 
+  it('GuidePage documents the current feature set (market pricing, insights, automation)', async () => {
+    const fs = await import('fs');
+    const src = fs.readFileSync('src/pages/GuidePage.tsx', 'utf8');
+    // Automatic StatCan market pricing
+    expect(src).toContain("id: 'budget'");
+    expect(src).toMatch(/Statistics Canada/i);
+    // Insights / weekly trends
+    expect(src).toContain("id: 'insights'");
+    // Auto-draft + push notifications
+    expect(src).toContain("id: 'automation'");
+    expect(src).toMatch(/auto-draft/i);
+    expect(src).toMatch(/notifications/i);
+  });
+
   it('MobileDrawer has User Guide nav item', async () => {
     const fs = await import('fs');
     const src = fs.readFileSync('src/components/layout/MobileDrawer.tsx', 'utf8');

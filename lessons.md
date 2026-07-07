@@ -370,3 +370,21 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** `db push` changes the remote schema but does not touch the generated types; they're a separate artifact that must be regenerated in lockstep.
 **Rule:** Immediately after any `supabase db push`, run `npx supabase gen types typescript --project-id qyablbzodmftobjslgri > src/types/database.gen.ts` and re-run tsc before writing code against the new schema. (Constraint-only migrations don't change types — those are exempt.)
 **Applies to:** Every migration that adds/renames tables or columns; the deploy checklist.
+
+### L-051: Name-based price matching must scope to the head noun, not "contains anywhere"
+**Bug:** The reference-price matcher matched any whole-word occurrence of a key, so "chicken broth"→chicken, "corn starch"→corn, "rice vinegar"→rice, and "black pepper"→bell pepper — silently mispricing derivatives as their base commodity.
+**Root cause:** A bare `\bKEY\b` contains-match has no notion of the head noun; a base word appearing as a prefix ("chicken" in "chicken broth") is a different ingredient, not a cheaper form of the same one.
+**Rule:** For name→price matching, require the key to be the head noun: everything AFTER the matched key must be empty or only prep descriptors (a fixed stoplist), and drop collision-prone bare one-word aliases ("pepper"). Keep the Deno-inlined copy in `generate-plan` in sync with `src/utils/referencePrices.ts`.
+**Applies to:** `src/utils/referencePrices.ts`, `supabase/functions/generate-plan/index.ts` (inlined matcher), any future fuzzy ingredient/product lookup.
+
+### L-052: A skip-guard that counts any row blocks retries when rows are written up front
+**Bug:** Auto-draft skipped a household when `plan_generations` had ANY row for the plan. Since `generate-plan` inserts its row as `status='running'` before doing work, a single failed run left a row that made every later day skip with "already generated" — the household permanently lost that week's draft.
+**Root cause:** The guard conflated "an attempt exists" with "a successful result exists." Rows created optimistically at the start of an operation can't be used as proof of completion.
+**Rule:** Gate idempotency/skip checks on a SUCCESSFUL terminal state (`status in ('done','partial')`), never on mere row existence, whenever the row is inserted before the work finishes.
+**Applies to:** `supabase/functions/scheduled-tasks/index.ts`, any "already did this" guard against a table whose rows are written pre-completion.
+
+### L-053: Browser-then-DB two-step subscribes can desync; roll back the first step on failure
+**Bug:** `subscribeToPush` subscribed the browser first, then upserted the DB row. If the upsert failed, the browser stayed subscribed, so `getPushStatus` reported "subscribed" and the UI showed "Enabled" with no server row — permanently zero notifications, no retry path.
+**Root cause:** Two independent side effects (browser subscription, DB row) with no compensating action when the second fails, and a status check that reads only the first.
+**Rule:** When a flow performs an external side effect then persists it, roll back the side effect if persistence fails (`await subscription.unsubscribe()` before rethrow). Order teardown the opposite way (kill the live thing first, then delete its record).
+**Applies to:** `src/lib/push.ts`, any subscribe/register-then-store or delete-then-unregister pair.
