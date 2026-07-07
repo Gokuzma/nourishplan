@@ -248,7 +248,8 @@ const GUIDE_SECTIONS: GuideSection[] = [
     intro: 'The pantry, fridge, and freezer are part of the plan. Inventory feeds the grocery list (buy only what\'s missing), flags expiring food, and drains automatically as you cook.',
     steps: [
       'On the Inventory page, switch between Pantry, Fridge, and Freezer tabs.',
-      'Add items manually or by barcode scan — name, quantity, location, optional expiry and price.',
+      'Stocking up? Tap "Bulk add" and just say or type what you have — "2 kg rice and 3 cans of tuna in the pantry, a dozen eggs in the fridge" — or paste rows from a spreadsheet. Everything is parsed into items you review before saving.',
+      'Add single items with "Add item" (name suggestions from your history, one-tap expiry presets) or by barcode scan.',
       'Items nearing expiry get a warning badge, and the planner nudges use-it-up meals into the schedule.',
       'Cooking a single recipe deducts its ingredients automatically — oldest purchase first — and shows a receipt of what was used and what was missing.',
       'After cooking, save an uneaten portion as a leftover — it lands back in the fridge with a 3-day expiry.',
@@ -267,6 +268,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       'Items you already have in inventory are split out as "Already have".',
       'Shop aisle by aisle — items are grouped by store section (Produce, Dairy, Meat, Pantry…).',
       'Check items off as you shop; the list syncs live, so two people can split the store.',
+      'After shopping, tap "Add purchased to inventory" — items are routed by store section (dairy to the fridge, frozen to the freezer) with a sensible expiry, so expiry tracking works without any retyping.',
       'Regenerate after plan changes — cooked or removed meals drop their ingredients automatically.',
     ],
     tips: [
