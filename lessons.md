@@ -346,3 +346,15 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** generate-plan has deterministic repair layers (slot-type guardrail, rationale-preserving merge) that run AFTER the prompts; a behavior added only at the prompt level can be silently undone by them, and the failure only shows up in end-to-end output, not in the prompt or the model response.
 **Rule:** When adding any new assignment behavior to generate-plan, grep for every post-pass mutation of `bestResult.slots` (guardrails, merges, corrections) and decide explicitly whether each one must exempt or preserve the new behavior. Validate with a real-catalog household (Sim Family), not claude-test — its 3-recipe catalog can't exercise slot competition.
 **Applies to:** supabase/functions/generate-plan/index.ts, any future prompt-level planning rules.
+
+### L-047: generate-plan's invoke stays open for the whole run — jobId arrives only at the end
+**Bug:** The first pass-progress implementation polled the job via useGenerationJob(activeJobId), but activeJobId is set from the invoke response, which doesn't resolve until the run completes — so the UI showed pass 0 for the entire generation despite the edge function updating pass_count live in the DB.
+**Root cause:** The generate-plan edge function creates the job row and then runs all passes inside the same request before responding. "Async generation" describes the DB job row, not the HTTP call: the client learns the jobId only when (or if — see gateway 502s) the request resolves.
+**Rule:** Any client feature that needs live generation state must discover the running job independently — poll plan_generations by plan_id (latest row, status='running') while the mutation is pending. Never gate live-progress UI on the invoke response.
+**Applies to:** src/hooks/usePlanGeneration.ts, PlanGrid generation UI, any future long-running edge function with a job row.
+
+### L-048: PostgREST bulk inserts require identical keys on every row
+**Bug:** A bulk INSERT into nutrition_targets with mixed rows (one with user_id, others with member_profile_id) failed with PGRST102 "All object keys must match".
+**Root cause:** PostgREST builds one column list for a bulk insert from the first row's keys; rows with different key sets are rejected outright rather than null-filled.
+**Rule:** When bulk-inserting rows that target either user_id or member_profile_id (or any optional-column split), include ALL columns on every row with explicit nulls.
+**Applies to:** Any supabase .insert([...]) or REST bulk insert with per-row optional columns (nutrition_targets, food_logs, spend_logs).
