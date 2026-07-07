@@ -51,7 +51,11 @@ lessons.md and this handoff remain in force — they're project knowledge.
    accepts internal calls (x-internal-secret + triggeredBy, membership still
    verified). Verified: forced run drafted Sim week 2026-07-12, 28/28.
    Manual run: `curl -X POST .../functions/v1/scheduled-tasks -H "x-internal-secret: $INTERNAL_FN_SECRET" -d '{"force":{"householdId":"..."}}'`.
-5. **Web push** — `push_subscriptions` (037, own-rows RLS), Settings →
+5. **Web push** — `push_subscriptions` (037; 038 tightened insert/update RLS to
+   also require household membership via `get_user_household_id()` — 037 alone
+   let any authenticated user subscribe to another household's notifications;
+   verified cross-tenant insert now 42501s while own-household succeeds),
+   Settings →
    Notifications enable/disable per device, push handlers in `public/push-sw.js`
    via workbox importScripts, VAPID keys in function secrets +
    `VITE_VAPID_PUBLIC_KEY` (Vercel prod env + .env.local). `_shared/push.ts`
