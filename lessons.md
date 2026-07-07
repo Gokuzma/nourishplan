@@ -358,3 +358,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** PostgREST builds one column list for a bulk insert from the first row's keys; rows with different key sets are rejected outright rather than null-filled.
 **Rule:** When bulk-inserting rows that target either user_id or member_profile_id (or any optional-column split), include ALL columns on every row with explicit nulls.
 **Applies to:** Any supabase .insert([...]) or REST bulk insert with per-row optional columns (nutrition_targets, food_logs, spend_logs).
+
+### L-049: CSS text-transform breaks text matching in Playwright innerText checks
+**Bug:** Two verification checks this session reported UI sections "not found" (`Auto-Draft Weekly Plan`, `Notifications`) even though they rendered fine — `innerText` returns the *rendered* text, and the `.eyebrow`/`.section-head` classes apply `text-transform: uppercase`, so `includes('Notifications')` missed `NOTIFICATIONS`.
+**Root cause:** `element.innerText` reflects CSS text-transform; the editorial design system uppercases most labels and kickers.
+**Rule:** When asserting on rendered text in this app, match case-insensitively (`/notifications/i`) or use `textContent` (which ignores text-transform). Prefer role/aria-based locators over text where possible.
+**Applies to:** Any Playwright/browser_evaluate verification against pages using eyebrow/kicker/section-head/mono-uppercase styles.

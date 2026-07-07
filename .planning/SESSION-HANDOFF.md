@@ -1,8 +1,8 @@
-# NourishPlan — session handoff (2026-07-06, evening session 2)
+# NourishPlan — session handoff (2026-07-06, evening session 2, updated late)
 
 Everything is committed; prod (`nourishplan.gregok.ca`) serves the latest build,
-`generate-plan` is redeployed, migration 035 is live. Read top-to-bottom before
-continuing.
+`generate-plan` + new `scheduled-tasks` are deployed, migrations 035–037 live.
+Read top-to-bottom before continuing.
 
 **Workflow note:** the user no longer wants the GSD workflow (skills, phases,
 .planning ceremony). Work directly: read code, implement, test, commit small.
@@ -39,15 +39,44 @@ lessons.md and this handoff remain in force — they're project knowledge.
    **Nothing reads this table yet** — check it occasionally via service role;
    an admin view or scheduled digest is a natural follow-up.
 
+### Late additions (same session, after "Go")
+
+4. **Auto-draft weekly plans** — `households.auto_draft_enabled` (036, Settings →
+   Household toggle, admin-only). pg_cron job `nourishplan-daily-tick` (15:00 UTC
+   daily) calls the new `scheduled-tasks` edge function with `x-internal-secret`
+   (secret: `INTERNAL_FN_SECRET`, in .env.local + function secrets). On the day
+   before a household's week start it creates the plan row and generates,
+   attributed to the household admin; skips weeks already planned/generated;
+   failures land in client_errors (`edge:scheduled-tasks`). generate-plan now
+   accepts internal calls (x-internal-secret + triggeredBy, membership still
+   verified). Verified: forced run drafted Sim week 2026-07-12, 28/28.
+   Manual run: `curl -X POST .../functions/v1/scheduled-tasks -H "x-internal-secret: $INTERNAL_FN_SECRET" -d '{"force":{"householdId":"..."}}'`.
+5. **Web push** — `push_subscriptions` (037, own-rows RLS), Settings →
+   Notifications enable/disable per device, push handlers in `public/push-sw.js`
+   via workbox importScripts, VAPID keys in function secrets +
+   `VITE_VAPID_PUBLIC_KEY` (Vercel prod env + .env.local). `_shared/push.ts`
+   sends and prunes dead endpoints. scheduled-tasks pushes "draft ready" and
+   "leftovers expire today/tomorrow" (→ /today). **Verified fully E2E on prod**:
+   headless subscribe → real cron-path send → notification displayed with
+   correct copy → disable removed the row. Human UAT still worthwhile on a real
+   phone (iOS requires Home-Screen install).
+
 ## Fixture state (changed today)
 
 - **Sim Family**: nutrition_targets now exist (sim-family 2000 kcal,
   Kid Ada 1400, Kid Ben 1600) — the sim docs claimed targets but none were
   persisted; Insights needed them. Week 2026-07-05 plan regenerated 2× this
-  session (2 rate-limit slots consumed): 28/28 filled, salmon leftover at
-  **Tuesday Lunch (day_index 2)** with 'Uses up leftover — expires 2026-07-12'
-  — the todayDayIndex fix is now **verified live** (was day 0 pre-fix).
-- client_errors smoke-test rows were deleted; table is empty.
+  session: 28/28 filled, salmon leftover at **Tuesday Lunch (day_index 2)**
+  with 'Uses up leftover — expires 2026-07-12' — the todayDayIndex fix is now
+  **verified live** (was day 0 pre-fix).
+- **Sim Family has `auto_draft_enabled = true`** and week 2026-07-12 is already
+  drafted (28/28, from the forced test run). Saturday's 15:00 UTC cron will hit
+  the "already generated" skip — that's the expected live validation. 3-4 rate
+  slots consumed today via UI/scheduled runs.
+- One salmon leftover was briefly aged to 2026-07-07 to test the expiry push,
+  then restored to 2026-07-12.
+- client_errors smoke rows deleted; push_subscriptions is empty (test
+  subscription removed via the Disable path).
 
 ## Open work — prioritized
 
@@ -56,11 +85,10 @@ lessons.md and this handoff remain in force — they're project knowledge.
    convenient. Old-style SlotCard visuals could move to editorial.
 3. Consider auto-suggesting "Tidy up" after checkout; virtualize inventory if
    large households stay slow.
-4. Next-feature candidates discussed with user (in priority order): auto-draft
-   next week's plan on a schedule (pg_cron), PWA push notifications (leftover
-   expiring, draft ready, schedule-aware cook reminders), price capture at
-   grocery checkout, canonical ingredient normalization (kill the AI-UUID bug
-   class at the root), a simple "follower" view for non-planner members.
+4. Next-feature candidates remaining (auto-draft + push shipped): price capture
+   at grocery checkout, canonical ingredient normalization (kill the AI-UUID
+   bug class at the root), a simple "follower" view for non-planner members,
+   schedule-aware cook-reminder pushes, an admin view/digest for client_errors.
 
 ## How to operate (see lessons L-001…L-048, auto-injected)
 
