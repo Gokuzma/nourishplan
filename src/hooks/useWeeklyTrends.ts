@@ -49,6 +49,7 @@ export function useWeeklyTrends(
         .select('week_start, amount, source')
         .eq('household_id', householdId!)
         .gte('week_start', firstWeekStart)
+        .lte('week_start', currentWeekStart)
       if (spendErr) throw spendErr
 
       const logRows = logs ?? []

@@ -28,10 +28,13 @@ export function reportError(source: string, error: unknown, context: Record<stri
   void (async () => {
     try {
       const message = error instanceof Error ? error.message : String(error ?? '')
-      if (!message || !gate(message)) return
+      if (!message) return
+      // Check auth BEFORE spending a gate slot — unauthenticated errors can't be
+      // reported (RLS), so counting them would burn the session budget on drops.
       const { data } = await supabase.auth.getSession()
       const userId = data.session?.user.id
       if (!userId) return
+      if (!gate(message)) return
       await supabase.from('client_errors').insert({
         user_id: userId,
         source,

@@ -85,7 +85,9 @@ export function WeeklyTrends({ householdId, weekStartDay, weeklyBudget }: Weekly
           <div className="flex flex-col gap-5 mt-3">
             {memberTrends.map(member => {
               const latest = [...weeks].reverse().map(w => member.cellsByWeek.get(w)).find(Boolean)
-              const scale = member.target ?? 2000
+              // Guard a stored target of 0 (or missing) — dividing by it would pin
+              // every bar to Infinity/max and place the target line meaninglessly.
+              const scale = member.target && member.target > 0 ? member.target : 2000
               return (
                 <div key={member.memberKey}>
                   <div className="flex items-baseline justify-between">

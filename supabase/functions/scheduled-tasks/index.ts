@@ -41,10 +41,11 @@ serve(async (req) => {
   const todayDow = now.getUTCDay();
 
   const summary = {
-    drafts: [] as { householdId: string; weekStart: string }[],
+    // Drafts are QUEUED here; generation runs in the background after this
+    // response returns, so success/failure lands in client_errors, not here.
+    draftsQueued: [] as { householdId: string; weekStart: string }[],
     skipped: [] as { householdId: string; reason: string }[],
     leftoverPushes: 0,
-    draftErrors: 0,
   };
 
   const background = (p: Promise<unknown>) => {
@@ -111,11 +112,15 @@ serve(async (req) => {
         summary.skipped.push({ householdId: hh.id, reason: "already planned" });
         continue;
       }
-      const { count: priorGens } = await adminClient
+      // Only skip on a SUCCESSFUL prior generation. generate-plan inserts its
+      // row as 'running' up front, so counting any row would permanently block
+      // retries after a single transient failure (the household loses the week).
+      const { count: goodGens } = await adminClient
         .from("plan_generations")
         .select("id", { count: "exact", head: true })
-        .eq("plan_id", plan.id);
-      if ((priorGens ?? 0) > 0) {
+        .eq("plan_id", plan.id)
+        .in("status", ["done", "partial"]);
+      if ((goodGens ?? 0) > 0) {
         summary.skipped.push({ householdId: hh.id, reason: "already generated" });
         continue;
       }
@@ -161,7 +166,7 @@ serve(async (req) => {
         });
       }
     })());
-    summary.drafts.push({ householdId: hh.id, weekStart });
+    summary.draftsQueued.push({ householdId: hh.id, weekStart });
   }
 
   // ---- B. Leftover expiry nudges ----
