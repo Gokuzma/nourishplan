@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { InventoryItem, StorageLocation, InventoryUnit } from '../../types/database'
 import type { BarcodeProduct } from '../../utils/barcodeLookup'
-import { useAddInventoryItem, useUpdateInventoryItem } from '../../hooks/useInventory'
+import { useAddInventoryItem, useUpdateInventoryItem, useInventoryItems } from '../../hooks/useInventory'
 
 interface AddInventoryItemModalProps {
   isOpen: boolean
@@ -9,6 +9,7 @@ interface AddInventoryItemModalProps {
   editItem?: InventoryItem | null
   scanResult?: { product: BarcodeProduct | null; barcode: string } | null
   leftoverDefaults?: { recipeName: string; recipeId: string } | null
+  defaultLocation?: StorageLocation
 }
 
 const LOCATION_OPTIONS: { label: string; value: StorageLocation }[] = [
@@ -28,9 +29,19 @@ function defaultExpiryDate(item?: InventoryItem | null): string {
   return ''
 }
 
-export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, leftoverDefaults }: AddInventoryItemModalProps) {
+export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, leftoverDefaults, defaultLocation }: AddInventoryItemModalProps) {
   const addItem = useAddInventoryItem()
   const updateItem = useUpdateInventoryItem()
+  const { data: allItems = [] } = useInventoryItems()
+
+  // Families buy the same items forever — suggest names they've used before
+  const knownNames = useMemo(() => {
+    const names = new Set<string>()
+    for (const it of allItems) {
+      if (!it.is_leftover) names.add(it.food_name)
+    }
+    return [...names].sort()
+  }, [allItems])
 
   const [foodName, setFoodName] = useState('')
   const [brand, setBrand] = useState('')
@@ -41,6 +52,8 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
   const [purchasePrice, setPurchasePrice] = useState<number | ''>('')
   const [isStaple, setIsStaple] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [addedCount, setAddedCount] = useState(0)
+  const [showDetails, setShowDetails] = useState(false)
 
   // Pre-fill from editItem, scanResult, or leftoverDefaults
   useEffect(() => {
@@ -70,26 +83,29 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
       setBrand(scanResult.product.brand)
       setQuantity(1)
       setUnit('units')
-      setLocation('fridge')
+      setLocation(defaultLocation ?? 'fridge')
       setExpiryDate('')
       setPurchasePrice('')
       setIsStaple(false)
     } else {
       setFoodName('')
       setBrand('')
-      setQuantity('')
+      setQuantity(1)
       setUnit('units')
-      setLocation('fridge')
+      setLocation(defaultLocation ?? 'fridge')
       setExpiryDate(defaultExpiryDate(null))
       setPurchasePrice('')
       setIsStaple(false)
     }
     setError(null)
-  }, [editItem, scanResult, leftoverDefaults, isOpen])
+    setAddedCount(0)
+    // Auto-open the details section when the item already uses those fields
+    setShowDetails(!!(editItem && (editItem.brand || editItem.purchase_price != null || editItem.is_staple)))
+  }, [editItem, scanResult, leftoverDefaults, defaultLocation, isOpen])
 
   if (!isOpen) return null
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent, addAnother = false) {
     e.preventDefault()
     setError(null)
     if (!foodName.trim()) {
@@ -131,7 +147,20 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
           leftover_from_recipe_id: leftoverDefaults ? leftoverDefaults.recipeId : undefined,
         })
       }
-      onClose()
+      if (addAnother && !editItem) {
+        // Keep the modal open for the next item: clear per-item fields but keep
+        // location and unit — people stock one shelf at a time.
+        setFoodName('')
+        setBrand('')
+        setQuantity(1)
+        setExpiryDate('')
+        setPurchasePrice('')
+        setIsStaple(false)
+        setAddedCount(c => c + 1)
+        document.getElementById('inv-food-name')?.focus()
+      } else {
+        onClose()
+      }
     } catch {
       setError('Could not save this item. Check your connection and try again.')
     }
@@ -174,24 +203,13 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
                 value={foodName}
                 onChange={e => setFoodName(e.target.value)}
                 required
+                list="inv-known-names"
                 className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
                 placeholder="e.g. Chicken breast"
               />
-            </div>
-
-            {/* Brand */}
-            <div>
-              <label className="block text-sm font-medium text-text/70 mb-1" htmlFor="inv-brand">
-                Brand <span className="text-text/40">(optional)</span>
-              </label>
-              <input
-                id="inv-brand"
-                type="text"
-                value={brand}
-                onChange={e => setBrand(e.target.value)}
-                className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
-                placeholder="e.g. President's Choice"
-              />
+              <datalist id="inv-known-names">
+                {knownNames.map(n => <option key={n} value={n} />)}
+              </datalist>
             </div>
 
             {/* Quantity + unit */}
@@ -250,6 +268,22 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
               <label className="block text-sm font-medium text-text/70 mb-1" htmlFor="inv-expiry">
                 Expiry date <span className="text-text/40">(optional)</span>
               </label>
+              <div className="flex gap-1.5 mb-2">
+                {([['+3 days', 3], ['1 week', 7], ['2 weeks', 14], ['1 month', 30]] as const).map(([label, days]) => (
+                  <button
+                    key={days}
+                    type="button"
+                    onClick={() => {
+                      const d = new Date()
+                      d.setDate(d.getDate() + days)
+                      setExpiryDate(d.toISOString().slice(0, 10))
+                    }}
+                    className="rounded-[--radius-btn] border border-secondary px-2.5 py-1 text-xs text-text/70 hover:text-text hover:border-accent transition-colors"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <input
                 id="inv-expiry"
                 type="date"
@@ -259,39 +293,69 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
               />
             </div>
 
-            {/* Purchase price */}
-            <div>
-              <label className="block text-sm font-medium text-text/70 mb-1" htmlFor="inv-price">
-                Add price for cost tracking (optional)
-              </label>
-              <input
-                id="inv-price"
-                type="number"
-                value={purchasePrice}
-                onChange={e => setPurchasePrice(e.target.value === '' ? '' : Number(e.target.value))}
-                min={0}
-                step="0.01"
-                className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
-                placeholder="$0.00"
-              />
-            </div>
+            {/* Rarely-used fields, tucked away to keep the common path short */}
+            <button
+              type="button"
+              onClick={() => setShowDetails(v => !v)}
+              aria-expanded={showDetails}
+              className="text-left text-sm text-text/50 hover:text-text transition-colors"
+            >
+              {showDetails ? '▾' : '▸'} More details (brand, price, staple)
+            </button>
+            {showDetails && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-text/70 mb-1" htmlFor="inv-brand">
+                    Brand <span className="text-text/40">(optional)</span>
+                  </label>
+                  <input
+                    id="inv-brand"
+                    type="text"
+                    value={brand}
+                    onChange={e => setBrand(e.target.value)}
+                    className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
+                    placeholder="e.g. President's Choice"
+                  />
+                </div>
 
-            {/* Staple toggle */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isStaple}
-                onChange={e => setIsStaple(e.target.checked)}
-                className="w-4 h-4 accent-primary"
-              />
-              <span className="text-sm text-text/70">Mark as staple for restock alerts</span>
-            </label>
+                <div>
+                  <label className="block text-sm font-medium text-text/70 mb-1" htmlFor="inv-price">
+                    Add price for cost tracking (optional)
+                  </label>
+                  <input
+                    id="inv-price"
+                    type="number"
+                    value={purchasePrice}
+                    onChange={e => setPurchasePrice(e.target.value === '' ? '' : Number(e.target.value))}
+                    min={0}
+                    step="0.01"
+                    className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
+                    placeholder="$0.00"
+                  />
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isStaple}
+                    onChange={e => setIsStaple(e.target.checked)}
+                    className="w-4 h-4 accent-primary"
+                  />
+                  <span className="text-sm text-text/70">Mark as staple for restock alerts</span>
+                </label>
+              </>
+            )}
 
             {error && (
               <p className="text-sm text-red-600">{error}</p>
             )}
 
             {/* Actions */}
+            {addedCount > 0 && (
+              <p className="text-xs text-green-700" role="status">
+                ✓ {addedCount} item{addedCount === 1 ? '' : 's'} added this session
+              </p>
+            )}
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="submit"
@@ -302,6 +366,16 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
                   ? 'Saving…'
                   : editItem ? 'Save Changes' : 'Add to Inventory'}
               </button>
+              {!editItem && (
+                <button
+                  type="button"
+                  onClick={e => handleSubmit(e as unknown as React.FormEvent, true)}
+                  disabled={isPending}
+                  className="rounded-[--radius-btn] border border-secondary px-3 py-2.5 text-sm font-medium text-text/70 hover:text-text disabled:opacity-50 transition-colors"
+                >
+                  Save +1 more
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onClose}
