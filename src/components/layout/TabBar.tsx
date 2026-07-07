@@ -9,11 +9,13 @@ interface TabItem {
   icon: IconName
 }
 
+// Grocery earns a permanent slot — it's the page parents open standing in a
+// store. The static Welcome launcher lives in the drawer instead.
 const tabs: TabItem[] = [
-  { label: 'Home', to: '/', icon: 'home' },
   { label: 'Today', to: '/today', icon: 'sun' },
-  { label: 'Recipes', to: '/recipes', icon: 'book' },
   { label: 'Plan', to: '/plan', icon: 'calendar' },
+  { label: 'Grocery', to: '/grocery', icon: 'cart' },
+  { label: 'Recipes', to: '/recipes', icon: 'book' },
 ]
 
 export function TabBar() {

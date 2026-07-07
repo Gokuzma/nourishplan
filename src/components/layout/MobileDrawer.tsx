@@ -9,8 +9,8 @@ interface DrawerItem {
 }
 
 const drawerItems: DrawerItem[] = [
+  { label: 'Home', to: '/', icon: 'home' },
   { label: 'Inventory', to: '/inventory', icon: 'box' },
-  { label: 'Grocery', to: '/grocery', icon: 'cart' },
   { label: 'Insights', to: '/insights', icon: 'chart' },
   { label: 'Household', to: '/household', icon: 'users' },
   { label: 'Settings', to: '/settings', icon: 'gear' },

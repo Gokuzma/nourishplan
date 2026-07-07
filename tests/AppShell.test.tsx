@@ -25,7 +25,7 @@ vi.mock('../src/hooks/useHousehold', () => ({
 }))
 
 describe('AppShell', () => {
-  it('renders navigation tabs: Home, Recipes, Plan, and More', async () => {
+  it('renders navigation tabs: Today, Plan, Grocery, Recipes, and More', async () => {
     const { TabBar } = await import('../src/components/layout/TabBar')
 
     render(
@@ -34,10 +34,13 @@ describe('AppShell', () => {
       )
     )
 
-    expect(screen.getAllByText('Home').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Recipes').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Today').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Plan').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Grocery').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Recipes').length).toBeGreaterThan(0)
     expect(screen.getAllByText('More').length).toBeGreaterThan(0)
+    // Home moved into the drawer; Grocery took the permanent tab slot
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0)
     expect(screen.queryByText('Foods')).toBeNull()
   })
 
