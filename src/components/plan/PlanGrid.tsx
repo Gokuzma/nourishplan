@@ -287,6 +287,21 @@ export function PlanGrid({
     }
   }, [activeJob?.status, planId, queryClient])
 
+  // Safety net: if the edge function hard-crashes it never writes a terminal
+  // status, leaving the row stuck in 'running' and the progress bar spinning
+  // forever. Fail it once it exceeds the wall-clock budget with margin.
+  const MAX_GENERATION_MS = 5 * 60 * 1000
+  useEffect(() => {
+    if (activeJob?.status !== 'running' || !activeJob.created_at) return
+    const age = Date.now() - new Date(activeJob.created_at).getTime()
+    const remaining = Math.max(0, MAX_GENERATION_MS - age)
+    const t = setTimeout(() => {
+      setGenerationError('Plan generation timed out. Try again.')
+      setActiveJobId(null)
+    }, remaining + 1000)
+    return () => clearTimeout(t)
+  }, [activeJob?.status, activeJob?.created_at, activeJob?.id, MAX_GENERATION_MS])
+
   const handleGenerate = useCallback(async () => {
     if (!planId) return
     setGenerationError(null)
@@ -299,18 +314,19 @@ export function PlanGrid({
       })
       setActiveJobId(result.jobId)
     } catch {
-      // The gateway often returns 502 while the job keeps running in the
-      // background — adopt the running job instead of reporting failure
-      // (a retry would burn a rate-limit slot).
-      const { data: runningJob } = await supabase
+      // The gateway often returns 502 while the job keeps running — or even
+      // finishes — in the background. Adopt the latest job whether it's still
+      // running OR already succeeded; only show an error if it truly failed or
+      // no job row exists (a retry would burn a rate-limit slot).
+      const { data: latestJob } = await supabase
         .from('plan_generations')
         .select('id, status')
         .eq('plan_id', planId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-      if (runningJob?.status === 'running') {
-        setActiveJobId(runningJob.id)
+      if (latestJob && latestJob.status !== 'error') {
+        setActiveJobId(latestJob.id)
       } else {
         setGenerationError('Plan generation failed. Try again.')
       }

@@ -53,8 +53,12 @@ export function useGenerationJob(jobId: string | null) {
     },
     enabled: !!jobId && !!householdId,
     refetchInterval: (query) => {
-      const status = query.state.data?.status
+      const job = query.state.data
+      const status = job?.status
       if (status === 'done' || status === 'partial' || status === 'timeout' || status === 'error') return false
+      // Stop polling a job wedged in 'running' past the wall-clock budget +
+      // margin — the edge function crashed without writing a terminal status.
+      if (job?.created_at && Date.now() - new Date(job.created_at).getTime() > 5 * 60 * 1000) return false
       return 2000
     },
   })
