@@ -5,6 +5,7 @@ import { useInventoryItems, useRemoveInventoryItem, useConsolidateInventory, use
 import { getExpiryUrgency, planInventoryConsolidation } from '../utils/inventory'
 import { InventoryItemRow } from '../components/inventory/InventoryItemRow'
 import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemModal'
+import { BulkAddInventoryModal } from '../components/inventory/BulkAddInventoryModal'
 import { BarcodeScanner } from '../components/inventory/BarcodeScanner'
 import { QuickScanMode } from '../components/inventory/QuickScanMode'
 import { Nameplate, StoryHead, Folio } from '../components/editorial'
@@ -19,6 +20,7 @@ const TABS: { label: string; value: StorageLocation; icon: 'pantry' | 'fridge' |
 export function InventoryPage() {
   const [activeTab, setActiveTab] = useState<StorageLocation>('fridge')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showBulkAdd, setShowBulkAdd] = useState(false)
   const [editItem, setEditItem] = useState<InventoryItem | null>(null)
   const [showScanner, setShowScanner] = useState(false)
   const [showQuickScan, setShowQuickScan] = useState(false)
@@ -207,6 +209,9 @@ export function InventoryPage() {
           <button type="button" onClick={() => { setShowScanner(false); setShowQuickScan(true) }} className="btn btn-sm">
             Quick scan
           </button>
+          <button type="button" onClick={() => setShowBulkAdd(true)} className="btn btn-sm">
+            Bulk add
+          </button>
           <button
             type="button"
             onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
@@ -265,13 +270,21 @@ export function InventoryPage() {
             <p className="serif-italic" style={{ fontSize: 18, color: 'var(--ink-soft)' }}>
               — nothing in your {TABS.find(t => t.value === activeTab)?.label.toLowerCase()} yet —
             </p>
-            <button
-              type="button"
-              onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
-              className="btn btn-primary btn-sm mt-4"
-            >
-              Add the first item
-            </button>
+            <p className="text-sm mt-2" style={{ color: 'var(--ink-dim)' }}>
+              Fastest way to stock up: dictate or paste your whole list at once.
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <button type="button" onClick={() => setShowBulkAdd(true)} className="btn btn-primary btn-sm">
+                Bulk add
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
+                className="btn btn-sm"
+              >
+                Add one item
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -291,6 +304,12 @@ export function InventoryPage() {
         onClose={handleModalClose}
         editItem={editItem}
         scanResult={scanResult}
+        defaultLocation={activeTab}
+      />
+
+      <BulkAddInventoryModal
+        isOpen={showBulkAdd}
+        onClose={() => setShowBulkAdd(false)}
       />
 
       <BarcodeScanner
