@@ -1,21 +1,29 @@
-const STEP_LABELS = [
-  'Shortlisting recipes...',
-  'Assigning to slots...',
-  'Verifying constraints...',
-  'Finalising plan...',
-] as const
+/*
+ * Live generation progress driven by plan_generations.pass_count, which the
+ * generate-plan edge function updates as each solver pass starts:
+ * 1 = shortlist, 2 = assign, 3-5 = verify/correct. 0 means the job row
+ * exists but constraint gathering hasn't reached pass 1 yet.
+ */
+const PASS_FILL: Record<number, number> = { 0: 8, 1: 25, 2: 50, 3: 70, 4: 80, 5: 90 }
+
+function labelForPass(passCount: number): string {
+  if (passCount <= 0) return 'Reading pantry, schedules and preferences...'
+  if (passCount === 1) return 'Shortlisting recipes...'
+  if (passCount === 2) return 'Choosing meals for each slot...'
+  return `Fixing rule violations — check ${passCount - 2} of 3...`
+}
 
 interface GenerationProgressBarProps {
-  step: number
+  passCount: number
   isVisible: boolean
   isTimeout?: boolean
 }
 
-export function GenerationProgressBar({ step, isVisible, isTimeout }: GenerationProgressBarProps) {
-  const fillPercent = Math.min(100, ((step + 1) / STEP_LABELS.length) * 100)
+export function GenerationProgressBar({ passCount, isVisible, isTimeout }: GenerationProgressBarProps) {
+  const fillPercent = isTimeout ? 100 : (PASS_FILL[passCount] ?? 90)
   const currentLabel = isTimeout
     ? 'Best plan found (time limit reached)'
-    : (STEP_LABELS[step] ?? STEP_LABELS[STEP_LABELS.length - 1])
+    : labelForPass(passCount)
 
   return (
     <div

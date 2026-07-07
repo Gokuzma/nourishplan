@@ -229,7 +229,7 @@ export function PlanGrid({
   // Generation hooks
   const generatePlan = useGeneratePlan()
   const suggestAlternative = useSuggestAlternative()
-  const { data: latestGeneration } = useLatestGeneration(planId)
+  const { data: latestGeneration } = useLatestGeneration(planId, generatePlan.isPending)
   const { gaps } = useNutritionGaps(planId)
 
   const swapSuggestions = useMemo(() => {
@@ -255,7 +255,6 @@ export function PlanGrid({
   }, [planId, assignSlot])
 
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
-  const [generationStep, setGenerationStep] = useState(0)
   const [generationError, setGenerationError] = useState<string | null>(null)
   const [batchPrepOpen, setBatchPrepOpen] = useState(false)
   const [reassignmentToast, setReassignmentToast] = useState<string | null>(null)
@@ -268,21 +267,14 @@ export function PlanGrid({
 
   const { data: activeJob } = useGenerationJob(activeJobId)
 
+  // While the invoke request is still open the client has no jobId yet;
+  // the polled latest row is the only view of the running job's progress.
+  const liveJob = activeJob
+    ?? (generatePlan.isPending && latestGeneration?.status === 'running' ? latestGeneration : null)
+
   const isGenerating = activeJob?.status === 'running' || generatePlan.isPending
   const isGenerationComplete = activeJob?.status === 'done' || activeJob?.status === 'partial'
   const isTimeout = activeJob?.status === 'timeout'
-
-  // Advance progress step while generation runs
-  useEffect(() => {
-    if (!isGenerating) {
-      setGenerationStep(0)
-      return
-    }
-    const interval = setInterval(() => {
-      setGenerationStep(prev => Math.min(prev + 1, 3))
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [isGenerating])
 
   // On job completion: refresh slot data and clear job
   useEffect(() => {
@@ -307,7 +299,21 @@ export function PlanGrid({
       })
       setActiveJobId(result.jobId)
     } catch {
-      setGenerationError('Plan generation failed. Try again.')
+      // The gateway often returns 502 while the job keeps running in the
+      // background — adopt the running job instead of reporting failure
+      // (a retry would burn a rate-limit slot).
+      const { data: runningJob } = await supabase
+        .from('plan_generations')
+        .select('id, status')
+        .eq('plan_id', planId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (runningJob?.status === 'running') {
+        setActiveJobId(runningJob.id)
+      } else {
+        setGenerationError('Plan generation failed. Try again.')
+      }
     }
   }, [planId, weekStart, householdId, priorityOrder, recipeMix, generatePlan])
 
@@ -706,7 +712,7 @@ export function PlanGrid({
 
         {(isGenerating || isTimeout) && (
           <GenerationProgressBar
-            step={generationStep}
+            passCount={liveJob?.pass_count ?? 0}
             isVisible={isGenerating || isTimeout}
             isTimeout={isTimeout}
           />

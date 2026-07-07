@@ -60,7 +60,7 @@ export function useGenerationJob(jobId: string | null) {
   })
 }
 
-export function useLatestGeneration(planId: string | undefined) {
+export function useLatestGeneration(planId: string | undefined, poll = false) {
   const { data: membership } = useHousehold()
   const householdId = membership?.household_id
 
@@ -78,6 +78,10 @@ export function useLatestGeneration(planId: string | undefined) {
       return data as PlanGeneration | null
     },
     enabled: !!planId && !!householdId,
+    // The generate-plan request stays open for the whole run, so during
+    // generation the fresh job row (and its live pass_count) is only
+    // visible by polling this query.
+    refetchInterval: poll ? 2000 : false,
   })
 }
 

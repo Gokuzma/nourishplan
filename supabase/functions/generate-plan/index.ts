@@ -533,6 +533,8 @@ serve(async (req) => {
 
       if (hasTimeLeft() && recipes.length > 0) {
         passCount++;
+        // Live progress: the client polls pass_count to label the current pass
+        await adminClient.from("plan_generations").update({ pass_count: passCount }).eq("id", jobId);
         const shortlistResponse = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
@@ -600,6 +602,7 @@ serve(async (req) => {
       // Pass 2 — Assign
       if (hasTimeLeft() && shortlistedRecipes.length > 0 && slotsToFill.length > 0) {
         passCount++;
+        await adminClient.from("plan_generations").update({ pass_count: passCount }).eq("id", jobId);
         const assignResponse = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
@@ -705,6 +708,7 @@ serve(async (req) => {
         if ((bestResult.violations ?? []).length === 0) break;
 
         passCount++;
+        await adminClient.from("plan_generations").update({ pass_count: passCount }).eq("id", jobId);
         const verifyResponse = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
