@@ -12,6 +12,8 @@ interface GenerateRequest {
   weekStart: string;
   priorityOrder: string[];
   recipeMix?: { favorites: number; liked: number; novel: number };
+  // Internal (scheduled) calls only: the household member the run is attributed to
+  triggeredBy?: string;
 }
 
 interface RecipeRow {
@@ -167,28 +169,45 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Auth validation — verify user is a member of the requested household
-    const authHeader = req.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Authorization required" }),
-        { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-      );
-    }
+    // Auth validation — either an internal scheduler call (shared secret)
+    // or a user JWT. Both paths end with a verified household member id.
+    const internalSecret = Deno.env.get("INTERNAL_FN_SECRET");
+    const isInternal = !!internalSecret &&
+      req.headers.get("x-internal-secret") === internalSecret;
 
-    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid auth token" }),
-        { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-      );
+    let triggeredByUserId: string;
+    if (isInternal) {
+      if (!body.triggeredBy) {
+        return new Response(
+          JSON.stringify({ success: false, error: "triggeredBy required for internal calls" }),
+          { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+        );
+      }
+      triggeredByUserId = body.triggeredBy;
+    } else {
+      const authHeader = req.headers.get("Authorization");
+      const token = authHeader?.replace("Bearer ", "");
+      if (!token) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Authorization required" }),
+          { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+        );
+      }
+
+      const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Invalid auth token" }),
+          { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+        );
+      }
+      triggeredByUserId = user.id;
     }
 
     const { data: membership } = await adminClient
       .from("household_members")
       .select("household_id")
-      .eq("user_id", user.id)
+      .eq("user_id", triggeredByUserId)
       .eq("household_id", householdId)
       .maybeSingle();
 
@@ -221,7 +240,7 @@ serve(async (req) => {
         household_id: householdId,
         plan_id: planId,
         status: "running",
-        triggered_by: user.id,
+        triggered_by: triggeredByUserId,
         priority_order: priorityOrder ?? [],
       })
       .select("id")
@@ -905,7 +924,7 @@ serve(async (req) => {
         } else {
           const { data: newMeal } = await adminClient
             .from("meals")
-            .insert({ household_id: householdId, name: sanitizeString(recipe.name), created_by: user.id })
+            .insert({ household_id: householdId, name: sanitizeString(recipe.name), created_by: triggeredByUserId })
             .select("id")
             .single();
           if (newMeal) mealIdByRecipeId[recipe.id] = newMeal.id;

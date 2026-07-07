@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase'
 import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
 import { DietaryRestrictionsSection } from '../components/settings/DietaryRestrictionsSection'
+import { NotificationsSection } from '../components/settings/NotificationsSection'
 import { WontEatSection } from '../components/settings/WontEatSection'
 import { ScheduleSection } from '../components/settings/ScheduleSection'
 import { Nameplate, StoryHead, SectionHead, Rule } from '../components/editorial'
@@ -57,6 +58,10 @@ export function SettingsPage() {
   const [budgetSaving, setBudgetSaving] = useState(false)
   const [budgetSaved, setBudgetSaved] = useState(false)
   const [budgetError, setBudgetError] = useState<string | null>(null)
+
+  // Auto-draft state
+  const [autoDraftSaving, setAutoDraftSaving] = useState(false)
+  const autoDraftEnabled = membership?.households?.auto_draft_enabled ?? false
 
   // Food prices state
   const { data: foodPrices } = useFoodPrices()
@@ -167,6 +172,22 @@ export function SettingsPage() {
       setBudgetError(err instanceof Error ? err.message : 'Failed to save budget.')
     } finally {
       setBudgetSaving(false)
+    }
+  }
+
+  async function handleToggleAutoDraft() {
+    const householdId = membership?.household_id
+    if (!householdId) return
+    setAutoDraftSaving(true)
+    try {
+      const { error } = await supabase
+        .from('households')
+        .update({ auto_draft_enabled: !autoDraftEnabled })
+        .eq('id', householdId)
+      if (error) throw error
+      await queryClient.invalidateQueries({ queryKey: ['household'] })
+    } finally {
+      setAutoDraftSaving(false)
     }
   }
 
@@ -326,7 +347,7 @@ export function SettingsPage() {
           </div>
 
           {isAdmin && (
-            <div style={{ padding: '14px 0' }}>
+            <div style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
               <label className="eyebrow block mb-1">Weekly Budget</label>
               <div className="flex gap-2 items-center">
                 <span className="mono" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>$</span>
@@ -349,6 +370,22 @@ export function SettingsPage() {
                 </button>
               </div>
               {budgetError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{budgetError}</p>}
+            </div>
+          )}
+
+          {isAdmin && (
+            <div style={{ padding: '14px 0' }}>
+              <label className="eyebrow block mb-1">Auto-Draft Weekly Plan</label>
+              <p className="serif-italic mb-2" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>
+                Draft next week&apos;s plan automatically the day before the week starts — review and adjust instead of starting from scratch.
+              </p>
+              <button
+                onClick={handleToggleAutoDraft}
+                disabled={autoDraftSaving}
+                className={`btn btn-sm ${autoDraftEnabled ? 'btn-primary' : ''}`}
+              >
+                {autoDraftSaving ? 'Saving...' : autoDraftEnabled ? 'On' : 'Off'}
+              </button>
             </div>
           )}
         </section>
@@ -509,9 +546,21 @@ export function SettingsPage() {
         </div>
       </section>
 
+      {/* Notifications section */}
+      {session && membership && (
+        <section className="mt-6">
+          <SectionHead no="07" label="Notifications" />
+          <Rule />
+          <NotificationsSection
+            userId={session.user.id}
+            householdId={membership.household_id}
+          />
+        </section>
+      )}
+
       {/* Account section */}
       <section className="mt-6">
-        <SectionHead no="07" label="Account" />
+        <SectionHead no="08" label="Account" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <button
@@ -525,7 +574,7 @@ export function SettingsPage() {
 
       {/* Danger Zone */}
       <section className="mt-10" style={{ borderLeft: '2px solid var(--tomato)', paddingLeft: 14 }}>
-        <SectionHead no="08" label="Danger Zone" aux="permanent" />
+        <SectionHead no="09" label="Danger Zone" aux="permanent" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <p className="serif-italic mb-3" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>These actions are permanent and cannot be undone.</p>

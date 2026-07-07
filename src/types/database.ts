@@ -10,6 +10,7 @@ export interface Household {
   name: string
   week_start_day: number
   weekly_budget: number | null
+  auto_draft_enabled: boolean
   created_at: string
 }
 
@@ -376,7 +377,7 @@ export type Database = {
       }
       households: {
         Row: Household
-        Insert: Omit<Household, 'id' | 'created_at' | 'week_start_day' | 'weekly_budget'> & { id?: string; created_at?: string; week_start_day?: number; weekly_budget?: number | null }
+        Insert: Omit<Household, 'id' | 'created_at' | 'week_start_day' | 'weekly_budget' | 'auto_draft_enabled'> & { id?: string; created_at?: string; week_start_day?: number; weekly_budget?: number | null; auto_draft_enabled?: boolean }
         Update: Partial<Omit<Household, 'id'>>
       }
       household_members: {
