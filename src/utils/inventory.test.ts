@@ -8,6 +8,7 @@ import {
   getExpiringSoonItems,
   getPurchaseHistory,
   planInventoryConsolidation,
+  defaultStorageForCategory,
 } from './inventory'
 import type { InventoryItem } from '../types/database'
 
@@ -286,5 +287,29 @@ describe('planInventoryConsolidation', () => {
   it('returns an empty plan when there are no duplicates', () => {
     const plan = planInventoryConsolidation([makeItem({ id: 'a' }), makeItem({ id: 'b', food_name: 'Other' })])
     expect(plan).toEqual({ survivors: [], removeIds: [], duplicateCount: 0 })
+  })
+})
+
+describe('defaultStorageForCategory', () => {
+  it('routes perishables to the fridge with a shelf life', () => {
+    expect(defaultStorageForCategory('Produce')).toEqual({ location: 'fridge', shelfDays: 7 })
+    expect(defaultStorageForCategory('Dairy')).toEqual({ location: 'fridge', shelfDays: 14 })
+    expect(defaultStorageForCategory('Meat & Seafood')).toEqual({ location: 'fridge', shelfDays: 3 })
+  })
+
+  it('routes frozen goods to the freezer', () => {
+    expect(defaultStorageForCategory('Frozen')).toEqual({ location: 'freezer', shelfDays: 90 })
+  })
+
+  it('routes shelf-stable categories to the pantry with no default expiry', () => {
+    expect(defaultStorageForCategory('Pantry/Dry Goods')).toEqual({ location: 'pantry', shelfDays: null })
+    expect(defaultStorageForCategory('Condiments & Spices')).toEqual({ location: 'pantry', shelfDays: null })
+    expect(defaultStorageForCategory('Beverages')).toEqual({ location: 'pantry', shelfDays: null })
+    expect(defaultStorageForCategory('Other')).toEqual({ location: 'pantry', shelfDays: null })
+    expect(defaultStorageForCategory('Bakery')).toEqual({ location: 'pantry', shelfDays: 5 })
+  })
+
+  it('defaults unknown categories to pantry, no expiry', () => {
+    expect(defaultStorageForCategory('Mystery Aisle')).toEqual({ location: 'pantry', shelfDays: null })
   })
 })

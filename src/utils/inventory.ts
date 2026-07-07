@@ -1,6 +1,21 @@
-import type { InventoryItem, InventoryUnit } from '../types/database'
+import type { InventoryItem, InventoryUnit, StorageLocation } from '../types/database'
 
 export type ExpiryUrgency = 'expired' | 'urgent' | 'warning' | 'ok' | 'none'
+
+/**
+ * Sensible storage defaults per store category, used when purchased grocery
+ * items flow into inventory. shelfDays null = shelf-stable, no default expiry.
+ */
+export function defaultStorageForCategory(category: string): { location: StorageLocation; shelfDays: number | null } {
+  switch (category) {
+    case 'Produce': return { location: 'fridge', shelfDays: 7 }
+    case 'Dairy': return { location: 'fridge', shelfDays: 14 }
+    case 'Meat & Seafood': return { location: 'fridge', shelfDays: 3 }
+    case 'Bakery': return { location: 'pantry', shelfDays: 5 }
+    case 'Frozen': return { location: 'freezer', shelfDays: 90 }
+    default: return { location: 'pantry', shelfDays: null }
+  }
+}
 
 /**
  * Classifies an item's expiry date into urgency levels.

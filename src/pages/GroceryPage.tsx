@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { supabase } from '../lib/supabase'
 import { useHousehold } from '../hooks/useHousehold'
 import { useGroceryList } from '../hooks/useGroceryList'
 import { useGroceryItems } from '../hooks/useGroceryItems'
@@ -13,6 +15,7 @@ import { useMealPlan } from '../hooks/useMealPlan'
 import { getWeekStart } from '../utils/mealPlan'
 import { formatCost } from '../utils/cost'
 import { STORE_CATEGORIES } from '../utils/groceryGeneration'
+import { defaultStorageForCategory } from '../utils/inventory'
 import { ManualAddItemInput } from '../components/grocery/ManualAddItemInput'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule, Chip } from '../components/editorial'
 import { Icon } from '../components/Icon'
@@ -40,6 +43,7 @@ export function GroceryPage() {
   const updateItem = useUpdateGroceryItem()
   const deleteItem = useDeleteGroceryItem()
 
+  const queryClient = useQueryClient()
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
   const [pantryStatus, setPantryStatus] = useState<'idle' | 'adding' | 'done'>('idle')
   const bulkAddInventoryItems = useBulkAddInventoryItems()
@@ -65,6 +69,7 @@ export function GroceryPage() {
 
   const estimatedTotal = needToBuy.reduce((sum, item) => sum + (item.estimated_cost ?? 0), 0)
   const checkedCount = needToBuy.filter(i => i.is_checked).length
+  const pendingPantryCount = needToBuy.filter(i => i.is_checked && i.notes !== 'pantry-added').length
   const checkedTotal = needToBuy.filter(i => i.is_checked).reduce((s, i) => s + (i.estimated_cost ?? 0), 0)
   const haveTotal = alreadyHave.reduce((s, i) => s + (i.estimated_cost ?? 0), 0)
   const isOverBudget = weeklyBudget != null && estimatedTotal > weeklyBudget
@@ -76,6 +81,8 @@ export function GroceryPage() {
     if (undoTimerId) clearTimeout(undoTimerId)
     toggleItem.mutate({ item })
     if (!item.is_checked) {
+      // A newly checked item re-arms "Add purchased" for the next batch
+      if (pantryStatus === 'done') setPantryStatus('idle')
       setUndoToast({ itemId, message: 'Item checked' })
       const timer = setTimeout(() => setUndoToast(null), 4000)
       setUndoTimerId(timer)
@@ -98,7 +105,7 @@ export function GroceryPage() {
   }
 
   async function handleAddToPantry() {
-    const purchased = needToBuy.filter(i => i.is_checked)
+    const purchased = needToBuy.filter(i => i.is_checked && i.notes !== 'pantry-added')
     if (purchased.length === 0) return
     setPantryStatus('adding')
     const validUnits: InventoryUnit[] = ['g', 'kg', 'ml', 'L', 'units']
@@ -111,16 +118,28 @@ export function GroceryPage() {
     for (const item of purchased) {
       const unit = validUnits.includes(item.unit as InventoryUnit) ? (item.unit as InventoryUnit) : 'units'
       const quantity = item.quantity ?? 1
+      // Route by store category — milk to the fridge, frozen peas to the
+      // freezer — with a category shelf life so expiry tracking works for
+      // groceries too, not just hand-entered items.
+      const { location, shelfDays } = defaultStorageForCategory(item.category)
+      const expiresAt = shelfDays != null
+        ? new Date(Date.now() + shelfDays * 86400000).toISOString().slice(0, 10)
+        : null
       const existing = pantryItems.find(p =>
         p.food_name.toLowerCase() === item.food_name.toLowerCase() &&
         p.unit === unit &&
-        p.storage_location === 'pantry' &&
+        p.storage_location === location &&
         !p.is_leftover,
       )
       if (existing) {
         merges.push({
           id: existing.id,
-          updates: { quantity_remaining: existing.quantity_remaining + quantity, purchased_at: today },
+          updates: {
+            quantity_remaining: existing.quantity_remaining + quantity,
+            purchased_at: today,
+            // Fresh purchase extends the merged row's life
+            expires_at: expiresAt ?? existing.expires_at,
+          },
         })
       } else {
         newRows.push({
@@ -128,7 +147,8 @@ export function GroceryPage() {
           food_id: item.food_id ?? undefined,
           quantity_remaining: quantity,
           unit,
-          storage_location: 'pantry',
+          storage_location: location,
+          expires_at: expiresAt,
           purchase_price: item.estimated_cost ?? null,
         })
       }
@@ -143,6 +163,13 @@ export function GroceryPage() {
     if (tripTotal > 0) {
       await createSpendLog.mutateAsync({ amount: tripTotal, is_partial: false, source: 'grocery' })
     }
+    // Durably mark these rows so a second batch (or a page reload) can't
+    // re-add them to inventory.
+    await supabase
+      .from('grocery_items')
+      .update({ notes: 'pantry-added' })
+      .in('id', purchased.map(i => i.id))
+    queryClient.invalidateQueries({ queryKey: ['grocery-items', list?.id] })
     setPantryStatus('done')
   }
 
@@ -255,19 +282,19 @@ export function GroceryPage() {
               {/* Regenerate button (top right) */}
               {!showRegenerateConfirm && (
                 <div className="flex justify-end gap-2 mt-3">
-                  {checkedCount > 0 && pantryStatus !== 'done' && (
+                  {pendingPantryCount > 0 && (
                     <button
                       type="button"
                       onClick={handleAddToPantry}
                       disabled={pantryStatus === 'adding'}
                       className="btn btn-sm"
                     >
-                      {pantryStatus === 'adding' ? 'Adding…' : `Add ${checkedCount} purchased to pantry`}
+                      {pantryStatus === 'adding' ? 'Adding…' : `Add ${pendingPantryCount} purchased to inventory`}
                     </button>
                   )}
-                  {pantryStatus === 'done' && (
+                  {pantryStatus === 'done' && pendingPantryCount === 0 && (
                     <span className="mono self-center" style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>
-                      Added to pantry ✓
+                      Added to inventory ✓
                     </span>
                   )}
                   <button
@@ -328,7 +355,7 @@ export function GroceryPage() {
                                 style={{ minWidth: 0, textAlign: 'left', background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
                               >
                                 <div className="serif" style={{ fontSize: 16 }}>{item.food_name}</div>
-                                {item.notes && item.notes !== 'inventory-covered' && (
+                                {item.notes && item.notes !== 'inventory-covered' && item.notes !== 'pantry-added' && (
                                   <div className="serif-italic" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 2 }}>— {item.notes}</div>
                                 )}
                               </button>
