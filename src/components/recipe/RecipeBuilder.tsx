@@ -15,7 +15,7 @@ import {
   applyYieldFactor,
   YIELD_FACTORS,
 } from '../../utils/nutrition'
-import { useFoodPrices, useSaveFoodPrice, getPriceForIngredient } from '../../hooks/useFoodPrices'
+import { useFoodPrices, useReferencePrices, useSaveFoodPrice, getPriceForIngredient } from '../../hooks/useFoodPrices'
 import { normaliseToCostPer100g, computeRecipeCostPerServing, formatCost } from '../../utils/cost'
 import type { DeductionResult } from '../../hooks/useInventoryDeduct'
 import { useCookCompletion } from '../../hooks/useCookCompletion'
@@ -274,6 +274,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
   const { data: ingredients, isPending: ingredientsPending } = useRecipeIngredients(recipeId)
   const { data: allRecipes } = useRecipes()
   const { data: foodPrices } = useFoodPrices()
+  const { data: referencePrices } = useReferencePrices()
   const saveFoodPrice = useSaveFoodPrice()
 
   const updateRecipe = useUpdateRecipe()
@@ -808,7 +809,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           {(() => {
             const ingredientsWithCost = (ingredients ?? []).map(ing => ({
               quantity_grams: ing.quantity_grams,
-              cost_per_100g: getPriceForIngredient(foodPrices ?? [], ing.ingredient_id, undefined, ing.ingredient_name),
+              cost_per_100g: getPriceForIngredient(foodPrices ?? [], ing.ingredient_id, undefined, ing.ingredient_name, referencePrices),
             }))
             const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(ingredientsWithCost, recipe.servings)
             const isPartial = pricedCount < totalCount && pricedCount > 0
@@ -881,7 +882,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
                     onEdit={() => setEditingIngredient(ing)}
                     onRemove={() => handleRemove(ing)}
                     onToggleWeightState={() => handleToggleWeightState(ing)}
-                    price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id, undefined, ing.ingredient_name)}
+                    price={getPriceForIngredient(foodPrices ?? [], ing.ingredient_id, undefined, ing.ingredient_name, referencePrices)}
                     onSavePrice={(amount, qty, unit, store) => handleSavePrice(ing, amount, qty, unit, store)}
                   />
                 </div>

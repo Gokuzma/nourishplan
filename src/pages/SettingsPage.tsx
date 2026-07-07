@@ -10,6 +10,7 @@ import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
 import { DietaryRestrictionsSection } from '../components/settings/DietaryRestrictionsSection'
 import { NotificationsSection } from '../components/settings/NotificationsSection'
+import { MarketPricesSection } from '../components/settings/MarketPricesSection'
 import { WontEatSection } from '../components/settings/WontEatSection'
 import { ScheduleSection } from '../components/settings/ScheduleSection'
 import { Nameplate, StoryHead, SectionHead, Rule } from '../components/editorial'
@@ -455,6 +456,12 @@ export function SettingsPage() {
               ))}
             </div>
           )}
+
+          <div className="mt-4">
+            <SectionHead label="Market Prices" aux="Ontario · StatCan" />
+            <Rule variant="soft" />
+            <MarketPricesSection />
+          </div>
         </section>
       )}
 

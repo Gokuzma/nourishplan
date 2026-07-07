@@ -264,6 +264,18 @@ export interface FoodPrice {
   updated_at: string
 }
 
+export interface ReferenceFoodPrice {
+  id: string
+  region: string
+  ingredient_name: string
+  cost_per_100g: number
+  quantity_label: string | null
+  statcan_product_id: number | null
+  source: string
+  ref_period: string | null
+  updated_at: string
+}
+
 export interface SpendLog {
   id: string
   household_id: string

@@ -1,6 +1,6 @@
 import { useCreateSpendLog } from './useSpendLog'
 import { useInventoryDeduct, type DeductionResult } from './useInventoryDeduct'
-import { useFoodPrices, getPriceForIngredient } from './useFoodPrices'
+import { useFoodPrices, useReferencePrices, getPriceForIngredient } from './useFoodPrices'
 import { computeRecipeCostPerServing } from '../utils/cost'
 import type { RecipeIngredient } from '../types/database'
 
@@ -22,6 +22,7 @@ export function useCookCompletion() {
   const spendLog = useCreateSpendLog()
   const inventoryDeduct = useInventoryDeduct()
   const { data: foodPrices } = useFoodPrices()
+  const { data: referencePrices } = useReferencePrices()
 
   async function runCookCompletion(
     input: CookCompletionInput
@@ -32,7 +33,7 @@ export function useCookCompletion() {
     // Cost calc — mirrors RecipeBuilder.tsx:578-588 exactly (per D-11)
     const ingredientsWithCost = input.ingredients.map(ing => ({
       quantity_grams: ing.quantity_grams,
-      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id, undefined, ing.ingredient_name),
+      cost_per_100g: getPriceForIngredient(prices, ing.ingredient_id, undefined, ing.ingredient_name, referencePrices),
     }))
     const { costPerServing, pricedCount, totalCount } = computeRecipeCostPerServing(
       ingredientsWithCost,

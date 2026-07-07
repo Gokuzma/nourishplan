@@ -1454,6 +1454,42 @@ export type Database = {
           },
         ]
       }
+      reference_food_prices: {
+        Row: {
+          cost_per_100g: number
+          id: string
+          ingredient_name: string
+          quantity_label: string | null
+          ref_period: string | null
+          region: string
+          source: string
+          statcan_product_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          cost_per_100g: number
+          id?: string
+          ingredient_name: string
+          quantity_label?: string | null
+          ref_period?: string | null
+          region?: string
+          source?: string
+          statcan_product_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cost_per_100g?: number
+          id?: string
+          ingredient_name?: string
+          quantity_label?: string | null
+          ref_period?: string | null
+          region?: string
+          source?: string
+          statcan_product_id?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       spend_logs: {
         Row: {
           amount: number

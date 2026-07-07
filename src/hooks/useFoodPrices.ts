@@ -3,7 +3,33 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
-import type { FoodPrice } from '../types/database'
+import { getReferencePriceForIngredient } from '../utils/referencePrices'
+import type { FoodPrice, ReferenceFoodPrice } from '../types/database'
+
+export { getReferencePriceForIngredient }
+
+const DEFAULT_REGION = 'ontario'
+
+/**
+ * Official current retail averages (Statistics Canada) used as a fallback when
+ * a household hasn't entered its own price for an ingredient. Read-only, shared
+ * across households, refreshed monthly by the sync-reference-prices function.
+ */
+export function useReferencePrices(region: string = DEFAULT_REGION) {
+  return useQuery({
+    queryKey: queryKeys.referencePrices.list(region),
+    queryFn: async (): Promise<ReferenceFoodPrice[]> => {
+      const { data, error } = await supabase
+        .from('reference_food_prices')
+        .select('*')
+        .eq('region', region)
+        .order('ingredient_name')
+      if (error) throw error
+      return data ?? []
+    },
+    staleTime: 1000 * 60 * 60 * 12,
+  })
+}
 
 export function useFoodPrices() {
   const { data: membership } = useHousehold()
@@ -76,23 +102,30 @@ export function useDeleteFoodPrice() {
  * Helper: find the price for a given ingredient from the loaded prices list.
  * Matches by food_id first, then by name — AI-generated recipes mint a new
  * ingredient_id every generation, so an id-only match loses saved prices.
- * Returns null if no price exists. If multiple stores have prices, returns the first.
+ *
+ * When the household has no price for the ingredient, falls back to official
+ * reference prices (StatCan) matched by name, so recipe costs and the purse
+ * still populate without anyone entering a price. Household prices always win.
+ * Returns null if neither source has a price.
  */
 export function getPriceForIngredient(
   prices: FoodPrice[],
   ingredientId: string,
   preferredStore?: string,
-  ingredientName?: string | null
+  ingredientName?: string | null,
+  referencePrices?: ReferenceFoodPrice[]
 ): number | null {
   let matching = prices.filter(p => p.food_id === ingredientId)
   if (matching.length === 0 && ingredientName) {
     const nameLower = ingredientName.toLowerCase()
     matching = prices.filter(p => p.food_name.toLowerCase() === nameLower)
   }
-  if (matching.length === 0) return null
-  if (preferredStore) {
-    const storeMatch = matching.find(p => p.store === preferredStore)
-    if (storeMatch) return storeMatch.cost_per_100g
+  if (matching.length > 0) {
+    if (preferredStore) {
+      const storeMatch = matching.find(p => p.store === preferredStore)
+      if (storeMatch) return storeMatch.cost_per_100g
+    }
+    return matching[0].cost_per_100g
   }
-  return matching[0].cost_per_100g
+  return getReferencePriceForIngredient(referencePrices, ingredientName)
 }

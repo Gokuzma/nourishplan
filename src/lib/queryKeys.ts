@@ -47,6 +47,9 @@ export const queryKeys = {
   foodPrices: {
     list: (householdId: string | undefined) => ['food-prices', householdId] as const,
   },
+  referencePrices: {
+    list: (region: string) => ['reference-prices', region] as const,
+  },
   weeklySpend: {
     root: (householdId: string | undefined, weekStart: string) =>
       ['weekly-spend', householdId, weekStart] as const,

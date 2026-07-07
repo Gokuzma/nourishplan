@@ -1,5 +1,6 @@
 import { getAvailableQuantity, getLowStockStaples, convertToGrams } from './inventory'
-import type { InventoryItem, FoodPrice } from '../types/database'
+import { getReferencePriceForIngredient } from './referencePrices'
+import type { InventoryItem, FoodPrice, ReferenceFoodPrice } from '../types/database'
 
 const MAX_RECIPE_DEPTH = 5
 
@@ -363,14 +364,18 @@ export function computeItemCost(
   quantity_grams: number,
   food_id: string | null,
   foodPrices: FoodPrice[],
-  food_name?: string | null
+  food_name?: string | null,
+  referencePrices?: ReferenceFoodPrice[]
 ): number | null {
   let price = food_id !== null ? foodPrices.find(p => p.food_id === food_id) : undefined
   if (!price && food_name) {
     const nameLower = food_name.toLowerCase()
     price = foodPrices.find(p => p.food_name.toLowerCase() === nameLower)
   }
-  if (!price) return null
+  if (price) return (quantity_grams / 100) * price.cost_per_100g
 
-  return (quantity_grams / 100) * price.cost_per_100g
+  // Fall back to official reference prices (StatCan) by name.
+  const refCost = getReferencePriceForIngredient(referencePrices, food_name)
+  if (refCost != null) return (quantity_grams / 100) * refCost
+  return null
 }

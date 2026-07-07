@@ -115,12 +115,17 @@ export function useGenerateGroceryList() {
         .is('removed_at', null)
       if (invError) throw invError
 
-      // 5. Fetch food prices
+      // 5. Fetch food prices (household + official reference fallback)
       const { data: foodPrices, error: priceError } = await supabase
         .from('food_prices')
         .select('*')
         .eq('household_id', householdId)
       if (priceError) throw priceError
+
+      const { data: referencePrices } = await supabase
+        .from('reference_food_prices')
+        .select('*')
+        .eq('region', 'ontario')
 
       // 6. Fetch previous grocery items for user category overrides
       const { data: previousItems, error: prevError } = await supabase
@@ -172,7 +177,7 @@ export function useGenerateGroceryList() {
       const allNeedToBuy = [...categorizedNeedToBuy, ...categorizedRestock]
       const needToBuyInserts = allNeedToBuy.map(item => {
         const { display_quantity, display_unit } = formatDisplayQuantity(item.quantity_grams)
-        const estimatedCost = computeItemCost(item.quantity_grams, item.food_id, foodPrices ?? [], item.food_name)
+        const estimatedCost = computeItemCost(item.quantity_grams, item.food_id, foodPrices ?? [], item.food_name, referencePrices ?? [])
         return {
           list_id: listId,
           household_id: householdId,
