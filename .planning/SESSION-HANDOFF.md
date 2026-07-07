@@ -65,6 +65,30 @@ lessons.md and this handoff remain in force — they're project knowledge.
    correct copy → disable removed the row. Human UAT still worthwhile on a real
    phone (iOS requires Home-Screen install).
 
+### Late additions II (same session — up-to-date Toronto food prices)
+
+6. **StatCan reference prices** — the user wanted current Toronto/Canada food
+   prices. The PC Express (Loblaws) API is Akamai-blocked from datacenters (403)
+   and now needs OAuth (401) — declined the ask to evade bot-detection; a
+   local-only tool was the honest option there but the user pivoted to "just
+   prices." **Statistics Canada table 18-10-0245** (monthly retail scanner data
+   by province) is free, official, cloud-runnable, and covers ~95 staples.
+   - Migration 039 `reference_food_prices` (global, read-only RLS, keyed by
+     region+ingredient_name). `sync-reference-prices` edge function pulls latest
+     Ontario prices via StatCan WDS, parses quantity→grams→cost_per_100g, upserts
+     canonical ingredient names. Weekly cron `nourishplan-price-sync` (Mon 14:00
+     UTC). Currently 136 rows, May 2026 data.
+   - Budget read path falls back to reference prices by name (exact, then
+     longest whole-word contains) when a household has no price; household prices
+     always win. Wired into recipe cost badges, Cook Mode spend, grocery
+     estimates. Settings → Food Prices shows a "Market Prices" list.
+   - **Geography is Ontario, not Toronto specifically** — Ontario is the finest
+     StatCan grain; it's the best official proxy. Count items (eggs/avocado/
+     lemon/lime) use documented per-unit weights (see PRODUCT_MAP in the fn).
+   - Verified live: Creamy Tuscan Chicken (claude-test, 3 household prices) now
+     $3.51+/serving, 7/12 priced, pulling olive oil $1.07 + chicken breast $1.40
+     from reference.
+
 ## Fixture state (changed today)
 
 - **Sim Family**: nutrition_targets now exist (sim-family 2000 kcal,
@@ -89,10 +113,12 @@ lessons.md and this handoff remain in force — they're project knowledge.
    convenient. Old-style SlotCard visuals could move to editorial.
 3. Consider auto-suggesting "Tidy up" after checkout; virtualize inventory if
    large households stay slow.
-4. Next-feature candidates remaining (auto-draft + push shipped): price capture
-   at grocery checkout, canonical ingredient normalization (kill the AI-UUID
-   bug class at the root), a simple "follower" view for non-planner members,
-   schedule-aware cook-reminder pushes, an admin view/digest for client_errors.
+4. Next-feature candidates remaining (auto-draft, push, StatCan prices shipped):
+   canonical ingredient normalization (kill the AI-UUID bug class at the root),
+   a simple "follower" view for non-planner members, schedule-aware cook-reminder
+   pushes, an admin view/digest for client_errors, and expanding the StatCan
+   PRODUCT_MAP coverage (more aliases → more ingredients auto-priced). A local
+   PC Express cart-builder was scoped but not built (user pivoted to prices).
 
 ## How to operate (see lessons L-001…L-048, auto-injected)
 

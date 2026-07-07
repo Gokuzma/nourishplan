@@ -364,3 +364,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** `element.innerText` reflects CSS text-transform; the editorial design system uppercases most labels and kickers.
 **Rule:** When asserting on rendered text in this app, match case-insensitively (`/notifications/i`) or use `textContent` (which ignores text-transform). Prefer role/aria-based locators over text where possible.
 **Applies to:** Any Playwright/browser_evaluate verification against pages using eyebrow/kicker/section-head/mono-uppercase styles.
+
+### L-050: Regenerate database.gen.ts after EVERY migration, before tsc
+**Bug:** After `supabase db push` applied migration 039 (reference_food_prices), tsc failed — `supabase.from('reference_food_prices')` typed the table as `never` because database.gen.ts still reflected the pre-039 schema. The client is typed from database.gen.ts, so any new table/column is invisible until the file is regenerated.
+**Root cause:** `db push` changes the remote schema but does not touch the generated types; they're a separate artifact that must be regenerated in lockstep.
+**Rule:** Immediately after any `supabase db push`, run `npx supabase gen types typescript --project-id qyablbzodmftobjslgri > src/types/database.gen.ts` and re-run tsc before writing code against the new schema. (Constraint-only migrations don't change types — those are exempt.)
+**Applies to:** Every migration that adds/renames tables or columns; the deploy checklist.
