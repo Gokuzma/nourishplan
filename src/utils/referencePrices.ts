@@ -37,11 +37,28 @@ interface ReferencePriceRow {
   cost_per_100g: number
 }
 
+// Words that may follow the head noun without changing what the ingredient is
+// (prep instructions, cut forms, size/quality adjectives). If ANY other word
+// follows the matched key, the ingredient is a different thing ("chicken
+// broth", "corn starch", "rice vinegar") and must NOT borrow the base price.
+const TRAILING_DESCRIPTORS = new Set([
+  'chopped', 'diced', 'sliced', 'minced', 'grated', 'shredded', 'cubed', 'halved',
+  'quartered', 'crushed', 'ground', 'peeled', 'seeded', 'deseeded', 'deveined',
+  'drained', 'rinsed', 'cooked', 'uncooked', 'raw', 'fresh', 'frozen', 'thawed',
+  'softened', 'melted', 'roughly', 'finely', 'thinly', 'coarsely', 'optional',
+  'divided', 'room', 'temperature', 'to', 'taste', 'and', 'or', 'for', 'garnish',
+  'boneless', 'skinless', 'trimmed', 'washed', 'dried', 'whole', 'large', 'small',
+  'medium', 'ripe', 'strips', 'fillet', 'fillets', 'pieces', 'chunks', 'cubes',
+  'tenders', 'cutlets', 'wedges', 'each', 'about',
+])
+
 /**
- * Looks up an ingredient's official reference price by name (exact, then a
- * loose whole-word contains match so "extra virgin olive oil" resolves to
- * "olive oil", longest key first so "sweet potato" beats "potato").
- * Returns null when no reference price applies.
+ * Looks up an ingredient's official reference price by name. Exact match first,
+ * then a "head-noun" match: the key must appear as whole words AND everything
+ * after it must be only prep descriptors — so "extra virgin olive oil" and
+ * "chicken breast, diced" resolve, but "chicken broth", "corn starch", and
+ * "red pepper flakes" do NOT borrow the base commodity's price. Longest key
+ * first so "sweet potato" beats "potato". Returns null when nothing applies.
  */
 export function getReferencePriceForIngredient(
   referencePrices: ReferencePriceRow[] | undefined,
@@ -51,9 +68,15 @@ export function getReferencePriceForIngredient(
   const nameLower = ingredientName.toLowerCase().trim()
   const exact = referencePrices.find(r => r.ingredient_name === nameLower)
   if (exact) return exact.cost_per_100g
+
   const byLength = [...referencePrices].sort((a, b) => b.ingredient_name.length - a.ingredient_name.length)
-  const loose = byLength.find(r => new RegExp(`\\b${escapeRegex(r.ingredient_name)}\\b`).test(nameLower))
-  return loose ? loose.cost_per_100g : null
+  for (const r of byLength) {
+    const m = nameLower.match(new RegExp(`\\b${escapeRegex(r.ingredient_name)}\\b(.*)$`))
+    if (!m) continue
+    const trailingTokens = m[1].split(/[^a-z]+/).filter(Boolean)
+    if (trailingTokens.every(t => TRAILING_DESCRIPTORS.has(t))) return r.cost_per_100g
+  }
+  return null
 }
 
 function escapeRegex(s: string): string {

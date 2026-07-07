@@ -4,9 +4,9 @@ import { formatCost } from '../../utils/cost'
 
 function formatPeriod(period: string | null): string {
   if (!period) return ''
-  return new Date(period + 'T00:00:00Z').toLocaleDateString('en-US', {
-    month: 'long', year: 'numeric', timeZone: 'UTC',
-  })
+  const d = new Date(period.slice(0, 10) + 'T00:00:00Z')
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 }
 
 export function MarketPricesSection() {

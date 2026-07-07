@@ -31,7 +31,11 @@ function parseQuantityToGrams(label: string): number | null {
 interface MapEntry {
   aliases: string[];
   gramsOverride?: number;
+  // Volume→mass density for oil-based products sold by the litre (~0.92);
+  // StatCan prices these per volume, so density-1 would understate cost ~8%.
+  density?: number;
 }
+const OIL_DENSITY = 0.92;
 const PRODUCT_MAP: Record<number, MapEntry> = {
   // Beef / pork
   1: { aliases: ["stewing beef", "beef stew meat", "beef chuck"] },
@@ -86,7 +90,7 @@ const PRODUCT_MAP: Record<number, MapEntry> = {
   37: { aliases: ["cucumber", "english cucumber"], gramsOverride: 300 },
   38: { aliases: ["mushroom", "mushrooms", "cremini", "button mushrooms"] },
   39: { aliases: ["broccoli"], gramsOverride: 450 },
-  40: { aliases: ["pepper", "bell pepper", "peppers", "red pepper", "green pepper", "yellow pepper"] },
+  40: { aliases: ["bell pepper", "peppers", "red pepper", "green pepper", "yellow pepper"] },
   48: { aliases: ["iceberg lettuce", "lettuce"], gramsOverride: 400 },
   49: { aliases: ["romaine lettuce", "romaine"], gramsOverride: 400 },
   85: { aliases: ["squash", "butternut squash", "acorn squash"] },
@@ -112,13 +116,13 @@ const PRODUCT_MAP: Record<number, MapEntry> = {
   59: { aliases: ["flour", "all-purpose flour", "wheat flour"] },
   60: { aliases: ["sugar", "white sugar", "granulated sugar"] },
   // Oils / condiments
-  96: { aliases: ["olive oil", "extra virgin olive oil"] },
-  66: { aliases: ["vegetable oil"] },
-  95: { aliases: ["canola oil"] },
+  96: { aliases: ["olive oil", "extra virgin olive oil"], density: OIL_DENSITY },
+  66: { aliases: ["vegetable oil"], density: OIL_DENSITY },
+  95: { aliases: ["canola oil"], density: OIL_DENSITY },
   65: { aliases: ["ketchup"] },
   68: { aliases: ["peanut butter"] },
-  69: { aliases: ["mayonnaise", "mayo"] },
-  106: { aliases: ["salad dressing", "ranch dressing", "vinaigrette", "caesar dressing"] },
+  69: { aliases: ["mayonnaise", "mayo"], density: OIL_DENSITY },
+  106: { aliases: ["salad dressing", "ranch dressing", "vinaigrette", "caesar dressing"], density: OIL_DENSITY },
   // Canned / pantry
   71: { aliases: ["canned tomatoes", "crushed tomatoes", "diced tomatoes", "tomato puree", "canned diced tomatoes"] },
   73: { aliases: ["canned beans", "black beans", "kidney beans", "chickpeas", "cannellini beans"] },
@@ -200,11 +204,17 @@ serve(async (req) => {
 
       const map = PRODUCT_MAP[pid];
       const label = labelById[pid] ?? "";
-      const grams = map.gramsOverride ?? parseQuantityToGrams(label);
-      if (!grams || grams <= 0) { skipped++; continue; }
+      // Prefer the live StatCan label; the per-unit override is only a fallback
+      // for genuinely count-based labels ("unit", "1 dozen") the parser can't read.
+      const parsedGrams = parseQuantityToGrams(label) ?? map.gramsOverride;
+      if (!parsedGrams || parsedGrams <= 0) { skipped++; continue; }
+      const grams = map.density ? parsedGrams * map.density : parsedGrams;
 
       const costPer100g = (Number(point.value) / grams) * 100;
-      const refPeriod: string = point.refPer;
+      // StatCan returns refPer as YYYY-MM-DD; normalize defensively to month start.
+      const refPeriod: string = /^\d{4}-\d{2}/.test(point.refPer)
+        ? `${point.refPer.slice(0, 7)}-01`
+        : point.refPer;
       for (const alias of map.aliases) {
         rows.push({
           region: "ontario",
@@ -219,21 +229,31 @@ serve(async (req) => {
       }
     }
 
-    if (rows.length > 0) {
+    // Dedupe by ingredient_name — a duplicate conflict key would make Postgres
+    // reject the whole batch (ON CONFLICT can't touch a row twice).
+    const byName = new Map<string, Record<string, unknown>>();
+    for (const row of rows) {
+      const key = row.ingredient_name as string;
+      if (!byName.has(key)) byName.set(key, row);
+    }
+    const deduped = [...byName.values()];
+
+    if (deduped.length > 0) {
       const { error } = await adminClient
         .from("reference_food_prices")
-        .upsert(rows, { onConflict: "region,ingredient_name" });
+        .upsert(deduped, { onConflict: "region,ingredient_name" });
       if (error) throw error;
     }
 
     return new Response(
-      JSON.stringify({ success: true, upserted: rows.length, productsSkipped: skipped }),
+      JSON.stringify({ success: true, upserted: deduped.length, productsSkipped: skipped }),
       { headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
+    // Return 500 so cron/monitoring can distinguish a hard failure from success.
     return new Response(
       JSON.stringify({ success: false, error: err instanceof Error ? err.message : String(err) }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 });

@@ -116,6 +116,39 @@ function computeRecipeCostPerServing(
   };
 }
 
+// Inlined from src/utils/referencePrices.ts (Deno cannot import src/). Keep in
+// sync with that file — the client and planner must price ingredients the same way.
+const REF_TRAILING_DESCRIPTORS = new Set([
+  "chopped", "diced", "sliced", "minced", "grated", "shredded", "cubed", "halved",
+  "quartered", "crushed", "ground", "peeled", "seeded", "deseeded", "deveined",
+  "drained", "rinsed", "cooked", "uncooked", "raw", "fresh", "frozen", "thawed",
+  "softened", "melted", "roughly", "finely", "thinly", "coarsely", "optional",
+  "divided", "room", "temperature", "to", "taste", "and", "or", "for", "garnish",
+  "boneless", "skinless", "trimmed", "washed", "dried", "whole", "large", "small",
+  "medium", "ripe", "strips", "fillet", "fillets", "pieces", "chunks", "cubes",
+  "tenders", "cutlets", "wedges", "each", "about",
+]);
+function escapeRegexRef(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function getReferencePriceForIngredient(
+  referencePrices: { ingredient_name: string; cost_per_100g: number }[],
+  ingredientName: string | null | undefined,
+): number | null {
+  if (!referencePrices.length || !ingredientName) return null;
+  const nameLower = ingredientName.toLowerCase().trim();
+  const exact = referencePrices.find((r) => r.ingredient_name === nameLower);
+  if (exact) return exact.cost_per_100g;
+  const byLength = [...referencePrices].sort((a, b) => b.ingredient_name.length - a.ingredient_name.length);
+  for (const r of byLength) {
+    const m = nameLower.match(new RegExp(`\\b${escapeRegexRef(r.ingredient_name)}\\b(.*)$`));
+    if (!m) continue;
+    const trailing = m[1].split(/[^a-z]+/).filter(Boolean);
+    if (trailing.every((t) => REF_TRAILING_DESCRIPTORS.has(t))) return r.cost_per_100g;
+  }
+  return null;
+}
+
 // Normalize recipeMix: clamp negatives, force sum=100, fallback to defaults
 function normalizeRecipeMix(raw: unknown): { favorites: number; liked: number; novel: number } {
   const defaults = { favorites: 50, liked: 30, novel: 20 };
@@ -305,6 +338,7 @@ serve(async (req) => {
         slotsResult,
         spendLogsResult,
         foodPricesResult,
+        referencePricesResult,
       ] = await Promise.all([
         adminClient
           .from("recipes")
@@ -360,6 +394,12 @@ serve(async (req) => {
           .from("food_prices")
           .select("food_id, food_name, cost_per_100g")
           .eq("household_id", householdId),
+        // Statistics Canada reference prices — fallback so cost_per_serving is
+        // meaningful even for ingredients the household hasn't priced by hand.
+        adminClient
+          .from("reference_food_prices")
+          .select("ingredient_name, cost_per_100g")
+          .eq("region", "ontario"),
       ]);
 
       const recipes: RecipeRow[] = (recipesResult.data ?? []) as RecipeRow[];
@@ -376,6 +416,8 @@ serve(async (req) => {
         (spendLogsResult.data ?? []) as { recipe_id: string | null; log_date: string }[];
       const foodPrices: { food_id: string; food_name: string; cost_per_100g: number }[] =
         (foodPricesResult.data ?? []) as { food_id: string; food_name: string; cost_per_100g: number }[];
+      const referencePrices: { ingredient_name: string; cost_per_100g: number }[] =
+        (referencePricesResult.data ?? []) as { ingredient_name: string; cost_per_100g: number }[];
 
       const memberCount = members.length + profiles.length;
       const hasActiveRestrictions = restrictions.length > 0 || wontEat.some((w) => w.strength === "allergy");
@@ -503,7 +545,9 @@ serve(async (req) => {
         const ings = r.recipe_ingredients ?? [];
         const ingsWithPrice = ings.map((i) => ({
           quantity_grams: i.quantity_grams,
-          cost_per_100g: i.ingredient_id ? priceByFoodId.get(i.ingredient_id) ?? null : null,
+          // Household price wins; fall back to the StatCan reference by name.
+          cost_per_100g: (i.ingredient_id ? priceByFoodId.get(i.ingredient_id) ?? null : null)
+            ?? getReferencePriceForIngredient(referencePrices, i.ingredient_name),
         }));
         const { costPerServing } = computeRecipeCostPerServing(ingsWithPrice, r.servings || 1);
 

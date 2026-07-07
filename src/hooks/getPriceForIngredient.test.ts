@@ -21,7 +21,37 @@ const references = [
   ref('potato', 0.29),
   ref('sweet potato', 0.55),
   ref('chicken breast', 1.40),
+  ref('chicken', 0.80),
+  ref('corn', 0.30),
+  ref('rice', 0.47),
+  ref('cream', 1.50),
+  ref('red pepper', 0.60),
 ]
+
+describe('getReferencePriceForIngredient — derivative false positives (regression)', () => {
+  it('does NOT price broths/stocks as their base meat', () => {
+    expect(getReferencePriceForIngredient(references, 'chicken broth')).toBeNull()
+    expect(getReferencePriceForIngredient(references, 'chicken stock')).toBeNull()
+    expect(getReferencePriceForIngredient(references, 'chicken breast bone broth')).toBeNull()
+  })
+
+  it('does NOT price starch/syrup/vinegar as their base plant', () => {
+    expect(getReferencePriceForIngredient(references, 'corn starch')).toBeNull()
+    expect(getReferencePriceForIngredient(references, 'corn syrup')).toBeNull()
+    expect(getReferencePriceForIngredient(references, 'rice vinegar')).toBeNull()
+  })
+
+  it('does NOT price red pepper flakes (a spice) as fresh red pepper', () => {
+    expect(getReferencePriceForIngredient(references, 'crushed red pepper flakes')).toBeNull()
+  })
+
+  it('still prices legitimate prep-descriptor forms', () => {
+    expect(getReferencePriceForIngredient(references, 'chicken breast, diced')).toBeCloseTo(1.40)
+    expect(getReferencePriceForIngredient(references, 'red pepper, sliced')).toBeCloseTo(0.60)
+    expect(getReferencePriceForIngredient(references, 'boneless skinless chicken breast')).toBeCloseTo(1.40)
+    expect(getReferencePriceForIngredient(references, 'white rice')).toBeCloseTo(0.47)
+  })
+})
 
 describe('getReferencePriceForIngredient', () => {
   it('matches exact ingredient name (case-insensitive)', () => {
