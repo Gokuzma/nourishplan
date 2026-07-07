@@ -24,6 +24,7 @@ export type IconName =
   | 'gear'
   | 'compass'
   | 'search'
+  | 'barcode'
   | 'plus'
   | 'minus'
   | 'lock'
@@ -165,6 +166,12 @@ export function Icon({
         <svg {...commonProps} {...SHARED}>
           <circle cx="11" cy="11" r="6.5" />
           <path d="m20 20-4-4" />
+        </svg>
+      )
+    case 'barcode':
+      return (
+        <svg {...commonProps} {...SHARED}>
+          <path d="M4 6v12M7.5 6v12M10 6v8M10 17v1M13 6v12M15.5 6v8M15.5 17v1M18 6v12M20.5 6v12" />
         </svg>
       )
     case 'plus':

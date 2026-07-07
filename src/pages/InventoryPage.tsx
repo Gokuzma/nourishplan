@@ -203,11 +203,23 @@ export function InventoryPage() {
           ))}
         </div>
         <div className="flex items-center gap-2 no-print pb-2">
-          <button type="button" onClick={() => { setShowQuickScan(false); setShowScanner(true) }} className="btn btn-sm" aria-label="Scan barcode">
-            <Icon name="search" size={14} /> Scan
+          <button
+            type="button"
+            onClick={() => { setShowQuickScan(false); setShowScanner(true) }}
+            className="btn btn-sm"
+            aria-label="Scan one barcode"
+            title="Scan one barcode, then fill in the details"
+          >
+            <Icon name="barcode" size={14} /> Scan
           </button>
-          <button type="button" onClick={() => { setShowScanner(false); setShowQuickScan(true) }} className="btn btn-sm">
-            Quick scan
+          <button
+            type="button"
+            onClick={() => { setShowScanner(false); setShowQuickScan(true) }}
+            className="btn btn-sm"
+            aria-label="Quick scan several items"
+            title="Scan item after item — each one is added as you go"
+          >
+            <Icon name="barcode" size={14} /> Quick scan
           </button>
           <button type="button" onClick={() => setShowBulkAdd(true)} className="btn btn-sm">
             Bulk add

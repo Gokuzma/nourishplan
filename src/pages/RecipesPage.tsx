@@ -115,9 +115,18 @@ export function RecipesPage() {
           ))}
         </div>
       ) : !recipes || recipes.length === 0 ? (
-        <p className="serif-italic text-base py-12 text-center" style={{ color: 'var(--ink-dim)' }}>
-          No recipes yet. Add your first one above.
-        </p>
+        <div className="py-12 text-center">
+          <p className="serif-italic text-base" style={{ color: 'var(--ink-dim)' }}>
+            No recipes yet — the fastest start is a Discover pass.
+          </p>
+          <button
+            type="button"
+            onClick={() => setDiscoverOpen(true)}
+            className="btn btn-primary btn-sm mt-4"
+          >
+            ✨ Discover recipes
+          </button>
+        </div>
       ) : (
         <div role="list" className="mt-1">
           {recipes.map((recipe) => (
