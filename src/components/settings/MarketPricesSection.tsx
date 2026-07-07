@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useReferencePrices } from '../../hooks/useFoodPrices'
 import { formatCost } from '../../utils/cost'
 
@@ -10,6 +11,7 @@ function formatPeriod(period: string | null): string {
 
 export function MarketPricesSection() {
   const { data: prices } = useReferencePrices()
+  const [open, setOpen] = useState(false)
 
   if (!prices || prices.length === 0) {
     return (
@@ -36,22 +38,36 @@ export function MarketPricesSection() {
         Current Ontario retail averages from Statistics Canada{period ? ` (${period})` : ''}. Used to
         estimate recipe and grocery costs when you haven&apos;t entered your own price. Your own prices always win.
       </p>
-      <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-        {rows.map(r => (
-          <div
-            key={r.statcan_product_id ?? r.ingredient_name}
-            className="flex items-baseline justify-between"
-            style={{ padding: '8px 0', borderBottom: '1px dashed var(--rule-soft)' }}
-          >
-            <span className="serif min-w-0" style={{ fontSize: 14 }}>
-              {r.quantity_label ?? r.ingredient_name}
-            </span>
-            <span className="mono tnum ml-4" style={{ fontSize: 12, color: 'var(--tomato)', whiteSpace: 'nowrap' }}>
-              {formatCost(r.cost_per_100g)}/100g
-            </span>
-          </div>
-        ))}
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center justify-between w-full"
+        style={{ background: 'transparent', border: 0, padding: '4px 0', cursor: 'pointer', color: 'inherit' }}
+        aria-expanded={open}
+      >
+        <span className="mono" style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--tomato)' }}>
+          {open ? 'Hide' : 'Show'} {rows.length} prices
+        </span>
+        <span aria-hidden="true" style={{ color: 'var(--ink-soft)', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }}>›</span>
+      </button>
+      {open && (
+        <div className="mt-2" style={{ maxHeight: 320, overflowY: 'auto' }}>
+          {rows.map(r => (
+            <div
+              key={r.statcan_product_id ?? r.ingredient_name}
+              className="flex items-baseline justify-between"
+              style={{ padding: '8px 0', borderBottom: '1px dashed var(--rule-soft)' }}
+            >
+              <span className="serif min-w-0" style={{ fontSize: 14 }}>
+                {r.quantity_label ?? r.ingredient_name}
+              </span>
+              <span className="mono tnum ml-4" style={{ fontSize: 12, color: 'var(--tomato)', whiteSpace: 'nowrap' }}>
+                {formatCost(r.cost_per_100g)}/100g
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
