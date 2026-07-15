@@ -19,8 +19,21 @@
    modals get trapped under the generate/batch bar. Reset + Template modals now
    portal to document.body.
 
+5. **Per-day schedule from the Plan screen** — "schedule" link on day headers
+   (desktop grid + mobile day card) opens DayScheduleModal: members × 4 slot
+   dropdowns for that day, saving only diffs vs the weekly pattern into
+   `member_schedule_exceptions` (dormant since 025, now live). Plan chips and
+   generate-plan read base+exceptions merged (`applyExceptions`). Also fixed
+   generate-plan's day_of_week/day_index conflation (wrong-day schedule for
+   non-Sunday-start households) and switched its member aggregation to the
+   same precedence as the UI chips. Verified live end-to-end incl. revert
+   (exception delete) and week-scoping; generation-with-exception not run
+   live (rate slots) — logic mirrors the tested frontend merge.
+
 Fixture note: week 2026-07-19 was created/generated/deleted during verification
-(1 rate slot); sim-family's Wed Dinner was set to batch then reverted to prep.
+(2 rate slots + 1 fresh gen); sim-family's Wed Dinner was set to batch then
+reverted to prep; Thu Dinner exceptions (Ada away / sim eat) added then
+reverted. All clean.
 
 ---
 
