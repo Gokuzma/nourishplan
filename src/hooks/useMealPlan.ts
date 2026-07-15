@@ -166,6 +166,50 @@ export function useClearSlot() {
 }
 
 /**
+ * Mutation to clear every unlocked slot of a plan (meal_id = null) so the
+ * week can be replanned around locked meals.
+ */
+export function useClearUnlockedSlots() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ planId }: { planId: string }): Promise<void> => {
+      const { error } = await supabase
+        .from('meal_plan_slots')
+        .update({ meal_id: null, is_override: false })
+        .eq('plan_id', planId)
+        .eq('is_locked', false)
+
+      if (error) throw error
+    },
+    onSuccess: (_, { planId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.mealPlan.slots(planId) })
+    },
+  })
+}
+
+/**
+ * Mutation to delete a week's plan entirely (slots cascade via FK), returning
+ * the week to the Start Week prompt. RLS allows the plan creator or an admin.
+ */
+export function useDeleteMealPlan() {
+  const queryClient = useQueryClient()
+  const { data: membership } = useHousehold()
+
+  return useMutation({
+    mutationFn: async ({ planId }: { planId: string; weekStart: string }): Promise<void> => {
+      const { error } = await supabase.from('meal_plans').delete().eq('id', planId)
+      if (error) throw error
+    },
+    onSuccess: (_, { weekStart }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.mealPlan.root(membership?.household_id, weekStart),
+      })
+    },
+  })
+}
+
+/**
  * Mutation to toggle the is_locked flag on a slot.
  */
 export function useToggleLock() {

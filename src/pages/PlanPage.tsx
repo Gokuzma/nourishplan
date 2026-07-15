@@ -11,6 +11,7 @@ import { PlanGrid } from '../components/plan/PlanGrid'
 import { MemberSelector } from '../components/plan/MemberSelector'
 import { NewWeekPrompt } from '../components/plan/NewWeekPrompt'
 import { TemplateManager } from '../components/plan/TemplateManager'
+import { ResetWeekMenu } from '../components/plan/ResetWeekMenu'
 import { BudgetStrip } from '../components/plan/BudgetStrip'
 import { IssuesPanel } from '../components/plan/IssuesPanel'
 import { usePlanViolations } from '../hooks/usePlanViolations'
@@ -208,9 +209,15 @@ export function PlanPage() {
             />
           </div>
 
-          {/* Template manager — Save/Load */}
-          <div className="no-print mb-4">
+          {/* Template manager — Save/Load — and week reset */}
+          <div className="no-print mb-4 flex items-start justify-between gap-2 flex-wrap">
             <TemplateManager planId={plan.id} />
+            <ResetWeekMenu
+              planId={plan.id}
+              weekStart={weekStart}
+              lockedCount={lockedCount}
+              canDelete={plan.created_by === session?.user.id || membership?.role === 'admin'}
+            />
           </div>
 
           {/* The grid */}
