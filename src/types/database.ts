@@ -338,7 +338,7 @@ export interface MacroSummary {
   carbs: number
 }
 
-export type ScheduleStatus = 'prep' | 'consume' | 'quick' | 'away'
+export type ScheduleStatus = 'prep' | 'batch' | 'consume' | 'quick' | 'away'
 
 export interface MemberScheduleSlot {
   id: string

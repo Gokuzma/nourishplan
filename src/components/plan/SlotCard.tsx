@@ -29,7 +29,7 @@ interface SlotCardProps {
   onToggleLock?: () => void
   violationCount?: number
   hasAllergyViolation?: boolean
-  scheduleStatus?: 'prep' | 'consume' | 'quick' | 'away'
+  scheduleStatus?: 'prep' | 'batch' | 'consume' | 'quick' | 'away'
   scheduleTooltip?: string
   isFreezerFriendly?: boolean
   onCook?: () => void
@@ -111,12 +111,14 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
             {scheduleStatus && scheduleStatus !== 'prep' && (
               <span
                 className={`ml-1 inline-block w-3 h-3 rounded-full align-middle ${
+                  scheduleStatus === 'batch' ? 'bg-violet-500' :
                   scheduleStatus === 'consume' ? 'bg-accent' :
                   scheduleStatus === 'quick' ? 'bg-amber-500' :
                   'bg-red-500'
                 }`}
                 aria-label={`Schedule: ${scheduleStatus}`}
                 title={scheduleTooltip ?? (
+                  scheduleStatus === 'batch' ? 'Batch cooking — extra for later meals' :
                   scheduleStatus === 'consume' ? 'Pre-made from prep day' :
                   scheduleStatus === 'quick' ? 'Quick meal only' :
                   'Away — not eating at home'
@@ -287,12 +289,14 @@ export function SlotCard(props: SlotCardProps) {
           {scheduleStatus && scheduleStatus !== 'prep' && (
             <span
               className={`ml-1 inline-block w-2.5 h-2.5 rounded-full align-middle ${
+                scheduleStatus === 'batch' ? 'bg-violet-500' :
                 scheduleStatus === 'consume' ? 'bg-accent' :
                 scheduleStatus === 'quick' ? 'bg-amber-500' :
                 'bg-red-500'
               }`}
               aria-label={`Schedule: ${scheduleStatus}`}
               title={scheduleTooltip ?? (
+                scheduleStatus === 'batch' ? 'Batch cooking — extra for later meals' :
                 scheduleStatus === 'consume' ? 'Pre-made from prep day' :
                 scheduleStatus === 'quick' ? 'Quick meal only' :
                 'Away — not eating at home'

@@ -1,6 +1,6 @@
 import type { ScheduleStatus, MemberScheduleSlot } from '../types/database'
 
-export const STATUS_CYCLE: ScheduleStatus[] = ['prep', 'consume', 'quick', 'away']
+export const STATUS_ORDER: ScheduleStatus[] = ['prep', 'batch', 'consume', 'quick', 'away']
 export const SLOT_NAMES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const
 export const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
@@ -14,24 +14,19 @@ export function buildGrid(rows: MemberScheduleSlot[]): ScheduleGrid {
   return grid
 }
 
-export function cycleStatus(current: ScheduleStatus): ScheduleStatus {
-  const idx = STATUS_CYCLE.indexOf(current)
-  return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length]
-}
-
 export function getOrderedDays(weekStartDay: number): number[] {
   return Array.from({ length: 7 }, (_, i) => (weekStartDay + i) % 7)
 }
 
-// Precedence: away > quick > consume > prep. Higher index in STATUS_CYCLE = higher precedence.
+// Precedence: away > quick > consume > batch > prep. Higher index in STATUS_ORDER = higher precedence.
 function precedence(s: ScheduleStatus): number {
-  return STATUS_CYCLE.indexOf(s)
+  return STATUS_ORDER.indexOf(s)
 }
 
 /**
  * Aggregates per-member schedule rows into a single household status per (day, slot).
- * Precedence: away > quick > consume > prep. 'prep' is dropped — returned Map contains
- * only entries where at least one member has a non-prep status.
+ * Precedence: away > quick > consume > batch > prep. 'prep' is dropped — returned Map
+ * contains only entries where at least one member has a non-prep status.
  * Key format: `${day_of_week}:${slot_name}` (slot_name is singular, matches DB).
  */
 export function buildHouseholdGrid(rows: MemberScheduleSlot[]): ScheduleGrid {
@@ -70,11 +65,12 @@ export function buildHouseholdTooltips(
   }
   const tooltips = new Map<string, string>()
   // High->low precedence order for tooltip display
-  const DISPLAY_ORDER: Exclude<ScheduleStatus, 'prep'>[] = ['away', 'quick', 'consume']
+  const DISPLAY_ORDER: Exclude<ScheduleStatus, 'prep'>[] = ['away', 'quick', 'consume', 'batch']
   const TITLE_CASE: Record<Exclude<ScheduleStatus, 'prep'>, string> = {
     away: 'Away',
     quick: 'Quick',
-    consume: 'Consume',
+    consume: 'Eat',
+    batch: 'Batch',
   }
   for (const [key, statusMap] of byKey) {
     const parts: string[] = []

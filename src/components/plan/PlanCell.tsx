@@ -47,6 +47,7 @@ function calcSlotKcal(slot: SlotWithMeal | null): number {
 
 function ScheduleChip({ status, tooltip }: { status: ScheduleStatus; tooltip?: string }) {
   const aria = `Schedule: ${status}`
+  if (status === 'batch') return <Chip kind="plum" ariaLabel={aria} title={tooltip ?? 'Batch cooking — extra for later meals'}>BATCH</Chip>
   if (status === 'consume') return <Chip kind="butter" ariaLabel={aria} title={tooltip ?? 'Pre-made from prep day'}>USE UP</Chip>
   if (status === 'quick') return <Chip kind="chart" ariaLabel={aria} title={tooltip ?? 'Quick meal only'}>&lt;20 MIN</Chip>
   if (status === 'away') return <Chip kind="sky" ariaLabel={aria} title={tooltip ?? 'Away — not eating at home'}>AWAY</Chip>

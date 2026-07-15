@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSchedule, useSaveSchedule } from '../../hooks/useSchedule'
 import {
   buildGrid,
-  cycleStatus,
   getOrderedDays,
   SLOT_NAMES,
   DAY_LABELS,
@@ -20,17 +19,29 @@ interface Props {
 
 const STATUS_STYLES: Record<ScheduleStatus, string> = {
   prep: 'bg-primary/20 border-primary/40 text-primary',
+  batch: 'bg-violet-100 border-violet-300 text-violet-700 dark:bg-violet-900/20 dark:border-violet-700 dark:text-violet-300',
   consume: 'bg-accent/20 border-accent/40 text-text/70',
   quick: 'bg-amber-100 border-amber-300 text-amber-700 dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-300',
   away: 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/10 dark:border-red-800 dark:text-red-400',
 }
 
 const STATUS_LABELS: Record<ScheduleStatus, string> = {
-  prep: 'Prep',
-  consume: 'Con',
+  prep: 'Cook',
+  batch: 'Batch',
+  consume: 'Eat',
   quick: 'Quick',
   away: 'Away',
 }
+
+const STATUS_OPTIONS: ScheduleStatus[] = ['prep', 'batch', 'consume', 'quick', 'away']
+
+const STATUS_LEGEND: { status: ScheduleStatus; text: string }[] = [
+  { status: 'prep', text: 'Cook — make a meal and eat it then' },
+  { status: 'batch', text: 'Batch — cook extra for later meals' },
+  { status: 'consume', text: 'Eat — leftovers or already-prepped food' },
+  { status: 'quick', text: 'Quick — something fast (under 20 min)' },
+  { status: 'away', text: 'Away — not eating at home' },
+]
 
 export function ScheduleSection({
   householdId,
@@ -50,10 +61,8 @@ export function ScheduleSection({
     }
   }, [slots])
 
-  function handleCellClick(dayOfWeek: number, slotName: string) {
+  function handleStatusChange(dayOfWeek: number, slotName: string, next: ScheduleStatus) {
     const key = `${dayOfWeek}:${slotName}`
-    const current: ScheduleStatus = grid.get(key) ?? 'prep'
-    const next = cycleStatus(current)
     setGrid(prev => {
       const updated = new Map(prev)
       updated.set(key, next)
@@ -77,7 +86,7 @@ export function ScheduleSection({
             {orderedDays.map(day => (
               <div
                 key={day}
-                className="w-12 text-xs text-text/50 text-center px-0.5"
+                className="w-16 text-xs text-text/50 text-center px-0.5"
               >
                 {DAY_LABELS[day]}
               </div>
@@ -93,21 +102,38 @@ export function ScheduleSection({
               {orderedDays.map(day => {
                 const status: ScheduleStatus = grid.get(`${day}:${slotName}`) ?? 'prep'
                 return (
-                  <button
+                  <select
                     key={day}
                     role="gridcell"
-                    onClick={() => handleCellClick(day, slotName)}
-                    aria-label={`${DAY_LABELS[day]} ${slotName}: ${status}. Tap to change.`}
-                    className={`w-12 min-h-[44px] border rounded text-xs font-semibold transition-colors mx-0.5 ${STATUS_STYLES[status]}`}
+                    value={status}
+                    onChange={e =>
+                      handleStatusChange(day, slotName, e.target.value as ScheduleStatus)
+                    }
+                    aria-label={`${DAY_LABELS[day]} ${slotName}: ${STATUS_LABELS[status]}`}
+                    className={`w-16 min-h-[44px] border rounded text-xs font-semibold transition-colors mx-0.5 text-center appearance-none cursor-pointer ${STATUS_STYLES[status]}`}
                   >
-                    {STATUS_LABELS[status]}
-                  </button>
+                    {STATUS_OPTIONS.map(option => (
+                      <option key={option} value={option}>
+                        {STATUS_LABELS[option]}
+                      </option>
+                    ))}
+                  </select>
                 )
               })}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Legend */}
+      <ul className="mt-3 flex flex-col gap-1">
+        {STATUS_LEGEND.map(({ status, text }) => (
+          <li key={status} className="flex items-center gap-2 text-xs text-text/60">
+            <span className={`inline-block w-3 h-3 rounded border flex-shrink-0 ${STATUS_STYLES[status]}`} />
+            {text}
+          </li>
+        ))}
+      </ul>
 
       <button
         onClick={() => saveSchedule.mutate({ householdId, memberId, memberType, grid })}

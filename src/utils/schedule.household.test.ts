@@ -68,6 +68,19 @@ describe('buildHouseholdGrid', () => {
     const grid = buildHouseholdGrid(rows)
     expect(grid.get('4:Snack')).toBe('consume')
   })
+
+  it('Test 6b — batch shows on the grid but loses to consume', () => {
+    const batchOnly = buildHouseholdGrid([
+      makeRow({ member_user_id: 'a', day_of_week: 5, slot_name: 'Dinner', status: 'batch' }),
+    ])
+    expect(batchOnly.get('5:Dinner')).toBe('batch')
+
+    const mixed = buildHouseholdGrid([
+      makeRow({ member_user_id: 'a', day_of_week: 5, slot_name: 'Dinner', status: 'batch' }),
+      makeRow({ member_user_id: 'b', day_of_week: 5, slot_name: 'Dinner', status: 'consume' }),
+    ])
+    expect(mixed.get('5:Dinner')).toBe('consume')
+  })
 })
 
 describe('buildHouseholdTooltips', () => {
@@ -80,19 +93,21 @@ describe('buildHouseholdTooltips', () => {
     expect(tooltips.get('1:Dinner')).toBe('Away: Dad.')
   })
 
-  it('Test 8 — multi-status precedence-ordered: "Away: A. Quick: B. Consume: C."', () => {
+  it('Test 8 — multi-status precedence-ordered: "Away: A. Quick: B. Eat: C. Batch: D."', () => {
     const names = new Map<string, string>([
       ['user-a', 'A'],
       ['user-b', 'B'],
       ['user-c', 'C'],
+      ['user-d', 'D'],
     ])
     const rows: MemberScheduleSlot[] = [
       makeRow({ member_user_id: 'user-a', day_of_week: 5, slot_name: 'Lunch', status: 'away' }),
       makeRow({ member_user_id: 'user-b', day_of_week: 5, slot_name: 'Lunch', status: 'quick' }),
       makeRow({ member_user_id: 'user-c', day_of_week: 5, slot_name: 'Lunch', status: 'consume' }),
+      makeRow({ member_user_id: 'user-d', day_of_week: 5, slot_name: 'Lunch', status: 'batch' }),
     ]
     const tooltips = buildHouseholdTooltips(rows, names)
-    expect(tooltips.get('5:Lunch')).toBe('Away: A. Quick: B. Consume: C.')
+    expect(tooltips.get('5:Lunch')).toBe('Away: A. Quick: B. Eat: C. Batch: D.')
   })
 
   it('Test 9 — prep members are omitted entirely (no "Prep: B." filler)', () => {
