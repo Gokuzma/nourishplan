@@ -388,3 +388,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** Two independent side effects (browser subscription, DB row) with no compensating action when the second fails, and a status check that reads only the first.
 **Rule:** When a flow performs an external side effect then persists it, roll back the side effect if persistence fails (`await subscription.unsubscribe()` before rethrow). Order teardown the opposite way (kill the live thing first, then delete its record).
 **Applies to:** `src/lib/push.ts`, any subscribe/register-then-store or delete-then-unregister pair.
+
+### L-054: Inline fixed-position modals get trapped under later z-index:1 siblings — portal to body
+**Bug:** ResetWeekMenu's confirmation modal rendered `position:fixed; z-index:50` but the Generate/Batch-prep button bar painted and hit-tested ABOVE it — Playwright couldn't click "Clear meals" because the batch-prep button intercepted the pointer. TemplateManager's Save/Load modals had the same latent bug.
+**Root cause:** PlanPage content wrappers compute `position:relative; z-index:1` (editorial paper styling), each creating a stacking context. A fixed z-50 element inside an EARLIER z-1 context paints below a LATER z-1 sibling context regardless of its own z-index — z-index only competes within the same stacking context.
+**Rule:** Never render a fixed-position overlay inline inside page content in this app — always `createPortal(<overlay/>, document.body)`. When a click "should work" but an unrelated element intercepts it, check ancestor stacking contexts (`position`+`z-index`, `transform`, `filter`, `opacity<1`) before blaming the event handler.
+**Applies to:** Every modal/overlay component under `src/components/**`; verifying clicks with Playwright on pages using the editorial paper wrappers.

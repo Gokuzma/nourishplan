@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useClearUnlockedSlots, useDeleteMealPlan } from '../../hooks/useMealPlan'
 
 interface ResetWeekMenuProps {
@@ -42,7 +43,9 @@ export function ResetWeekMenu({ planId, weekStart, lockedCount, canDelete }: Res
         Reset week
       </button>
 
-      {open && (
+      {/* Portaled to body: PlanPage content wrappers create z-index:1 stacking
+          contexts, so an inline fixed overlay gets painted under later siblings. */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm rounded-[--radius-card] border border-accent/30 bg-surface p-6 shadow-lg">
             <h3 className="text-base font-bold text-primary mb-1">Reset Week</h3>
@@ -128,7 +131,8 @@ export function ResetWeekMenu({ planId, weekStart, lockedCount, canDelete }: Res
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

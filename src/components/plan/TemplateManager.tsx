@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   useTemplates,
   useSaveAsTemplate,
@@ -54,8 +55,9 @@ export function TemplateManager({ planId }: TemplateManagerProps) {
         </button>
       </div>
 
-      {/* Save as template modal */}
-      {showSaveModal && (
+      {/* Save as template modal — portaled to body: PlanPage content wrappers
+          create z-index:1 stacking contexts that trap inline fixed overlays. */}
+      {showSaveModal && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm rounded-[--radius-card] border border-accent/30 bg-surface p-6 shadow-lg">
             <h3 className="text-base font-bold text-primary mb-4">Save as Template</h3>
@@ -84,11 +86,12 @@ export function TemplateManager({ planId }: TemplateManagerProps) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Load template modal */}
-      {showLoadModal && (
+      {/* Load template modal — portaled for the same stacking-context reason */}
+      {showLoadModal && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm rounded-[--radius-card] border border-accent/30 bg-surface p-6 shadow-lg">
             <h3 className="text-base font-bold text-primary mb-1">Load Template</h3>
@@ -169,7 +172,8 @@ export function TemplateManager({ planId }: TemplateManagerProps) {
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
