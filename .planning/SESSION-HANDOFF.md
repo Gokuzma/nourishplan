@@ -1,4 +1,30 @@
-# NourishPlan — session handoff (2026-07-06, evening session 2, updated late)
+# NourishPlan — session handoff (2026-07-15)
+
+## What shipped 2026-07-15 (schedule & plan usability, from user voice feedback)
+
+1. **Schedule statuses**: now 5 — prep/batch/consume/quick/away (migration 040),
+   UI labels Cook/Batch/Eat/Quick/Away with a legend. Cells are dropdowns
+   (click-cycling removed; `cycleStatus` deleted). Batch = cook extra for later
+   meals; generate-plan assign+verify prompts prefer scale-up leftover-friendly
+   recipes on batch slots and batch-leftover reuse on consume slots (deployed).
+   Validated live on Sim Family: batch Dinner slot drew Spaghetti Bolognese.
+2. **Admins set family schedules**: Settings has a Family Schedules section
+   (admin-only) for other adult members; migration 040 extends insert RLS
+   (target must be in household). Sim Family has no second adult, so the
+   section is only visible on households that do — human UAT pending there.
+3. **Reset week** on Plan page: Clear unlocked meals / Delete week entirely
+   (creator-or-admin, matches RLS), both behind confirm steps. Verified live
+   including locked-slot survival.
+4. **L-054**: PlanPage wrappers are z-index:1 stacking contexts — inline fixed
+   modals get trapped under the generate/batch bar. Reset + Template modals now
+   portal to document.body.
+
+Fixture note: week 2026-07-19 was created/generated/deleted during verification
+(1 rate slot); sim-family's Wed Dinner was set to batch then reverted to prep.
+
+---
+
+# Previous handoff (2026-07-06, evening session 2, updated late)
 
 Everything is committed; prod (`nourishplan.gregok.ca`) serves the latest build,
 `generate-plan` + new `scheduled-tasks` are deployed, migrations 035–037 live.
