@@ -536,9 +536,32 @@ export function SettingsPage() {
         </section>
       )}
 
+      {/* Family schedules — admins set other adult members' schedules */}
+      {membership && isAdmin && otherMembers.length > 0 && (
+        <section className="mt-6">
+          <SectionHead no="06" label="Family Schedules" aux={`${otherMembers.length} member${otherMembers.length === 1 ? '' : 's'}`} />
+          <Rule />
+          <p className="text-sm text-text/60 mt-2">
+            As an admin you can set the weekly schedule for other adults in your household.
+            Child profiles are managed in the section above.
+          </p>
+          {otherMembers.map(hm => (
+            <div key={hm.user_id} style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
+              <ScheduleSection
+                householdId={membership.household_id}
+                memberId={hm.user_id}
+                memberType="user"
+                memberName={hm.profiles?.display_name ?? hm.user_id.slice(0, 8)}
+                weekStartDay={membership.households?.week_start_day}
+              />
+            </div>
+          ))}
+        </section>
+      )}
+
       {/* Appearance section */}
       <section className="mt-6">
-        <SectionHead no="06" label="Appearance" aux={theme} />
+        <SectionHead no="07" label="Appearance" aux={theme} />
         <Rule />
         <div className="flex gap-2" style={{ padding: '14px 0' }}>
           {(['light', 'dark', 'system'] as ThemePreference[]).map((option) => (
@@ -556,7 +579,7 @@ export function SettingsPage() {
       {/* Notifications section */}
       {session && membership && (
         <section className="mt-6">
-          <SectionHead no="07" label="Notifications" />
+          <SectionHead no="08" label="Notifications" />
           <Rule />
           <NotificationsSection
             userId={session.user.id}
@@ -567,7 +590,7 @@ export function SettingsPage() {
 
       {/* Account section */}
       <section className="mt-6">
-        <SectionHead no="08" label="Account" />
+        <SectionHead no="09" label="Account" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <button
@@ -581,7 +604,7 @@ export function SettingsPage() {
 
       {/* Danger Zone */}
       <section className="mt-10" style={{ borderLeft: '2px solid var(--tomato)', paddingLeft: 14 }}>
-        <SectionHead no="09" label="Danger Zone" aux="permanent" />
+        <SectionHead no="10" label="Danger Zone" aux="permanent" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <p className="serif-italic mb-3" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>These actions are permanent and cannot be undone.</p>
