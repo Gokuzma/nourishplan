@@ -220,10 +220,10 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
     // (responsive — CSS hides one or the other; both are in the DOM). Take the first.
     const awayDots = screen.getAllByLabelText('Schedule: away')
     expect(awayDots.length).toBeGreaterThanOrEqual(1)
-    expect(awayDots[0].getAttribute('title')).toBe('Away: Dad. Quick: Sam. Consume: Kayla.')
+    expect(awayDots[0].getAttribute('title')).toBe('Away: Dad. Quick: Sam. Eat: Kayla.')
     // All away dots (mobile + desktop) carry the same tooltip — the data layer is shared.
     for (const dot of awayDots) {
-      expect(dot.getAttribute('title')).toBe('Away: Dad. Quick: Sam. Consume: Kayla.')
+      expect(dot.getAttribute('title')).toBe('Away: Dad. Quick: Sam. Eat: Kayla.')
     }
   })
 

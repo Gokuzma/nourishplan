@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildGrid,
-  cycleStatus,
   getOrderedDays,
+  STATUS_ORDER,
 } from '../src/utils/schedule'
 import type { MemberScheduleSlot } from '../src/types/database'
 
@@ -59,21 +59,9 @@ describe('buildGrid', () => {
   })
 })
 
-describe('cycleStatus', () => {
-  it('cycles prep -> consume', () => {
-    expect(cycleStatus('prep')).toBe('consume')
-  })
-
-  it('cycles consume -> quick', () => {
-    expect(cycleStatus('consume')).toBe('quick')
-  })
-
-  it('cycles quick -> away', () => {
-    expect(cycleStatus('quick')).toBe('away')
-  })
-
-  it('cycles away -> prep (wraps around)', () => {
-    expect(cycleStatus('away')).toBe('prep')
+describe('STATUS_ORDER', () => {
+  it('contains all five statuses in precedence order (low to high)', () => {
+    expect(STATUS_ORDER).toEqual(['prep', 'batch', 'consume', 'quick', 'away'])
   })
 })
 
