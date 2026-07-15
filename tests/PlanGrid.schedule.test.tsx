@@ -54,6 +54,8 @@ let mockScheduleRows: Array<{
 
 vi.mock('../src/hooks/useSchedule', () => ({
   useHouseholdSchedules: vi.fn(() => ({ data: mockScheduleRows, isPending: false, isError: false })),
+  useScheduleExceptions: vi.fn(() => ({ data: [], isPending: false, isError: false })),
+  useSaveDayScheduleExceptions: vi.fn(() => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false })),
   // Keep useSchedule + useSaveSchedule present as no-ops in case ScheduleSection or another module
   // is transitively imported during test setup (D-06a — useSchedule still exists for ScheduleSection).
   useSchedule: vi.fn(() => ({ data: [], isPending: false, isError: false })),
