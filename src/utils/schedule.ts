@@ -1,6 +1,14 @@
 import type { ScheduleStatus, MemberScheduleSlot, MemberScheduleException } from '../types/database'
 
 export const STATUS_ORDER: ScheduleStatus[] = ['prep', 'batch', 'consume', 'quick', 'away']
+
+export const STATUS_LABELS: Record<ScheduleStatus, string> = {
+  prep: 'Cook',
+  batch: 'Batch',
+  consume: 'Eat',
+  quick: 'Quick',
+  away: 'Away',
+}
 export const SLOT_NAMES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const
 export const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 

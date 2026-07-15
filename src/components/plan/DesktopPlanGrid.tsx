@@ -25,6 +25,7 @@ interface DesktopPlanGridProps {
   onDropSwap: () => void
   onDropReplace: () => void
   onDropCancel: () => void
+  onEditDay?: (dayIndex: number) => void
 }
 
 function dayDateLabel(weekStart: string, dayIndex: number): string {
@@ -63,6 +64,7 @@ export function DesktopPlanGrid({
   onDropSwap,
   onDropReplace,
   onDropCancel,
+  onEditDay,
 }: DesktopPlanGridProps) {
   return (
     <div className="plan-grid">
@@ -81,6 +83,17 @@ export function DesktopPlanGrid({
           <div key={di} className={`ghead ${isToday ? 'today' : ''}`}>
             <div className="dn">{dayName.toUpperCase()}</div>
             <div className="dd">{dayDateLabel(weekStart, di)}</div>
+            {onEditDay && (
+              <button
+                type="button"
+                onClick={() => onEditDay(di)}
+                aria-label={`Edit who's around on ${dayName} ${dayDateLabel(weekStart, di)}`}
+                title="Who's around this day?"
+                className="text-[10px] text-text/40 hover:text-primary transition-colors underline decoration-dotted underline-offset-2"
+              >
+                schedule
+              </button>
+            )}
           </div>
         )
       })}

@@ -75,6 +75,7 @@ interface DayCardProps {
   slotTooltips?: Map<string, string>
   slotFreezerFriendly?: Map<string, boolean>
   onCookSlot?: (slotId: string, mealId: string) => void
+  onEditSchedule?: () => void
 }
 
 /**
@@ -103,6 +104,7 @@ export function DayCard({
   slotTooltips,
   slotFreezerFriendly,
   onCookSlot,
+  onEditSchedule,
 }: DayCardProps) {
   const weekStartDate = new Date(weekStart + 'T00:00:00Z')
   const dayDate = new Date(weekStartDate)
@@ -136,6 +138,17 @@ export function DayCard({
         <div>
           <span className="text-base font-semibold text-text">{dayName}</span>
           <span className="ml-2 text-sm text-text/50">{dateLabel}</span>
+          {onEditSchedule && (
+            <button
+              type="button"
+              onClick={onEditSchedule}
+              aria-label={`Edit who's around on ${dayName} ${dateLabel}`}
+              title="Who's around this day?"
+              className="ml-2 text-xs text-text/40 hover:text-primary transition-colors underline decoration-dotted underline-offset-2"
+            >
+              schedule
+            </button>
+          )}
         </div>
         <div className="text-sm font-medium text-text/70">
           {Math.round(dayTotal.calories)} kcal

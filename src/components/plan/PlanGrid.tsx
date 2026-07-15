@@ -18,8 +18,8 @@ import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
 import { useGeneratePlan, useGenerationJob, useLatestGeneration, useSuggestAlternative } from '../../hooks/usePlanGeneration'
 import { useNutritionGaps } from '../../hooks/useNutritionGaps'
-import { useHouseholdSchedules } from '../../hooks/useSchedule'
-import { buildHouseholdGrid, buildHouseholdTooltips } from '../../utils/schedule'
+import { useHouseholdSchedules, useScheduleExceptions } from '../../hooks/useSchedule'
+import { applyExceptions, buildHouseholdGrid, buildHouseholdTooltips } from '../../utils/schedule'
 import { calcPortionSuggestions } from '../../utils/portionSuggestions'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { groupRecipesForSlot } from '../../utils/recipePicker'
@@ -34,6 +34,7 @@ import { GeneratePlanButton } from './GeneratePlanButton'
 import { GenerationProgressBar } from './GenerationProgressBar'
 import { BatchPrepButton } from './BatchPrepButton'
 import { BatchPrepModal } from './BatchPrepModal'
+import { DayScheduleModal } from './DayScheduleModal'
 import { getPriorityOrder } from './PriorityOrderPanel'
 import { getRecipeMix } from './RecipeMixPanel'
 import { NutritionGapCard } from './NutritionGapCard'
@@ -361,6 +362,7 @@ export function PlanGrid({
   const { data: householdMembers } = useHouseholdMembers()
   const { data: memberProfiles } = useMemberProfiles()
   const { data: scheduleSlots } = useHouseholdSchedules(householdId)
+  const { data: scheduleExceptions } = useScheduleExceptions(householdId, weekStart)
 
   const memberNameById = useMemo(() => {
     const map = new Map<string, string>()
@@ -374,9 +376,15 @@ export function PlanGrid({
     return map
   }, [householdMembers, memberProfiles])
 
+  // Base weekly pattern with this week's date-specific overrides applied
+  const effectiveScheduleSlots = useMemo(
+    () => applyExceptions(scheduleSlots ?? [], scheduleExceptions ?? []),
+    [scheduleSlots, scheduleExceptions]
+  )
+
   const slotSchedulesByDay = useMemo(() => {
-    if (!scheduleSlots?.length) return undefined
-    const grid = buildHouseholdGrid(scheduleSlots)
+    if (!effectiveScheduleSlots.length) return undefined
+    const grid = buildHouseholdGrid(effectiveScheduleSlots)
     const byDay = new Map<number, Map<string, ScheduleStatus>>()
     for (const [key, status] of grid) {
       const [dayStr, ...slotParts] = key.split(':')
@@ -387,11 +395,11 @@ export function PlanGrid({
       byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, status)
     }
     return byDay
-  }, [scheduleSlots])
+  }, [effectiveScheduleSlots])
 
   const slotTooltipsByDay = useMemo(() => {
-    if (!scheduleSlots?.length) return undefined
-    const tooltips = buildHouseholdTooltips(scheduleSlots, memberNameById)
+    if (!effectiveScheduleSlots.length) return undefined
+    const tooltips = buildHouseholdTooltips(effectiveScheduleSlots, memberNameById)
     const byDay = new Map<number, Map<string, string>>()
     for (const [key, text] of tooltips) {
       const [dayStr, ...slotParts] = key.split(':')
@@ -401,9 +409,10 @@ export function PlanGrid({
       byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, text)
     }
     return byDay
-  }, [scheduleSlots, memberNameById])
+  }, [effectiveScheduleSlots, memberNameById])
 
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
+  const [dayEditorIndex, setDayEditorIndex] = useState<number | null>(null)
   const [pickerState, setPickerState] = useState<{
     dayIndex: number
     slotName: string
@@ -705,6 +714,7 @@ export function PlanGrid({
         slotTooltips={slotTooltipsByDay?.get((weekStartDay + i) % 7)}
         slotFreezerFriendly={dayFreezerFriendly}
         onCookSlot={(_slotId, mealId) => navigate(`/cook/${mealId}?slotId=${_slotId}`)}
+        onEditSchedule={householdId ? () => setDayEditorIndex(i) : undefined}
       />
     )
   })
@@ -856,6 +866,7 @@ export function PlanGrid({
               onDropSwap={executeSwap}
               onDropReplace={executeReplace}
               onDropCancel={handleDropCancel}
+              onEditDay={householdId ? setDayEditorIndex : undefined}
             />
           )}
         </div>
@@ -956,6 +967,17 @@ export function PlanGrid({
           }
         }}
       />
+
+      {/* Day schedule editor — week-specific "who's around" overrides */}
+      {dayEditorIndex !== null && householdId && (
+        <DayScheduleModal
+          householdId={householdId}
+          weekStart={weekStart}
+          weekStartDay={weekStartDay}
+          dayIndex={dayEditorIndex}
+          onClose={() => setDayEditorIndex(null)}
+        />
+      )}
     </>
   )
 }

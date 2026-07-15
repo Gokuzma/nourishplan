@@ -5,6 +5,7 @@ import {
   getOrderedDays,
   SLOT_NAMES,
   DAY_LABELS,
+  STATUS_LABELS,
 } from '../../utils/schedule'
 import type { ScheduleGrid } from '../../utils/schedule'
 import type { ScheduleStatus } from '../../types/database'
@@ -23,14 +24,6 @@ const STATUS_STYLES: Record<ScheduleStatus, string> = {
   consume: 'bg-accent/20 border-accent/40 text-text/70',
   quick: 'bg-amber-100 border-amber-300 text-amber-700 dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-300',
   away: 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/10 dark:border-red-800 dark:text-red-400',
-}
-
-const STATUS_LABELS: Record<ScheduleStatus, string> = {
-  prep: 'Cook',
-  batch: 'Batch',
-  consume: 'Eat',
-  quick: 'Quick',
-  away: 'Away',
 }
 
 const STATUS_OPTIONS: ScheduleStatus[] = ['prep', 'batch', 'consume', 'quick', 'away']
