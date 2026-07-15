@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { buildHouseholdGrid, buildHouseholdTooltips } from './schedule'
-import type { MemberScheduleSlot } from '../types/database'
+import { buildHouseholdGrid, buildHouseholdTooltips, applyExceptions } from './schedule'
+import type { MemberScheduleSlot, MemberScheduleException } from '../types/database'
 
 function makeRow(overrides: Partial<MemberScheduleSlot> = {}): MemberScheduleSlot {
   return {
@@ -80,6 +80,63 @@ describe('buildHouseholdGrid', () => {
       makeRow({ member_user_id: 'b', day_of_week: 5, slot_name: 'Dinner', status: 'consume' }),
     ])
     expect(mixed.get('5:Dinner')).toBe('consume')
+  })
+})
+
+function makeException(overrides: Partial<MemberScheduleException> = {}): MemberScheduleException {
+  return {
+    id: 'ex-id',
+    household_id: 'hh-1',
+    member_user_id: 'user-1',
+    member_profile_id: null,
+    week_start: '2026-07-19',
+    day_of_week: 1,
+    slot_name: 'Dinner',
+    status: 'away',
+    created_at: '2026-07-15T00:00:00Z',
+    ...overrides,
+  }
+}
+
+describe('applyExceptions', () => {
+  it('returns base unchanged when there are no exceptions', () => {
+    const base = [makeRow({ status: 'prep' })]
+    expect(applyExceptions(base, [])).toBe(base)
+  })
+
+  it('replaces the matching member/day/slot status, leaving other rows alone', () => {
+    const base = [
+      makeRow({ member_user_id: 'user-1', day_of_week: 1, slot_name: 'Dinner', status: 'prep' }),
+      makeRow({ member_user_id: 'user-2', day_of_week: 1, slot_name: 'Dinner', status: 'prep' }),
+      makeRow({ member_user_id: 'user-1', day_of_week: 2, slot_name: 'Dinner', status: 'quick' }),
+    ]
+    const merged = applyExceptions(base, [
+      makeException({ member_user_id: 'user-1', day_of_week: 1, slot_name: 'Dinner', status: 'away' }),
+    ])
+    expect(merged.find(r => r.member_user_id === 'user-1' && r.day_of_week === 1)!.status).toBe('away')
+    expect(merged.find(r => r.member_user_id === 'user-2')!.status).toBe('prep')
+    expect(merged.find(r => r.day_of_week === 2)!.status).toBe('quick')
+  })
+
+  it('synthesizes a row when the member has no base row for that day/slot', () => {
+    const merged = applyExceptions([], [
+      makeException({ member_profile_id: 'mp-kid', member_user_id: null, status: 'batch' }),
+    ])
+    expect(merged).toHaveLength(1)
+    expect(merged[0].member_profile_id).toBe('mp-kid')
+    expect(merged[0].status).toBe('batch')
+    expect(merged[0].day_of_week).toBe(1)
+  })
+
+  it('matches profile-member exceptions to profile base rows, not user rows with the same id', () => {
+    const base = [
+      makeRow({ member_user_id: 'shared-id', member_profile_id: null, day_of_week: 3, slot_name: 'Lunch', status: 'prep' }),
+    ]
+    const merged = applyExceptions(base, [
+      makeException({ member_user_id: 'shared-id', member_profile_id: null, day_of_week: 3, slot_name: 'Lunch', status: 'quick' }),
+    ])
+    expect(merged).toHaveLength(1)
+    expect(merged[0].status).toBe('quick')
   })
 })
 

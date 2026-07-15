@@ -1,4 +1,4 @@
-import type { ScheduleStatus, MemberScheduleSlot } from '../types/database'
+import type { ScheduleStatus, MemberScheduleSlot, MemberScheduleException } from '../types/database'
 
 export const STATUS_ORDER: ScheduleStatus[] = ['prep', 'batch', 'consume', 'quick', 'away']
 export const SLOT_NAMES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const
@@ -21,6 +21,48 @@ export function getOrderedDays(weekStartDay: number): number[] {
 // Precedence: away > quick > consume > batch > prep. Higher index in STATUS_ORDER = higher precedence.
 function precedence(s: ScheduleStatus): number {
   return STATUS_ORDER.indexOf(s)
+}
+
+/**
+ * Overlays week-specific exception rows onto the recurring weekly pattern.
+ * An exception replaces the member's base status for that (day, slot); exceptions
+ * with no matching base row become synthetic rows so buildHouseholdGrid sees them.
+ */
+export function applyExceptions(
+  base: MemberScheduleSlot[],
+  exceptions: MemberScheduleException[]
+): MemberScheduleSlot[] {
+  if (!exceptions.length) return base
+  const exceptionByKey = new Map<string, MemberScheduleException>()
+  for (const ex of exceptions) {
+    const memberId = ex.member_user_id ?? ex.member_profile_id ?? ''
+    exceptionByKey.set(`${memberId}:${ex.day_of_week}:${ex.slot_name}`, ex)
+  }
+  const covered = new Set<string>()
+  const result: MemberScheduleSlot[] = base.map(row => {
+    const memberId = row.member_user_id ?? row.member_profile_id ?? ''
+    const key = `${memberId}:${row.day_of_week}:${row.slot_name}`
+    const ex = exceptionByKey.get(key)
+    if (!ex) return row
+    covered.add(key)
+    return { ...row, status: ex.status }
+  })
+  for (const ex of exceptions) {
+    const memberId = ex.member_user_id ?? ex.member_profile_id ?? ''
+    const key = `${memberId}:${ex.day_of_week}:${ex.slot_name}`
+    if (covered.has(key)) continue
+    result.push({
+      id: ex.id,
+      household_id: ex.household_id,
+      member_user_id: ex.member_user_id,
+      member_profile_id: ex.member_profile_id,
+      day_of_week: ex.day_of_week,
+      slot_name: ex.slot_name,
+      status: ex.status,
+      updated_at: ex.created_at,
+    })
+  }
+  return result
 }
 
 /**

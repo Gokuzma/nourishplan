@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { queryKeys } from '../lib/queryKeys'
-import type { MemberScheduleSlot, ScheduleStatus } from '../types/database'
+import type { MemberScheduleSlot, MemberScheduleException, ScheduleStatus } from '../types/database'
 import type { ScheduleGrid } from '../utils/schedule'
 import { SLOT_NAMES } from '../utils/schedule'
 
@@ -82,6 +82,96 @@ export function useSaveSchedule() {
     },
     onSuccess: (_data, params) => {
       queryClient.invalidateQueries({ queryKey: ['schedule', params.householdId] })
+    },
+  })
+}
+
+export function useScheduleExceptions(householdId: string | undefined, weekStart: string) {
+  return useQuery({
+    queryKey: queryKeys.schedule.exceptionsForWeek(householdId, weekStart),
+    queryFn: async (): Promise<MemberScheduleException[]> => {
+      const { data, error } = await supabase
+        .from('member_schedule_exceptions')
+        .select('*')
+        .eq('household_id', householdId!)
+        .eq('week_start', weekStart)
+      if (error) throw error
+      return (data ?? []) as unknown as MemberScheduleException[]
+    },
+    enabled: !!householdId && !!weekStart,
+  })
+}
+
+export interface DayExceptionEntry {
+  memberId: string
+  memberType: 'user' | 'profile'
+  slotName: string
+  status: ScheduleStatus
+}
+
+interface SaveDayExceptionsParams {
+  householdId: string
+  weekStart: string
+  dayOfWeek: number
+  /** Members whose exception rows for this day are being replaced. */
+  members: { memberId: string; memberType: 'user' | 'profile' }[]
+  /** Rows to write — only statuses that differ from the member's base pattern. */
+  entries: DayExceptionEntry[]
+}
+
+/**
+ * Replaces one day's schedule exceptions for the given members:
+ * deletes their existing rows for (week, day), then inserts the diffs.
+ * Delete+insert because the partial unique indexes don't work with onConflict.
+ */
+export function useSaveDayScheduleExceptions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (params: SaveDayExceptionsParams) => {
+      const { householdId, weekStart, dayOfWeek, members, entries } = params
+      const userIds = members.filter(m => m.memberType === 'user').map(m => m.memberId)
+      const profileIds = members.filter(m => m.memberType === 'profile').map(m => m.memberId)
+
+      if (userIds.length > 0) {
+        const { error } = await supabase
+          .from('member_schedule_exceptions')
+          .delete()
+          .eq('household_id', householdId)
+          .eq('week_start', weekStart)
+          .eq('day_of_week', dayOfWeek)
+          .in('member_user_id', userIds)
+        if (error) throw error
+      }
+      if (profileIds.length > 0) {
+        const { error } = await supabase
+          .from('member_schedule_exceptions')
+          .delete()
+          .eq('household_id', householdId)
+          .eq('week_start', weekStart)
+          .eq('day_of_week', dayOfWeek)
+          .in('member_profile_id', profileIds)
+        if (error) throw error
+      }
+
+      if (entries.length > 0) {
+        const rows = entries.map(entry => ({
+          household_id: householdId,
+          week_start: weekStart,
+          day_of_week: dayOfWeek,
+          slot_name: entry.slotName,
+          status: entry.status,
+          ...(entry.memberType === 'user'
+            ? { member_user_id: entry.memberId }
+            : { member_profile_id: entry.memberId }),
+        }))
+        const { error } = await supabase
+          .from('member_schedule_exceptions')
+          .insert(rows)
+        if (error) throw error
+      }
+    },
+    onSuccess: (_data, params) => {
+      queryClient.invalidateQueries({ queryKey: ['schedule-exceptions', params.householdId] })
     },
   })
 }

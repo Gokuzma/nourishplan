@@ -92,6 +92,8 @@ export const queryKeys = {
       ['schedule', householdId] as const,
     exceptionsForMember: (householdId: string | undefined, memberId: string | undefined) =>
       ['schedule-exceptions', householdId, memberId] as const,
+    exceptionsForWeek: (householdId: string | undefined, weekStart: string) =>
+      ['schedule-exceptions', householdId, 'week', weekStart] as const,
   },
   aiTags: {
     forRecipe: (recipeId: string | undefined) => ['ai-tags', recipeId] as const,
