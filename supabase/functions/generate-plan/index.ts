@@ -46,6 +46,8 @@ interface ScheduleSlotRow {
   day_of_week: number;
   slot_name: string;
   status: "prep" | "batch" | "consume" | "quick" | "away";
+  member_user_id: string | null;
+  member_profile_id: string | null;
 }
 
 interface InventoryItemRow {
@@ -339,6 +341,7 @@ serve(async (req) => {
         spendLogsResult,
         foodPricesResult,
         referencePricesResult,
+        scheduleExceptionsResult,
       ] = await Promise.all([
         adminClient
           .from("recipes")
@@ -355,7 +358,7 @@ serve(async (req) => {
           .eq("household_id", householdId),
         adminClient
           .from("member_schedule_slots")
-          .select("day_of_week, slot_name, status")
+          .select("day_of_week, slot_name, status, member_user_id, member_profile_id")
           .eq("household_id", householdId),
         adminClient
           .from("inventory_items")
@@ -400,6 +403,12 @@ serve(async (req) => {
           .from("reference_food_prices")
           .select("ingredient_name, cost_per_100g")
           .eq("region", "ontario"),
+        // Week-specific schedule overrides ("who's around this week")
+        adminClient
+          .from("member_schedule_exceptions")
+          .select("day_of_week, slot_name, status, member_user_id, member_profile_id")
+          .eq("household_id", householdId)
+          .eq("week_start", weekStart),
       ]);
 
       const recipes: RecipeRow[] = (recipesResult.data ?? []) as RecipeRow[];
@@ -418,6 +427,8 @@ serve(async (req) => {
         (foodPricesResult.data ?? []) as { food_id: string; food_name: string; cost_per_100g: number }[];
       const referencePrices: { ingredient_name: string; cost_per_100g: number }[] =
         (referencePricesResult.data ?? []) as { ingredient_name: string; cost_per_100g: number }[];
+      const scheduleExceptions: ScheduleSlotRow[] =
+        (scheduleExceptionsResult.data ?? []) as ScheduleSlotRow[];
 
       const memberCount = members.length + profiles.length;
       const hasActiveRestrictions = restrictions.length > 0 || wontEat.some((w) => w.strength === "allergy");
@@ -476,12 +487,37 @@ serve(async (req) => {
       const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
       const lockedKey = new Set(lockedSlots.map((s) => `${s.day_index}_${capitalize(s.slot_name)}`));
 
-      // Build schedule status lookup: key = `${day_index}_${SlotName}` (capitalized)
-      const scheduleStatus: Record<string, string> = {};
+      // Build schedule status lookup: key = `${day_index}_${SlotName}` (capitalized).
+      // 1. Overlay week-specific exceptions on the recurring pattern, per member.
+      // 2. Aggregate members with the same precedence the UI chips use
+      //    (away > quick > consume > batch > prep).
+      // 3. Convert day_of_week to day_index using the week's actual start day
+      //    (weekStart's UTC weekday) — day_index 0 is the first day of the plan
+      //    week, not necessarily Sunday.
+      const effectiveByMember = new Map<string, ScheduleSlotRow>();
       for (const ss of scheduleSlots) {
+        const memberId = ss.member_user_id ?? ss.member_profile_id ?? "";
+        effectiveByMember.set(`${memberId}:${ss.day_of_week}:${ss.slot_name}`, ss);
+      }
+      for (const ex of scheduleExceptions) {
+        const memberId = ex.member_user_id ?? ex.member_profile_id ?? "";
+        effectiveByMember.set(`${memberId}:${ex.day_of_week}:${ex.slot_name}`, ex);
+      }
+      const STATUS_PRECEDENCE = ["prep", "batch", "consume", "quick", "away"];
+      const weekStartDow = new Date(weekStart + "T00:00:00Z").getUTCDay();
+      const scheduleStatus: Record<string, string> = {};
+      for (const ss of effectiveByMember.values()) {
         // Normalize "Snack" (DB schedule) vs "Snacks" (plan grid)
         const normalizedSlotName = ss.slot_name === "Snack" ? "Snacks" : capitalize(ss.slot_name);
-        scheduleStatus[`${ss.day_of_week}_${normalizedSlotName}`] = ss.status;
+        const dayIndex = (ss.day_of_week - weekStartDow + 7) % 7;
+        const key = `${dayIndex}_${normalizedSlotName}`;
+        const existing = scheduleStatus[key];
+        if (
+          !existing ||
+          STATUS_PRECEDENCE.indexOf(ss.status) > STATUS_PRECEDENCE.indexOf(existing)
+        ) {
+          scheduleStatus[key] = ss.status;
+        }
       }
 
       // Enumerate ALL possible slots (7 days x 4 default slots), not just existing DB rows.
