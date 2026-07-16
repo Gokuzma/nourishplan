@@ -129,6 +129,7 @@ vi.mock('@dnd-kit/core', () => ({
 
 type PlanGridOverrides = {
   weekStartDay?: number
+  weekStart?: string
 }
 
 async function renderPlanGrid(overrides: PlanGridOverrides = {}) {
@@ -144,7 +145,9 @@ async function renderPlanGrid(overrides: PlanGridOverrides = {}) {
         null,
         React.createElement(PlanGrid, {
           planId: 'plan-1',
-          weekStart: '2026-04-06',
+          // 2026-04-05 is a Sunday — day names derive from the actual weekStart
+          // date, so the fixture date and weekStartDay must agree.
+          weekStart: '2026-04-05',
           weekStartDay: 0,
           memberTarget: null,
           householdId: 'hh-1',
@@ -240,13 +243,14 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
     expect(screen.queryAllByLabelText(/^Schedule:/).length).toBe(0)
   })
 
-  it('places the away dot in the Tuesday column, not Monday, when weekStartDay=1', async () => {
-    // With weekStartDay=1 (Monday-first), dayIndex=0→'Mon', dayIndex=1→'Tue'.
+  it('places the away dot in the Tuesday column, not Monday, when the week starts on a Monday', async () => {
+    // 2026-04-06 is a Monday — day names derive from the weekStart DATE, so
+    // dayIndex=0→'Mon', dayIndex=1→'Tue'.
     // Row day_of_week=2 corresponds to Tuesday, which renders in the SECOND DayCard (dayIndex=1).
     mockScheduleRows = [
       { id: 'r1', household_id: 'hh-1', member_user_id: 'u-dad', member_profile_id: null, day_of_week: 2, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
     ]
-    await renderPlanGrid({ weekStartDay: 1 })
+    await renderPlanGrid({ weekStart: '2026-04-06', weekStartDay: 1 })
 
     // Post-v2.0 architecture: mobile renders 1 DayCard at a time (currentDayIndex defaults to 0 = Mon),
     // desktop renders 7 PlanCells per meal row in a single .plan-grid. Mobile's DayCard for Mon should

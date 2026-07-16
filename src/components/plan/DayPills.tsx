@@ -1,9 +1,10 @@
+import { dayOfWeekFor } from '../../utils/mealPlan'
+
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 const DAY_COUNT = 7
 
 interface DayPillsProps {
   weekStart: string
-  weekStartDay: number
   todayDateStr: string
   currentDayIndex: number
   onSelect: (dayIndex: number) => void
@@ -25,7 +26,7 @@ function dayOfMonth(weekStart: string, dayIndex: number): number {
  * Mobile day scrubber — horizontal scrollable strip of day pills.
  * Active pill = tomato bg, today pill gets a small tomato dot.
  */
-export function DayPills({ weekStart, weekStartDay, todayDateStr, currentDayIndex, onSelect }: DayPillsProps) {
+export function DayPills({ weekStart, todayDateStr, currentDayIndex, onSelect }: DayPillsProps) {
   return (
     <div
       className="no-scrollbar"
@@ -38,7 +39,7 @@ export function DayPills({ weekStart, weekStartDay, todayDateStr, currentDayInde
       }}
     >
       {Array.from({ length: DAY_COUNT }, (_, di) => {
-        const dayName = DAY_NAMES[(weekStartDay + di) % 7]
+        const dayName = DAY_NAMES[dayOfWeekFor(weekStart, di)]
         const dateStr = dayDateStr(weekStart, di)
         const isToday = dateStr === todayDateStr
         const isActive = di === currentDayIndex

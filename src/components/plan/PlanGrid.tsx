@@ -41,7 +41,7 @@ import { getRecipeMix } from './RecipeMixPanel'
 import { NutritionGapCard } from './NutritionGapCard'
 import { RecipeSuggestionCard } from './RecipeSuggestionCard'
 import { GenerationJobBadge } from './GenerationJobBadge'
-import { DEFAULT_SLOTS } from '../../utils/mealPlan'
+import { DEFAULT_SLOTS, dayOfWeekFor } from '../../utils/mealPlan'
 import { useQueryClient } from '@tanstack/react-query'
 import type { NutritionTarget, Meal, MealItem, MacroSummary, ScheduleStatus } from '../../types/database'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
@@ -689,7 +689,6 @@ export function PlanGrid({
         key={i}
         dayIndex={i}
         weekStart={weekStart}
-        weekStartDay={weekStartDay}
         slots={slotsByDay[i]}
         memberTarget={memberTarget}
         currentUserId={currentUserId}
@@ -714,8 +713,8 @@ export function PlanGrid({
         onDropReplace={executeReplace}
         onDropCancel={handleDropCancel}
         slotViolations={slotViolationsByDay?.get(i)}
-        slotSchedules={slotSchedulesByDay?.get((weekStartDay + i) % 7)}
-        slotTooltips={slotTooltipsByDay?.get((weekStartDay + i) % 7)}
+        slotSchedules={slotSchedulesByDay?.get(dayOfWeekFor(weekStart, i))}
+        slotTooltips={slotTooltipsByDay?.get(dayOfWeekFor(weekStart, i))}
         slotFreezerFriendly={dayFreezerFriendly}
         onCookSlot={(_slotId, mealId) => navigate(`/cook/${mealId}?slotId=${_slotId}`)}
         onEditSchedule={householdId ? () => setDayEditorIndex(i) : undefined}
@@ -771,7 +770,6 @@ export function PlanGrid({
         <div className="md:hidden">
           <DayPills
             weekStart={weekStart}
-            weekStartDay={weekStartDay}
             todayDateStr={todayString()}
             currentDayIndex={currentDayIndex}
             onSelect={setCurrentDayIndex}
@@ -853,7 +851,6 @@ export function PlanGrid({
           ) : (
             <DesktopPlanGrid
               weekStart={weekStart}
-              weekStartDay={weekStartDay}
               slotsByDay={slotsByDay}
               todayDateStr={todayString()}
               weekNumber={weekOfYear(weekStart)}
@@ -977,7 +974,6 @@ export function PlanGrid({
         <DayScheduleModal
           householdId={householdId}
           weekStart={weekStart}
-          weekStartDay={weekStartDay}
           dayIndex={dayEditorIndex}
           onClose={() => setDayEditorIndex(null)}
         />

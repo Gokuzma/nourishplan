@@ -9,12 +9,12 @@ import {
 } from '../../hooks/useSchedule'
 import type { DayExceptionEntry } from '../../hooks/useSchedule'
 import { SLOT_NAMES, STATUS_LABELS, STATUS_ORDER } from '../../utils/schedule'
+import { dayOfWeekFor } from '../../utils/mealPlan'
 import type { ScheduleStatus } from '../../types/database'
 
 interface DayScheduleModalProps {
   householdId: string
   weekStart: string
-  weekStartDay: number
   dayIndex: number
   onClose: () => void
 }
@@ -43,7 +43,6 @@ function dayTitle(weekStart: string, dayIndex: number): string {
 export function DayScheduleModal({
   householdId,
   weekStart,
-  weekStartDay,
   dayIndex,
   onClose,
 }: DayScheduleModalProps) {
@@ -55,7 +54,7 @@ export function DayScheduleModal({
   const { data: exceptionRows = [] } = useScheduleExceptions(householdId, weekStart)
   const saveDay = useSaveDayScheduleExceptions()
 
-  const dayOfWeek = (weekStartDay + dayIndex) % 7
+  const dayOfWeek = dayOfWeekFor(weekStart, dayIndex)
   const isAdmin = membership?.role === 'admin'
   const currentUserId = session?.user.id
 

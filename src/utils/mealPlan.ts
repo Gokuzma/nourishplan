@@ -16,6 +16,16 @@ export function getWeekStart(today: Date, weekStartDay: number): string {
 }
 
 /**
+ * Day of week (0=Sun through 6=Sat) for a given day of the plan week.
+ * Derived from the plan's actual start DATE — a plan may start on any weekday
+ * (custom start dates), so the household's week_start_day setting cannot be
+ * trusted for date-to-weekday mapping.
+ */
+export function dayOfWeekFor(weekStart: string, dayIndex: number): number {
+  return (new Date(weekStart + 'T00:00:00Z').getUTCDay() + dayIndex) % 7;
+}
+
+/**
  * Standard dietary reference intake presets (USDA 2020-2025 guidelines).
  * Used as starting defaults; users should customize for their individual needs.
  */

@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition, calcDayNutrition } from '../../utils/nutrition'
-import { DEFAULT_SLOTS } from '../../utils/mealPlan'
+import { DEFAULT_SLOTS, dayOfWeekFor } from '../../utils/mealPlan'
 import { ProgressRing } from './ProgressRing'
 import { SlotCard } from './SlotCard'
 import { DropActionMenu } from './DropActionMenu'
@@ -55,7 +55,6 @@ function DroppableSlot({
 interface DayCardProps {
   dayIndex: number
   weekStart: string
-  weekStartDay: number
   slots: SlotWithMeal[]
   memberTarget: NutritionTarget | null
   currentUserId?: string
@@ -84,7 +83,6 @@ interface DayCardProps {
 export function DayCard({
   dayIndex,
   weekStart,
-  weekStartDay,
   slots,
   memberTarget,
   currentUserId,
@@ -110,7 +108,7 @@ export function DayCard({
   const dayDate = new Date(weekStartDate)
   dayDate.setUTCDate(weekStartDate.getUTCDate() + dayIndex)
 
-  const dayName = DAY_NAMES[(weekStartDay + dayIndex) % 7]
+  const dayName = DAY_NAMES[dayOfWeekFor(weekStart, dayIndex)]
   const dateLabel = dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
   const slotMap = new Map<string, SlotWithMeal>()

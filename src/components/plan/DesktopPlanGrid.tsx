@@ -1,4 +1,4 @@
-import { DEFAULT_SLOTS } from '../../utils/mealPlan'
+import { DEFAULT_SLOTS, dayOfWeekFor } from '../../utils/mealPlan'
 import { PlanCell } from './PlanCell'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { ScheduleStatus } from '../../types/database'
@@ -8,7 +8,6 @@ const DAY_COUNT = 7
 
 interface DesktopPlanGridProps {
   weekStart: string
-  weekStartDay: number
   slotsByDay: Record<number, SlotWithMeal[]>
   todayDateStr: string
   weekNumber: number
@@ -47,7 +46,6 @@ function dayDateStr(weekStart: string, dayIndex: number): string {
  */
 export function DesktopPlanGrid({
   weekStart,
-  weekStartDay,
   slotsByDay,
   todayDateStr,
   weekNumber,
@@ -76,7 +74,7 @@ export function DesktopPlanGrid({
 
       {/* 7 day-of-week headers */}
       {Array.from({ length: DAY_COUNT }, (_, di) => {
-        const dayName = DAY_NAMES[(weekStartDay + di) % 7]
+        const dayName = DAY_NAMES[dayOfWeekFor(weekStart, di)]
         const dateStr = dayDateStr(weekStart, di)
         const isToday = dateStr === todayDateStr
         return (
@@ -104,7 +102,6 @@ export function DesktopPlanGrid({
           key={slotName}
           slotName={slotName}
           weekStart={weekStart}
-          weekStartDay={weekStartDay}
           slotsByDay={slotsByDay}
           todayDateStr={todayDateStr}
           slotSchedulesByDay={slotSchedulesByDay}
@@ -128,7 +125,6 @@ export function DesktopPlanGrid({
 interface RowProps {
   slotName: string
   weekStart: string
-  weekStartDay: number
   slotsByDay: Record<number, SlotWithMeal[]>
   todayDateStr: string
   slotSchedulesByDay?: Map<number, Map<string, ScheduleStatus>>
@@ -148,7 +144,6 @@ interface RowProps {
 function Row({
   slotName,
   weekStart,
-  weekStartDay,
   slotsByDay,
   todayDateStr,
   slotSchedulesByDay,
@@ -174,7 +169,7 @@ function Row({
         const dateStr = dayDateStr(weekStart, di)
         const isToday = dateStr === todayDateStr
         const dropKey = `${di}:${slotName}`
-        const dayOfWeek = (weekStartDay + di) % 7
+        const dayOfWeek = dayOfWeekFor(weekStart, di)
         return (
           <PlanCell
             key={di}
