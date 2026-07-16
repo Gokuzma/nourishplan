@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useBatchPrepSummary } from '../../hooks/useBatchPrepSummary'
 import type { BatchPrepReassignment } from '../../hooks/useBatchPrepSummary'
 import { useRecipes } from '../../hooks/useRecipes'
@@ -46,7 +47,9 @@ export function BatchPrepModal({ open, onClose, planId, weekStart, onOpenCookMod
   const hasSessions = sessions.length > 0
   const firstSessionId = sessions[0]?.session_id
 
-  return (
+  // Portaled to body: fixed overlays inside PlanPage content get trapped
+  // under later z-index:1 stacking contexts (L-054).
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       role="dialog"
@@ -125,6 +128,7 @@ export function BatchPrepModal({ open, onClose, planId, weekStart, onOpenCookMod
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

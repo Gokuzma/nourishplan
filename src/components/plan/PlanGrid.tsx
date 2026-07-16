@@ -1,4 +1,5 @@
 import { Fragment, useState, useMemo, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   DndContext,
   DragOverlay,
@@ -112,7 +113,9 @@ function RecipePicker({ recipes, slotName, macrosById, onSelect, onClose }: Reci
   const primary = [...groups.slotMatch, ...groups.untagged]
   const total = primary.length + groups.rest.length
 
-  return (
+  // Portaled to body: fixed overlays inside PlanPage content get trapped
+  // under later z-index:1 stacking contexts (L-054).
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-sm max-h-[70vh] flex flex-col">
@@ -164,7 +167,8 @@ function RecipePicker({ recipes, slotName, macrosById, onSelect, onClose }: Reci
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { PortionStepper } from './PortionStepper'
 import { useInsertFoodLog } from '../../hooks/useFoodLogs'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
@@ -92,7 +93,9 @@ export function LogMealModal({
     }
   }
 
-  return (
+  // Portaled to body: fixed overlays inside page content get trapped
+  // under later z-index:1 stacking contexts (L-054).
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -174,6 +177,7 @@ export function LogMealModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
