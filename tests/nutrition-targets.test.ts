@@ -35,6 +35,13 @@ describe('buildTargetUpsertPayload', () => {
     fat_g: 65,
   };
 
+  it('never includes profile stat keys', () => {
+    const payload = buildTargetUpsertPayload({ ...baseParams, userId: 'user-id' });
+    for (const key of ['birth_date', 'sex', 'height_cm', 'weight_kg', 'notes', 'is_pregnant']) {
+      expect(payload).not.toHaveProperty(key);
+    }
+  });
+
   it('builds payload with user_id set and member_profile_id null when userId provided', () => {
     const payload = buildTargetUpsertPayload({
       ...baseParams,

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { ageInYears, pregnancyStatus, suggestTargets } from './nutritionProfile'
+import { ageInYears, buildApplyPayload, pregnancyStatus, suggestTargets, targetsDifferFromSuggestion } from './nutritionProfile'
 import type { MemberStats } from './nutritionProfile'
+import type { NutritionTarget } from '../types/database'
 
 const today = new Date('2026-11-15')
 
@@ -53,11 +54,11 @@ describe('pregnancyStatus', () => {
   })
 
   it('is expired when past due', () => {
-    expect(pregnancyStatus('2026-11-14', today)).toEqual({ expired: true })
+    expect(pregnancyStatus('2026-11-14', today)).toEqual({ expired: true, reason: 'past' })
   })
 
   it('is expired when due date is more than 300 days away', () => {
-    expect(pregnancyStatus('2028-01-01', today)).toEqual({ expired: true })
+    expect(pregnancyStatus('2028-01-01', today)).toEqual({ expired: true, reason: 'too_far' })
   })
 })
 
@@ -89,6 +90,17 @@ describe('suggestTargets adult', () => {
       target_weight_kg: 45, activity_level: 'sedentary',
     }))
     expect(s.calories).toBe(1200)
+    expect(s.explanation).not.toContain('−500 kcal to move toward 45 kg')
+    expect(s.explanation).toContain('Held at the 1,200 kcal minimum')
+  })
+
+  it('floor that binds partway states the actual reduction', () => {
+    const s = suggestion(makeStats({
+      birth_date: '1990-01-01', height_cm: 160, weight_kg: 60,
+      target_weight_kg: 50, activity_level: 'sedentary',
+    }))
+    expect(s.calories).toBe(1200)
+    expect(s.explanation).toContain('−311 kcal to move toward 50 kg')
   })
 
   it('gain adds 300', () => {
@@ -135,6 +147,92 @@ describe('suggestTargets pregnant', () => {
     expect(s.kind).toBe('adult')
     expect(s.trimester).toBeUndefined()
     expect(s.explanation).toContain('Due date has passed: update pregnancy?')
+  })
+})
+
+describe('suggestTargets expired and required fields', () => {
+  it('due date too far away gets its own message', () => {
+    const s = suggestion(makeStats({
+      birth_date: '1994-01-01', is_pregnant: true, due_date: '2028-01-01',
+    }))
+    expect(s.kind).toBe('adult')
+    expect(s.explanation).toContain('Due date looks too far away: check it.')
+    expect(s.explanation).not.toContain('Due date has passed: update pregnancy?')
+  })
+
+  it('pregnant adult without due date is missing due_date', () => {
+    const result = suggestTargets(makeStats({ birth_date: '1994-01-01', is_pregnant: true, due_date: null }), false, today)
+    expect(result).toEqual({ ok: false, missing: ['due_date'] })
+  })
+
+  it('pregnant minor does not require due_date', () => {
+    const result = suggestTargets(makeStats({ birth_date: '2010-01-01', is_pregnant: true, due_date: null }), true, today)
+    expect(result.ok).toBe(true)
+  })
+
+  it('under one is reported before missing fields', () => {
+    const result = suggestTargets(
+      makeStats({ birth_date: '2026-06-01', sex: null, height_cm: null, weight_kg: null, activity_level: null }),
+      true,
+      today,
+    )
+    expect(result).toEqual({ ok: false, missing: [], reason: 'under_one' })
+  })
+})
+
+describe('buildApplyPayload', () => {
+  const suggested = {
+    calories: 2100, protein_g: 100, carbs_g: 250, fat_g: 70,
+    micronutrients: { fiber_g: 25, calcium_mg: 1000, iron_mg: 18, folate_mcg: 400 },
+    explanation: [], kind: 'adult' as const,
+  }
+  const existing = {
+    id: 't', household_id: 'h', user_id: 'u', member_profile_id: null,
+    calories: 1800, protein_g: 80, carbs_g: 200, fat_g: 60,
+    micronutrients: { iron_mg: 8, sodium_mg: 2300 },
+    custom_goals: { water_ml: 2000 },
+    macro_mode: 'percent' as const,
+    created_at: '', updated_at: '',
+  } as unknown as NutritionTarget
+
+  it('keeps custom goals, other micros and macro mode while overwriting suggested micros', () => {
+    const payload = buildApplyPayload(existing, suggested)
+    expect(payload.custom_goals).toEqual({ water_ml: 2000 })
+    expect(payload.micronutrients.sodium_mg).toBe(2300)
+    expect(payload.micronutrients.iron_mg).toBe(18)
+    expect(payload.macro_mode).toBe('percent')
+    expect(payload.calories).toBe(2100)
+  })
+
+  it('defaults for a missing target', () => {
+    const payload = buildApplyPayload(null, suggested)
+    expect(payload.custom_goals).toEqual({})
+    expect(payload.macro_mode).toBe('grams')
+    expect(payload.micronutrients).toEqual(suggested.micronutrients)
+  })
+})
+
+describe('targetsDifferFromSuggestion', () => {
+  const suggested = {
+    calories: 2000, protein_g: 100, carbs_g: 250, fat_g: 70,
+    micronutrients: { fiber_g: 25, calcium_mg: 1000, iron_mg: 18, folate_mcg: 400 },
+    explanation: [], kind: 'adult' as const,
+  }
+  const target = (overrides: Partial<NutritionTarget> = {}) =>
+    ({ calories: 2000, protein_g: 100, carbs_g: 250, fat_g: 70, ...overrides }) as NutritionTarget
+
+  it('is true for a missing target or null calories', () => {
+    expect(targetsDifferFromSuggestion(null, suggested)).toBe(true)
+    expect(targetsDifferFromSuggestion(target({ calories: null }), suggested)).toBe(true)
+  })
+
+  it('is false at 50 kcal and 5 g differences', () => {
+    expect(targetsDifferFromSuggestion(target({ calories: 2050, protein_g: 105 }), suggested)).toBe(false)
+  })
+
+  it('is true past 50 kcal or 5 g', () => {
+    expect(targetsDifferFromSuggestion(target({ calories: 2051 }), suggested)).toBe(true)
+    expect(targetsDifferFromSuggestion(target({ carbs_g: 256 }), suggested)).toBe(true)
   })
 })
 

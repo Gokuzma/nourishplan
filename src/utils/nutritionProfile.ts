@@ -90,9 +90,10 @@ export function ageInYears(birthDate: string, today: Date): number {
 export function pregnancyStatus(
   dueDate: string,
   today: Date,
-): { trimester: 1 | 2 | 3 } | { expired: true } {
+): { trimester: 1 | 2 | 3 } | { expired: true; reason: 'past' | 'too_far' } {
   const daysUntilDue = utcDayNumber(parseUtcDay(dueDate)) - utcDayNumber(today)
-  if (daysUntilDue < 0 || daysUntilDue > 300) return { expired: true }
+  if (daysUntilDue < 0) return { expired: true, reason: 'past' }
+  if (daysUntilDue > 300) return { expired: true, reason: 'too_far' }
   const gestationalWeek = Math.floor((280 - daysUntilDue) / 7)
   if (gestationalWeek < 14) return { trimester: 1 }
   if (gestationalWeek < 28) return { trimester: 2 }
@@ -158,13 +159,16 @@ function suggestForChild(
 }
 
 export function suggestTargets(stats: MemberStats, _isChild: boolean, today: Date): SuggestionResult {
+  const knownAge = stats.birth_date ? ageInYears(stats.birth_date, today) : null
+  if (knownAge != null && knownAge < 1) return { ok: false, missing: [], reason: 'under_one' }
+
   const missing: ProfileField[] = []
   if (!stats.birth_date) missing.push('birth_date')
   if (!stats.sex) missing.push('sex')
   if (stats.height_cm == null) missing.push('height_cm')
   if (stats.weight_kg == null) missing.push('weight_kg')
   if (!stats.activity_level) missing.push('activity_level')
-  if (stats.is_pregnant && !stats.due_date) missing.push('due_date')
+  if (stats.is_pregnant && (knownAge == null || knownAge >= 18) && !stats.due_date) missing.push('due_date')
   if (
     missing.length > 0 ||
     !stats.birth_date ||
@@ -177,7 +181,6 @@ export function suggestTargets(stats: MemberStats, _isChild: boolean, today: Dat
   }
 
   const age = ageInYears(stats.birth_date, today)
-  if (age < 1) return { ok: false, missing: [], reason: 'under_one' }
 
   const { sex, height_cm: heightCm, weight_kg: weightKg, activity_level: activity } = stats
 
@@ -192,7 +195,11 @@ export function suggestTargets(stats: MemberStats, _isChild: boolean, today: Dat
     if ('trimester' in status) {
       pregnancy = status
     } else {
-      explanation.push('Due date has passed: update pregnancy?')
+      explanation.push(
+        status.reason === 'past'
+          ? 'Due date has passed: update pregnancy?'
+          : 'Due date looks too far away: check it.',
+      )
     }
   }
 
@@ -228,7 +235,12 @@ export function suggestTargets(stats: MemberStats, _isChild: boolean, today: Dat
     const floor = sex === 'male' ? 1500 : 1200
     target = Math.max(floor, maintenance - 500)
     proteinPerKg = 1.6
-    explanation.push(`−500 kcal to move toward ${goalWeight} kg`)
+    const reduction = Math.round(maintenance - target)
+    explanation.push(
+      reduction > 0
+        ? `−${formatKcal(reduction)} kcal to move toward ${goalWeight} kg`
+        : `Held at the ${formatKcal(floor)} kcal minimum`,
+    )
   } else if (goalWeight != null && goalWeight > weightKg + 1) {
     target = maintenance + 300
     explanation.push(`+300 kcal to move toward ${goalWeight} kg`)
@@ -245,4 +257,37 @@ export function suggestTargets(stats: MemberStats, _isChild: boolean, today: Dat
       kind: 'adult',
     },
   }
+}
+
+export function buildApplyPayload(
+  existing: NutritionTarget | null,
+  s: SuggestedTargets,
+): {
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  micronutrients: Record<string, number>
+  custom_goals: Record<string, number>
+  macro_mode: 'grams' | 'percent'
+} {
+  return {
+    calories: s.calories,
+    protein_g: s.protein_g,
+    carbs_g: s.carbs_g,
+    fat_g: s.fat_g,
+    micronutrients: { ...(existing?.micronutrients ?? {}), ...s.micronutrients },
+    custom_goals: existing?.custom_goals ?? {},
+    macro_mode: existing?.macro_mode ?? 'grams',
+  }
+}
+
+export function targetsDifferFromSuggestion(existing: NutritionTarget | null, s: SuggestedTargets): boolean {
+  if (!existing || existing.calories == null) return true
+  if (Math.abs(existing.calories - s.calories) > 50) return true
+  return (
+    Math.abs((existing.protein_g ?? 0) - s.protein_g) > 5 ||
+    Math.abs((existing.carbs_g ?? 0) - s.carbs_g) > 5 ||
+    Math.abs((existing.fat_g ?? 0) - s.fat_g) > 5
+  )
 }

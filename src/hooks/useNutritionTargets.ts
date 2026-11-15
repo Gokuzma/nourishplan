@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase'
 import { queryKeys } from '../lib/queryKeys'
 import type { NutritionTarget } from '../types/database'
 import { buildTargetUpsertPayload } from '../utils/mealPlan'
+import { buildApplyPayload } from '../utils/nutritionProfile'
+import type { MemberStats, SuggestedTargets } from '../utils/nutritionProfile'
 
 /**
  * Returns all nutrition targets for the given household.
@@ -82,6 +84,97 @@ export function useUpsertNutritionTargets() {
       const { data, error } = await supabase
         .from('nutrition_targets')
         .upsert(payload, { onConflict: conflictColumn })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as unknown as NutritionTarget
+    },
+    onSuccess: (_, params) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.list(params.householdId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.detail(params.householdId, params.memberId) })
+    },
+  })
+}
+
+function targetKeyColumns(householdId: string, memberId: string, memberType: 'user' | 'profile') {
+  return {
+    household_id: householdId,
+    user_id: memberType === 'user' ? memberId : null,
+    member_profile_id: memberType === 'profile' ? memberId : null,
+  }
+}
+
+function conflictColumns(memberType: 'user' | 'profile') {
+  return memberType === 'user' ? 'household_id,user_id' : 'household_id,member_profile_id'
+}
+
+/**
+ * Saves a member's profile stats. Writes only the key and profile columns,
+ * never calories, macros or micronutrients.
+ */
+export function useSaveMemberStats() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (params: {
+      householdId: string
+      memberId: string
+      memberType: 'user' | 'profile'
+      stats: MemberStats & { notes: string | null }
+    }): Promise<NutritionTarget> => {
+      const { householdId, memberId, memberType, stats } = params
+      const payload = { ...targetKeyColumns(householdId, memberId, memberType), ...stats }
+
+      const { data, error } = await supabase
+        .from('nutrition_targets')
+        .upsert(payload, { onConflict: conflictColumns(memberType) })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      if (memberType === 'profile' && stats.birth_date) {
+        await supabase
+          .from('member_profiles')
+          .update({ birth_year: Number(stats.birth_date.slice(0, 4)) })
+          .eq('id', memberId)
+      }
+
+      return data as unknown as NutritionTarget
+    },
+    onSuccess: (_, params) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.list(params.householdId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutritionTargets.detail(params.householdId, params.memberId) })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
+    },
+  })
+}
+
+/**
+ * Writes suggested calories, macros and micronutrients to a member's targets,
+ * keeping their custom goals, other micronutrients and macro mode.
+ */
+export function useApplySuggestedTargets() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (params: {
+      householdId: string
+      memberId: string
+      memberType: 'user' | 'profile'
+      existing: NutritionTarget | null
+      suggestion: SuggestedTargets
+    }): Promise<NutritionTarget> => {
+      const { householdId, memberId, memberType, existing, suggestion } = params
+      const payload = {
+        ...targetKeyColumns(householdId, memberId, memberType),
+        ...buildApplyPayload(existing, suggestion),
+      }
+
+      const { data, error } = await supabase
+        .from('nutrition_targets')
+        .upsert(payload, { onConflict: conflictColumns(memberType) })
         .select()
         .single()
 
