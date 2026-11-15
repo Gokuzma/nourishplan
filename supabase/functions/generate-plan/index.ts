@@ -530,7 +530,6 @@ serve(async (req) => {
       const scheduleStatus: Record<string, string> = {};
       // A slot is 'away' only when every household member is away; otherwise
       // away members drop out and whoever is home decides the slot.
-      const memberCount = members.length + profiles.length;
       const awayCountByKey: Record<string, number> = {};
       for (const ss of effectiveByMember.values()) {
         // Normalize "Snack" (DB schedule) vs "Snacks" (plan grid)
