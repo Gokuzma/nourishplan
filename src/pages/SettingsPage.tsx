@@ -13,6 +13,7 @@ import { NotificationsSection } from '../components/settings/NotificationsSectio
 import { MarketPricesSection } from '../components/settings/MarketPricesSection'
 import { WontEatSection } from '../components/settings/WontEatSection'
 import { ScheduleSection } from '../components/settings/ScheduleSection'
+import { ProfilesSection } from '../components/settings/ProfilesSection'
 import { Nameplate, StoryHead, SectionHead, Rule } from '../components/editorial'
 
 const fieldStyle: React.CSSProperties = {
@@ -249,7 +250,7 @@ export function SettingsPage() {
 
       {/* Profile section */}
       <section className="mt-6">
-        <SectionHead no="01" label="Profile" aux={session?.user.email ?? undefined} />
+        <SectionHead no="01" label="Account" aux={session?.user.email ?? undefined} />
         <Rule />
 
         {/* Avatar */}
@@ -315,10 +316,23 @@ export function SettingsPage() {
         )}
       </section>
 
+      {/* Profiles section */}
+      {session && membership && (
+        <section className="mt-6">
+          <SectionHead no="02" label="Profiles" />
+          <Rule />
+          <ProfilesSection
+            householdId={membership.household_id}
+            currentUserId={session.user.id}
+            isAdmin={isAdmin}
+          />
+        </section>
+      )}
+
       {/* Household section */}
       {membership && (
         <section className="mt-6">
-          <SectionHead no="02" label="Household" aux={isAdmin ? 'admin' : membership.role ?? undefined} />
+          <SectionHead no="03" label="Household" aux={isAdmin ? 'admin' : membership.role ?? undefined} />
           <Rule />
           <div style={{ padding: '14px 0', borderBottom: isAdmin ? '1px dashed var(--rule-soft)' : 'none' }}>
             <label className="eyebrow block mb-1">Household Name</label>
@@ -396,7 +410,7 @@ export function SettingsPage() {
       {membership && (
         <section className="mt-6">
           <SectionHead
-            no="03"
+            no="04"
             label="Food Prices"
             aux={foodPrices && foodPrices.length > 0 ? `${foodPrices.length} on file` : undefined}
           />
@@ -468,7 +482,7 @@ export function SettingsPage() {
       {/* Nutrition & Dietary section */}
       {session && membership && (
         <section className="mt-6">
-          <SectionHead no="04" label="Nutrition" />
+          <SectionHead no="05" label="Nutrition" />
           <Rule />
           <div style={{ padding: '14px 0' }}>
             <a
@@ -501,7 +515,7 @@ export function SettingsPage() {
       {/* Child member profiles — dietary restrictions and won't-eat */}
       {membership && memberProfiles && memberProfiles.length > 0 && (
         <section className="mt-6">
-          <SectionHead no="05" label="Member Dietary Preferences" aux={`${memberProfiles.length} member${memberProfiles.length === 1 ? '' : 's'}`} />
+          <SectionHead no="06" label="Member Dietary Preferences" aux={`${memberProfiles.length} member${memberProfiles.length === 1 ? '' : 's'}`} />
           <Rule />
           {memberProfiles.map(profile => (
             <div key={profile.id} style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
@@ -540,7 +554,7 @@ export function SettingsPage() {
       {/* Family schedules — admins set other adult members' schedules */}
       {membership && isAdmin && otherMembers.length > 0 && (
         <section className="mt-6">
-          <SectionHead no="06" label="Family Schedules" aux={`${otherMembers.length} member${otherMembers.length === 1 ? '' : 's'}`} />
+          <SectionHead no="07" label="Family Schedules" aux={`${otherMembers.length} member${otherMembers.length === 1 ? '' : 's'}`} />
           <Rule />
           <p className="text-sm text-text/60 mt-2">
             As an admin you can set the weekly schedule for other adults in your household.
@@ -562,7 +576,7 @@ export function SettingsPage() {
 
       {/* Appearance section */}
       <section className="mt-6">
-        <SectionHead no="07" label="Appearance" aux={theme} />
+        <SectionHead no="08" label="Appearance" aux={theme} />
         <Rule />
         <div className="flex gap-2" style={{ padding: '14px 0' }}>
           {(['light', 'dark', 'system'] as ThemePreference[]).map((option) => (
@@ -580,7 +594,7 @@ export function SettingsPage() {
       {/* Notifications section */}
       {session && membership && (
         <section className="mt-6">
-          <SectionHead no="08" label="Notifications" />
+          <SectionHead no="09" label="Notifications" />
           <Rule />
           <NotificationsSection
             userId={session.user.id}
@@ -591,7 +605,7 @@ export function SettingsPage() {
 
       {/* Account section */}
       <section className="mt-6">
-        <SectionHead no="09" label="Account" />
+        <SectionHead no="10" label="Account" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <button
@@ -605,7 +619,7 @@ export function SettingsPage() {
 
       {/* Danger Zone */}
       <section className="mt-10" style={{ borderLeft: '2px solid var(--tomato)', paddingLeft: 14 }}>
-        <SectionHead no="10" label="Danger Zone" aux="permanent" />
+        <SectionHead no="11" label="Danger Zone" aux="permanent" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <p className="serif-italic mb-3" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>These actions are permanent and cannot be undone.</p>
