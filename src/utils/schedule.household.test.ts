@@ -18,14 +18,14 @@ function makeRow(overrides: Partial<MemberScheduleSlot> = {}): MemberScheduleSlo
 
 describe('buildHouseholdGrid', () => {
   it('Test 1 — returns an empty Map for empty input (no crash)', () => {
-    const grid = buildHouseholdGrid([])
+    const grid = buildHouseholdGrid([], 1)
     expect(grid.size).toBe(0)
   })
 
   it('Test 2 — single member single row maps to "day:slot" -> status', () => {
     const grid = buildHouseholdGrid([
       makeRow({ day_of_week: 1, slot_name: 'Dinner', status: 'away' }),
-    ])
+    ], 1)
     expect(grid.get('1:Dinner')).toBe('away')
     expect(grid.size).toBe(1)
   })
@@ -34,19 +34,34 @@ describe('buildHouseholdGrid', () => {
     const grid = buildHouseholdGrid([
       makeRow({ member_user_id: 'a', day_of_week: 2, slot_name: 'Lunch', status: 'consume' }),
       makeRow({ member_user_id: 'b', day_of_week: 2, slot_name: 'Lunch', status: 'quick' }),
-    ])
+    ], 2)
     expect(grid.get('2:Lunch')).toBe('quick')
   })
 
-  it('Test 4 — precedence full ladder: away wins over [consume, quick, away, prep]', () => {
+  it('Test 4 — away members drop out when someone is still home: quick wins over [consume, quick, away, prep]', () => {
     const rows: MemberScheduleSlot[] = [
       makeRow({ member_user_id: 'a', day_of_week: 3, slot_name: 'Breakfast', status: 'consume' }),
       makeRow({ member_user_id: 'b', day_of_week: 3, slot_name: 'Breakfast', status: 'quick' }),
       makeRow({ member_user_id: 'c', day_of_week: 3, slot_name: 'Breakfast', status: 'away' }),
       makeRow({ member_user_id: 'd', day_of_week: 3, slot_name: 'Breakfast', status: 'prep' }),
     ]
-    const grid = buildHouseholdGrid(rows)
-    expect(grid.get('3:Breakfast')).toBe('away')
+    const grid = buildHouseholdGrid(rows, 4)
+    expect(grid.get('3:Breakfast')).toBe('quick')
+  })
+
+  it('Test 4b — slot is away only when every household member is away', () => {
+    const rows: MemberScheduleSlot[] = [
+      makeRow({ member_user_id: 'a', day_of_week: 5, slot_name: 'Dinner', status: 'away' }),
+      makeRow({ member_user_id: null, member_profile_id: 'kid', day_of_week: 5, slot_name: 'Dinner', status: 'away' }),
+    ]
+    expect(buildHouseholdGrid(rows, 2).get('5:Dinner')).toBe('away')
+  })
+
+  it('Test 4c — one adult away while a child with no saved schedule is home: no away, no dot', () => {
+    const rows: MemberScheduleSlot[] = [
+      makeRow({ member_user_id: 'a', day_of_week: 5, slot_name: 'Dinner', status: 'away' }),
+    ]
+    expect(buildHouseholdGrid(rows, 2).get('5:Dinner')).toBeUndefined()
   })
 
   it('Test 5 — all-prep (day, slot) yields no entry (no dot for prep)', () => {
@@ -55,7 +70,7 @@ describe('buildHouseholdGrid', () => {
       makeRow({ member_user_id: 'b', day_of_week: 0, slot_name: 'Breakfast', status: 'prep' }),
       makeRow({ member_user_id: 'c', day_of_week: 0, slot_name: 'Breakfast', status: 'prep' }),
     ]
-    const grid = buildHouseholdGrid(rows)
+    const grid = buildHouseholdGrid(rows, 3)
     expect(grid.get('0:Breakfast')).toBeUndefined()
     expect(grid.size).toBe(0)
   })
@@ -65,20 +80,20 @@ describe('buildHouseholdGrid', () => {
       makeRow({ member_user_id: 'a', day_of_week: 4, slot_name: 'Snack', status: 'prep' }),
       makeRow({ member_user_id: 'b', day_of_week: 4, slot_name: 'Snack', status: 'consume' }),
     ]
-    const grid = buildHouseholdGrid(rows)
+    const grid = buildHouseholdGrid(rows, 2)
     expect(grid.get('4:Snack')).toBe('consume')
   })
 
   it('Test 6b — batch shows on the grid but loses to consume', () => {
     const batchOnly = buildHouseholdGrid([
       makeRow({ member_user_id: 'a', day_of_week: 5, slot_name: 'Dinner', status: 'batch' }),
-    ])
+    ], 1)
     expect(batchOnly.get('5:Dinner')).toBe('batch')
 
     const mixed = buildHouseholdGrid([
       makeRow({ member_user_id: 'a', day_of_week: 5, slot_name: 'Dinner', status: 'batch' }),
       makeRow({ member_user_id: 'b', day_of_week: 5, slot_name: 'Dinner', status: 'consume' }),
-    ])
+    ], 2)
     expect(mixed.get('5:Dinner')).toBe('consume')
   })
 })

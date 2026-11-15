@@ -506,11 +506,19 @@ serve(async (req) => {
       const STATUS_PRECEDENCE = ["prep", "batch", "consume", "quick", "away"];
       const weekStartDow = new Date(weekStart + "T00:00:00Z").getUTCDay();
       const scheduleStatus: Record<string, string> = {};
+      // A slot is 'away' only when every household member is away; otherwise
+      // away members drop out and whoever is home decides the slot.
+      const memberCount = members.length + profiles.length;
+      const awayCountByKey: Record<string, number> = {};
       for (const ss of effectiveByMember.values()) {
         // Normalize "Snack" (DB schedule) vs "Snacks" (plan grid)
         const normalizedSlotName = ss.slot_name === "Snack" ? "Snacks" : capitalize(ss.slot_name);
         const dayIndex = (ss.day_of_week - weekStartDow + 7) % 7;
         const key = `${dayIndex}_${normalizedSlotName}`;
+        if (ss.status === "away") {
+          awayCountByKey[key] = (awayCountByKey[key] ?? 0) + 1;
+          continue;
+        }
         const existing = scheduleStatus[key];
         if (
           !existing ||
@@ -518,6 +526,10 @@ serve(async (req) => {
         ) {
           scheduleStatus[key] = ss.status;
         }
+      }
+      for (const [key, awayCount] of Object.entries(awayCountByKey)) {
+        if (awayCount >= memberCount) scheduleStatus[key] = "away";
+        else if (!scheduleStatus[key]) scheduleStatus[key] = "prep";
       }
 
       // Enumerate ALL possible slots (7 days x 4 default slots), not just existing DB rows.

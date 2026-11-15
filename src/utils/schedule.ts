@@ -75,19 +75,30 @@ export function applyExceptions(
 
 /**
  * Aggregates per-member schedule rows into a single household status per (day, slot).
- * Precedence: away > quick > consume > batch > prep. 'prep' is dropped — returned Map
- * contains only entries where at least one member has a non-prep status.
+ * A slot is 'away' only when all `memberCount` members are away; otherwise away members
+ * drop out and the rest resolve by precedence: quick > consume > batch > prep. 'prep' is
+ * dropped — returned Map contains only entries with a non-prep result.
+ * Members with no row for a slot count as home.
  * Key format: `${day_of_week}:${slot_name}` (slot_name is singular, matches DB).
  */
-export function buildHouseholdGrid(rows: MemberScheduleSlot[]): ScheduleGrid {
+export function buildHouseholdGrid(rows: MemberScheduleSlot[], memberCount: number): ScheduleGrid {
   const grid = new Map<string, ScheduleStatus>()
+  const awayMembersByKey = new Map<string, Set<string>>()
   for (const row of rows) {
-    if (row.status === 'prep') continue
     const key = `${row.day_of_week}:${row.slot_name}`
+    if (row.status === 'away') {
+      if (!awayMembersByKey.has(key)) awayMembersByKey.set(key, new Set())
+      awayMembersByKey.get(key)!.add(row.member_user_id ?? row.member_profile_id ?? '')
+      continue
+    }
+    if (row.status === 'prep') continue
     const existing = grid.get(key)
     if (!existing || precedence(row.status) > precedence(existing)) {
       grid.set(key, row.status)
     }
+  }
+  for (const [key, awayMembers] of awayMembersByKey) {
+    if (awayMembers.size >= memberCount) grid.set(key, 'away')
   }
   return grid
 }

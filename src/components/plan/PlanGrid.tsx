@@ -388,7 +388,8 @@ export function PlanGrid({
 
   const slotSchedulesByDay = useMemo(() => {
     if (!effectiveScheduleSlots.length) return undefined
-    const grid = buildHouseholdGrid(effectiveScheduleSlots)
+    const memberCount = (householdMembers?.length ?? 0) + (memberProfiles?.length ?? 0)
+    const grid = buildHouseholdGrid(effectiveScheduleSlots, memberCount)
     const byDay = new Map<number, Map<string, ScheduleStatus>>()
     for (const [key, status] of grid) {
       const [dayStr, ...slotParts] = key.split(':')
@@ -399,7 +400,7 @@ export function PlanGrid({
       byDay.get(dayOfWeek)!.set(slotName === 'Snack' ? 'Snacks' : slotName, status)
     }
     return byDay
-  }, [effectiveScheduleSlots])
+  }, [effectiveScheduleSlots, householdMembers, memberProfiles])
 
   const slotTooltipsByDay = useMemo(() => {
     if (!effectiveScheduleSlots.length) return undefined

@@ -179,14 +179,18 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
     // mockScheduleRows), not from the single-member useSchedule.
     mockScheduleRows = [
       { id: 'r1', household_id: 'hh-1', member_user_id: 'u-dad', member_profile_id: null, day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r2', household_id: 'hh-1', member_user_id: 'u-sam', member_profile_id: null, day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r3', household_id: 'hh-1', member_user_id: null, member_profile_id: 'mp-kayla', day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
     ]
     await renderPlanGrid()
     expect(screen.queryAllByLabelText('Schedule: away').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders a single member away chip + aria-label "Schedule: away"', async () => {
+  it('renders the away chip + aria-label "Schedule: away" when everyone is away', async () => {
     mockScheduleRows = [
       { id: 'r1', household_id: 'hh-1', member_user_id: 'u-dad', member_profile_id: null, day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r2', household_id: 'hh-1', member_user_id: 'u-sam', member_profile_id: null, day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r3', household_id: 'hh-1', member_user_id: null, member_profile_id: 'mp-kayla', day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
     ]
     const { container } = await renderPlanGrid()
     const awayDots = screen.queryAllByLabelText('Schedule: away')
@@ -197,19 +201,18 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
     expect(awayChips.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('applies precedence away > quick > consume > prep on same (day, slot)', async () => {
+  it('drops away members while others are home, then applies quick > consume > prep', async () => {
     mockScheduleRows = [
       { id: 'r1', household_id: 'hh-1', member_user_id: 'u-dad', member_profile_id: null,       day_of_week: 1, slot_name: 'Dinner', status: 'away',    updated_at: '2026-04-06' },
       { id: 'r2', household_id: 'hh-1', member_user_id: 'u-sam', member_profile_id: null,       day_of_week: 1, slot_name: 'Dinner', status: 'quick',   updated_at: '2026-04-06' },
       { id: 'r3', household_id: 'hh-1', member_user_id: null,    member_profile_id: 'mp-kayla', day_of_week: 1, slot_name: 'Dinner', status: 'consume', updated_at: '2026-04-06' },
     ]
     await renderPlanGrid()
-    // Precedence winner = away
-    const awayDots = screen.queryAllByLabelText('Schedule: away')
-    expect(awayDots.length).toBeGreaterThanOrEqual(1)
-    // Non-winners are NOT rendered for the same (day, slot) — the aggregated dot is singular.
+    // Dad is away but Sam and Kayla still eat — the meal is planned, quick wins
     const quickDots = screen.queryAllByLabelText('Schedule: quick')
-    expect(quickDots.length).toBe(0)
+    expect(quickDots.length).toBeGreaterThanOrEqual(1)
+    // Non-winners are NOT rendered for the same (day, slot) — the aggregated dot is singular.
+    expect(screen.queryAllByLabelText('Schedule: away').length).toBe(0)
     const consumeDots = screen.queryAllByLabelText('Schedule: consume')
     expect(consumeDots.length).toBe(0)
   })
@@ -223,11 +226,11 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
     await renderPlanGrid()
     // PlanGrid renders dayCards in BOTH the mobile DayCarousel and the desktop stack
     // (responsive — CSS hides one or the other; both are in the DOM). Take the first.
-    const awayDots = screen.getAllByLabelText('Schedule: away')
-    expect(awayDots.length).toBeGreaterThanOrEqual(1)
-    expect(awayDots[0].getAttribute('title')).toBe('Away: Dad. Quick: Sam. Eat: Kayla.')
-    // All away dots (mobile + desktop) carry the same tooltip — the data layer is shared.
-    for (const dot of awayDots) {
+    const quickDots = screen.getAllByLabelText('Schedule: quick')
+    expect(quickDots.length).toBeGreaterThanOrEqual(1)
+    expect(quickDots[0].getAttribute('title')).toBe('Away: Dad. Quick: Sam. Eat: Kayla.')
+    // All quick dots (mobile + desktop) carry the same tooltip — the data layer is shared.
+    for (const dot of quickDots) {
       expect(dot.getAttribute('title')).toBe('Away: Dad. Quick: Sam. Eat: Kayla.')
     }
   })
@@ -249,6 +252,8 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
     // Row day_of_week=2 corresponds to Tuesday, which renders in the SECOND DayCard (dayIndex=1).
     mockScheduleRows = [
       { id: 'r1', household_id: 'hh-1', member_user_id: 'u-dad', member_profile_id: null, day_of_week: 2, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r2', household_id: 'hh-1', member_user_id: 'u-sam', member_profile_id: null, day_of_week: 2, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r3', household_id: 'hh-1', member_user_id: null, member_profile_id: 'mp-kayla', day_of_week: 2, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
     ]
     await renderPlanGrid({ weekStart: '2026-04-06', weekStartDay: 1 })
 
@@ -304,15 +309,15 @@ describe('PlanGrid → DayCard → SlotCard schedule wiring (Phase 27 regression
 
   it('falls back to first-8-char UUID slice in tooltip when member_user_id is unknown', async () => {
     mockScheduleRows = [
-      { id: 'r1', household_id: 'hh-1', member_user_id: 'abcd1234-unknown-uuid-xyz', member_profile_id: null, day_of_week: 1, slot_name: 'Dinner', status: 'away', updated_at: '2026-04-06' },
+      { id: 'r1', household_id: 'hh-1', member_user_id: 'abcd1234-unknown-uuid-xyz', member_profile_id: null, day_of_week: 1, slot_name: 'Dinner', status: 'quick', updated_at: '2026-04-06' },
     ]
     await renderPlanGrid()
-    // PlanGrid renders dayCards twice (mobile + desktop); both away dots share the same tooltip
+    // PlanGrid renders dayCards twice (mobile + desktop); both quick dots share the same tooltip
     // because they read from the same memberNameById fallback path in buildHouseholdTooltips.
-    const awayDots = screen.getAllByLabelText('Schedule: away')
-    expect(awayDots.length).toBeGreaterThanOrEqual(1)
-    for (const dot of awayDots) {
-      expect(dot.getAttribute('title')).toBe('Away: abcd1234.')
+    const quickDots = screen.getAllByLabelText('Schedule: quick')
+    expect(quickDots.length).toBeGreaterThanOrEqual(1)
+    for (const dot of quickDots) {
+      expect(dot.getAttribute('title')).toBe('Quick: abcd1234.')
     }
   })
 
