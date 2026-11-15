@@ -2,9 +2,13 @@ import { useHousehold, useHouseholdMembers, useMemberProfiles } from '../hooks/u
 import { MemberList } from '../components/household/MemberList'
 import { InviteLink } from '../components/household/InviteLink'
 import { MemberProfileForm } from '../components/household/MemberProfileForm'
+import { HouseholdDetails } from '../components/household/HouseholdDetails'
+import { ProfilesSection } from '../components/settings/ProfilesSection'
+import { useAuth } from '../contexts/AuthContext'
 import { Nameplate, StoryHead, SectionHead, Folio, Rule } from '../components/editorial'
 
 export function HouseholdPage() {
+  const { session } = useAuth()
   const { data: membership, isPending } = useHousehold()
   const { data: members = [] } = useHouseholdMembers()
   const { data: profiles = [] } = useMemberProfiles()
@@ -73,6 +77,26 @@ export function HouseholdPage() {
             <div className="py-2">
               <MemberList />
             </div>
+
+            {session && (
+              <>
+                <SectionHead label="Profiles" aux="diet, foods & schedule" />
+                <Rule />
+                <p className="serif-italic mt-3" style={{ fontSize: 14, color: 'var(--ink-dim)' }}>
+                  Tap a name to set their dietary restrictions, foods they won&apos;t eat, and weekly schedule.
+                </p>
+                <ProfilesSection
+                  householdId={membership.household_id}
+                  currentUserId={session.user.id}
+                  isAdmin={isAdmin}
+                  weekStartDay={household?.week_start_day}
+                />
+              </>
+            )}
+
+            <SectionHead label="Household details" aux={isAdmin ? 'admin' : undefined} />
+            <Rule />
+            <HouseholdDetails householdId={membership.household_id} household={household} isAdmin={isAdmin} />
 
             {/* Invite block — admins only */}
             {isAdmin && (

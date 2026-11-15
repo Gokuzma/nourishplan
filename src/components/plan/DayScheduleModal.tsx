@@ -37,7 +37,7 @@ function dayTitle(weekStart: string, dayIndex: number): string {
  * member with a status dropdown per meal slot, initialized from the base
  * weekly pattern merged with this week's exceptions. Saving stores only
  * the statuses that differ from the base pattern as week-specific
- * exceptions — the recurring schedule in Settings is never touched.
+ * exceptions — the recurring schedule (Household page) is never touched.
  * Portaled to body (L-054).
  */
 export function DayScheduleModal({
@@ -137,7 +137,7 @@ export function DayScheduleModal({
           Who&apos;s around — {dayTitle(weekStart, dayIndex)}
         </h3>
         <p className="text-sm text-text/60 mb-4">
-          Changes apply to this day only; the usual weekly schedule in Settings stays as is.
+          Changes apply to this day only; the usual weekly schedule on the Household page stays as is.
         </p>
 
         {/* Column headers */}

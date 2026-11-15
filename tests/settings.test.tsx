@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ProfilesSection } from '../src/components/settings/ProfilesSection';
 
 // ACCTM-01: Account deletion with typed confirmation
@@ -40,6 +40,18 @@ vi.mock('../src/hooks/useHousehold', () => ({
   useMemberProfiles: () => ({ data: [{ id: 'p-kid', name: 'Kiddo', is_child: true, birth_year: 2018 }] }),
 }))
 
+vi.mock('../src/components/settings/DietaryRestrictionsSection', () => ({
+  DietaryRestrictionsSection: ({ memberId }: { memberId: string }) => <div data-testid="diet">{memberId}</div>,
+}))
+vi.mock('../src/components/settings/WontEatSection', () => ({
+  WontEatSection: ({ memberId }: { memberId: string }) => <div data-testid="wonteat">{memberId}</div>,
+}))
+vi.mock('../src/components/settings/ScheduleSection', () => ({
+  ScheduleSection: ({ memberId, isChild }: { memberId: string; isChild?: boolean }) => (
+    <div data-testid="schedule">{memberId}{isChild ? ':child' : ''}</div>
+  ),
+}))
+
 function target(overrides: Record<string, unknown>) {
   return {
     id: 't', household_id: 'h', user_id: null, member_profile_id: null,
@@ -60,14 +72,19 @@ describe('Settings Profiles section', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('SettingsPage renders Your Details at 01 and Profiles at 02', async () => {
+  it('SettingsPage keeps app settings only; people settings live on HouseholdPage', async () => {
     const fs = await import('fs')
-    const src = fs.readFileSync('src/pages/SettingsPage.tsx', 'utf8')
-    expect(src).toContain('<SectionHead no="01" label="Your Details"')
-    expect(src).toContain('<SectionHead no="02" label="Profiles"')
-    expect(src).toContain('<ProfilesSection')
-    expect(src).toContain('no="03" label="Household"')
-    expect(src).toContain('no="11" label="Danger Zone"')
+    const settings = fs.readFileSync('src/pages/SettingsPage.tsx', 'utf8')
+    expect(settings).toContain('<SectionHead no="01" label="Your Details"')
+    expect(settings).toContain('no="02" label="Planning"')
+    expect(settings).toContain('no="07" label="Danger Zone"')
+    expect(settings).not.toContain('Masthead')
+    for (const moved of ['ProfilesSection', 'DietaryRestrictionsSection', 'WontEatSection', 'ScheduleSection', 'Weekly Budget', 'Household Name']) {
+      expect(settings).not.toContain(moved)
+    }
+    const household = fs.readFileSync('src/pages/HouseholdPage.tsx', 'utf8')
+    expect(household).toContain('<ProfilesSection')
+    expect(household).toContain('<HouseholdDetails')
   })
 
   it('lists you first, then other members, then member profiles', () => {
@@ -151,5 +168,31 @@ describe('Settings Profiles section', () => {
     render(<ProfilesSection householdId="h" currentUserId="u-admin" isAdmin />)
     expect(screen.getAllByText('Edit profile')).toHaveLength(3)
     expect(screen.queryByText('View')).toBeNull()
+  })
+
+  it('cards start collapsed and expand to show diet, wont-eat and schedule', () => {
+    render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    expect(screen.queryByTestId('profile-details')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /Sam/ }))
+    expect(screen.getByTestId('diet').textContent).toBe('u-self')
+    expect(screen.getByTestId('wonteat').textContent).toBe('u-self')
+    expect(screen.getByTestId('schedule').textContent).toBe('u-self')
+  })
+
+  it('child card shows the child schedule', () => {
+    render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    fireEvent.click(screen.getByRole('button', { name: /Kiddo/ }))
+    expect(screen.getByTestId('schedule').textContent).toBe('p-kid:child')
+    expect(screen.getByTestId('diet').textContent).toBe('p-kid')
+  })
+
+  it('non-admin cannot open another adult; admin can set their schedule only', () => {
+    const { unmount } = render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    expect(screen.queryByRole('button', { name: /Alex/ })).toBeNull()
+    unmount()
+    render(<ProfilesSection householdId="h" currentUserId="u-admin" isAdmin />)
+    fireEvent.click(screen.getByRole('button', { name: /Sam/ }))
+    expect(screen.getByTestId('schedule').textContent).toBe('u-self')
+    expect(screen.queryByTestId('diet')).toBeNull()
   })
 })

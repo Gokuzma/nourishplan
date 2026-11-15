@@ -1,19 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
-import { useHousehold, useHouseholdMembers, useMemberProfiles } from '../hooks/useHousehold'
+import { useHousehold, useHouseholdMembers } from '../hooks/useHousehold'
 import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile'
 import { useFoodPrices, useDeleteFoodPrice } from '../hooks/useFoodPrices'
 import { formatCost } from '../utils/cost'
 import { supabase } from '../lib/supabase'
 import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
-import { DietaryRestrictionsSection } from '../components/settings/DietaryRestrictionsSection'
 import { NotificationsSection } from '../components/settings/NotificationsSection'
 import { MarketPricesSection } from '../components/settings/MarketPricesSection'
-import { WontEatSection } from '../components/settings/WontEatSection'
-import { ScheduleSection } from '../components/settings/ScheduleSection'
-import { ProfilesSection } from '../components/settings/ProfilesSection'
 import { Nameplate, StoryHead, SectionHead, Rule } from '../components/editorial'
 
 const fieldStyle: React.CSSProperties = {
@@ -49,18 +45,6 @@ export function SettingsPage() {
   const [avatarError, setAvatarError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Household editing state
-  const [householdName, setHouseholdName] = useState('')
-  const [householdSaving, setHouseholdSaving] = useState(false)
-  const [householdSaved, setHouseholdSaved] = useState(false)
-  const [householdError, setHouseholdError] = useState<string | null>(null)
-
-  // Weekly budget state
-  const [weeklyBudget, setWeeklyBudget] = useState<string>('')
-  const [budgetSaving, setBudgetSaving] = useState(false)
-  const [budgetSaved, setBudgetSaved] = useState(false)
-  const [budgetError, setBudgetError] = useState<string | null>(null)
-
   // Auto-draft state
   const [autoDraftSaving, setAutoDraftSaving] = useState(false)
   const autoDraftEnabled = membership?.households?.auto_draft_enabled ?? false
@@ -76,21 +60,6 @@ export function SettingsPage() {
       setDisplayName(profile.display_name)
     }
   }, [profile?.display_name])
-
-  // Sync household name into form state
-  useEffect(() => {
-    if (membership?.households?.name) {
-      setHouseholdName(membership.households.name)
-    }
-  }, [membership?.households?.name])
-
-  // Sync weekly budget into form state
-  useEffect(() => {
-    const budget = membership?.households?.weekly_budget
-    if (budget != null) {
-      setWeeklyBudget(String(budget))
-    }
-  }, [membership?.households?.weekly_budget])
 
   useEffect(() => {
     toggleTheme(theme)
@@ -132,51 +101,6 @@ export function SettingsPage() {
     }
   }
 
-  async function handleSaveHouseholdName() {
-    const householdId = membership?.household_id
-    if (!householdId) return
-    setHouseholdSaving(true)
-    setHouseholdError(null)
-    setHouseholdSaved(false)
-    try {
-      const { error } = await supabase
-        .from('households')
-        .update({ name: householdName.trim() })
-        .eq('id', householdId)
-      if (error) throw error
-      await queryClient.invalidateQueries({ queryKey: ['household'] })
-      setHouseholdSaved(true)
-      setTimeout(() => setHouseholdSaved(false), 2000)
-    } catch (err) {
-      setHouseholdError(err instanceof Error ? err.message : 'Failed to save household name.')
-    } finally {
-      setHouseholdSaving(false)
-    }
-  }
-
-  async function handleSaveWeeklyBudget() {
-    const householdId = membership?.household_id
-    if (!householdId) return
-    setBudgetSaving(true)
-    setBudgetError(null)
-    setBudgetSaved(false)
-    try {
-      const parsed = weeklyBudget.trim() === '' ? null : parseFloat(weeklyBudget)
-      const { error } = await supabase
-        .from('households')
-        .update({ weekly_budget: parsed })
-        .eq('id', householdId)
-      if (error) throw error
-      await queryClient.invalidateQueries({ queryKey: ['household'] })
-      setBudgetSaved(true)
-      setTimeout(() => setBudgetSaved(false), 2000)
-    } catch (err) {
-      setBudgetError(err instanceof Error ? err.message : 'Failed to save budget.')
-    } finally {
-      setBudgetSaving(false)
-    }
-  }
-
   async function handleToggleAutoDraft() {
     const householdId = membership?.household_id
     if (!householdId) return
@@ -202,7 +126,6 @@ export function SettingsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const { data: members } = useHouseholdMembers()
-  const { data: memberProfiles } = useMemberProfiles()
   const otherMembers = (members ?? []).filter(m => m.user_id !== session?.user.id)
   const isLastMember = otherMembers.length === 0
   const householdDisplayName = membership?.households?.name ?? 'this household'
@@ -244,7 +167,7 @@ export function SettingsPage() {
       <StoryHead
         kicker="SETTINGS"
         headline="The Settings"
-        byline="Account & household"
+        byline="App & account"
         size="sm"
       />
 
@@ -316,93 +239,24 @@ export function SettingsPage() {
         )}
       </section>
 
-      {/* Profiles section */}
-      {session && membership && (
+      {/* Planning section */}
+      {membership && isAdmin && (
         <section className="mt-6">
-          <SectionHead no="02" label="Profiles" />
+          <SectionHead no="02" label="Planning" />
           <Rule />
-          <ProfilesSection
-            householdId={membership.household_id}
-            currentUserId={session.user.id}
-            isAdmin={isAdmin}
-          />
-        </section>
-      )}
-
-      {/* Household section */}
-      {membership && (
-        <section className="mt-6">
-          <SectionHead no="03" label="Household" aux={isAdmin ? 'admin' : membership.role ?? undefined} />
-          <Rule />
-          <div style={{ padding: '14px 0', borderBottom: isAdmin ? '1px dashed var(--rule-soft)' : 'none' }}>
-            <label className="eyebrow block mb-1">Household Name</label>
-            {isAdmin ? (
-              <>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={householdName}
-                    onChange={(e) => setHouseholdName(e.target.value)}
-                    className="flex-1"
-                    style={fieldStyle}
-                  />
-                  <button
-                    onClick={handleSaveHouseholdName}
-                    disabled={householdSaving}
-                    className="btn btn-primary btn-sm"
-                  >
-                    {householdSaving ? 'Saving...' : householdSaved ? 'Saved!' : 'Save'}
-                  </button>
-                </div>
-                {householdError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{householdError}</p>}
-              </>
-            ) : (
-              <p className="serif" style={{ fontSize: 15 }}>{membership.households?.name}</p>
-            )}
+          <div style={{ padding: '14px 0' }}>
+            <label className="eyebrow block mb-1">Auto-Draft Weekly Plan</label>
+            <p className="serif-italic mb-2" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>
+              Draft next week&apos;s plan automatically the day before the week starts — review and adjust instead of starting from scratch.
+            </p>
+            <button
+              onClick={handleToggleAutoDraft}
+              disabled={autoDraftSaving}
+              className={`btn btn-sm ${autoDraftEnabled ? 'btn-primary' : ''}`}
+            >
+              {autoDraftSaving ? 'Saving...' : autoDraftEnabled ? 'On' : 'Off'}
+            </button>
           </div>
-
-          {isAdmin && (
-            <div style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
-              <label className="eyebrow block mb-1">Weekly Budget</label>
-              <div className="flex gap-2 items-center">
-                <span className="mono" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>$</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={weeklyBudget}
-                  onChange={(e) => setWeeklyBudget(e.target.value)}
-                  className="flex-1 mono tnum"
-                  style={fieldStyle}
-                />
-                <button
-                  onClick={handleSaveWeeklyBudget}
-                  disabled={budgetSaving}
-                  className="btn btn-primary btn-sm"
-                >
-                  {budgetSaving ? 'Saving...' : budgetSaved ? 'Saved!' : 'Save'}
-                </button>
-              </div>
-              {budgetError && <p className="serif-italic mt-1" style={{ fontSize: 12, color: 'var(--tomato)' }}>{budgetError}</p>}
-            </div>
-          )}
-
-          {isAdmin && (
-            <div style={{ padding: '14px 0' }}>
-              <label className="eyebrow block mb-1">Auto-Draft Weekly Plan</label>
-              <p className="serif-italic mb-2" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>
-                Draft next week&apos;s plan automatically the day before the week starts — review and adjust instead of starting from scratch.
-              </p>
-              <button
-                onClick={handleToggleAutoDraft}
-                disabled={autoDraftSaving}
-                className={`btn btn-sm ${autoDraftEnabled ? 'btn-primary' : ''}`}
-              >
-                {autoDraftSaving ? 'Saving...' : autoDraftEnabled ? 'On' : 'Off'}
-              </button>
-            </div>
-          )}
         </section>
       )}
 
@@ -410,7 +264,7 @@ export function SettingsPage() {
       {membership && (
         <section className="mt-6">
           <SectionHead
-            no="04"
+            no="03"
             label="Food Prices"
             aux={foodPrices && foodPrices.length > 0 ? `${foodPrices.length} on file` : undefined}
           />
@@ -479,104 +333,9 @@ export function SettingsPage() {
         </section>
       )}
 
-      {/* Nutrition & Dietary section */}
-      {session && membership && (
-        <section className="mt-6">
-          <SectionHead no="05" label="Nutrition" />
-          <Rule />
-          <div style={{ padding: '14px 0' }}>
-            <a
-              href={`/members/${session.user.id}/targets`}
-              className="serif"
-              style={{ fontSize: 15, color: 'var(--tomato)', textDecorationColor: 'var(--rule-c)' }}
-            >
-              Edit Nutrition Targets
-            </a>
-            <DietaryRestrictionsSection
-              householdId={membership.household_id}
-              memberId={session.user.id}
-              memberType="user"
-            />
-            <WontEatSection
-              householdId={membership.household_id}
-              memberId={session.user.id}
-              memberType="user"
-            />
-            <ScheduleSection
-              householdId={membership.household_id}
-              memberId={session.user.id}
-              memberType="user"
-              weekStartDay={membership.households?.week_start_day}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Child member profiles — dietary restrictions and won't-eat */}
-      {membership && memberProfiles && memberProfiles.length > 0 && (
-        <section className="mt-6">
-          <SectionHead no="06" label="Member Dietary Preferences" aux={`${memberProfiles.length} member${memberProfiles.length === 1 ? '' : 's'}`} />
-          <Rule />
-          {memberProfiles.map(profile => (
-            <div key={profile.id} style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
-              <a
-                href={`/members/${profile.id}/targets`}
-                className="serif"
-                style={{ fontSize: 15, color: 'var(--tomato)', textDecorationColor: 'var(--rule-c)' }}
-              >
-                Edit {profile.name}&apos;s Nutrition Targets
-              </a>
-              <DietaryRestrictionsSection
-                householdId={membership.household_id}
-                memberId={profile.id}
-                memberType="profile"
-                memberName={profile.name}
-              />
-              <WontEatSection
-                householdId={membership.household_id}
-                memberId={profile.id}
-                memberType="profile"
-                memberName={profile.name}
-              />
-              <ScheduleSection
-                householdId={membership.household_id}
-                memberId={profile.id}
-                memberType="profile"
-                memberName={profile.name}
-                weekStartDay={membership.households?.week_start_day}
-                isChild={profile.is_child}
-              />
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* Family schedules — admins set other adult members' schedules */}
-      {membership && isAdmin && otherMembers.length > 0 && (
-        <section className="mt-6">
-          <SectionHead no="07" label="Family Schedules" aux={`${otherMembers.length} member${otherMembers.length === 1 ? '' : 's'}`} />
-          <Rule />
-          <p className="text-sm text-text/60 mt-2">
-            As an admin you can set the weekly schedule for other adults in your household.
-            Child profiles are managed in the section above.
-          </p>
-          {otherMembers.map(hm => (
-            <div key={hm.user_id} style={{ padding: '14px 0', borderBottom: '1px dashed var(--rule-soft)' }}>
-              <ScheduleSection
-                householdId={membership.household_id}
-                memberId={hm.user_id}
-                memberType="user"
-                memberName={hm.profiles?.display_name ?? hm.user_id.slice(0, 8)}
-                weekStartDay={membership.households?.week_start_day}
-              />
-            </div>
-          ))}
-        </section>
-      )}
-
       {/* Appearance section */}
       <section className="mt-6">
-        <SectionHead no="08" label="Appearance" aux={theme} />
+        <SectionHead no="04" label="Appearance" aux={theme} />
         <Rule />
         <div className="flex gap-2" style={{ padding: '14px 0' }}>
           {(['light', 'dark', 'system'] as ThemePreference[]).map((option) => (
@@ -594,7 +353,7 @@ export function SettingsPage() {
       {/* Notifications section */}
       {session && membership && (
         <section className="mt-6">
-          <SectionHead no="09" label="Notifications" />
+          <SectionHead no="05" label="Notifications" />
           <Rule />
           <NotificationsSection
             userId={session.user.id}
@@ -605,7 +364,7 @@ export function SettingsPage() {
 
       {/* Account section */}
       <section className="mt-6">
-        <SectionHead no="10" label="Account" />
+        <SectionHead no="06" label="Account" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <button
@@ -619,7 +378,7 @@ export function SettingsPage() {
 
       {/* Danger Zone */}
       <section className="mt-10" style={{ borderLeft: '2px solid var(--tomato)', paddingLeft: 14 }}>
-        <SectionHead no="11" label="Danger Zone" aux="permanent" />
+        <SectionHead no="07" label="Danger Zone" aux="permanent" />
         <Rule />
         <div style={{ padding: '14px 0' }}>
           <p className="serif-italic mb-3" style={{ fontSize: 13, color: 'var(--ink-dim)' }}>These actions are permanent and cannot be undone.</p>

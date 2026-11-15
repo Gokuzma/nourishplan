@@ -110,8 +110,8 @@ const GUIDE_SECTIONS: GuideSection[] = [
       'Invite family members from the Household page by sharing the invite link.',
       'Add managed profiles for children or anyone who won\'t log in themselves — they still get their own targets and portions.',
       'Set each member\'s nutrition targets (calories, protein, carbs, fat) from the Household page — tap a member to open their targets.',
-      'Record dietary restrictions and won\'t-eat foods for each member — the planner treats allergies as hard rules and dislikes as strong preferences.',
-      'Set each member\'s weekly schedule on the Plan page (who\'s home for which meals) and the weekly budget — both become constraints the planner respects.',
+      'On the Household page, tap a member under Profiles to record their dietary restrictions and won\'t-eat foods — the planner treats allergies as hard rules and dislikes as strong preferences.',
+      'Set each member\'s weekly schedule in the same place (who\'s home for which meals), and the weekly budget under Household details — both become constraints the planner respects.',
     ],
     tips: [
       'Tip: You don\'t have to finish setup before using the app. Start anywhere — the plan ties it together.',
@@ -217,7 +217,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     title: 'Schedule & Batch Prep',
     intro: 'Real weeks have soccer practice and late meetings. Tell NourishPlan who is home when, and it plans around your life instead of an ideal one.',
     steps: [
-      'On the Plan page, set each member\'s weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
+      'On the Household page, open a member under Profiles and set their weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
       'The generator respects it — no slow braise on a Quick night, nothing planned for someone who\'s Away.',
       'Schedule badges label the grid: "Use up" on consume days, "<20 min" on quick nights, "Away" when a member is out — so the shape of the week is readable at a glance.',
       'Tap "Batch prep" to see which of the week\'s recipes share ingredients or steps — cook once, eat twice.',
@@ -328,7 +328,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       'Invite members from the Household page; choose their role (admin or member) when creating the invite.',
       'Promote, demote, or remove members from the Members list — the last admin can\'t be demoted or removed.',
       'Add managed profiles for children — they get targets, portions, and schedules without an account.',
-      'Edit the household name in Settings.',
+      'Edit the household name and weekly budget on the Household page.',
       'Leaving or deleting your account walks you through transferring admin first if you\'re the last one.',
     ],
     tips: [
