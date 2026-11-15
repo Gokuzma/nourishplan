@@ -443,7 +443,14 @@ serve(async (req) => {
       const memberCount = members.length + profiles.length;
       const hasActiveRestrictions = restrictions.length > 0 || wontEat.some((w) => w.strength === "allergy");
       const smallCatalog = recipes.length < 7;
-      const pregnancyActive = nutritionTargets.some((r) => isCurrentlyPregnant(r, new Date()));
+      // A failed targets read must not be treated as "nobody pregnant": fail safe
+      // and run every pregnancy layer.
+      let pregnancyUnknown = false;
+      if (nutritionResult.error) {
+        console.error("[generate-plan] nutrition_targets read failed; applying pregnancy safety:", nutritionResult.error);
+        pregnancyUnknown = true;
+      }
+      const pregnancyActive = pregnancyUnknown || nutritionTargets.some((r) => isCurrentlyPregnant(r, new Date()));
       let pregnancySafetyChecked = false;
       // `${day_index}|${Slot}` keys the forced safety pass explicitly cleared
       const pregnancyModelClearedKeys = new Set<string>();
@@ -1186,9 +1193,15 @@ serve(async (req) => {
         .filter((s) => s.length > 0);
       const isSafeRecipe = (ingredientNames: string[]) =>
         !ingredientNames.some((n) => bannedIngredient.some((b) => n.toLowerCase().includes(b)));
+      // When pregnant, swaps draw only from the model's pregnancy-filtered shortlist.
+      const pregnancySafeShortlistIds = new Set(shortlistedRecipes.map((r) => r.id));
       const poolForSlot = (slotName: string): string[] =>
         recipeEnriched
-          .filter((r) => (r.meal_types ?? []).includes(capSlot(slotName)) && isSafeRecipe(r.ingredient_names))
+          .filter((r) =>
+            (r.meal_types ?? []).includes(capSlot(slotName)) &&
+            isSafeRecipe(r.ingredient_names) &&
+            (!pregnancyActive || pregnancySafeShortlistIds.has(r.id))
+          )
           .map((r) => r.id);
 
       // A leftover-consuming assignment at Lunch/Dinner is exempt: eating up an
@@ -1382,7 +1395,10 @@ serve(async (req) => {
         skippedSlots,
         reusedFills,
         ...(pregnancyActive
-          ? { pregnancyFilterRepairs, pregnancySafety: { active: true, checked: pregnancySafetyChecked } }
+          ? {
+            pregnancyFilterRepairs,
+            pregnancySafety: { active: true, checked: pregnancySafetyChecked, ...(pregnancyUnknown ? { unknown: true } : {}) },
+          }
           : {}),
         coverage: {
           totalSlotsToFill,

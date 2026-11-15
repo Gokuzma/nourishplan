@@ -7,10 +7,12 @@ export const PREGNANCY_BANNED_TERMS: string[] = [
   "wine", "beer", "liqueur", "rum", "vodka", "whisky", "whiskey", "bourbon", "brandy", "sake",
   "liver", "pâté", "pate", "shark", "swordfish", "king mackerel", "tilefish",
   "bigeye tuna", "marlin", "sushi", "sashimi", "tartare", "ceviche",
+  "liverwurst", "foie gras", "carpaccio", "gravlax", "crudo", "sherry", "tequila", "vermouth",
+  "champagne", "prosecco", "cognac", "marsala", "gin", "mirin",
 ];
 
 const MS_PER_DAY = 86400000;
-const MAX_DAYS_UNTIL_DUE = 300;
+const OVERDUE_GRACE_DAYS = 28;
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -29,7 +31,8 @@ const BANNED_TERM_PATTERNS: RegExp[] = PREGNANCY_BANNED_TERMS.map((term) => {
 });
 
 // Non-alcoholic phrases that contain a banned term; removed before matching.
-const SAFE_PHRASE_PATTERN = /(^|[^a-z0-9])(wine vinegars?|ginger beers?|root beers?)(?=[^a-z0-9]|$)/g;
+const SAFE_PHRASE_PATTERN =
+  /(^|[^a-z0-9])(wine vinegars?|ginger beers?|root beers?|pate (brisee|brisée|sucree|sucrée))(?=[^a-z0-9]|$)/g;
 
 export function isPregnancyUnsafe(recipeName: string, ingredientNames: string[]): boolean {
   const texts = [recipeName, ...ingredientNames].map((t) =>
@@ -42,7 +45,8 @@ function utcDayNumber(date: Date): number {
   return Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / MS_PER_DAY);
 }
 
-// A pregnant row with no due date fails safe: treated as currently pregnant.
+// Fails safe: a pregnant row counts as currently pregnant with no due date, a
+// due date more than 300 days out (likely a typo), or up to 28 days overdue.
 export function isCurrentlyPregnant(
   row: { is_pregnant: boolean; due_date: string | null },
   today: Date,
@@ -50,5 +54,5 @@ export function isCurrentlyPregnant(
   if (!row.is_pregnant) return false;
   if (!row.due_date) return true;
   const daysUntilDue = utcDayNumber(new Date(`${row.due_date}T00:00:00Z`)) - utcDayNumber(today);
-  return daysUntilDue >= 0 && daysUntilDue <= MAX_DAYS_UNTIL_DUE;
+  return daysUntilDue >= -OVERDUE_GRACE_DAYS;
 }

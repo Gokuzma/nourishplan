@@ -76,7 +76,41 @@ describe('isPregnancyUnsafe', () => {
       'wine', 'beer', 'liqueur', 'rum', 'vodka', 'whisky', 'whiskey', 'bourbon', 'brandy', 'sake',
       'liver', 'pâté', 'pate', 'shark', 'swordfish', 'king mackerel', 'tilefish',
       'bigeye tuna', 'marlin', 'sushi', 'sashimi', 'tartare', 'ceviche',
+      'liverwurst', 'foie gras', 'carpaccio', 'gravlax', 'crudo', 'sherry', 'tequila', 'vermouth',
+      'champagne', 'prosecco', 'cognac', 'marsala', 'gin', 'mirin',
     ])
+  })
+
+  it('flags the added cured, raw and alcohol terms', () => {
+    expect(isPregnancyUnsafe('Liverwurst Sandwich', [])).toBe(true)
+    expect(isPregnancyUnsafe('Seared Foie Gras', [])).toBe(true)
+    expect(isPregnancyUnsafe('Beef Carpaccio', [])).toBe(true)
+    expect(isPregnancyUnsafe('Dill Gravlax', [])).toBe(true)
+    expect(isPregnancyUnsafe('Tuna Crudo', [])).toBe(true)
+    expect(isPregnancyUnsafe('Trifle', ['sherry'])).toBe(true)
+    expect(isPregnancyUnsafe('Tequila Lime Chicken', [])).toBe(true)
+    expect(isPregnancyUnsafe('Braise', ['dry vermouth'])).toBe(true)
+    expect(isPregnancyUnsafe('Champagne Risotto', [])).toBe(true)
+    expect(isPregnancyUnsafe('Prosecco Sorbet', [])).toBe(true)
+    expect(isPregnancyUnsafe('Steak au Poivre', ['cognac'])).toBe(true)
+    expect(isPregnancyUnsafe('Chicken Marsala', [])).toBe(true)
+    expect(isPregnancyUnsafe('Gin Cured Salmon', [])).toBe(true)
+    expect(isPregnancyUnsafe('Teriyaki', ['mirin'])).toBe(true)
+  })
+
+  it('matches "gin" only as a whole word', () => {
+    expect(isPregnancyUnsafe('Ginger Chicken', ['fresh ginger'])).toBe(false)
+    expect(isPregnancyUnsafe('Engine Room Chili', [])).toBe(false)
+    expect(isPregnancyUnsafe('Chicken Tikka Masala', [])).toBe(false)
+  })
+
+  it('does not treat pâte brisée or pâte sucrée as pâté', () => {
+    expect(isPregnancyUnsafe('Apple Tart', ['pate brisee'])).toBe(false)
+    expect(isPregnancyUnsafe('Apple Tart', ['pate brisée'])).toBe(false)
+    expect(isPregnancyUnsafe('Lemon Tart', ['pate sucree'])).toBe(false)
+    expect(isPregnancyUnsafe('Lemon Tart', ['pâte sucrée'])).toBe(false)
+    expect(isPregnancyUnsafe('Quiche', ['pâte brisée'])).toBe(false)
+    expect(isPregnancyUnsafe('Chicken liver pate', [])).toBe(true)
   })
 
   it('avoid rule covers the spec categories', () => {
@@ -97,12 +131,17 @@ describe('isCurrentlyPregnant', () => {
     expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, 0) }, today)).toBe(true)
   })
 
-  it('is false for a past due date', () => {
-    expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, -1) }, today)).toBe(false)
+  it('stays true up to 28 days past due', () => {
+    expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, -1) }, today)).toBe(true)
+    expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, -28) }, today)).toBe(true)
   })
 
-  it('is false for a due date more than 300 days out', () => {
-    expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, 301) }, today)).toBe(false)
+  it('is false more than 28 days past due', () => {
+    expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, -29) }, today)).toBe(false)
+  })
+
+  it('fails safe (true) for a due date more than 300 days out', () => {
+    expect(isCurrentlyPregnant({ is_pregnant: true, due_date: daysFromToday(today, 301) }, today)).toBe(true)
   })
 
   it('is false when not pregnant', () => {
@@ -126,6 +165,17 @@ describe('generate-plan pregnancy wiring', () => {
     expect(source).toContain('If constraints.pregnancySafety is present it is a HARD rule like allergens.')
     expect(source).toContain('PREGNANT_ASSIGN_DEADLINE_MS = 100000')
     expect(source).toContain('pregnancyFilterRepairs')
+  })
+
+  it('fails safe when the nutrition_targets read errors', () => {
+    expect(source).toMatch(/if \(nutritionResult\.error\)\s*\{[^}]*pregnancyUnknown = true/)
+    expect(source).toContain('const pregnancyActive = pregnancyUnknown || nutritionTargets.some(')
+    expect(source).toContain('pregnancySafety: { active: true, checked: pregnancySafetyChecked, ...(pregnancyUnknown ? { unknown: true } : {}) }')
+  })
+
+  it('restricts guardrail swap pools to the pregnancy-safe shortlist', () => {
+    expect(source).toContain('const pregnancySafeShortlistIds = new Set(shortlistedRecipes.map((r) => r.id));')
+    expect(source).toMatch(/const poolForSlot = [\s\S]{0,400}\(!pregnancyActive \|\| pregnancySafeShortlistIds\.has\(r\.id\)\)/)
   })
 
   it('selects the new profile columns from nutrition_targets', () => {
