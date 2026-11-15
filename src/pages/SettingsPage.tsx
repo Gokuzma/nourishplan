@@ -235,7 +235,7 @@ export function SettingsPage() {
       <div className="hidden md:block">
         <Nameplate
           left={membership?.households?.name ?? 'Your account'}
-          title={<>The <span className="amp">Masthead</span></>}
+          title={<>The <span className="amp">Settings</span></>}
           right={session?.user.email ?? '—'}
         />
       </div>
@@ -243,7 +243,7 @@ export function SettingsPage() {
       {/* Story head */}
       <StoryHead
         kicker="SETTINGS"
-        headline="The Masthead"
+        headline="The Settings"
         byline="Account & household"
         size="sm"
       />
