@@ -123,12 +123,29 @@ describe('ProfileForm', () => {
     fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'female' } })
     fireEvent.click(screen.getByLabelText(/pregnant/i))
     fireEvent.change(screen.getByLabelText(/due date/i), { target: { value: '2027-01-01' } })
+    fireEvent.change(screen.getByLabelText(/pre-pregnancy weight/i), { target: { value: '140' } })
     fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'male' } })
     expect(screen.queryByLabelText(/pregnant/i)).toBeNull()
     expect(screen.queryByLabelText(/due date/i)).toBeNull()
     expect(screen.getByLabelText(/target weight/i)).toBeTruthy()
     fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'female' } })
     expect((screen.getByLabelText(/pregnant/i) as HTMLInputElement).checked).toBe(false)
+    fireEvent.click(screen.getByLabelText(/pregnant/i))
+    expect((screen.getByLabelText(/pre-pregnancy weight/i) as HTMLInputElement).value).toBe('')
+    expect((screen.getByLabelText(/due date/i) as HTMLInputElement).value).toBe('')
+  })
+
+  it('clears a stale saved pregnancy on a male when saving', () => {
+    vi.mocked(useNutritionTarget).mockReturnValue({
+      data: makeTarget({ sex: 'male', is_pregnant: true, due_date: '2027-01-01', pre_pregnancy_weight_kg: 60 }),
+      isPending: false,
+    } as never)
+    render(<ProfileForm {...baseProps} isChild={false} />)
+    fireEvent.click(screen.getByRole('button', { name: /save profile/i }))
+    const stats = saveMutate.mock.calls[0][0].stats
+    expect(stats.is_pregnant).toBe(false)
+    expect(stats.due_date).toBeNull()
+    expect(stats.pre_pregnancy_weight_kg).toBeNull()
   })
 
   it('has no save button when read-only', () => {
