@@ -89,6 +89,38 @@ export function useLatestGeneration(planId: string | undefined, poll = false) {
   })
 }
 
+const DEFAULT_TYPICAL_SECONDS = 45
+
+export function useTypicalGenerationSeconds(): number {
+  const { data: membership } = useHousehold()
+  const householdId = membership?.household_id
+
+  const { data } = useQuery({
+    queryKey: queryKeys.planGeneration.typical(householdId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('plan_generations')
+        .select('created_at, completed_at')
+        .eq('household_id', householdId!)
+        .in('status', ['done', 'partial'])
+        .not('completed_at', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(5)
+      if (error) throw error
+      const durations = (data ?? [])
+        .map(row => (new Date(row.completed_at as string).getTime() - new Date(row.created_at).getTime()) / 1000)
+        .sort((a, b) => a - b)
+      if (durations.length === 0) return DEFAULT_TYPICAL_SECONDS
+      const mid = Math.floor(durations.length / 2)
+      const median = durations.length % 2 === 1 ? durations[mid] : (durations[mid - 1] + durations[mid]) / 2
+      return Math.round(median)
+    },
+    enabled: !!householdId,
+  })
+
+  return data ?? DEFAULT_TYPICAL_SECONDS
+}
+
 export function useSuggestAlternative() {
   const { data: membership } = useHousehold()
   const householdId = membership?.household_id

@@ -64,6 +64,7 @@ vi.mock('../src/hooks/usePlanGeneration', () => ({
     isError: false,
   })),
   useSuggestAlternative: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+  useTypicalGenerationSeconds: vi.fn(() => 45),
 }))
 
 vi.mock('../src/hooks/useNutritionGaps', () => ({

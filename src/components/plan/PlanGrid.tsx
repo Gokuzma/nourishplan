@@ -17,7 +17,7 @@ import { useRecipes, useRecipeMacros } from '../../hooks/useRecipes'
 import { useHouseholdDayLogs } from '../../hooks/useFoodLogs'
 import { useNutritionTargets } from '../../hooks/useNutritionTargets'
 import { useHouseholdMembers, useMemberProfiles } from '../../hooks/useHousehold'
-import { useGeneratePlan, useGenerationJob, useLatestGeneration, useSuggestAlternative } from '../../hooks/usePlanGeneration'
+import { useGeneratePlan, useGenerationJob, useLatestGeneration, useSuggestAlternative, useTypicalGenerationSeconds } from '../../hooks/usePlanGeneration'
 import { useNutritionGaps } from '../../hooks/useNutritionGaps'
 import { useHouseholdSchedules, useScheduleExceptions } from '../../hooks/useSchedule'
 import { applyExceptions, buildHouseholdGrid, buildHouseholdTooltips } from '../../utils/schedule'
@@ -33,6 +33,7 @@ import { SlotCard } from './SlotCard'
 import { SlotShimmer } from './SlotShimmer'
 import { GeneratePlanButton } from './GeneratePlanButton'
 import { GenerationProgressBar } from './GenerationProgressBar'
+import { isCurrentlyPregnant } from '../../../supabase/functions/_shared/pregnancySafety'
 import { BatchPrepButton } from './BatchPrepButton'
 import { BatchPrepModal } from './BatchPrepModal'
 import { DayScheduleModal } from './DayScheduleModal'
@@ -364,6 +365,8 @@ export function PlanGrid({
   // Suggestion data — fetched once for the whole grid
   const today = logDate ?? new Date().toISOString().slice(0, 10)
   const { data: targets } = useNutritionTargets(householdId)
+  const typicalSeconds = useTypicalGenerationSeconds()
+  const anyonePregnant = (targets ?? []).some(row => isCurrentlyPregnant(row, new Date()))
   const { data: allLogs } = useHouseholdDayLogs(householdId, today)
   const { data: householdMembers } = useHouseholdMembers()
   const { data: memberProfiles } = useMemberProfiles()
@@ -755,6 +758,9 @@ export function PlanGrid({
         {(isGenerating || isTimeout) && (
           <GenerationProgressBar
             passCount={liveJob?.pass_count ?? 0}
+            startedAt={liveJob?.created_at}
+            typicalSeconds={typicalSeconds}
+            pregnancyCheck={anyonePregnant}
             isVisible={isGenerating || isTimeout}
             isTimeout={isTimeout}
           />

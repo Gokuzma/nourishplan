@@ -108,6 +108,8 @@ export const queryKeys = {
       ['plan-generation', householdId, jobId] as const,
     latest: (householdId: string | undefined, weekStart: string) =>
       ['plan-generation', householdId, weekStart, 'latest'] as const,
+    typical: (householdId: string | undefined) =>
+      ['plan-generation', householdId, 'typical'] as const,
   },
   cookSession: {
     detail: (sessionId: string | undefined) =>

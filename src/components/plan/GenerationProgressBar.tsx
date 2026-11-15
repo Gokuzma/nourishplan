@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react'
+
 /*
  * Live generation progress driven by plan_generations.pass_count, which the
  * generate-plan edge function updates as each solver pass starts:
@@ -13,17 +15,49 @@ function labelForPass(passCount: number): string {
   return `Fixing rule violations — check ${passCount - 2} of 3...`
 }
 
+export function estimateFill(passCount: number, elapsedS: number, typicalS: number): number {
+  return Math.max(PASS_FILL[passCount] ?? 90, Math.min(95, Math.round((elapsedS / typicalS) * 95)))
+}
+
+function formatElapsed(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
 interface GenerationProgressBarProps {
   passCount: number
   isVisible: boolean
   isTimeout?: boolean
+  startedAt?: string
+  typicalSeconds?: number
+  pregnancyCheck?: boolean
 }
 
-export function GenerationProgressBar({ passCount, isVisible, isTimeout }: GenerationProgressBarProps) {
-  const fillPercent = isTimeout ? 100 : (PASS_FILL[passCount] ?? 90)
-  const currentLabel = isTimeout
-    ? 'Best plan found (time limit reached)'
-    : labelForPass(passCount)
+export function GenerationProgressBar({
+  passCount,
+  isVisible,
+  isTimeout,
+  startedAt,
+  typicalSeconds = 45,
+  pregnancyCheck,
+}: GenerationProgressBarProps) {
+  const mountedAtMs = useRef(Date.now())
+  const [nowMs, setNowMs] = useState(() => Date.now())
+
+  useEffect(() => {
+    const id = setInterval(() => setNowMs(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  const startMs = startedAt ? new Date(startedAt).getTime() : mountedAtMs.current
+  const elapsedS = Math.max(0, Math.floor((nowMs - startMs) / 1000))
+  const overTypical = elapsedS > typicalSeconds
+
+  const fillPercent = isTimeout ? 100 : estimateFill(passCount, elapsedS, typicalSeconds)
+  let currentLabel = labelForPass(passCount)
+  if (pregnancyCheck && passCount >= 3) currentLabel = 'Extra safety check for pregnancy'
+  if (isTimeout) currentLabel = 'Best plan found (time limit reached)'
 
   return (
     <div
@@ -45,6 +79,13 @@ export function GenerationProgressBar({ passCount, isVisible, isTimeout }: Gener
       <p className={`text-xs font-sans text-center mt-1.5 ${isTimeout ? 'text-amber-500' : 'text-text/50'}`}>
         {currentLabel}
       </p>
+      {!isTimeout && (
+        <p className="text-xs font-sans text-center mt-0.5 text-text/50">
+          <span>{formatElapsed(elapsedS)}</span>
+          {' · '}
+          <span>{overTypical ? 'Taking longer than usual, still working…' : `Usually about ${typicalSeconds} s`}</span>
+        </p>
+      )}
     </div>
   )
 }
