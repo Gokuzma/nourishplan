@@ -16,6 +16,7 @@ interface Props {
   memberType: 'user' | 'profile'
   memberName?: string
   weekStartDay?: number
+  isChild?: boolean
 }
 
 const STATUS_STYLES: Record<ScheduleStatus, string> = {
@@ -27,6 +28,18 @@ const STATUS_STYLES: Record<ScheduleStatus, string> = {
 }
 
 const STATUS_OPTIONS: ScheduleStatus[] = ['prep', 'batch', 'consume', 'quick', 'away']
+
+const CHILD_STATUS_OPTIONS: ScheduleStatus[] = ['prep', 'away']
+
+const CHILD_STATUS_LABELS: Partial<Record<ScheduleStatus, string>> = {
+  prep: 'Home',
+  away: 'Away',
+}
+
+const CHILD_STATUS_LEGEND: { status: ScheduleStatus; text: string }[] = [
+  { status: 'prep', text: 'Home — eats with the family' },
+  { status: 'away', text: 'Away — eats somewhere else (daycare, school, grandparents)' },
+]
 
 const STATUS_LEGEND: { status: ScheduleStatus; text: string }[] = [
   { status: 'prep', text: 'Cook — make a meal and eat it then' },
@@ -42,6 +55,7 @@ export function ScheduleSection({
   memberType,
   memberName,
   weekStartDay,
+  isChild,
 }: Props) {
   const { data: slots } = useSchedule(householdId, memberId, memberType)
   const saveSchedule = useSaveSchedule()
@@ -49,10 +63,15 @@ export function ScheduleSection({
   const [grid, setGrid] = useState<ScheduleGrid>(new Map())
 
   useEffect(() => {
-    if (slots) {
-      setGrid(buildGrid(slots))
+    if (!slots) return
+    const loaded = buildGrid(slots)
+    if (isChild) {
+      for (const [key, status] of loaded) {
+        if (status !== 'away') loaded.set(key, 'prep')
+      }
     }
-  }, [slots])
+    setGrid(loaded)
+  }, [slots, isChild])
 
   function handleStatusChange(dayOfWeek: number, slotName: string, next: ScheduleStatus) {
     const key = `${dayOfWeek}:${slotName}`
@@ -64,12 +83,21 @@ export function ScheduleSection({
   }
 
   const orderedDays = getOrderedDays(weekStartDay ?? 1)
+  const options = isChild ? CHILD_STATUS_OPTIONS : STATUS_OPTIONS
+  const labelFor = (status: ScheduleStatus) =>
+    (isChild ? CHILD_STATUS_LABELS[status] : undefined) ?? STATUS_LABELS[status]
+  const legend = isChild ? CHILD_STATUS_LEGEND : STATUS_LEGEND
 
   return (
     <div className="mt-4">
       <h4 className="text-base font-semibold text-text mt-4">
         {memberName ? `${memberName} — ` : ''}Weekly Schedule
       </h4>
+      <p className="text-xs text-text/60 mt-1 max-w-prose">
+        {isChild
+          ? `${memberName ?? 'This child'} eats whatever the family is having, so most meals stay on Home. Mark Away only for meals eaten somewhere else, like daycare lunch.`
+          : 'Pick what you are doing for each meal. The plan combines everyone in the household: the strictest choice of whoever is home wins, and a meal is only skipped when everyone is away.'}
+      </p>
 
       <div className="overflow-x-auto mt-3">
         <div role="grid" className="min-w-max">
@@ -102,12 +130,12 @@ export function ScheduleSection({
                     onChange={e =>
                       handleStatusChange(day, slotName, e.target.value as ScheduleStatus)
                     }
-                    aria-label={`${DAY_LABELS[day]} ${slotName}: ${STATUS_LABELS[status]}`}
+                    aria-label={`${DAY_LABELS[day]} ${slotName}: ${labelFor(status)}`}
                     className={`w-16 min-h-[44px] border rounded text-xs font-semibold transition-colors mx-0.5 text-center appearance-none cursor-pointer ${STATUS_STYLES[status]}`}
                   >
-                    {STATUS_OPTIONS.map(option => (
+                    {options.map(option => (
                       <option key={option} value={option}>
-                        {STATUS_LABELS[option]}
+                        {labelFor(option)}
                       </option>
                     ))}
                   </select>
@@ -120,7 +148,7 @@ export function ScheduleSection({
 
       {/* Legend */}
       <ul className="mt-3 flex flex-col gap-1">
-        {STATUS_LEGEND.map(({ status, text }) => (
+        {legend.map(({ status, text }) => (
           <li key={status} className="flex items-center gap-2 text-xs text-text/60">
             <span className={`inline-block w-3 h-3 rounded border flex-shrink-0 ${STATUS_STYLES[status]}`} />
             {text}

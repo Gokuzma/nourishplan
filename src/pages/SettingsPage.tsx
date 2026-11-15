@@ -530,6 +530,7 @@ export function SettingsPage() {
                 memberType="profile"
                 memberName={profile.name}
                 weekStartDay={membership.households?.week_start_day}
+                isChild={profile.is_child}
               />
             </div>
           ))}
