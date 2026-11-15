@@ -23,7 +23,7 @@ function buildSummary(target: NutritionTarget | undefined, isChild: boolean, tod
   if (target.birth_date) parts.push(String(ageInYears(target.birth_date, today)))
   if (target.is_pregnant && target.due_date) {
     const status = pregnancyStatus(target.due_date, today)
-    if ('trimester' in status) parts.push(`Pregnant, T${status.trimester}`)
+    parts.push('trimester' in status ? `Pregnant, T${status.trimester}` : 'Pregnancy: check due date')
   } else if (target.is_pregnant) {
     parts.push('Pregnant')
   }

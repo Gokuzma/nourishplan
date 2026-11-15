@@ -100,6 +100,21 @@ describe('Settings Profiles section', () => {
     expect(screen.getAllByTestId('profile-summary')[0].textContent).toBe('36 · Pregnant · 2400 kcal')
   })
 
+  it('asks to check the due date when it is past or too far away', () => {
+    mockTargets.push(target({
+      user_id: 'u-self', sex: 'female', birth_date: '1990-06-01', is_pregnant: true,
+      due_date: '2026-10-01', calories: 2400,
+    }))
+    mockTargets.push(target({
+      user_id: 'u-admin', sex: 'female', birth_date: '1990-06-01', is_pregnant: true,
+      due_date: '2027-12-01', calories: 2400,
+    }))
+    render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    const summaries = screen.getAllByTestId('profile-summary').map(el => el.textContent)
+    expect(summaries[0]).toBe('36 · Pregnancy: check due date · 2400 kcal')
+    expect(summaries[1]).toBe('36 · Pregnancy: check due date · 2400 kcal')
+  })
+
   it('shows a suggested calorie figure when no targets are saved', () => {
     mockTargets.push(target({
       member_profile_id: 'p-kid', sex: 'male', birth_date: '2018-03-01',

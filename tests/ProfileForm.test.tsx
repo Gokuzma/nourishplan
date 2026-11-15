@@ -46,6 +46,11 @@ function makeTarget(overrides: Partial<NutritionTarget> = {}): NutritionTarget {
   }
 }
 
+function daysFromToday(days: number): string {
+  const today = new Date()
+  return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + days)).toISOString().slice(0, 10)
+}
+
 beforeEach(() => {
   saveMutate.mockReset()
   applyMutate.mockReset()
@@ -106,7 +111,7 @@ describe('ProfileForm', () => {
   it('caps notes at 500 characters', () => {
     render(<ProfileForm {...baseProps} isChild={false} />)
     expect(screen.getByLabelText(/notes/i).getAttribute('maxlength')).toBe('500')
-    expect(screen.getByText('Visible to your household.')).toBeTruthy()
+    expect(screen.getByText('Visible to your household and used by the meal planner.')).toBeTruthy()
   })
 
   it('keeps unsaved edits when only calories change on the target', () => {
@@ -146,6 +151,48 @@ describe('ProfileForm', () => {
     expect(stats.is_pregnant).toBe(false)
     expect(stats.due_date).toBeNull()
     expect(stats.pre_pregnancy_weight_kg).toBeNull()
+  })
+
+  it('rejects a due date more than 300 days out or more than 28 days past', () => {
+    render(<ProfileForm {...baseProps} isChild={false} />)
+    fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'female' } })
+    fireEvent.click(screen.getByLabelText(/pregnant/i))
+    const form = screen.getByRole('button', { name: /save profile/i }).closest('form')!
+    for (const days of [301, -29]) {
+      fireEvent.change(screen.getByLabelText(/due date/i), { target: { value: daysFromToday(days) } })
+      fireEvent.submit(form)
+      expect(screen.getByText('Check the due date.')).toBeTruthy()
+    }
+    expect(saveMutate).not.toHaveBeenCalled()
+    for (const days of [300, -28]) {
+      fireEvent.change(screen.getByLabelText(/due date/i), { target: { value: daysFromToday(days) } })
+      fireEvent.submit(form)
+    }
+    expect(screen.queryByText('Check the due date.')).toBeNull()
+    expect(saveMutate).toHaveBeenCalledTimes(2)
+  })
+
+  it('rejects zero or negative height and weights', () => {
+    render(<ProfileForm {...baseProps} isChild={false} />)
+    const form = screen.getByRole('button', { name: /save profile/i }).closest('form')!
+    expect(screen.getByLabelText('Weight (lb)').getAttribute('min')).toBe('0.1')
+    fireEvent.change(screen.getByLabelText('Weight (lb)'), { target: { value: '0' } })
+    fireEvent.submit(form)
+    expect(screen.getByText('Height and weights must be greater than 0.')).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Weight (lb)'), { target: { value: '150' } })
+    fireEvent.change(screen.getByLabelText('Height (ft)'), { target: { value: '0' } })
+    fireEvent.change(screen.getByLabelText('Height (in)'), { target: { value: '0' } })
+    fireEvent.submit(form)
+    expect(screen.getByText('Height and weights must be greater than 0.')).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(/target weight/i), { target: { value: '-5' } })
+    fireEvent.change(screen.getByLabelText('Height (ft)'), { target: { value: '5' } })
+    fireEvent.submit(form)
+    expect(screen.getByText('Height and weights must be greater than 0.')).toBeTruthy()
+    expect(saveMutate).not.toHaveBeenCalled()
+    fireEvent.change(screen.getByLabelText(/target weight/i), { target: { value: '140' } })
+    fireEvent.submit(form)
+    expect(screen.queryByText('Height and weights must be greater than 0.')).toBeNull()
+    expect(saveMutate).toHaveBeenCalledTimes(1)
   })
 
   it('has no save button when read-only', () => {

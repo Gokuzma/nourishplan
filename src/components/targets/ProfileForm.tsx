@@ -8,6 +8,9 @@ type Units = 'metric' | 'imperial'
 
 const UNITS_STORAGE_KEY = 'np-units'
 const NOTES_MAX_LENGTH = 500
+const MS_PER_DAY = 86400000
+const MAX_DAYS_UNTIL_DUE = 300
+const MAX_DAYS_PAST_DUE = 28
 
 const ACTIVITY_OPTIONS: { value: ActivityLevel; label: string }[] = [
   { value: 'sedentary', label: 'Sedentary' },
@@ -51,6 +54,12 @@ function parseNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function isDueDateOutOfRange(dueDate: string, today: Date): boolean {
+  const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  const daysUntilDue = Math.round((Date.parse(`${dueDate}T00:00:00Z`) - todayUtc) / MS_PER_DAY)
+  return daysUntilDue > MAX_DAYS_UNTIL_DUE || daysUntilDue < -MAX_DAYS_PAST_DUE
+}
+
 export function ProfileForm({
   householdId,
   memberId,
@@ -76,6 +85,7 @@ export function ProfileForm({
   const [dueDate, setDueDate] = useState('')
   const [notes, setNotes] = useState('')
   const [saved, setSaved] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   function weightToDisplay(kg: number | null, unitSystem: Units): string {
     if (kg == null) return ''
@@ -155,6 +165,19 @@ export function ProfileForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const heightInCm = heightToCm()
+    const weightKg = displayToKg(weight)
+    const targetWeightKg = showTargetWeight ? displayToKg(targetWeight) : null
+    const prePregnancyWeightKg = showPregnancy ? displayToKg(prePregnancyWeight) : null
+    if ([heightInCm, weightKg, targetWeightKg, prePregnancyWeightKg].some((value) => value != null && value <= 0)) {
+      setValidationError('Height and weights must be greater than 0.')
+      return
+    }
+    if (showPregnancy && dueDate && isDueDateOutOfRange(dueDate, new Date())) {
+      setValidationError('Check the due date.')
+      return
+    }
+    setValidationError(null)
     save.mutate(
       {
         householdId,
@@ -163,10 +186,10 @@ export function ProfileForm({
         stats: {
           birth_date: birthDate || null,
           sex: sex || null,
-          height_cm: heightToCm(),
-          weight_kg: displayToKg(weight),
-          target_weight_kg: showTargetWeight ? displayToKg(targetWeight) : null,
-          pre_pregnancy_weight_kg: showPregnancy ? displayToKg(prePregnancyWeight) : null,
+          height_cm: heightInCm,
+          weight_kg: weightKg,
+          target_weight_kg: targetWeightKg,
+          pre_pregnancy_weight_kg: prePregnancyWeightKg,
           activity_level: activity || null,
           is_pregnant: showPregnancy,
           due_date: showPregnancy ? dueDate || null : null,
@@ -254,7 +277,7 @@ export function ProfileForm({
             <input
               id="profile-height-cm"
               type="number"
-              min={0}
+              min={0.1}
               step="any"
               value={heightCm}
               onChange={(e) => setHeightCm(e.target.value)}
@@ -299,7 +322,7 @@ export function ProfileForm({
           <input
             id="profile-weight"
             type="number"
-            min={0}
+            min={0.1}
             step="any"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
@@ -359,7 +382,7 @@ export function ProfileForm({
               <input
                 id="profile-pre-pregnancy-weight"
                 type="number"
-                min={0}
+                min={0.1}
                 step="any"
                 value={prePregnancyWeight}
                 onChange={(e) => setPrePregnancyWeight(e.target.value)}
@@ -377,7 +400,7 @@ export function ProfileForm({
             <input
               id="profile-target-weight"
               type="number"
-              min={0}
+              min={0.1}
               step="any"
               value={targetWeight}
               onChange={(e) => setTargetWeight(e.target.value)}
@@ -398,7 +421,7 @@ export function ProfileForm({
             onChange={(e) => setNotes(e.target.value)}
             className={inputClass}
           />
-          <p className="text-xs text-text/50">Visible to your household.</p>
+          <p className="text-xs text-text/50">Visible to your household and used by the meal planner.</p>
         </div>
       </fieldset>
 
@@ -412,6 +435,7 @@ export function ProfileForm({
             {save.isPending ? 'Saving…' : 'Save profile'}
           </button>
           {saved && <span className="text-sm font-medium text-green-600">Saved</span>}
+          {validationError && <span className="text-sm text-red-500">{validationError}</span>}
           {save.isError && (
             <span className="text-sm text-red-500">
               {save.error instanceof Error ? save.error.message : 'Failed to save.'}
