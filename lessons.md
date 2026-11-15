@@ -406,3 +406,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** `npx supabase` resolved to CLI v3.1.0, which requires interactive consent for any hosted/production mutation and detects non-interactive agent shells.
 **Rule:** When the user has approved a deploy (or the "always deploy" preference applies), pass `--yes` to `supabase functions deploy` / `db push`. Never add `--yes` to a mutation the user hasn't approved. Note also that `--project-ref` is deprecated in v3 in favour of `--remote=<ref>`.
 **Applies to:** Every Supabase CLI command that changes the hosted project, run from harness tool calls.
+
+### L-057: Parse-check edge functions before deploying — tsc/vitest don't cover them
+**Bug:** Commit d6828cf added `const memberCount` inside a `generate-plan` block that already declared it. All 436 tests and `tsc -b` passed, the function deployed "successfully", and production returned `BOOT_ERROR` (plan generation down) until a later agent noticed the duplicate.
+**Root cause:** `supabase/functions/**` sits outside the app tsconfig, there is no local Deno, and `supabase functions deploy` uploads without type-checking. The vitest edge-function tests read source as text, so nothing ever parsed the file. The post-deploy check only looked at the client bundle, not the function.
+**Rule:** Before every `supabase functions deploy <fn>`, run `npx -y esbuild@0.24.0 supabase/functions/<fn>/index.ts --loader:.ts=ts --log-level=error > /dev/null && echo PARSE_OK` and deploy only on PARSE_OK. After deploying, probe it with `curl -s -X POST https://<ref>.supabase.co/functions/v1/<fn> -H "Content-Type: application/json" -d '{}'`. A validation error means it booted; `BOOT_ERROR` means roll back or fix immediately.
+**Applies to:** Every edge-function edit and deploy, especially `generate-plan`.
