@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isCurrentlyPregnant, isPregnancyUnsafe, PREGNANCY_AVOID_RULE } from "../_shared/pregnancySafety.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -73,6 +74,9 @@ interface NutritionTargetRow {
   protein_g: number | null;
   carbs_g: number | null;
   fat_g: number | null;
+  is_pregnant: boolean;
+  due_date: string | null;
+  notes: string | null;
 }
 
 interface AssignedSlot {
@@ -296,6 +300,9 @@ serve(async (req) => {
     // Pass 1 (Haiku shortlist, ~3s) + Pass 2 (Haiku/Sonnet assign, max_tokens=4096, ~5-15s)
     // + passes 3-5 (Haiku correction, ~3-8s each if violations) fit comfortably in 90s.
     const WALL_CLOCK_BUDGET_MS = 90000;
+    // When a member is pregnant the pregnancy-safety verify pass is mandatory, so
+    // pass 3 may start up to 100s in (still inside the 150s platform timeout).
+    const PREGNANT_ASSIGN_DEADLINE_MS = 100000;
     const startTime = Date.now();
     function hasTimeLeft(): boolean {
       return Date.now() - startTime < WALL_CLOCK_BUDGET_MS;
@@ -371,7 +378,7 @@ serve(async (req) => {
           .eq("household_id", householdId),
         adminClient
           .from("nutrition_targets")
-          .select("user_id, member_profile_id, calories, protein_g, carbs_g, fat_g")
+          .select("user_id, member_profile_id, calories, protein_g, carbs_g, fat_g, is_pregnant, due_date, notes")
           .eq("household_id", householdId),
         adminClient
           .from("household_members")
@@ -433,6 +440,21 @@ serve(async (req) => {
       const memberCount = members.length + profiles.length;
       const hasActiveRestrictions = restrictions.length > 0 || wontEat.some((w) => w.strength === "allergy");
       const smallCatalog = recipes.length < 7;
+      const pregnancyActive = nutritionTargets.some((r) => isCurrentlyPregnant(r, new Date()));
+      let pregnancySafetyChecked = false;
+      const pregnancySystemSuffix = pregnancyActive
+        ? " If constraints.pregnancySafety is present it is a HARD rule like allergens."
+        : "";
+      const pregnancyConstraint = pregnancyActive ? { pregnancySafety: PREGNANCY_AVOID_RULE } : {};
+      const nutritionTargetsForModel = nutritionTargets.map((t) => ({
+        user_id: t.user_id,
+        member_profile_id: t.member_profile_id,
+        calories: t.calories,
+        protein_g: t.protein_g,
+        carbs_g: t.carbs_g,
+        fat_g: t.fat_g,
+        notes: t.notes ? sanitizeString(t.notes).slice(0, 500) : null,
+      }));
 
       constraintSnapshotSummary = {
         recipeCount: recipes.length,
@@ -629,8 +651,14 @@ serve(async (req) => {
         };
       });
 
+      const pregnancyUnsafeIds = new Set(
+        pregnancyActive
+          ? recipeEnriched.filter((r) => isPregnancyUnsafe(r.name, r.ingredient_names)).map((r) => r.id)
+          : [],
+      );
+
       // Recipe catalog for AI shortlist (Pass 1) — LEAN shape + tier_hint + meal_types.
-      const recipeCatalog = recipeEnriched.map((r) => ({
+      const recipeCatalog = recipeEnriched.filter((r) => !pregnancyUnsafeIds.has(r.id)).map((r) => ({
         id: r.id,
         name: r.name,
         ingredient_names: r.ingredient_names,
@@ -657,7 +685,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 1024,
             system:
-              "You are a household meal planner. Given a recipe catalog and household constraints, return a JSON array of recipe IDs that are good candidates for this week's plan. Consider dietary restrictions (HARD constraint — never include recipes with allergen ingredients), won't-eat lists (HARD — never include), member preferences (ratings), schedule complexity requirements, inventory availability (prefer recipes using ingredients the household has), and budget awareness. ALWAYS include any recipe whose name matches an unexpired leftover in constraints.leftovers (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), and favor recipes that use items in constraints.expiringSoon. Return approximately 30 candidates. Select candidates with tier balance roughly matching the provided recipeMix ratios (favorites/liked/novel percentages). Include enough novel candidates (tier_hint='novel') to support the novel quota. Prefer recipes whose tier_hint matches the tier you are filling. Return ONLY a JSON array of ID strings, nothing else.",
+              "You are a household meal planner. Given a recipe catalog and household constraints, return a JSON array of recipe IDs that are good candidates for this week's plan. Consider dietary restrictions (HARD constraint — never include recipes with allergen ingredients), won't-eat lists (HARD — never include), member preferences (ratings), schedule complexity requirements, inventory availability (prefer recipes using ingredients the household has), and budget awareness. ALWAYS include any recipe whose name matches an unexpired leftover in constraints.leftovers (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), and favor recipes that use items in constraints.expiringSoon. Return approximately 30 candidates. Select candidates with tier balance roughly matching the provided recipeMix ratios (favorites/liked/novel percentages). Include enough novel candidates (tier_hint='novel') to support the novel quota. Prefer recipes whose tier_hint matches the tier you are filling. Return ONLY a JSON array of ID strings, nothing else." + pregnancySystemSuffix,
             messages: [
               {
                 role: "user",
@@ -672,6 +700,7 @@ serve(async (req) => {
                     leftovers: leftoverNames,
                     expiringSoon: expiringSoonNames,
                     priorityOrder: priorityOrder ?? [],
+                    ...pregnancyConstraint,
                   },
                   recipeMix,
                   memberCount,
@@ -704,7 +733,7 @@ serve(async (req) => {
       // Recipe details for shortlisted candidates (Phase 24: enriched with cook history,
       // per-member ratings, cost_per_serving, tier_hint — Pitfall 1 says Pass 2 only).
       const shortlistedSet = new Set(shortlistedIds);
-      const shortlistedRecipes = recipeEnriched.filter((r) => shortlistedSet.has(r.id));
+      const shortlistedRecipes = recipeEnriched.filter((r) => shortlistedSet.has(r.id) && !pregnancyUnsafeIds.has(r.id));
 
       // Model selection per D-06: haiku for small simple households, sonnet for complex
       const assignModel =
@@ -725,7 +754,7 @@ serve(async (req) => {
             model: assignModel,
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get normal cook-and-eat recipes (complex is fine), 'batch' slots STRONGLY prefer recipes that scale up and keep well as leftovers (soups, stews, casseroles, curries, bakes) because the household cooks extra for later meals, 'consume' slots prefer repeating a recipe assigned to an earlier 'batch' slot in the same week (eating those leftovers) or otherwise a low-effort recipe, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon — using food before it expires beats perfect variety. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. 10) If leftovers lists an unexpired leftover whose name matches a candidate recipe (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), STRONGLY prefer assigning that recipe to the earliest unlocked Lunch slot with day_index >= todayDayIndex and a date before the leftover's expiry (a slot in the past cannot be eaten), with rationale 'Uses up leftover — expires {date}' (this format overrides the tier formats in rule 9). Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get normal cook-and-eat recipes (complex is fine), 'batch' slots STRONGLY prefer recipes that scale up and keep well as leftovers (soups, stews, casseroles, curries, bakes) because the household cooks extra for later meals, 'consume' slots prefer repeating a recipe assigned to an earlier 'batch' slot in the same week (eating those leftovers) or otherwise a low-effort recipe, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment (leave slot_name as null in your response for away slots). 4) Optimize for the priority order provided (first priority = most important). 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon — using food before it expires beats perfect variety. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. 8) Enforce tier quotas across the 28 weekly slots based on recipeMix percentages: favorites% of assignments should come from recipes with tier_hint='favorite' (high avg_rating and cook_count>0); liked% should come from tier_hint='liked' recipes, deprioritizing those with a last_cooked_date within the past 14 days; novel% should come from tier_hint='novel' recipes (cook_count=0), choosing novels by ingredient similarity to the highest-avg-rating favorite in the shortlist. 9) For generation_rationale, use these EXACT formats: Favorite tier → 'Favorite — avg {N} stars across {N} cooks' where the first {N} is avg_rating rounded to 1 decimal and the second {N} is cook_count; Liked tier → 'Liked — last cooked {N} weeks ago' where {N} = floor(daysSinceLastCooked/7); if last_cooked_date is null use 'Liked — not recently cooked'; Novel tier → 'Novel — similar ingredients to your top-rated {Recipe Name}' where Recipe Name is the highest-avg_rating favorite whose ingredient_names overlap with this novel recipe. If no history is available for a recipe, fall back to a brief nutrition-fit rationale. 10) If leftovers lists an unexpired leftover whose name matches a candidate recipe (e.g. 'Leftover: Creamy Tuscan Chicken' matches recipe 'Creamy Tuscan Chicken'), STRONGLY prefer assigning that recipe to the earliest unlocked Lunch slot with day_index >= todayDayIndex and a date before the leftover's expiry (a slot in the past cannot be eaten), with rationale 'Uses up leftover — expires {date}' (this format overrides the tier formats in rule 9). Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }" + pregnancySystemSuffix,
             messages: [
               {
                 role: "user",
@@ -739,7 +768,7 @@ serve(async (req) => {
                   inventory: inventoryNames,
                   leftovers: leftoverNames,
                   expiringSoon: expiringSoonNames,
-                  nutritionTargets,
+                  nutritionTargets: nutritionTargetsForModel,
                   priorityOrder: priorityOrder ?? [],
                   recipeMix,
                   smallCatalog,
@@ -747,6 +776,7 @@ serve(async (req) => {
                     allergens: allergenNames,
                     wontEat: wontEatNames,
                     restrictions: allPredefined,
+                    ...pregnancyConstraint,
                   },
                 }),
               },
@@ -810,13 +840,28 @@ serve(async (req) => {
         }
       }
 
-      // Passes 3-5 — Verify and Correct (if violations exist)
+      // Passes 3-5 — Verify and Correct (if violations exist, or always once
+      // when a member is pregnant)
       for (let pass = 3; pass <= 5; pass++) {
-        if (!hasTimeLeft()) {
-          correctionPassesSkippedForTime = true;
-          break;
+        const forcePregnancyCheck = pregnancyActive && pass2Completed && !pregnancySafetyChecked;
+        if (forcePregnancyCheck) {
+          if (Date.now() - startTime >= PREGNANT_ASSIGN_DEADLINE_MS) {
+            correctionPassesSkippedForTime = true;
+            break;
+          }
+        } else if (pregnancySafetyChecked) {
+          if ((bestResult.violations ?? []).length === 0) break;
+          if (!hasTimeLeft()) {
+            correctionPassesSkippedForTime = true;
+            break;
+          }
+        } else {
+          if (!hasTimeLeft()) {
+            correctionPassesSkippedForTime = true;
+            break;
+          }
+          if ((bestResult.violations ?? []).length === 0) break;
         }
-        if ((bestResult.violations ?? []).length === 0) break;
 
         passCount++;
         await adminClient.from("plan_generations").update({ pass_count: passCount }).eq("id", jobId);
@@ -831,7 +876,7 @@ serve(async (req) => {
             model: "claude-haiku-4-5",
             max_tokens: 4096,
             system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get normal cook-and-eat recipes, 'batch' slots prefer recipes that scale up and keep well as leftovers, 'consume' slots prefer repeating an earlier 'batch' recipe from the same week or a low-effort recipe, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon; when a leftover in leftovers matches a candidate recipe name, keep or place that recipe in the earliest unlocked Lunch slot before the leftover expires. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }",
+              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get normal cook-and-eat recipes, 'batch' slots prefer recipes that scale up and keep well as leftovers, 'consume' slots prefer repeating an earlier 'batch' recipe from the same week or a low-effort recipe, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon; when a leftover in leftovers matches a candidate recipe name, keep or place that recipe in the earliest unlocked Lunch slot before the leftover expires. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }" + pregnancySystemSuffix,
             messages: [
               {
                 role: "user",
@@ -851,8 +896,11 @@ serve(async (req) => {
                     leftovers: leftoverNames,
                     expiringSoon: expiringSoonNames,
                     priorityOrder: priorityOrder ?? [],
+                    ...pregnancyConstraint,
                   },
-                  instruction: "Fix these violations while preserving as many good assignments as possible.",
+                  instruction: forcePregnancyCheck
+                    ? "Re-check every slot against constraints.pregnancySafety; fix any violation. Also fix any listed violations while preserving as many good assignments as possible."
+                    : "Fix these violations while preserving as many good assignments as possible.",
                 }),
               },
             ],
@@ -882,7 +930,10 @@ serve(async (req) => {
                 validVerifySlots.push(s);
               }
               parsed.slots = validVerifySlots;
-              if ((parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
+              const acceptForcedCheck = forcePregnancyCheck &&
+                parsed.slots.length > 0 &&
+                (parsed.violations ?? []).length <= (bestResult.violations ?? []).length;
+              if (acceptForcedCheck || (parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
                 // The verify prompt has no tier-rationale rules, so its slots come
                 // back with empty rationale. Preserve the prior pass's rationale for
                 // any slot whose recipe assignment did not change.
@@ -896,6 +947,7 @@ serve(async (req) => {
                 }
                 bestResult = parsed;
                 suggestedRecipes = parsed.suggestedRecipes;
+                if (forcePregnancyCheck) pregnancySafetyChecked = true;
               }
             } catch {
               // Keep existing bestResult
@@ -915,6 +967,9 @@ serve(async (req) => {
         finalStatus = "partial";
       } else {
         finalStatus = "done";
+      }
+      if (pregnancyActive && pass2Completed && !pregnancySafetyChecked) {
+        finalStatus = "partial";
       }
 
       // Slot-level fallback (Gap A closure). For every slotToFill that ended up
@@ -1175,6 +1230,44 @@ serve(async (req) => {
         console.log(`[generate-plan] monotony guardrail swapped ${monotonyRepairs} repeat assignment(s)`);
       }
 
+      // ── Pregnancy safety filter (deterministic) ──────────────────────────────
+      // Runs after every other bestResult.slots mutation (slot + monotony
+      // guardrails) so nothing can reintroduce an unsafe recipe. Replacements
+      // come from poolForSlot (slot-tagged, allergen/won't-eat safe); a slot with
+      // no safe replacement is left empty and reported as skipped.
+      let pregnancyFilterRepairs = 0;
+      const pregnancyClearedSlots: { day_index: number; slot_name: string }[] = [];
+      if (pregnancyActive) {
+        for (const slot of bestResult.slots) {
+          if (!slot.recipe_id || !pregnancyUnsafeIds.has(slot.recipe_id)) continue;
+          const usage: Record<string, number> = {};
+          for (const s2 of bestResult.slots) {
+            if (capSlot(s2.slot_name) === capSlot(slot.slot_name) && s2.recipe_id) {
+              usage[s2.recipe_id] = (usage[s2.recipe_id] ?? 0) + 1;
+            }
+          }
+          const pool = poolForSlot(slot.slot_name)
+            .filter((id) => !pregnancyUnsafeIds.has(id))
+            .sort((a, b) => (usage[a] ?? 0) - (usage[b] ?? 0));
+          const replacement = pool[0] ?? null;
+          slot.recipe_id = replacement ?? "";
+          if (replacement) {
+            slot.rationale = "Swapped for a pregnancy-safe recipe";
+          } else {
+            skippedSlots.push({
+              day_index: slot.day_index,
+              slot_name: slot.slot_name,
+              reason: "no_pregnancy_safe_recipe",
+            });
+            pregnancyClearedSlots.push({ day_index: slot.day_index, slot_name: slot.slot_name });
+          }
+          pregnancyFilterRepairs++;
+        }
+      }
+      if (pregnancyFilterRepairs > 0) {
+        console.log(`[generate-plan] pregnancy filter repaired ${pregnancyFilterRepairs} assignment(s)`);
+      }
+
       // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
       const slotOrderMap: Record<string, number> = { "Breakfast": 0, "Lunch": 1, "Dinner": 2, "Snacks": 3 };
       const upsertRows = bestResult.slots
@@ -1202,6 +1295,22 @@ serve(async (req) => {
         if (ue) upsertError = ue.message;
       }
 
+      // A pregnancy-emptied slot is not upserted, so clear any meal a previous
+      // run left in it rather than leave a possibly unsafe meal in place.
+      const staleSlotIds = slots
+        .filter((s) =>
+          !s.is_locked && s.meal_id &&
+          pregnancyClearedSlots.some((c) => c.day_index === s.day_index && capSlot(c.slot_name) === capSlot(s.slot_name))
+        )
+        .map((s) => s.id);
+      if (staleSlotIds.length > 0) {
+        const { error: clearError } = await adminClient
+          .from("meal_plan_slots")
+          .update({ meal_id: null, is_override: false })
+          .in("id", staleSlotIds);
+        if (clearError) console.error("[generate-plan] clearing pregnancy-emptied slots failed:", clearError);
+      }
+
       const totalSlotsToFill = slotsToFill.filter((s) => {
         const key = `${s.day_index}_${s.slot_name}`;
         return scheduleStatus[key] !== "away";
@@ -1215,6 +1324,9 @@ serve(async (req) => {
         droppedAssignments,
         skippedSlots,
         reusedFills,
+        ...(pregnancyActive
+          ? { pregnancyFilterRepairs, pregnancySafety: { active: true, checked: pregnancySafetyChecked } }
+          : {}),
         coverage: {
           totalSlotsToFill,
           filledSlots: upsertRows.length,
