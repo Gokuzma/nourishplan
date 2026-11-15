@@ -445,6 +445,8 @@ serve(async (req) => {
       const smallCatalog = recipes.length < 7;
       const pregnancyActive = nutritionTargets.some((r) => isCurrentlyPregnant(r, new Date()));
       let pregnancySafetyChecked = false;
+      // `${day_index}|${Slot}` keys the forced safety pass explicitly cleared
+      const pregnancyModelClearedKeys = new Set<string>();
       const pregnancySystemSuffix = pregnancyActive
         ? " If constraints.pregnancySafety is present it is a HARD rule like allergens."
         : "";
@@ -927,7 +929,11 @@ serve(async (req) => {
             // Validate recipe IDs (T-22-04) — log drops to droppedAssignments
             const validIds = new Set(recipes.map((r) => r.id));
             const validVerifySlots: AssignedSlot[] = [];
+            const clearedByForcedPass: string[] = [];
             for (const s of (parsed.slots ?? [])) {
+              if (forcePregnancyCheck && !s.recipe_id && typeof s.slot_name === "string") {
+                clearedByForcedPass.push(`${s.day_index}|${capitalize(s.slot_name)}`);
+              }
               if (!s.recipe_id || !validIds.has(s.recipe_id)) {
                 droppedAssignments.push({
                   day_index: s.day_index,
@@ -941,7 +947,7 @@ serve(async (req) => {
             }
             parsed.slots = validVerifySlots;
             const acceptForcedCheck = forcePregnancyCheck &&
-              parsed.slots.length > 0 &&
+              (parsed.slots.length > 0 || clearedByForcedPass.length > 0) &&
               (parsed.violations ?? []).length <= (bestResult.violations ?? []).length;
             if (acceptForcedCheck || (parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
               // The verify prompt has no tier-rationale rules, so its slots come
@@ -961,6 +967,15 @@ serve(async (req) => {
                 const slotKey = (s: AssignedSlot) => `${s.day_index}|${capitalize(s.slot_name)}`;
                 const mergedByKey = new Map(bestResult.slots.map((s) => [slotKey(s), s]));
                 for (const s of parsed.slots) mergedByKey.set(slotKey(s), s);
+                // A slot returned with no recipe is the model clearing a meal it
+                // judged unsafe but could not swap. Remove it (rather than keep
+                // the old recipe) so the slot fallback reuses or skips it.
+                for (const key of clearedByForcedPass) {
+                  if (mergedByKey.get(key)?.recipe_id) {
+                    mergedByKey.delete(key);
+                    pregnancyModelClearedKeys.add(key);
+                  }
+                }
                 bestResult = { ...parsed, slots: [...mergedByKey.values()] };
                 suggestedRecipes = parsed.suggestedRecipes ?? suggestedRecipes;
                 pregnancySafetyChecked = true;
@@ -1339,7 +1354,9 @@ serve(async (req) => {
         .filter((s) =>
           !s.is_locked && s.meal_id && (
             pregnancyClearedSlots.some((c) => c.day_index === s.day_index && capSlot(c.slot_name) === capSlot(s.slot_name)) ||
-            (unsafeMealIds.has(s.meal_id) && !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`))
+            (unsafeMealIds.has(s.meal_id) && !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`)) ||
+            (pregnancyModelClearedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`) &&
+              !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`))
           )
         )
         .map((s) => s.id);

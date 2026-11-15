@@ -20,8 +20,12 @@ function escapeRegex(s: string): string {
 const NO_PLURAL_TERMS = new Set(["pate"]);
 
 const BANNED_TERM_PATTERNS: RegExp[] = PREGNANCY_BANNED_TERMS.map((term) => {
-  const plural = NO_PLURAL_TERMS.has(term) ? "" : "(s|es)?";
-  return new RegExp(`(^|[^a-z0-9])${escapeRegex(term.normalize("NFC").toLowerCase())}${plural}([^a-z0-9]|$)`);
+  const normalized = escapeRegex(term.normalize("NFC").toLowerCase());
+  let body: string;
+  if (NO_PLURAL_TERMS.has(term)) body = normalized;
+  else if (normalized.endsWith("y")) body = `${normalized.slice(0, -1)}(y|ys|ies)`;
+  else body = `${normalized}(s|es)?`;
+  return new RegExp(`(^|[^a-z0-9])${body}([^a-z0-9]|$)`);
 });
 
 // Non-alcoholic phrases that contain a banned term; removed before matching.

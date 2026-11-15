@@ -47,6 +47,12 @@ describe('isPregnancyUnsafe', () => {
     expect(isPregnancyUnsafe('Whiskey Glaze', [])).toBe(true)
   })
 
+  it('matches -ies plurals of terms ending in y', () => {
+    expect(isPregnancyUnsafe('Flight of whiskies', [])).toBe(true)
+    expect(isPregnancyUnsafe('Cake', ['assorted brandies'])).toBe(true)
+    expect(isPregnancyUnsafe('Brandy Snaps', [])).toBe(true)
+  })
+
   it('does not flag wine vinegar, ginger beer or root beer', () => {
     expect(isPregnancyUnsafe('Salad', ['red wine vinegar'])).toBe(false)
     expect(isPregnancyUnsafe('Salad', ['white wine vinegar'])).toBe(false)
