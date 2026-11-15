@@ -109,6 +109,28 @@ describe('ProfileForm', () => {
     expect(screen.getByText('Visible to your household.')).toBeTruthy()
   })
 
+  it('keeps unsaved edits when only calories change on the target', () => {
+    vi.mocked(useNutritionTarget).mockReturnValue({ data: makeTarget({ calories: 2000 }), isPending: false } as never)
+    const { rerender } = render(<ProfileForm {...baseProps} isChild={false} />)
+    fireEvent.change(screen.getByLabelText('Weight (lb)'), { target: { value: '999' } })
+    vi.mocked(useNutritionTarget).mockReturnValue({ data: makeTarget({ calories: 2500 }), isPending: false } as never)
+    rerender(<ProfileForm {...baseProps} isChild={false} />)
+    expect((screen.getByLabelText('Weight (lb)') as HTMLInputElement).value).toBe('999')
+  })
+
+  it('hides pregnant toggle for male and clears pregnancy when sex becomes male', () => {
+    render(<ProfileForm {...baseProps} isChild={false} />)
+    fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'female' } })
+    fireEvent.click(screen.getByLabelText(/pregnant/i))
+    fireEvent.change(screen.getByLabelText(/due date/i), { target: { value: '2027-01-01' } })
+    fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'male' } })
+    expect(screen.queryByLabelText(/pregnant/i)).toBeNull()
+    expect(screen.queryByLabelText(/due date/i)).toBeNull()
+    expect(screen.getByLabelText(/target weight/i)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(/sex/i), { target: { value: 'female' } })
+    expect((screen.getByLabelText(/pregnant/i) as HTMLInputElement).checked).toBe(false)
+  })
+
   it('has no save button when read-only', () => {
     render(<ProfileForm {...baseProps} isChild={false} canEdit={false} />)
     expect(screen.queryByRole('button', { name: /save profile/i })).toBeNull()
@@ -117,6 +139,11 @@ describe('ProfileForm', () => {
 
 describe('SuggestedTargetsCard', () => {
   const cardProps = { ...baseProps, isChild: false }
+
+  it('explains it uses the saved profile', () => {
+    render(<SuggestedTargetsCard {...cardProps} target={null} />)
+    expect(screen.getByText('Based on your saved profile. Save changes to update.')).toBeTruthy()
+  })
 
   it('lists missing fields', () => {
     render(<SuggestedTargetsCard {...cardProps} target={null} />)

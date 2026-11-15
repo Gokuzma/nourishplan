@@ -115,6 +115,7 @@ export function SuggestedTargetsCard({
       <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text/60">
         Suggested targets
       </h3>
+      <p className="mb-3 text-xs text-text/50">Based on your saved profile. Save changes to update.</p>
       {body}
     </div>
   )

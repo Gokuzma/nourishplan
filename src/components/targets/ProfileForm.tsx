@@ -109,6 +109,19 @@ export function ProfileForm({
     return ftInToCm(ft ?? 0, inches ?? 0)
   }
 
+  const profileKey = JSON.stringify([
+    target?.birth_date,
+    target?.sex,
+    target?.height_cm,
+    target?.weight_kg,
+    target?.target_weight_kg,
+    target?.pre_pregnancy_weight_kg,
+    target?.activity_level,
+    target?.is_pregnant,
+    target?.due_date,
+    target?.notes,
+  ])
+
   useEffect(() => {
     setBirthDate(target?.birth_date ?? (birthYearFallback ? `${birthYearFallback}-07-01` : ''))
     setSex(target?.sex ?? '')
@@ -121,7 +134,7 @@ export function ProfileForm({
     setDueDate(target?.due_date ?? '')
     setNotes(target?.notes ?? '')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target, birthYearFallback])
+  }, [profileKey, birthYearFallback])
 
   function switchUnits(next: Units) {
     if (next === units) return
@@ -136,8 +149,9 @@ export function ProfileForm({
   }
 
   const isAdult = !isChild && (!birthDate || ageInYears(birthDate, new Date()) >= 18)
-  const showPregnancy = isAdult && isPregnant
-  const showTargetWeight = isAdult && !isPregnant
+  const showPregnancyToggle = isAdult && sex !== 'male'
+  const showPregnancy = showPregnancyToggle && isPregnant
+  const showTargetWeight = isAdult && !showPregnancy
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -215,7 +229,15 @@ export function ProfileForm({
           <select
             id="profile-sex"
             value={sex}
-            onChange={(e) => setSex(e.target.value as 'female' | 'male' | '')}
+            onChange={(e) => {
+              const next = e.target.value as 'female' | 'male' | ''
+              setSex(next)
+              if (next === 'male') {
+                setIsPregnant(false)
+                setDueDate('')
+                setPrePregnancyWeight('')
+              }
+            }}
             className={inputClass}
           >
             <option value="">Select…</option>
@@ -304,7 +326,7 @@ export function ProfileForm({
           </select>
         </div>
 
-        {isAdult && (
+        {showPregnancyToggle && (
           <label className="flex items-center gap-2 text-sm font-medium text-text">
             <input
               type="checkbox"
