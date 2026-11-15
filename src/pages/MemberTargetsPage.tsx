@@ -13,8 +13,9 @@ export function MemberTargetsPage() {
   const { data: membership } = useHousehold()
   const { data: members } = useHouseholdMembers()
   const { data: profiles } = useMemberProfiles()
+  const membersLoaded = members !== undefined && profiles !== undefined
   const { data: target } = useNutritionTarget(
-    membership?.household_id,
+    membersLoaded ? membership?.household_id : undefined,
     id,
     members?.some((m) => m.user_id === id) ? 'user' : 'profile',
   )
@@ -46,7 +47,7 @@ export function MemberTargetsPage() {
   // canEdit: current user is the member themselves, or is admin
   const canEdit = isAdmin || currentUserId === id
 
-  if (!householdId) {
+  if (!householdId || !membersLoaded) {
     return (
       <div className="min-h-screen bg-background px-4 py-8 font-sans flex items-center justify-center">
         <p className="text-text/50">Loading…</p>
