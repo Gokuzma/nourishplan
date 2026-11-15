@@ -400,3 +400,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** `households.week_start_day` is a preference for computing the DEFAULT week start; a plan's `week_start` can be any date (NewWeekPrompt custom start). Mapping day_index→weekday through the config silently breaks whenever the two disagree.
 **Rule:** Anywhere a day_index needs a weekday (labels, schedule lookups, day_of_week keys), use `dayOfWeekFor(weekStart, dayIndex)` from `src/utils/mealPlan.ts` (in Deno: `(new Date(weekStart+"T00:00:00Z").getUTCDay() + i) % 7`). `week_start_day` is only for getWeekStart/getOrderedDays (default-week + pattern-grid ordering). Grep for `weekStartDay +` before shipping any new week-rendering code.
 **Applies to:** All plan-week rendering components, generate-plan, any future week-keyed feature (grocery-by-day, cook reminders).
+
+### L-056: Supabase CLI v3 refuses production deploys from agent shells without `--yes`
+**Bug:** `npx supabase functions deploy generate-plan ...` failed with `HostedMutationConsentRequiredError: Confirmation required ... This run can't ask because it is running in agent mode. Nothing was changed.`
+**Root cause:** `npx supabase` resolved to CLI v3.1.0, which requires interactive consent for any hosted/production mutation and detects non-interactive agent shells.
+**Rule:** When the user has approved a deploy (or the "always deploy" preference applies), pass `--yes` to `supabase functions deploy` / `db push`. Never add `--yes` to a mutation the user hasn't approved. Note also that `--project-ref` is deprecated in v3 in favour of `--remote=<ref>`.
+**Applies to:** Every Supabase CLI command that changes the hosted project, run from harness tool calls.
