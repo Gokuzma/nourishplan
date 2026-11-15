@@ -1,5 +1,21 @@
 # NourishPlan — session handoff (2026-07-15)
 
+## What shipped 2026-11-15 (member profiles + pregnancy safety)
+
+- **Schedules:** child profiles get a Home/Away grid; a slot is Away only when *every* member is away (client + generate-plan).
+- **Incident:** d6828cf redeclared `const memberCount` in generate-plan, causing a prod BOOT_ERROR (plan generation down for several hours). Hotfix d4914df. See L-057: esbuild parse-check before every function deploy, curl boot probe after.
+- **Member profiles** (spec `docs/superpowers/specs/2026-11-15-member-profiles-design.md`): migration 041 adds the profile stats to `nutrition_targets`. Settings has a "Profiles" section (02), and `/members/:id/targets` is now "Profile & Targets", with a suggestion engine (`src/utils/nutritionProfile.ts`) and an Apply button.
+- **Pregnancy safety** in generate-plan (`supabase/functions/_shared/pregnancySafety.ts`): prompt rule, banned-term filter, forced verify pass with a 125 s abort, a shortlist-only swap pool, stale unsafe-meal clearing, and fail-safe on a targets read error. The rule applies until 28 days past the due date. An unchecked plan shows a banner.
+- **Generation progress:** elapsed timer, plus "Usually about N s" from the median of the last 5 runs.
+- **Deferred tickets:**
+  - The planId→household ownership check is missing in generate-plan (pre-existing; the stale-slot clear is a new service-role write on that path).
+  - The slot_name casing in the fallback can duplicate keys.
+  - No locked-unsafe-meal warning.
+  - MemberTargetsPage shows "Loading" forever if the member lists fail to load.
+  - Sherry/champagne vinegar are flagged unsafe.
+  - Edge logic has only source-text tests.
+  - Profile stats are household-readable (user was told; an owner/admin-only table is the alternative).
+
 ## What shipped 2026-07-15 (schedule & plan usability, from user voice feedback)
 
 1. **Schedule statuses**: now 5 — prep/batch/consume/quick/away (migration 040),
