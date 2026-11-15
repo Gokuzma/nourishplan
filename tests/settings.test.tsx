@@ -60,10 +60,10 @@ describe('Settings Profiles section', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('SettingsPage renders Account at 01 and Profiles at 02', async () => {
+  it('SettingsPage renders Your Details at 01 and Profiles at 02', async () => {
     const fs = await import('fs')
     const src = fs.readFileSync('src/pages/SettingsPage.tsx', 'utf8')
-    expect(src).toContain('<SectionHead no="01" label="Account"')
+    expect(src).toContain('<SectionHead no="01" label="Your Details"')
     expect(src).toContain('<SectionHead no="02" label="Profiles"')
     expect(src).toContain('<ProfilesSection')
     expect(src).toContain('no="03" label="Household"')
@@ -87,7 +87,8 @@ describe('Settings Profiles section', () => {
       due_date: '2027-01-15', calories: 2400,
     }))
     render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
-    expect(screen.getByText('36 · Pregnant, T3 · 2400 kcal')).toBeTruthy()
+    expect(screen.getAllByTestId('profile-summary')[0].textContent).toBe('36 · Pregnant, T3 · 2400 kcal')
+    expect(screen.queryByTestId('profile-suggestion')).toBeNull()
   })
 
   it('shows a suggested calorie figure when no targets are saved', () => {
@@ -96,7 +97,21 @@ describe('Settings Profiles section', () => {
       height_cm: 125, weight_kg: 25, activity_level: 'moderate',
     }))
     render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
-    expect(screen.getByText(/^8 · \d+ kcal \(suggested\)$/)).toBeTruthy()
+    expect(screen.getAllByTestId('profile-summary')[2].textContent).toBe('8')
+    expect(screen.getByTestId('profile-suggestion').textContent).toMatch(/^\d+ kcal \(suggested\)$/)
+  })
+
+  it('shows "No profile yet" when a target row exists but sex is null', () => {
+    mockTargets.push(target({ user_id: 'u-self', birth_date: '1990-06-01', calories: 2000 }))
+    render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    expect(screen.getAllByText('No profile yet')).toHaveLength(3)
+  })
+
+  it('shows "Profile incomplete" when sex is set but nothing can be summarised', () => {
+    mockTargets.push(target({ user_id: 'u-self', sex: 'female' }))
+    render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    expect(screen.getByText('Profile incomplete')).toBeTruthy()
+    expect(screen.getAllByText('No profile yet')).toHaveLength(2)
   })
 
   it('non-admin sees Edit profile for self and View for others', () => {

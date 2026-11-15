@@ -17,7 +17,7 @@ interface ProfileRow {
 }
 
 function buildSummary(target: NutritionTarget | undefined, isChild: boolean, today: Date) {
-  if (!target || target.sex == null) return { text: 'No profile yet', suggested: false }
+  if (!target || target.sex == null) return { text: 'No profile yet', suggestion: null }
 
   const parts: string[] = []
   if (target.birth_date) parts.push(String(ageInYears(target.birth_date, today)))
@@ -26,17 +26,15 @@ function buildSummary(target: NutritionTarget | undefined, isChild: boolean, tod
     if ('trimester' in status) parts.push(`Pregnant, T${status.trimester}`)
   }
 
-  let suggested = false
+  let suggestion: string | null = null
   if (target.calories != null) {
     parts.push(`${target.calories} kcal`)
   } else {
     const result = suggestTargets(target, isChild, today)
-    if (result.ok) {
-      parts.push(`${result.suggestion.calories} kcal (suggested)`)
-      suggested = true
-    }
+    if (result.ok) suggestion = `${result.suggestion.calories} kcal (suggested)`
   }
-  return { text: parts.join(' · '), suggested }
+  if (parts.length === 0 && suggestion == null) return { text: 'Profile incomplete', suggestion: null }
+  return { text: parts.join(' · '), suggestion }
 }
 
 export function ProfilesSection({ householdId, currentUserId, isAdmin }: ProfilesSectionProps) {
@@ -77,11 +75,15 @@ export function ProfilesSection({ householdId, currentUserId, isAdmin }: Profile
           >
             <div className="min-w-0">
               <span className="serif" style={{ fontSize: 15 }} data-testid="profile-name">{row.name}</span>
-              <span
-                className="serif-italic ml-2"
-                style={{ fontSize: 13, color: summary.suggested ? 'var(--ink-soft)' : 'var(--ink-dim)' }}
-              >
-                {summary.text}
+              <span className="serif-italic" style={{ fontSize: 13, color: 'var(--ink)' }}>
+                {' · '}
+                <span data-testid="profile-summary">{summary.text}</span>
+                {summary.suggestion && (
+                  <>
+                    {summary.text && ' · '}
+                    <span data-testid="profile-suggestion" style={{ color: 'var(--ink-dim)' }}>{summary.suggestion}</span>
+                  </>
+                )}
               </span>
             </div>
             <a

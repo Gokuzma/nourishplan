@@ -250,7 +250,7 @@ export function SettingsPage() {
 
       {/* Profile section */}
       <section className="mt-6">
-        <SectionHead no="01" label="Account" aux={session?.user.email ?? undefined} />
+        <SectionHead no="01" label="Your Details" aux={session?.user.email ?? undefined} />
         <Rule />
 
         {/* Avatar */}
