@@ -19,6 +19,12 @@ export interface ParsedInventoryItem {
   brand: string | null
 }
 
+// Must match MAX_INPUT_CHARS / MAX_ITEMS in supabase/functions/parse-inventory
+const MAX_INPUT_CHARS = 8000
+const MAX_ITEMS = 100
+const NEARLY_FULL_CHARS = 7000
+const AUTO_STOP_CHARS = 7600
+
 const UNIT_OPTIONS: InventoryUnit[] = ['g', 'kg', 'ml', 'L', 'units']
 const LOCATION_OPTIONS: { label: string; value: StorageLocation }[] = [
   { label: 'Pantry', value: 'pantry' },
@@ -61,6 +67,8 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
   const [parsing, setParsing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [items, setItems] = useState<ParsedInventoryItem[]>([])
+  const [truncated, setTruncated] = useState(false)
+  const [autoStopped, setAutoStopped] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const voiceSupported = getSpeechRecognition() !== null
 
@@ -72,6 +80,8 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
       setInterim('')
       setItems([])
       setError(null)
+      setTruncated(false)
+      setAutoStopped(false)
     }
     return () => stopListening()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,6 +108,7 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
     recognition.continuous = true
     recognition.interimResults = true
     recognition.lang = 'en-CA'
+    setAutoStopped(false)
     recognition.onresult = (event) => {
       let interimText = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -105,7 +116,14 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
         if (result.isFinal) {
           const transcript = result[0].transcript.trim()
           if (transcript) {
-            setText(prev => (prev.trim() ? `${prev.trim()}, ${transcript}` : transcript))
+            setText(prev => {
+              const next = prev.trim() ? `${prev.trim()}, ${transcript}` : transcript
+              if (next.length >= AUTO_STOP_CHARS) {
+                setAutoStopped(true)
+                queueMicrotask(stopListening)
+              }
+              return next
+            })
           }
         } else {
           interimText += result[0].transcript
@@ -134,6 +152,7 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
       if (fnError) throw fnError
       if (!data?.success) throw new Error(data?.error || 'Could not understand that list.')
       setItems(data.items as ParsedInventoryItem[])
+      setTruncated(data.truncated === true)
       setStep('review')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not understand that list. Try again.')
@@ -177,6 +196,10 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
 
   if (!isOpen) return null
 
+  const charCount = text.trim().length
+  const overLimit = charCount > MAX_INPUT_CHARS
+  const nearlyFull = charCount >= NEARLY_FULL_CHARS
+
   return (
     <>
       <div className="fixed inset-0 bg-black/40 z-50" onClick={onClose} aria-hidden="true" />
@@ -198,6 +221,30 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
                 className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
                 placeholder={PLACEHOLDER}
               />
+              <div data-testid="batch-meter">
+                <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden" aria-hidden="true">
+                  <div
+                    className={`h-full ${overLimit ? 'bg-red-600' : nearlyFull ? 'bg-amber-500' : 'bg-primary'}`}
+                    style={{ width: `${Math.min(100, (charCount / MAX_INPUT_CHARS) * 100)}%` }}
+                  />
+                </div>
+                <p className={`text-xs mt-1 ${overLimit ? 'text-red-600' : 'text-text/60'}`}>
+                  {charCount.toLocaleString('en-CA')} / {MAX_INPUT_CHARS.toLocaleString('en-CA')} characters · up to {MAX_ITEMS} items per batch
+                </p>
+                {overLimit ? (
+                  <p className="text-xs text-red-600 mt-1" role="alert">
+                    Too long for one batch — remove {(charCount - MAX_INPUT_CHARS).toLocaleString('en-CA')} characters, or cut the end and add it in the next batch.
+                  </p>
+                ) : autoStopped ? (
+                  <p className="text-xs text-amber-700 mt-1" role="status">
+                    This batch is full, so the mic stopped. Tap Continue to review it, then start the next batch.
+                  </p>
+                ) : nearlyFull ? (
+                  <p className="text-xs text-amber-700 mt-1" role="status">
+                    Nearly full — finish this area, then tap Continue and start a new batch.
+                  </p>
+                ) : null}
+              </div>
               {listening && (
                 <p className="text-xs text-red-600 animate-pulse" role="status">
                   ● Listening… speak naturally, tap the mic again to stop.
@@ -221,7 +268,7 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
                 <button
                   type="button"
                   onClick={handleParse}
-                  disabled={parsing || !text.trim()}
+                  disabled={parsing || !text.trim() || overLimit}
                   className="flex-1 rounded-[--radius-btn] bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {parsing ? 'Sorting it out…' : 'Continue'}
@@ -236,6 +283,11 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
               <p className="text-sm text-text/60">
                 Check the details — tap any field to adjust, then add everything at once.
               </p>
+              {truncated && (
+                <p className="text-sm text-amber-700" role="alert">
+                  Only the first {MAX_ITEMS} items were read. Add these, then bulk add the rest of that list as a new batch.
+                </p>
+              )}
               <div className="flex flex-col gap-2">
                 {items.map((item, i) => (
                   <div key={i} className="rounded-[--radius-btn] border border-secondary p-3 flex flex-col gap-2">

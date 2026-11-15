@@ -57,6 +57,11 @@ function jsonResponse(body: Record<string, unknown>): Response {
 }
 
 // Clamp AI output to what the schema allows — never trust it blindly.
+function rawItemCount(raw: unknown): number {
+  if (!raw || typeof raw !== "object" || !Array.isArray((raw as { items?: unknown }).items)) return 0;
+  return (raw as { items: unknown[] }).items.length;
+}
+
 function sanitizeItems(raw: unknown): ParsedItem[] {
   if (!raw || typeof raw !== "object" || !Array.isArray((raw as { items?: unknown }).items)) return [];
   const items = (raw as { items: unknown[] }).items.slice(0, MAX_ITEMS);
@@ -135,7 +140,10 @@ serve(async (req) => {
     }
 
     const today = new Date().toISOString().slice(0, 10);
-    const content = input.trim().slice(0, MAX_INPUT_CHARS);
+    if (input.trim().length > MAX_INPUT_CHARS) {
+      return jsonResponse({ success: false, error: `That's too long for one batch (limit ${MAX_INPUT_CHARS.toLocaleString("en-CA")} characters). Split it into smaller lists.` });
+    }
+    const content = input.trim();
 
     // AI extraction — user input stays in the user message (prompt-injection mitigation)
     const aiResponse = await fetchWithTimeout("https://api.anthropic.com/v1/messages", {
@@ -181,7 +189,7 @@ serve(async (req) => {
       return jsonResponse({ success: false, error: "No food items found in that. Try naming the items with quantities, e.g. \"2 kg rice, a dozen eggs, 3 cans of tuna\"." });
     }
 
-    return jsonResponse({ success: true, items });
+    return jsonResponse({ success: true, items, truncated: rawItemCount(parsed) > MAX_ITEMS, maxItems: MAX_ITEMS });
   } catch (err) {
     return jsonResponse({
       success: false,
