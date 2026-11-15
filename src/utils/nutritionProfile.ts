@@ -233,14 +233,16 @@ export function suggestTargets(stats: MemberStats, _isChild: boolean, today: Dat
   const goalWeight = stats.target_weight_kg
   if (goalWeight != null && goalWeight < weightKg - 1) {
     const floor = sex === 'male' ? 1500 : 1200
-    target = Math.max(floor, maintenance - 500)
+    target = Math.min(maintenance, Math.max(floor, maintenance - 500))
     proteinPerKg = 1.6
     const reduction = Math.round(maintenance - target)
-    explanation.push(
-      reduction > 0
-        ? `−${formatKcal(reduction)} kcal to move toward ${goalWeight} kg`
-        : `Held at the ${formatKcal(floor)} kcal minimum`,
-    )
+    if (reduction > 0) {
+      explanation.push(`−${formatKcal(reduction)} kcal to move toward ${goalWeight} kg`)
+    } else if (maintenance < floor) {
+      explanation.push(`Kept at maintenance — already below the ${formatKcal(floor)} kcal minimum`)
+    } else {
+      explanation.push(`Held at the ${formatKcal(floor)} kcal minimum`)
+    }
   } else if (goalWeight != null && goalWeight > weightKg + 1) {
     target = maintenance + 300
     explanation.push(`+300 kcal to move toward ${goalWeight} kg`)

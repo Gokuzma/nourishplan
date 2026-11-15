@@ -84,14 +84,14 @@ describe('suggestTargets adult', () => {
     expect(s.explanation).toContain('−500 kcal to move toward 80 kg')
   })
 
-  it('floor applies', () => {
+  it('loss target never exceeds maintenance when maintenance is below the floor', () => {
     const s = suggestion(makeStats({
       birth_date: '1960-01-01', height_cm: 150, weight_kg: 50,
       target_weight_kg: 45, activity_level: 'sedentary',
     }))
-    expect(s.calories).toBe(1200)
+    expect(s.calories).toBe(1140)
     expect(s.explanation).not.toContain('−500 kcal to move toward 45 kg')
-    expect(s.explanation).toContain('Held at the 1,200 kcal minimum')
+    expect(s.explanation).toContain('Kept at maintenance — already below the 1,200 kcal minimum')
   })
 
   it('floor that binds partway states the actual reduction', () => {
