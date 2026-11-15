@@ -1,7 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useHousehold, useHouseholdMembers, useMemberProfiles } from '../hooks/useHousehold'
+import { useNutritionTarget } from '../hooks/useNutritionTargets'
 import { NutritionTargetsForm } from '../components/targets/NutritionTargetsForm'
+import { ProfileForm } from '../components/targets/ProfileForm'
+import { SuggestedTargetsCard } from '../components/targets/SuggestedTargetsCard'
 
 export function MemberTargetsPage() {
   const { id } = useParams<{ id: string }>()
@@ -10,6 +13,11 @@ export function MemberTargetsPage() {
   const { data: membership } = useHousehold()
   const { data: members } = useHouseholdMembers()
   const { data: profiles } = useMemberProfiles()
+  const { data: target } = useNutritionTarget(
+    membership?.household_id,
+    id,
+    members?.some((m) => m.user_id === id) ? 'user' : 'profile',
+  )
 
   if (!id) {
     return (
@@ -33,6 +41,7 @@ export function MemberTargetsPage() {
     ?? id.slice(0, 8)
 
   const memberType: 'user' | 'profile' = authMember ? 'user' : 'profile'
+  const isChild = managedProfile?.is_child ?? false
 
   // canEdit: current user is the member themselves, or is admin
   const canEdit = isAdmin || currentUserId === id
@@ -59,16 +68,34 @@ export function MemberTargetsPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-primary">Nutrition Targets</h1>
+          <h1 className="text-2xl font-bold text-primary">Profile & Targets</h1>
           <p className="mt-1 text-sm text-text/60">{memberName}</p>
         </div>
 
-        {/* Form */}
+        <ProfileForm
+          householdId={householdId}
+          memberId={id}
+          memberType={memberType}
+          isChild={isChild}
+          canEdit={canEdit}
+          birthYearFallback={managedProfile?.birth_year}
+        />
+
+        <SuggestedTargetsCard
+          householdId={householdId}
+          memberId={id}
+          memberType={memberType}
+          isChild={isChild}
+          target={target ?? null}
+          canEdit={canEdit}
+        />
+
         <NutritionTargetsForm
           householdId={householdId}
           memberId={id}
           memberType={memberType}
           canEdit={canEdit}
+          hasProfile={!!target?.sex}
         />
       </div>
     </div>

@@ -18,6 +18,7 @@ const DEFAULT_MICROS = [
   { key: 'calcium_mg', label: 'Calcium (mg)' },
   { key: 'iron_mg', label: 'Iron (mg)' },
   { key: 'vitamin_c_mg', label: 'Vitamin C (mg)' },
+  { key: 'folate_mcg', label: 'Folate (mcg)' },
 ]
 
 interface Props {
@@ -25,6 +26,7 @@ interface Props {
   memberId: string
   memberType: 'user' | 'profile'
   canEdit: boolean
+  hasProfile: boolean
 }
 
 interface MacroState {
@@ -36,7 +38,7 @@ interface MacroState {
 
 const emptyMacros: MacroState = { calories: '', protein_g: '', carbs_g: '', fat_g: '' }
 
-export function NutritionTargetsForm({ householdId, memberId, memberType, canEdit }: Props) {
+export function NutritionTargetsForm({ householdId, memberId, memberType, canEdit, hasProfile }: Props) {
   const { data: target, isPending } = useNutritionTarget(householdId, memberId, memberType)
   const upsert = useUpsertNutritionTargets()
 
@@ -239,7 +241,7 @@ export function NutritionTargetsForm({ householdId, memberId, memberType, canEdi
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       {/* Preset selector */}
-      {canEdit && (
+      {canEdit && !hasProfile && (
         <div className="flex flex-col gap-1">
           <label htmlFor="preset" className="text-sm font-medium text-text">
             Preset template
