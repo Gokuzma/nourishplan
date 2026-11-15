@@ -83,7 +83,7 @@ export function HouseholdPage() {
                 <SectionHead label="Profiles" aux="diet, foods & schedule" />
                 <Rule />
                 <p className="serif-italic mt-3" style={{ fontSize: 14, color: 'var(--ink-dim)' }}>
-                  Tap a name to set their dietary restrictions, foods they won&apos;t eat, and weekly schedule.
+                  Use “Diet &amp; schedule” on each person to set their dietary restrictions, foods they won&apos;t eat, and weekly schedule.
                 </p>
                 <ProfilesSection
                   householdId={membership.household_id}

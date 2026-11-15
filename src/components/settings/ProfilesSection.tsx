@@ -85,22 +85,9 @@ export function ProfilesSection({ householdId, currentUserId, isAdmin, weekStart
         const memberName = isSelf ? undefined : row.name
         return (
           <div key={row.id} style={{ borderBottom: '1px dashed var(--rule-soft)' }}>
-            <div className="flex items-baseline justify-between gap-3" style={{ padding: '12px 0' }}>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-2" style={{ padding: '12px 0' }}>
               <div className="min-w-0">
-                {showSchedule ? (
-                  <button
-                    type="button"
-                    onClick={() => setOpenId(isOpen ? null : row.id)}
-                    aria-expanded={isOpen}
-                    className="serif"
-                    style={{ fontSize: 15, background: 'none', border: 0, padding: 0, cursor: 'pointer', color: 'var(--ink)' }}
-                  >
-                    <span aria-hidden="true" className="mono" style={{ fontSize: 11, marginRight: 6, color: 'var(--ink-dim)' }}>{isOpen ? '▾' : '▸'}</span>
-                    <span data-testid="profile-name">{row.name}</span>
-                  </button>
-                ) : (
-                  <span className="serif" style={{ fontSize: 15 }} data-testid="profile-name">{row.name}</span>
-                )}
+                <span className="serif" style={{ fontSize: 15 }} data-testid="profile-name">{row.name}</span>
                 <span className="serif-italic" style={{ fontSize: 13, color: 'var(--ink)' }}>
                   {' · '}
                   <span data-testid="profile-summary">{summary.text}</span>
@@ -112,13 +99,26 @@ export function ProfilesSection({ householdId, currentUserId, isAdmin, weekStart
                   )}
                 </span>
               </div>
-              <a
-                href={`/members/${row.id}/targets`}
-                className="serif"
-                style={{ fontSize: 14, color: 'var(--tomato)', textDecorationColor: 'var(--rule-c)' }}
-              >
-                {canEdit ? 'Edit profile' : 'View'}
-              </a>
+              <div className="flex items-baseline gap-3 flex-shrink-0">
+                {showSchedule && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenId(isOpen ? null : row.id)}
+                    aria-expanded={isOpen}
+                    aria-label={`${row.name}: ${showPreferences ? 'diet & schedule' : 'schedule'}`}
+                    className="btn btn-sm"
+                  >
+                    {showPreferences ? 'Diet & schedule' : 'Schedule'} {isOpen ? '▴' : '▾'}
+                  </button>
+                )}
+                <a
+                  href={`/members/${row.id}/targets`}
+                  className="serif"
+                  style={{ fontSize: 14, color: 'var(--tomato)', textDecorationColor: 'var(--rule-c)' }}
+                >
+                  {canEdit ? 'Edit profile' : 'View'}
+                </a>
+              </div>
             </div>
             {isOpen && (
               <div style={{ paddingBottom: 14 }} data-testid="profile-details">

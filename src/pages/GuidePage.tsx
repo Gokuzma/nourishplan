@@ -110,7 +110,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       'Invite family members from the Household page by sharing the invite link.',
       'Add managed profiles for children or anyone who won\'t log in themselves — they still get their own targets and portions.',
       'Set each member\'s nutrition targets (calories, protein, carbs, fat) from the Household page — tap a member to open their targets.',
-      'On the Household page, tap a member under Profiles to record their dietary restrictions and won\'t-eat foods — the planner treats allergies as hard rules and dislikes as strong preferences.',
+      'On the Household page, tap "Diet & schedule" next to a member to record their dietary restrictions and won\'t-eat foods — the planner treats allergies as hard rules and dislikes as strong preferences.',
       'Set each member\'s weekly schedule in the same place (who\'s home for which meals), and the weekly budget under Household details — both become constraints the planner respects.',
     ],
     tips: [
@@ -217,7 +217,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     title: 'Schedule & Batch Prep',
     intro: 'Real weeks have soccer practice and late meetings. Tell NourishPlan who is home when, and it plans around your life instead of an ideal one.',
     steps: [
-      'On the Household page, open a member under Profiles and set their weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
+      'On the Household page, tap "Diet & schedule" next to a member and set their weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
       'The generator respects it — no slow braise on a Quick night, nothing planned for someone who\'s Away.',
       'Schedule badges label the grid: "Use up" on consume days, "<20 min" on quick nights, "Away" when a member is out — so the shape of the week is readable at a glance.',
       'Tap "Batch prep" to see which of the week\'s recipes share ingredients or steps — cook once, eat twice.',
