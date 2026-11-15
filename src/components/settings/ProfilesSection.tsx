@@ -24,6 +24,8 @@ function buildSummary(target: NutritionTarget | undefined, isChild: boolean, tod
   if (target.is_pregnant && target.due_date) {
     const status = pregnancyStatus(target.due_date, today)
     if ('trimester' in status) parts.push(`Pregnant, T${status.trimester}`)
+  } else if (target.is_pregnant) {
+    parts.push('Pregnant')
   }
 
   let suggestion: string | null = null

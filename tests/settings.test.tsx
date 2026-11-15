@@ -91,6 +91,15 @@ describe('Settings Profiles section', () => {
     expect(screen.queryByTestId('profile-suggestion')).toBeNull()
   })
 
+  it('shows "Pregnant" without a trimester when the due date is missing', () => {
+    mockTargets.push(target({
+      user_id: 'u-self', sex: 'female', birth_date: '1990-06-01', is_pregnant: true,
+      due_date: null, calories: 2400,
+    }))
+    render(<ProfilesSection householdId="h" currentUserId="u-self" isAdmin={false} />)
+    expect(screen.getAllByTestId('profile-summary')[0].textContent).toBe('36 · Pregnant · 2400 kcal')
+  })
+
   it('shows a suggested calorie figure when no targets are saved', () => {
     mockTargets.push(target({
       member_profile_id: 'p-kid', sex: 'male', birth_date: '2018-03-01',

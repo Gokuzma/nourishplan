@@ -41,13 +41,33 @@ describe('isPregnancyUnsafe', () => {
     expect(isPregnancyUnsafe('Pâté on toast', [])).toBe(true)
   })
 
+  it('matches plural and inflected forms', () => {
+    expect(isPregnancyUnsafe('Fried Chicken Livers', [])).toBe(true)
+    expect(isPregnancyUnsafe('Braise', ['red wines'])).toBe(true)
+    expect(isPregnancyUnsafe('Whiskey Glaze', [])).toBe(true)
+  })
+
+  it('does not flag wine vinegar, ginger beer or root beer', () => {
+    expect(isPregnancyUnsafe('Salad', ['red wine vinegar'])).toBe(false)
+    expect(isPregnancyUnsafe('Salad', ['white wine vinegar'])).toBe(false)
+    expect(isPregnancyUnsafe('Stir Fry', ['rice wine vinegar'])).toBe(false)
+    expect(isPregnancyUnsafe('Ginger Beer Chicken', [])).toBe(false)
+    expect(isPregnancyUnsafe('Root Beer Pulled Pork', [])).toBe(false)
+  })
+
+  it('still flags real wine alongside wine vinegar', () => {
+    expect(isPregnancyUnsafe('Beef Stew', ['red wine'])).toBe(true)
+    expect(isPregnancyUnsafe('Beef Stew', ['red wine vinegar', 'red wine'])).toBe(true)
+    expect(isPregnancyUnsafe('Red wine and red wine vinegar braise', [])).toBe(true)
+  })
+
   it('passes ordinary safe recipes', () => {
     expect(isPregnancyUnsafe('Chicken Stir Fry', ['chicken breast', 'broccoli', 'soy sauce'])).toBe(false)
   })
 
   it('exports the exact banned term list', () => {
     expect(PREGNANCY_BANNED_TERMS).toEqual([
-      'wine', 'beer', 'liqueur', 'rum', 'vodka', 'whisky', 'bourbon', 'brandy', 'sake',
+      'wine', 'beer', 'liqueur', 'rum', 'vodka', 'whisky', 'whiskey', 'bourbon', 'brandy', 'sake',
       'liver', 'pâté', 'pate', 'shark', 'swordfish', 'king mackerel', 'tilefish',
       'bigeye tuna', 'marlin', 'sushi', 'sashimi', 'tartare', 'ceviche',
     ])

@@ -303,6 +303,9 @@ serve(async (req) => {
     // When a member is pregnant the pregnancy-safety verify pass is mandatory, so
     // pass 3 may start up to 100s in (still inside the 150s platform timeout).
     const PREGNANT_ASSIGN_DEADLINE_MS = 100000;
+    // Verify/correct calls are aborted at 125s (min 5s each) so DB writes still
+    // finish before the 150s platform timeout.
+    const VERIFY_ABORT_AT_MS = 125000;
     const startTime = Date.now();
     function hasTimeLeft(): boolean {
       return Date.now() - startTime < WALL_CLOCK_BUDGET_MS;
@@ -864,93 +867,110 @@ serve(async (req) => {
 
         passCount++;
         await adminClient.from("plan_generations").update({ pass_count: passCount }).eq("id", jobId);
-        const verifyResponse = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5",
-            max_tokens: 4096,
-            system:
-              "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get normal cook-and-eat recipes, 'batch' slots prefer recipes that scale up and keep well as leftovers, 'consume' slots prefer repeating an earlier 'batch' recipe from the same week or a low-effort recipe, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon; when a leftover in leftovers matches a candidate recipe name, keep or place that recipe in the earliest unlocked Lunch slot before the leftover expires. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }" + pregnancySystemSuffix,
-            messages: [
-              {
-                role: "user",
-                content: JSON.stringify({
-                  previousAssignment: {
-                    slots: bestResult.slots,
-                    violations: bestResult.violations,
-                  },
-                  constraints: {
-                    candidates: shortlistedRecipes,
-                    slotsToFill,
-                    lockedSlots: lockedSlots.map((s) => ({ day_index: s.day_index, slot_name: s.slot_name })),
-                    allergens: allergenNames,
-                    wontEat: wontEatNames,
-                    restrictions: allPredefined,
-                    inventory: inventoryNames,
-                    leftovers: leftoverNames,
-                    expiringSoon: expiringSoonNames,
-                    priorityOrder: priorityOrder ?? [],
-                    ...pregnancyConstraint,
-                  },
-                  instruction: forcePregnancyCheck
-                    ? "Re-check every slot against constraints.pregnancySafety; fix any violation. Also fix any listed violations while preserving as many good assignments as possible."
-                    : "Fix these violations while preserving as many good assignments as possible.",
-                }),
-              },
-            ],
-          }),
-        });
-
-        if (verifyResponse.ok) {
-          const verifyData = await verifyResponse.json();
-          const verifyText = verifyData.content?.[0]?.text ?? "";
-          const verifyMatch = verifyText.match(/\{[\s\S]*\}/);
-          if (verifyMatch) {
-            try {
-              const parsed: AssignResult = JSON.parse(verifyMatch[0]);
-              // Validate recipe IDs (T-22-04) — log drops to droppedAssignments
-              const validIds = new Set(recipes.map((r) => r.id));
-              const validVerifySlots: AssignedSlot[] = [];
-              for (const s of (parsed.slots ?? [])) {
-                if (!s.recipe_id || !validIds.has(s.recipe_id)) {
-                  droppedAssignments.push({
-                    day_index: s.day_index,
-                    slot_name: s.slot_name,
-                    raw_recipe_id: s.recipe_id ?? null,
-                    reason: !s.recipe_id ? "missing_recipe_id" : "invalid_recipe_id",
-                  });
-                  continue;
-                }
-                validVerifySlots.push(s);
+        // An aborted/failed verify call leaves verifyText empty: the pass simply
+        // does not count (pregnancy check stays unchecked -> partial).
+        let verifyText = "";
+        try {
+          const verifyResponse = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            signal: AbortSignal.timeout(Math.max(5000, VERIFY_ABORT_AT_MS - (Date.now() - startTime))),
+            headers: {
+              "x-api-key": apiKey,
+              "anthropic-version": "2023-06-01",
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "claude-haiku-4-5",
+              max_tokens: 4096,
+              system:
+                "You are a household meal planner. Assign recipes to meal plan slots for a 7-day week. Rules: 1) NEVER assign recipes to locked slots. 2) NEVER use recipes containing allergen or won't-eat ingredients. 3) STRONGLY prefer recipes whose meal_types array contains the target slot_name (e.g., a slot with slot_name='Breakfast' should be filled with a recipe whose meal_types includes 'Breakfast'). Only use a non-matching recipe when no slot-matching recipe is available in candidates. Recipes with meal_types=[] are slot-agnostic and may be assigned anywhere. Match recipe complexity to schedule: 'prep' slots get normal cook-and-eat recipes, 'batch' slots prefer recipes that scale up and keep well as leftovers, 'consume' slots prefer repeating an earlier 'batch' recipe from the same week or a low-effort recipe, 'quick' slots get simple/fast recipes, 'away' slots get NO assignment. 4) Optimize for the priority order provided. 5) Prefer recipes that use ingredients the household already has in inventory, especially items listed in expiringSoon; when a leftover in leftovers matches a candidate recipe name, keep or place that recipe in the earliest unlocked Lunch slot before the leftover expires. 6) Avoid repeating the same recipe more than twice in a week unless the catalog is very small. 7) NEVER leave a Snacks slot empty. If the catalog has no snack-specific recipe, either (a) reuse a full-meal recipe from the catalog as a Snacks assignment with a rationale noting 'reused as snack' or (b) add an entry to suggestedRecipes describing a canonical snack (e.g., 'Greek Yogurt with Berries', 'Hummus and Vegetables', 'Trail Mix'). All slots in slotsToFill must appear in your response — either with a recipe_id or explicitly via suggestedRecipes. Only use recipe_id values from the candidates array — NEVER invent recipe_ids. Return JSON: { slots: [{ day_index: number, slot_name: string, recipe_id: string, rationale: string }], violations: string[], suggestedRecipes: [{ name: string, prepMinutes: number, description: string }] }" + pregnancySystemSuffix,
+              messages: [
+                {
+                  role: "user",
+                  content: JSON.stringify({
+                    previousAssignment: {
+                      slots: bestResult.slots,
+                      violations: bestResult.violations,
+                    },
+                    constraints: {
+                      candidates: shortlistedRecipes,
+                      slotsToFill,
+                      lockedSlots: lockedSlots.map((s) => ({ day_index: s.day_index, slot_name: s.slot_name })),
+                      allergens: allergenNames,
+                      wontEat: wontEatNames,
+                      restrictions: allPredefined,
+                      inventory: inventoryNames,
+                      leftovers: leftoverNames,
+                      expiringSoon: expiringSoonNames,
+                      priorityOrder: priorityOrder ?? [],
+                      ...pregnancyConstraint,
+                    },
+                    instruction: forcePregnancyCheck
+                      ? "Re-check every slot against constraints.pregnancySafety; fix any violation. Also fix any listed violations while preserving as many good assignments as possible."
+                      : "Fix these violations while preserving as many good assignments as possible.",
+                  }),
+                },
+              ],
+            }),
+          });
+          if (verifyResponse.ok) {
+            const verifyData = await verifyResponse.json();
+            verifyText = verifyData.content?.[0]?.text ?? "";
+          }
+        } catch (verifyErr) {
+          console.error("[generate-plan] verify pass request failed:", verifyErr);
+        }
+        const verifyMatch = verifyText.match(/\{[\s\S]*\}/);
+        if (verifyMatch) {
+          try {
+            const parsed: AssignResult = JSON.parse(verifyMatch[0]);
+            // Validate recipe IDs (T-22-04) — log drops to droppedAssignments
+            const validIds = new Set(recipes.map((r) => r.id));
+            const validVerifySlots: AssignedSlot[] = [];
+            for (const s of (parsed.slots ?? [])) {
+              if (!s.recipe_id || !validIds.has(s.recipe_id)) {
+                droppedAssignments.push({
+                  day_index: s.day_index,
+                  slot_name: s.slot_name,
+                  raw_recipe_id: s.recipe_id ?? null,
+                  reason: !s.recipe_id ? "missing_recipe_id" : "invalid_recipe_id",
+                });
+                continue;
               }
-              parsed.slots = validVerifySlots;
-              const acceptForcedCheck = forcePregnancyCheck &&
-                parsed.slots.length > 0 &&
-                (parsed.violations ?? []).length <= (bestResult.violations ?? []).length;
-              if (acceptForcedCheck || (parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
-                // The verify prompt has no tier-rationale rules, so its slots come
-                // back with empty rationale. Preserve the prior pass's rationale for
-                // any slot whose recipe assignment did not change.
-                const prevRationale = new Map(
-                  (bestResult.slots ?? []).map((s) => [`${s.day_index}|${s.slot_name}|${s.recipe_id}`, s.rationale]),
-                );
-                for (const s of parsed.slots) {
-                  if (!s.rationale) {
-                    s.rationale = prevRationale.get(`${s.day_index}|${s.slot_name}|${s.recipe_id}`) ?? s.rationale;
-                  }
+              validVerifySlots.push(s);
+            }
+            parsed.slots = validVerifySlots;
+            const acceptForcedCheck = forcePregnancyCheck &&
+              parsed.slots.length > 0 &&
+              (parsed.violations ?? []).length <= (bestResult.violations ?? []).length;
+            if (acceptForcedCheck || (parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
+              // The verify prompt has no tier-rationale rules, so its slots come
+              // back with empty rationale. Preserve the prior pass's rationale for
+              // any slot whose recipe assignment did not change.
+              const prevRationale = new Map(
+                (bestResult.slots ?? []).map((s) => [`${s.day_index}|${s.slot_name}|${s.recipe_id}`, s.rationale]),
+              );
+              for (const s of parsed.slots) {
+                if (!s.rationale) {
+                  s.rationale = prevRationale.get(`${s.day_index}|${s.slot_name}|${s.recipe_id}`) ?? s.rationale;
                 }
+              }
+              if (forcePregnancyCheck) {
+                // Merge per slot so a partial response cannot drop assignments
+                // the model did not return.
+                const slotKey = (s: AssignedSlot) => `${s.day_index}|${capitalize(s.slot_name)}`;
+                const mergedByKey = new Map(bestResult.slots.map((s) => [slotKey(s), s]));
+                for (const s of parsed.slots) mergedByKey.set(slotKey(s), s);
+                bestResult = { ...parsed, slots: [...mergedByKey.values()] };
+                suggestedRecipes = parsed.suggestedRecipes ?? suggestedRecipes;
+                pregnancySafetyChecked = true;
+              } else {
                 bestResult = parsed;
                 suggestedRecipes = parsed.suggestedRecipes;
-                if (forcePregnancyCheck) pregnancySafetyChecked = true;
               }
-            } catch {
-              // Keep existing bestResult
             }
+          } catch {
+            // Keep existing bestResult
           }
         }
       }
@@ -1266,6 +1286,9 @@ serve(async (req) => {
       if (pregnancyFilterRepairs > 0) {
         console.log(`[generate-plan] pregnancy filter repaired ${pregnancyFilterRepairs} assignment(s)`);
       }
+      if (pregnancyActive && suggestedRecipes) {
+        suggestedRecipes = suggestedRecipes.filter((r) => !isPregnancyUnsafe(String(r.name ?? ""), []));
+      }
 
       // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
       const slotOrderMap: Record<string, number> = { "Breakfast": 0, "Lunch": 1, "Dinner": 2, "Snacks": 3 };
@@ -1294,12 +1317,30 @@ serve(async (req) => {
         if (ue) upsertError = ue.message;
       }
 
-      // A pregnancy-emptied slot is not upserted, so clear any meal a previous
-      // run left in it rather than leave a possibly unsafe meal in place.
+      // Slots not upserted this run keep whatever meal a previous run stored.
+      // When pregnant, clear pregnancy-emptied slots and any unlocked slot still
+      // holding a meal built from an unsafe recipe.
+      const unsafeMealIds = new Set<string>();
+      if (pregnancyActive && pregnancyUnsafeIds.size > 0) {
+        for (const rid of pregnancyUnsafeIds) {
+          if (mealIdByRecipeId[rid]) unsafeMealIds.add(mealIdByRecipeId[rid]);
+        }
+        const { data: unsafeItems } = await adminClient
+          .from("meal_items")
+          .select("meal_id")
+          .eq("item_type", "recipe")
+          .in("item_id", [...pregnancyUnsafeIds]);
+        for (const it of unsafeItems ?? []) unsafeMealIds.add(it.meal_id);
+      }
+      const upsertedKeys = new Set(
+        upsertError ? [] : upsertRows.map((r) => `${r.day_index}|${r.slot_name}`),
+      );
       const staleSlotIds = slots
         .filter((s) =>
-          !s.is_locked && s.meal_id &&
-          pregnancyClearedSlots.some((c) => c.day_index === s.day_index && capSlot(c.slot_name) === capSlot(s.slot_name))
+          !s.is_locked && s.meal_id && (
+            pregnancyClearedSlots.some((c) => c.day_index === s.day_index && capSlot(c.slot_name) === capSlot(s.slot_name)) ||
+            (unsafeMealIds.has(s.meal_id) && !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`))
+          )
         )
         .map((s) => s.id);
       if (staleSlotIds.length > 0) {
