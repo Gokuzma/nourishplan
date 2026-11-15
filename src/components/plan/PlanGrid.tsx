@@ -245,6 +245,8 @@ export function PlanGrid({
   const generatePlan = useGeneratePlan()
   const suggestAlternative = useSuggestAlternative()
   const { data: latestGeneration } = useLatestGeneration(planId, generatePlan.isPending)
+  const pregnancySafety = (latestGeneration?.constraint_snapshot as { pregnancySafety?: { active?: boolean; checked?: boolean } } | null | undefined)?.pregnancySafety
+  const pregnancyUnchecked = !!pregnancySafety?.active && !pregnancySafety.checked
   const { gaps } = useNutritionGaps(planId)
 
   const swapSuggestions = useMemo(() => {
@@ -756,6 +758,12 @@ export function PlanGrid({
             isVisible={isGenerating || isTimeout}
             isTimeout={isTimeout}
           />
+        )}
+
+        {pregnancyUnchecked && (
+          <div role="alert" className="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm rounded-[--radius-card] px-4 py-3 font-sans">
+            Not pregnancy-safety checked. Regenerate or review.
+          </div>
         )}
 
         {generationError && (
