@@ -1106,49 +1106,79 @@ export type Database = {
       }
       nutrition_targets: {
         Row: {
+          activity_level: string | null
+          birth_date: string | null
           calories: number | null
           carbs_g: number | null
           created_at: string
           custom_goals: Json
+          due_date: string | null
           fat_g: number | null
+          height_cm: number | null
           household_id: string
           id: string
+          is_pregnant: boolean
           macro_mode: string
           member_profile_id: string | null
           micronutrients: Json
+          notes: string | null
+          pre_pregnancy_weight_kg: number | null
           protein_g: number | null
+          sex: string | null
+          target_weight_kg: number | null
           updated_at: string
           user_id: string | null
+          weight_kg: number | null
         }
         Insert: {
+          activity_level?: string | null
+          birth_date?: string | null
           calories?: number | null
           carbs_g?: number | null
           created_at?: string
           custom_goals?: Json
+          due_date?: string | null
           fat_g?: number | null
+          height_cm?: number | null
           household_id: string
           id?: string
+          is_pregnant?: boolean
           macro_mode?: string
           member_profile_id?: string | null
           micronutrients?: Json
+          notes?: string | null
+          pre_pregnancy_weight_kg?: number | null
           protein_g?: number | null
+          sex?: string | null
+          target_weight_kg?: number | null
           updated_at?: string
           user_id?: string | null
+          weight_kg?: number | null
         }
         Update: {
+          activity_level?: string | null
+          birth_date?: string | null
           calories?: number | null
           carbs_g?: number | null
           created_at?: string
           custom_goals?: Json
+          due_date?: string | null
           fat_g?: number | null
+          height_cm?: number | null
           household_id?: string
           id?: string
+          is_pregnant?: boolean
           macro_mode?: string
           member_profile_id?: string | null
           micronutrients?: Json
+          notes?: string | null
+          pre_pregnancy_weight_kg?: number | null
           protein_g?: number | null
+          sex?: string | null
+          target_weight_kg?: number | null
           updated_at?: string
           user_id?: string | null
+          weight_kg?: number | null
         }
         Relationships: [
           {

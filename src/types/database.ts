@@ -211,6 +211,8 @@ export interface MealPlanTemplateSlot {
   meal_id: string | null
 }
 
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active'
+
 export interface NutritionTarget {
   id: string
   household_id: string
@@ -223,6 +225,16 @@ export interface NutritionTarget {
   micronutrients: Record<string, number>
   custom_goals: Record<string, number>
   macro_mode: 'grams' | 'percent'
+  birth_date: string | null
+  sex: 'female' | 'male' | null
+  height_cm: number | null
+  weight_kg: number | null
+  target_weight_kg: number | null
+  pre_pregnancy_weight_kg: number | null
+  activity_level: ActivityLevel | null
+  is_pregnant: boolean
+  due_date: string | null
+  notes: string | null
   created_at: string
   updated_at: string
 }

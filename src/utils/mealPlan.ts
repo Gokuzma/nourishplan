@@ -1,6 +1,7 @@
 import type { NutritionTarget } from '../types/database';
 
-export type NutritionTargetInsert = Omit<NutritionTarget, 'id' | 'created_at' | 'updated_at'>;
+type ProfileStatKey = 'birth_date' | 'sex' | 'height_cm' | 'weight_kg' | 'target_weight_kg' | 'pre_pregnancy_weight_kg' | 'activity_level' | 'is_pregnant' | 'due_date' | 'notes';
+export type NutritionTargetInsert = Omit<NutritionTarget, 'id' | 'created_at' | 'updated_at' | ProfileStatKey> & Partial<Pick<NutritionTarget, ProfileStatKey>>;
 
 /**
  * Returns the ISO date string ('YYYY-MM-DD') for the week start containing today,
