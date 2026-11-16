@@ -424,3 +424,9 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** Reused the correction-pass acceptance rule (fewer violations) for a pass whose purpose is mandatory verification; and trusted an AI shortlist to cover every slot type.
 **Rule:** Accept a mandatory verification pass on "it returned a usable answer", never on an unrelated quality metric. Any AI pre-filter that narrows a candidate pool must be topped up deterministically so every required category (slot type) has candidates. When narrowing a fallback pool for safety, check what it leaves for each category on a large real catalog.
 **Applies to:** supabase/functions/generate-plan (shortlist, verify passes, guardrail pools); any multi-pass AI pipeline with a forced pass.
+
+### L-060: Supabase CLI `db push` now defaults to the LOCAL stack — pass `--remote`
+**Bug:** `npx supabase db push --yes` failed with `DbConnectError ... 127.0.0.1:54322` ("Target: local stack") even though the project is linked; the same command had pushed migration 041 earlier.
+**Root cause:** A newer CLI changed the default target of `db push` to the local Docker stack; the linked project now needs an explicit flag.
+**Rule:** Push migrations with `npx supabase db push --remote --yes` (token from `.env.local` per L-048/L-056). Read the "Target:" line in the output before trusting a push. For edge functions, also run `npx -y deno check <fn>/index.ts` before deploying — it catches out-of-scope variables that a syntax-only esbuild check (L-057) misses.
+**Applies to:** Every migration push and edge-function deploy from agent shells.
