@@ -50,6 +50,7 @@ interface AddInventoryItemParams {
   is_ready_meal?: boolean
   ready_meal_slots?: string[] | null
   serving_grams?: number | null
+  servings_per_unit?: number | null
   serving_calories?: number | null
   serving_protein_g?: number | null
   serving_carbs_g?: number | null
@@ -62,6 +63,7 @@ function readyMealColumns(params: AddInventoryItemParams) {
     is_ready_meal: params.is_ready_meal ?? false,
     ready_meal_slots: params.ready_meal_slots ?? null,
     serving_grams: params.serving_grams ?? null,
+    servings_per_unit: params.servings_per_unit ?? null,
     serving_calories: params.serving_calories ?? null,
     serving_protein_g: params.serving_protein_g ?? null,
     serving_carbs_g: params.serving_carbs_g ?? null,

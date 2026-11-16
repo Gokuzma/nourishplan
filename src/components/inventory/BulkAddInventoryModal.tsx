@@ -20,6 +20,7 @@ export interface ParsedInventoryItem {
   is_ready_meal?: boolean
   ready_meal_slots?: string[] | null
   serving_grams?: number | null
+  servings_per_unit?: number | null
   serving_calories?: number | null
   serving_protein_g?: number | null
   serving_carbs_g?: number | null
@@ -196,6 +197,7 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
           is_ready_meal: it.is_ready_meal ?? false,
           ready_meal_slots: it.is_ready_meal ? it.ready_meal_slots ?? null : null,
           serving_grams: it.is_ready_meal ? it.serving_grams ?? null : null,
+          servings_per_unit: it.is_ready_meal ? it.servings_per_unit ?? null : null,
           serving_calories: it.is_ready_meal ? it.serving_calories ?? null : null,
           serving_protein_g: it.is_ready_meal ? it.serving_protein_g ?? null : null,
           serving_carbs_g: it.is_ready_meal ? it.serving_carbs_g ?? null : null,

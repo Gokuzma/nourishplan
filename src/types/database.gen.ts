@@ -666,6 +666,7 @@ export type Database = {
           serving_fat_g: number | null
           serving_grams: number | null
           serving_protein_g: number | null
+          servings_per_unit: number | null
           storage_location: string
           unit: string
           updated_at: string
@@ -696,6 +697,7 @@ export type Database = {
           serving_fat_g?: number | null
           serving_grams?: number | null
           serving_protein_g?: number | null
+          servings_per_unit?: number | null
           storage_location: string
           unit: string
           updated_at?: string
@@ -726,6 +728,7 @@ export type Database = {
           serving_fat_g?: number | null
           serving_grams?: number | null
           serving_protein_g?: number | null
+          servings_per_unit?: number | null
           storage_location?: string
           unit?: string
           updated_at?: string

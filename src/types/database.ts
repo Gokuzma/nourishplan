@@ -595,6 +595,7 @@ export interface InventoryItem {
   is_ready_meal: boolean
   ready_meal_slots: string[] | null
   serving_grams: number | null
+  servings_per_unit: number | null
   serving_calories: number | null
   serving_protein_g: number | null
   serving_carbs_g: number | null

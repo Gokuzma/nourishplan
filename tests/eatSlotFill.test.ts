@@ -91,3 +91,11 @@ describe('fillEatSlots dates', () => {
     expect(past.fills.get('0|Lunch')?.fill_source).toBe('make_ahead')
   })
 })
+
+describe('readyMealServings per unit', () => {
+  it('multiplies counted units by servings per unit', () => {
+    expect(readyMealServings(2, 'units', null, 3)).toBe(6)
+    expect(readyMealServings(10, 'units', null, 0.2)).toBe(2)
+    expect(readyMealServings(6, 'units', null, null)).toBe(6)
+  })
+})

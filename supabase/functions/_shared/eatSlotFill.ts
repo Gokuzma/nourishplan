@@ -163,11 +163,17 @@ export function fillEatSlots(
   return { fills, extraPortions, readyMealServingsUsed };
 }
 
-// Servings a ready-meal inventory row provides: one per unit, or weight / serving size.
+// Servings a ready-meal inventory row provides: units × servings per unit
+// (default 1), or weight / serving size.
 export const DEFAULT_SERVING_GRAMS = 350;
 
-export function readyMealServings(quantity: number, unit: string, servingGrams: number | null): number {
-  if (unit === "units") return Math.floor(quantity);
+export function readyMealServings(
+  quantity: number,
+  unit: string,
+  servingGrams: number | null,
+  servingsPerUnit: number | null = null,
+): number {
+  if (unit === "units") return Math.floor(quantity * (servingsPerUnit && servingsPerUnit > 0 ? servingsPerUnit : 1) + 1e-9);
   const grams = unit === "kg" ? quantity * 1000 : unit === "g" ? quantity : unit === "L" ? quantity * 1000 : quantity;
   return Math.floor(grams / (servingGrams && servingGrams > 0 ? servingGrams : DEFAULT_SERVING_GRAMS));
 }

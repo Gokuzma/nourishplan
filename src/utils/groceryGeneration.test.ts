@@ -36,6 +36,7 @@ function makeInventoryItem(overrides: Partial<InventoryItem> = {}): InventoryIte
     is_ready_meal: false,
     ready_meal_slots: null,
     serving_grams: null,
+    servings_per_unit: null,
     serving_calories: null,
     serving_protein_g: null,
     serving_carbs_g: null,

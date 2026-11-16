@@ -16,6 +16,7 @@ export interface ReadyMealProposal {
   storage_location: string
   ready_meal_slots: string[] | null
   serving_grams: number | null
+  servings_per_unit: number | null
   serving_calories: number | null
   serving_protein_g: number | null
   serving_carbs_g: number | null
@@ -71,6 +72,7 @@ export function ReadyMealReviewModal({ isOpen, onClose }: ReadyMealReviewModalPr
             is_ready_meal: true,
             ready_meal_slots: p.ready_meal_slots,
             serving_grams: p.serving_grams,
+            servings_per_unit: p.servings_per_unit,
             serving_calories: p.serving_calories,
             serving_protein_g: p.serving_protein_g,
             serving_carbs_g: p.serving_carbs_g,

@@ -64,6 +64,7 @@ interface InventoryItemRow {
   is_ready_meal: boolean;
   ready_meal_slots: string[] | null;
   serving_grams: number | null;
+  servings_per_unit: number | null;
   serving_calories: number | null;
   serving_protein_g: number | null;
   serving_carbs_g: number | null;
@@ -382,7 +383,7 @@ serve(async (req) => {
           .eq("household_id", householdId),
         adminClient
           .from("inventory_items")
-          .select("id, food_name, food_id, quantity_remaining, unit, storage_location, is_leftover, expires_at, is_ready_meal, ready_meal_slots, serving_grams, serving_calories, serving_protein_g, serving_carbs_g, serving_fat_g")
+          .select("id, food_name, food_id, quantity_remaining, unit, storage_location, is_leftover, expires_at, is_ready_meal, ready_meal_slots, serving_grams, servings_per_unit, serving_calories, serving_protein_g, serving_carbs_g, serving_fat_g")
           .eq("household_id", householdId)
           .is("removed_at", null),
         adminClient
@@ -1390,7 +1391,7 @@ serve(async (req) => {
           name: i.food_name,
           storage_location: i.storage_location,
           slots: i.ready_meal_slots && i.ready_meal_slots.length > 0 ? i.ready_meal_slots : ["Lunch", "Dinner"],
-          servings: readyMealServings(Number(i.quantity_remaining), i.unit, i.serving_grams),
+          servings: readyMealServings(Number(i.quantity_remaining), i.unit, i.serving_grams, i.servings_per_unit),
           expires_at: i.expires_at,
         })),
         dayNames,
