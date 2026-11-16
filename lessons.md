@@ -430,3 +430,10 @@ This runs inside the page, polls every 100ms, and resolves as soon as the elemen
 **Root cause:** A newer CLI changed the default target of `db push` to the local Docker stack; the linked project now needs an explicit flag.
 **Rule:** Push migrations with `npx supabase db push --remote --yes` (token from `.env.local` per L-048/L-056). Read the "Target:" line in the output before trusting a push. For edge functions, also run `npx -y deno check <fn>/index.ts` before deploying — it catches out-of-scope variables that a syntax-only esbuild check (L-057) misses.
 **Applies to:** Every migration push and edge-function deploy from agent shells.
+
+### L-061: An edge-function deploy can fail silently in a loop — confirm "Deployed Functions."
+**Bug:** Three `supabase functions deploy` calls in a `for` loop printed a JSON line starting `{"target":...` (an error object) instead of the usual success JSON; I read it as success, and an end-to-end test then ran the previous planner version and looked like a logic bug.
+**Root cause:** Trimming output with `tail -1 | cut` hid the error, and nothing checked the result.
+**Rule:** After every deploy, grep for `"message":"Deployed Functions."` and treat anything else as a failure; deploy functions one at a time. If an end-to-end result contradicts a passing local test of the same logic, suspect a stale deployment before the code.
+**Applies to:** All `supabase functions deploy` calls from agent shells.
+

@@ -62,5 +62,14 @@ existing kcal display shows kcal per serving.
 `classify-inventory` function proposes ready meals + estimates for existing items;
 the Inventory page shows a review list to confirm.
 
+## Builder's calls (made during implementation)
+- A same-day source counts (Tuesday lunch cooked extra can be Tuesday dinner).
+- Labels read `From freezer` with the servings used in the tooltip; `+N portions`
+  counts the people eating the leftovers.
+- Ready meals also skip allergens/won't-eats by name, expired items, and past days.
+- Counted ready meals carry `servings_per_unit` (migration 043): a frozen pizza ~3.
+- Ready-meal meals use a food item `ready:<inventory id>` and are kept off the
+  shopping list.
+
 ## Left to the builder
 Exact copy, chip colours, prompt wording, the default serving size constant.
