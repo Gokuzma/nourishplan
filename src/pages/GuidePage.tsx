@@ -219,7 +219,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     steps: [
       'On the Household page, tap "Diet & schedule" next to a member and set their weekly schedule: Prep (time to cook), Consume (eating only), Quick (fast meal only), or Away.',
       'The generator respects it — no slow braise on a Quick night, nothing planned for someone who\'s Away.',
-      'Schedule badges label the grid: "Use up" on consume days, "<20 min" on quick nights, "Away" when a member is out — so the shape of the week is readable at a glance.',
+      'Schedule badges label the grid: "Eat" on no-cook meals (filled with "Leftovers", "From freezer" or "Make ahead"), "<20 min" on quick nights, "Away" when a member is out — so the shape of the week is readable at a glance.',
       'Tap "Batch prep" to see which of the week\'s recipes share ingredients or steps — cook once, eat twice.',
       'Cooking multiple recipes in one session? Cook Mode generates a combined, interleaved prep sequence; reheat slots get a simple reheat sequence.',
     ],

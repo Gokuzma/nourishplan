@@ -114,6 +114,9 @@ export function useLoadTemplate() {
         slot_order: slot.slot_order,
         meal_id: slot.meal_id,
         is_override: false,
+        fill_source: null,
+        fill_note: null,
+        extra_portions: 0,
       }))
 
       const { error: upsertError } = await supabase
@@ -198,6 +201,9 @@ export function useRepeatLastWeek() {
         slot_order: slot.slot_order,
         meal_id: slot.meal_id,
         is_override: false,
+        fill_source: null,
+        fill_note: null,
+        extra_portions: 0,
       }))
 
       const { error: upsertError } = await supabase

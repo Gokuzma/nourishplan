@@ -1394,9 +1394,62 @@ serve(async (req) => {
           expires_at: i.expires_at,
         })),
         dayNames,
-        (name) => pregnancyActive && isPregnancyUnsafe(name, []),
+        // Unsafe = pregnancy banned term, allergen or won't-eat in the name.
+        (name) =>
+          (pregnancyActive && isPregnancyUnsafe(name, [])) ||
+          bannedIngredient.some((b) => name.toLowerCase().includes(b)),
+        Array.from({ length: 7 }, (_, i) => {
+          const d = new Date(weekStart + "T00:00:00Z");
+          d.setUTCDate(d.getUTCDate() + i);
+          return d.toISOString().slice(0, 10);
+        }),
+        todayStr,
       );
       const readyMealSlotRows: { day_index: number; slot_name: string; mealId: string; note: string; name: string }[] = [];
+      // Ready-meal meals are identified by their single food item
+      // (item_id "ready:<inventory id>"), never by name, so they cannot collide
+      // with a recipe-backed meal of the same name. One lookup per item.
+      const readyMealIdByItem = new Map<string, string | null>();
+      async function mealForReadyItem(item: InventoryItemRow): Promise<string | null> {
+        if (readyMealIdByItem.has(item.id)) return readyMealIdByItem.get(item.id) ?? null;
+        const itemKey = `ready:${item.id}`;
+        const mealName = sanitizeString(item.food_name);
+        const { data: existingItem } = await adminClient
+          .from("meal_items")
+          .select("meal_id, meals!inner(household_id, deleted_at)")
+          .eq("item_type", "food")
+          .eq("item_id", itemKey)
+          .eq("meals.household_id", householdId)
+          .is("meals.deleted_at", null)
+          .limit(1);
+        let mealId = (existingItem?.[0]?.meal_id as string | undefined) ?? null;
+        if (!mealId) {
+          const { data: newMeal } = await adminClient
+            .from("meals")
+            .insert({ household_id: householdId, name: mealName, created_by: triggeredByUserId })
+            .select("id")
+            .single();
+          mealId = newMeal?.id ?? null;
+        }
+        if (mealId) {
+          // Per-serving values stored at quantity 100 g so kcal shows per serving.
+          await adminClient.from("meal_items").delete().eq("meal_id", mealId);
+          await adminClient.from("meal_items").insert({
+            meal_id: mealId,
+            item_type: "food",
+            item_id: itemKey,
+            item_name: mealName,
+            quantity_grams: 100,
+            calories_per_100g: item.serving_calories ?? 0,
+            protein_per_100g: item.serving_protein_g ?? 0,
+            carbs_per_100g: item.serving_carbs_g ?? 0,
+            fat_per_100g: item.serving_fat_g ?? 0,
+            sort_order: 0,
+          });
+        }
+        readyMealIdByItem.set(item.id, mealId);
+        return mealId;
+      }
       for (const [key, fill] of eatFill.fills) {
         const [dayStr, slotName] = key.split("|");
         const dayIndex = Number(dayStr);
@@ -1404,44 +1457,17 @@ serve(async (req) => {
           bestResult.slots = bestResult.slots.filter((s) => fillSlotKey(s.day_index, capSlot(s.slot_name)) !== key);
           const item = readyMealRows.find((i) => i.id === fill.ready_meal_id);
           if (!item) continue;
-          const mealName = sanitizeString(item.food_name);
-          const { data: existingMeal } = await adminClient
-            .from("meals")
-            .select("id")
-            .eq("household_id", householdId)
-            .eq("name", mealName)
-            .is("deleted_at", null)
-            .limit(1);
-          let mealId = existingMeal?.[0]?.id as string | undefined;
-          if (!mealId) {
-            const { data: newMeal } = await adminClient
-              .from("meals")
-              .insert({ household_id: householdId, name: mealName, created_by: triggeredByUserId })
-              .select("id")
-              .single();
-            mealId = newMeal?.id;
-          }
+          const mealId = await mealForReadyItem(item);
           if (!mealId) continue;
-          if (item.serving_calories != null) {
-            // Per-serving values stored at quantity 100 g so kcal shows per serving.
-            await adminClient.from("meal_items").delete().eq("meal_id", mealId).eq("item_type", "food").eq("item_id", item.id);
-            await adminClient.from("meal_items").insert({
-              meal_id: mealId,
-              item_type: "food",
-              item_id: item.id,
-              item_name: mealName,
-              quantity_grams: 100,
-              calories_per_100g: item.serving_calories,
-              protein_per_100g: item.serving_protein_g ?? 0,
-              carbs_per_100g: item.serving_carbs_g ?? 0,
-              fat_per_100g: item.serving_fat_g ?? 0,
-              sort_order: 0,
-            });
-          }
-          readyMealSlotRows.push({ day_index: dayIndex, slot_name: slotName, mealId, note: fill.fill_note, name: mealName });
+          readyMealSlotRows.push({ day_index: dayIndex, slot_name: slotName, mealId, note: fill.fill_note, name: sanitizeString(item.food_name) });
         } else if (fill.recipe_id) {
           const existing = assignedByKey.get(key);
-          if (existing) existing.recipe_id = fill.recipe_id;
+          if (existing) {
+            existing.recipe_id = fill.recipe_id;
+          } else {
+            // The Eat slot was empty (AI skipped it or a safety filter cleared it).
+            bestResult.slots.push({ day_index: dayIndex, slot_name: slotName, recipe_id: fill.recipe_id, rationale: "" });
+          }
         }
       }
 
@@ -1512,7 +1538,8 @@ serve(async (req) => {
       const staleSlotIds = slots
         .filter((s) =>
           !s.is_locked && s.meal_id && (
-            pregnancyClearedSlots.some((c) => c.day_index === s.day_index && capSlot(c.slot_name) === capSlot(s.slot_name)) ||
+            (pregnancyClearedSlots.some((c) => c.day_index === s.day_index && capSlot(c.slot_name) === capSlot(s.slot_name)) &&
+              !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`)) ||
             (unsafeMealIds.has(s.meal_id) && !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`)) ||
             (pregnancyModelClearedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`) &&
               !upsertedKeys.has(`${s.day_index}|${capSlot(s.slot_name)}`))

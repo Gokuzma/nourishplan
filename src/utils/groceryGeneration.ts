@@ -164,6 +164,8 @@ export function aggregateIngredients(
 
     for (const item of slot.meal_items) {
       if (item.item_type === 'food') {
+        // Ready meals (item_id "ready:<inventory id>") are already in the house.
+        if (item.item_id?.startsWith('ready:')) continue
         const key = item.item_id ?? (item.item_name ?? '').toLowerCase()
         if (!key) continue
         const existing = map.get(key)

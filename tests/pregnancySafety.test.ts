@@ -194,6 +194,13 @@ describe('generate-plan pregnancy wiring', () => {
     expect(source).toContain('isPregnancyUnsafe(String(r.name ?? ""), [String(r.description ?? "")])')
   })
 
+  it('Eat-slot fill: leftovers can fill an empty slot, rescued slots are not wiped, ready meals keyed by item', () => {
+    expect(source).toContain('bestResult.slots.push({ day_index: dayIndex, slot_name: slotName, recipe_id: fill.recipe_id, rationale: "" });')
+    expect(source).toMatch(/capSlot\(c\.slot_name\) === capSlot\(s\.slot_name\)\) &&\s*!upsertedKeys\.has/)
+    expect(source).toContain('const itemKey = `ready:${item.id}`;')
+    expect(source).toContain('bannedIngredient.some((b) => name.toLowerCase().includes(b))')
+  })
+
   it('selects the new profile columns from nutrition_targets', () => {
     expect(source).toMatch(/from\("nutrition_targets"\)\s*\.select\("[^"]*is_pregnant, due_date, notes/)
   })

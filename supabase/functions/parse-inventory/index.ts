@@ -7,7 +7,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const FETCH_TIMEOUT_MS = 60000;
+const FETCH_TIMEOUT_MS = 100000;
 const MAX_INPUT_CHARS = 8000;
 const MAX_ITEMS = 100;
 
@@ -158,7 +158,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5",
-        max_tokens: 12000,
+        max_tokens: 16000,
         system: SYSTEM_PROMPT,
         messages: [
           {
@@ -194,6 +194,9 @@ serve(async (req) => {
 
     return jsonResponse({ success: true, items, truncated: rawItemCount(parsed) > MAX_ITEMS, maxItems: MAX_ITEMS });
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return jsonResponse({ success: false, error: "That took too long to sort out. Try a shorter batch, like one shelf at a time." });
+    }
     return jsonResponse({
       success: false,
       error: err instanceof Error ? err.message : "Unexpected error",

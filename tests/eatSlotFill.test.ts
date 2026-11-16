@@ -80,3 +80,14 @@ describe('readyMealServings', () => {
     expect(readyMealServings(1, 'kg', 250)).toBe(4)
   })
 })
+
+describe('fillEatSlots dates', () => {
+  const dates = ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20', '2026-11-21', '2026-11-22']
+  it('does not place a ready meal after it expires or on a day already past', () => {
+    const fridgeMeal: ReadyMealInput = { ...beefRice, storage_location: 'fridge', expires_at: '2026-11-17' }
+    const r = fillEatSlots([slot(4, 'Lunch', 'consume', 'r-x')], [fridgeMeal], DAYS, safe, dates, '2026-11-16')
+    expect(r.fills.get('4|Lunch')?.fill_source).toBe('make_ahead')
+    const past = fillEatSlots([slot(0, 'Lunch', 'consume', 'r-x')], [beefRice], DAYS, safe, dates, '2026-11-18')
+    expect(past.fills.get('0|Lunch')?.fill_source).toBe('make_ahead')
+  })
+})

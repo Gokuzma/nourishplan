@@ -55,11 +55,15 @@ function locationLabel(location: string): string {
   return location.charAt(0).toUpperCase() + location.slice(1);
 }
 
+// slotDates[i] is the ISO date of day i; ready meals are not placed on days
+// before `today` (already eaten) or after they expire.
 export function fillEatSlots(
   slots: PlanSlotInput[],
   readyMeals: ReadyMealInput[],
   dayNames: string[],
   isUnsafe: (name: string) => boolean,
+  slotDates?: string[],
+  today?: string,
 ): EatFillResult {
   const fills = new Map<string, SlotFill>();
   const extraPortions = new Map<string, number>();
@@ -72,7 +76,10 @@ export function fillEatSlots(
 
   function pickReadyMeal(slot: PlanSlotInput): ReadyMealInput | null {
     const needed = Math.max(1, slot.eaters);
+    const slotDate = slotDates?.[slot.day_index];
+    if (slotDate && today && slotDate < today) return null;
     const candidates = readyMeals.filter((m) =>
+      (!slotDate || !m.expires_at || m.expires_at >= slotDate) &&
       m.slots.includes(slot.slot_name) &&
       m.servings - (readyMealServingsUsed.get(m.id) ?? 0) >= needed &&
       !isUnsafe(m.name)
