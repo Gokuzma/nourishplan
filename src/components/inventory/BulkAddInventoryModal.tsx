@@ -17,6 +17,13 @@ export interface ParsedInventoryItem {
   expires_at: string | null
   purchase_price: number | null
   brand: string | null
+  is_ready_meal?: boolean
+  ready_meal_slots?: string[] | null
+  serving_grams?: number | null
+  serving_calories?: number | null
+  serving_protein_g?: number | null
+  serving_carbs_g?: number | null
+  serving_fat_g?: number | null
 }
 
 // Must match MAX_INPUT_CHARS / MAX_ITEMS in supabase/functions/parse-inventory
@@ -186,6 +193,14 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
           storage_location: it.storage_location,
           expires_at: it.expires_at,
           purchase_price: it.purchase_price,
+          is_ready_meal: it.is_ready_meal ?? false,
+          ready_meal_slots: it.is_ready_meal ? it.ready_meal_slots ?? null : null,
+          serving_grams: it.is_ready_meal ? it.serving_grams ?? null : null,
+          serving_calories: it.is_ready_meal ? it.serving_calories ?? null : null,
+          serving_protein_g: it.is_ready_meal ? it.serving_protein_g ?? null : null,
+          serving_carbs_g: it.is_ready_meal ? it.serving_carbs_g ?? null : null,
+          serving_fat_g: it.is_ready_meal ? it.serving_fat_g ?? null : null,
+          nutrition_source: it.is_ready_meal && it.serving_calories != null ? 'estimate' as const : null,
         }))
       )
       onClose()
@@ -335,6 +350,18 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
                         {LOCATION_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                       </select>
                     </div>
+                    <label className="flex items-center gap-2 text-xs text-text/70">
+                      <input
+                        type="checkbox"
+                        checked={item.is_ready_meal ?? false}
+                        onChange={e => updateItem(i, { is_ready_meal: e.target.checked })}
+                        aria-label={`Item ${i + 1} is a ready meal`}
+                      />
+                      Ready meal
+                      {item.is_ready_meal && item.serving_calories != null && (
+                        <span className="text-text/50">· ≈ {Math.round(item.serving_calories)} kcal per serving (estimate)</span>
+                      )}
+                    </label>
                     {(item.expires_at || item.purchase_price != null || item.brand) && (
                       <p className="text-xs text-text/50">
                         {[

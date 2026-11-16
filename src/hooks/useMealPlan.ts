@@ -124,6 +124,9 @@ export function useAssignSlot() {
             slot_order: slotOrder,
             meal_id: mealId,
             is_override: isOverride,
+            fill_source: null,
+            fill_note: null,
+            extra_portions: 0,
           },
           { onConflict: 'plan_id,day_index,slot_name' },
         )
@@ -154,7 +157,7 @@ export function useClearSlot() {
     }): Promise<void> => {
       const { error } = await supabase
         .from('meal_plan_slots')
-        .update({ meal_id: null, is_override: false })
+        .update({ meal_id: null, is_override: false, fill_source: null, fill_note: null, extra_portions: 0 })
         .eq('id', slotId)
 
       if (error) throw error
@@ -176,7 +179,7 @@ export function useClearUnlockedSlots() {
     mutationFn: async ({ planId }: { planId: string }): Promise<void> => {
       const { error } = await supabase
         .from('meal_plan_slots')
-        .update({ meal_id: null, is_override: false })
+        .update({ meal_id: null, is_override: false, fill_source: null, fill_note: null, extra_portions: 0 })
         .eq('plan_id', planId)
         .eq('is_locked', false)
 

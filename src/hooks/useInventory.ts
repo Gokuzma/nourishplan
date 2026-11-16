@@ -47,6 +47,27 @@ interface AddInventoryItemParams {
   purchase_price?: number | null
   is_leftover?: boolean
   leftover_from_recipe_id?: string | null
+  is_ready_meal?: boolean
+  ready_meal_slots?: string[] | null
+  serving_grams?: number | null
+  serving_calories?: number | null
+  serving_protein_g?: number | null
+  serving_carbs_g?: number | null
+  serving_fat_g?: number | null
+  nutrition_source?: 'estimate' | 'barcode' | null
+}
+
+function readyMealColumns(params: AddInventoryItemParams) {
+  return {
+    is_ready_meal: params.is_ready_meal ?? false,
+    ready_meal_slots: params.ready_meal_slots ?? null,
+    serving_grams: params.serving_grams ?? null,
+    serving_calories: params.serving_calories ?? null,
+    serving_protein_g: params.serving_protein_g ?? null,
+    serving_carbs_g: params.serving_carbs_g ?? null,
+    serving_fat_g: params.serving_fat_g ?? null,
+    nutrition_source: params.nutrition_source ?? null,
+  }
 }
 
 export function useAddInventoryItem() {
@@ -80,6 +101,7 @@ export function useAddInventoryItem() {
           purchase_price: params.purchase_price ?? null,
           is_leftover: params.is_leftover ?? false,
           leftover_from_recipe_id: params.leftover_from_recipe_id ?? null,
+          ...readyMealColumns(params),
         })
         .select()
         .single()
@@ -142,6 +164,7 @@ export function useBulkAddInventoryItems() {
           purchase_price: params.purchase_price ?? null,
           is_leftover: params.is_leftover ?? false,
           leftover_from_recipe_id: params.leftover_from_recipe_id ?? null,
+          ...readyMealColumns(params),
         }))
       )
       if (error) throw error

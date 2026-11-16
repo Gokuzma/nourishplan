@@ -4,6 +4,7 @@ import { Icon } from '../Icon'
 import { Chip } from '../editorial'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { DropActionMenu } from './DropActionMenu'
+import { slotFillLabels } from '../../utils/slotFill'
 import type { SlotWithMeal } from '../../hooks/useMealPlan'
 import type { ScheduleStatus } from '../../types/database'
 
@@ -48,7 +49,7 @@ function calcSlotKcal(slot: SlotWithMeal | null): number {
 function ScheduleChip({ status, tooltip }: { status: ScheduleStatus; tooltip?: string }) {
   const aria = `Schedule: ${status}`
   if (status === 'batch') return <Chip kind="plum" ariaLabel={aria} title={tooltip ?? 'Batch cooking — extra for later meals'}>BATCH</Chip>
-  if (status === 'consume') return <Chip kind="butter" ariaLabel={aria} title={tooltip ?? 'Pre-made from prep day'}>USE UP</Chip>
+  if (status === 'consume') return <Chip kind="butter" ariaLabel={aria} title={tooltip ?? 'Eat — leftovers or already-made food, no cooking'}>EAT</Chip>
   if (status === 'quick') return <Chip kind="chart" ariaLabel={aria} title={tooltip ?? 'Quick meal only'}>&lt;20 MIN</Chip>
   if (status === 'away') return <Chip kind="sky" ariaLabel={aria} title={tooltip ?? 'Away — not eating at home'}>AWAY</Chip>
   return null
@@ -95,6 +96,7 @@ export function PlanCell({
 
   const kcal = calcSlotKcal(slot)
   const occupied = slot?.meal_id != null && slot?.meals != null
+  const fillLabels = occupied ? slotFillLabels(slot) : []
 
   return (
     <div
@@ -146,9 +148,14 @@ export function PlanCell({
             {Math.round(kcal)} kcal
             {isFreezerFriendly && <span style={{ marginLeft: 6, color: 'var(--sky)' }} title="Freezer-friendly">❄</span>}
           </div>
-          {scheduleStatus && scheduleStatus !== 'prep' && (
+          {(fillLabels.length > 0 || (scheduleStatus && scheduleStatus !== 'prep')) && (
             <div className="slot-tags">
-              <ScheduleChip status={scheduleStatus} tooltip={scheduleTooltip} />
+              {fillLabels.map(l => (
+                <Chip key={l.text} kind="butter" ariaLabel={l.tooltip} title={l.tooltip}>{l.text.toUpperCase()}</Chip>
+              ))}
+              {scheduleStatus && scheduleStatus !== 'prep' && !(scheduleStatus === 'consume' && fillLabels.length > 0) && (
+                <ScheduleChip status={scheduleStatus} tooltip={scheduleTooltip} />
+              )}
             </div>
           )}
           {violationCount != null && violationCount > 0 && (

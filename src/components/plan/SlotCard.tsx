@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { slotFillLabels } from '../../utils/slotFill'
 import { useDraggable } from '@dnd-kit/core'
 import { calcIngredientNutrition, calcMealNutrition } from '../../utils/nutrition'
 import { ProgressRing } from './ProgressRing'
@@ -119,7 +120,7 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
                 aria-label={`Schedule: ${scheduleStatus}`}
                 title={scheduleTooltip ?? (
                   scheduleStatus === 'batch' ? 'Batch cooking — extra for later meals' :
-                  scheduleStatus === 'consume' ? 'Pre-made from prep day' :
+                  scheduleStatus === 'consume' ? 'Eat — leftovers or already-made food, no cooking' :
                   scheduleStatus === 'quick' ? 'Quick meal only' :
                   'Away — not eating at home'
                 )}
@@ -131,6 +132,13 @@ function OccupiedSlotCard({ slotName, slot, onAssign, onClear, onSwap, onLog, on
               </span>
             ) : null}
           </p>
+          {slotFillLabels(slot).length > 0 && (
+            <p className="text-xs text-text/70 font-sans" data-testid="slot-fill-labels">
+              {slotFillLabels(slot).map(l => (
+                <span key={l.text} title={l.tooltip} className="mr-2">{l.text}</span>
+              ))}
+            </p>
+          )}
           <div className="flex items-center gap-2">
             <p className="text-xs text-text/50 font-sans">{Math.round(calories)} kcal</p>
             {currentUserSuggestion && (
@@ -297,7 +305,7 @@ export function SlotCard(props: SlotCardProps) {
               aria-label={`Schedule: ${scheduleStatus}`}
               title={scheduleTooltip ?? (
                 scheduleStatus === 'batch' ? 'Batch cooking — extra for later meals' :
-                scheduleStatus === 'consume' ? 'Pre-made from prep day' :
+                scheduleStatus === 'consume' ? 'Eat — leftovers or already-made food, no cooking' :
                 scheduleStatus === 'quick' ? 'Quick meal only' :
                 'Away — not eating at home'
               )}

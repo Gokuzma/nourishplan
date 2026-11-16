@@ -9,6 +9,27 @@ export interface BarcodeProduct {
   barcode: string
 }
 
+// Per-serving nutrition from a barcode product (Open Food Facts gives per-100g
+// values plus a free-text serving size such as "1 burrito (142 g)").
+export function barcodeServingNutrition(product: BarcodeProduct): {
+  serving_calories: number
+  serving_protein_g: number | null
+  serving_carbs_g: number | null
+  serving_fat_g: number | null
+} | null {
+  if (product.calories == null || !product.serving_size) return null
+  const match = product.serving_size.match(/(\d+(?:\.\d+)?)\s*g\b/i)
+  if (!match) return null
+  const factor = Number(match[1]) / 100
+  const scale = (v: number | null) => (v == null ? null : Math.round(v * factor * 10) / 10)
+  return {
+    serving_calories: Math.round(product.calories * factor),
+    serving_protein_g: scale(product.protein),
+    serving_carbs_g: scale(product.carbs),
+    serving_fat_g: scale(product.fat),
+  }
+}
+
 const barcodeCache = new Map<string, BarcodeProduct | null>()
 
 export async function lookupBarcode(barcode: string): Promise<BarcodeProduct | null> {

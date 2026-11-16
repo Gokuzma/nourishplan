@@ -1,19 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { READY_MEAL_PROMPT_RULES, sanitizeReadyMealFields, type ReadyMealFields } from "../_shared/readyMeal.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const FETCH_TIMEOUT_MS = 30000;
+const FETCH_TIMEOUT_MS = 60000;
 const MAX_INPUT_CHARS = 8000;
 const MAX_ITEMS = 100;
 
 const VALID_UNITS = ["g", "kg", "ml", "L", "units"] as const;
 const VALID_LOCATIONS = ["pantry", "fridge", "freezer"] as const;
 
-interface ParsedItem {
+interface ParsedItem extends ReadyMealFields {
   food_name: string;
   quantity: number;
   unit: (typeof VALID_UNITS)[number];
@@ -25,7 +26,7 @@ interface ParsedItem {
 
 const SYSTEM_PROMPT = `You turn a messy description of groceries into structured inventory items. Input may be: spoken dictation ("two pounds of chicken breast in the freezer, uh, a dozen eggs..."), a typed list, or a pasted spreadsheet (comma/tab separated, possibly with a header row).
 
-Return ONLY a JSON object: {"items": [{"food_name": string, "quantity": number, "unit": "g"|"kg"|"ml"|"L"|"units", "storage_location": "pantry"|"fridge"|"freezer", "expires_at": string|null, "purchase_price": number|null, "brand": string|null}]}
+Return ONLY a JSON object: {"items": [{"food_name": string, "quantity": number, "unit": "g"|"kg"|"ml"|"L"|"units", "storage_location": "pantry"|"fridge"|"freezer", "expires_at": string|null, "purchase_price": number|null, "brand": string|null, "is_ready_meal": boolean, "ready_meal_slots": string[]|null, "serving_grams": number|null, "serving_calories": number|null, "serving_protein_g": number|null, "serving_carbs_g": number|null, "serving_fat_g": number|null}]}
 
 Rules:
 1. food_name: the canonical food, Title Case, no quantities or packaging words ("Chicken Breast", not "2 lbs chicken breasts").
@@ -37,7 +38,8 @@ Rules:
 7. Spreadsheet input: map columns by header names when present (name/item, qty/quantity, unit, location, expiry/expires, price, brand); skip the header row itself; skip empty rows.
 8. Split multi-item lines. Ignore filler words, greetings, and anything that is not a food item.
 9. If nothing in the input looks like food items, return {"items": []}.
-10. Return ONLY the JSON object — no prose, no markdown fences.`;
+10. ${READY_MEAL_PROMPT_RULES}
+11. Return ONLY the JSON object — no prose, no markdown fences.`;
 
 async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
   const controller = new AbortController();
@@ -89,6 +91,7 @@ function sanitizeItems(raw: unknown): ParsedItem[] {
       expires_at: expires,
       purchase_price: price,
       brand,
+      ...sanitizeReadyMealFields(o),
     });
   }
   return out;
@@ -155,7 +158,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5",
-        max_tokens: 8192,
+        max_tokens: 12000,
         system: SYSTEM_PROMPT,
         messages: [
           {

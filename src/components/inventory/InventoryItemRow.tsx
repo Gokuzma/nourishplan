@@ -69,6 +69,14 @@ export function InventoryItemRow({ item, onEdit, onRemove, isRemoving }: Invento
               {item.is_opened && (
                 <span className="text-xs text-text/50">Opened</span>
               )}
+              {item.is_ready_meal && (
+                <span
+                  className="bg-accent/15 text-text text-xs px-1.5 py-0.5 rounded-full"
+                  title={item.serving_calories != null ? `≈ ${Math.round(item.serving_calories)} kcal per serving${item.nutrition_source === 'estimate' ? ' (estimate)' : ''}` : undefined}
+                >
+                  Ready meal{item.serving_calories != null ? ` · ≈${Math.round(item.serving_calories)} kcal` : ''}
+                </span>
+              )}
             </div>
             {item.brand && (
               <p className="text-xs text-text/50 mt-0.5">{item.brand}</p>

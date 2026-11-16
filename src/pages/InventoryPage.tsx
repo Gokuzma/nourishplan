@@ -8,6 +8,7 @@ import { AddInventoryItemModal } from '../components/inventory/AddInventoryItemM
 import { BulkAddInventoryModal } from '../components/inventory/BulkAddInventoryModal'
 import { BarcodeScanner } from '../components/inventory/BarcodeScanner'
 import { QuickScanMode } from '../components/inventory/QuickScanMode'
+import { ReadyMealReviewModal } from '../components/inventory/ReadyMealReviewModal'
 import { Nameplate, StoryHead, Folio } from '../components/editorial'
 import { Icon } from '../components/Icon'
 
@@ -24,6 +25,7 @@ export function InventoryPage() {
   const [editItem, setEditItem] = useState<InventoryItem | null>(null)
   const [showScanner, setShowScanner] = useState(false)
   const [showQuickScan, setShowQuickScan] = useState(false)
+  const [showReadyMeals, setShowReadyMeals] = useState(false)
   const [scanResult, setScanResult] = useState<{ product: BarcodeProduct | null; barcode: string } | null>(null)
 
   const { data: items, isPending } = useInventoryItems(activeTab)
@@ -226,6 +228,14 @@ export function InventoryPage() {
           </button>
           <button
             type="button"
+            onClick={() => setShowReadyMeals(true)}
+            className="btn btn-sm"
+            title="Find items you eat as is or just heat, so the planner can use them"
+          >
+            Find ready meals
+          </button>
+          <button
+            type="button"
             onClick={() => { setEditItem(null); setScanResult(null); setShowAddModal(true) }}
             className="btn btn-primary btn-sm"
           >
@@ -319,6 +329,7 @@ export function InventoryPage() {
         defaultLocation={activeTab}
       />
 
+      <ReadyMealReviewModal isOpen={showReadyMeals} onClose={() => setShowReadyMeals(false)} />
       <BulkAddInventoryModal
         isOpen={showBulkAdd}
         onClose={() => setShowBulkAdd(false)}

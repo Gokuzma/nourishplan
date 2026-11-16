@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { InventoryItem, StorageLocation, InventoryUnit } from '../../types/database'
 import type { BarcodeProduct } from '../../utils/barcodeLookup'
+import { barcodeServingNutrition } from '../../utils/barcodeLookup'
 import { useAddInventoryItem, useUpdateInventoryItem, useInventoryItems } from '../../hooks/useInventory'
 
 interface AddInventoryItemModalProps {
@@ -51,6 +52,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
   const [expiryDate, setExpiryDate] = useState('')
   const [purchasePrice, setPurchasePrice] = useState<number | ''>('')
   const [isStaple, setIsStaple] = useState(false)
+  const [isReadyMeal, setIsReadyMeal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [addedCount, setAddedCount] = useState(0)
   const [showDetails, setShowDetails] = useState(false)
@@ -66,6 +68,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
       setExpiryDate(editItem.expires_at ?? defaultExpiryDate(editItem))
       setPurchasePrice(editItem.purchase_price ?? '')
       setIsStaple(editItem.is_staple)
+      setIsReadyMeal(editItem.is_ready_meal)
     } else if (leftoverDefaults) {
       const d = new Date()
       d.setUTCDate(d.getUTCDate() + 3)
@@ -97,6 +100,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
       setPurchasePrice('')
       setIsStaple(false)
     }
+    if (!editItem) setIsReadyMeal(false)
     setError(null)
     setAddedCount(0)
     // Auto-open the details section when the item already uses those fields
@@ -104,6 +108,14 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
   }, [editItem, scanResult, leftoverDefaults, defaultLocation, isOpen])
 
   if (!isOpen) return null
+
+  function readyMealFields() {
+    if (!isReadyMeal) return { is_ready_meal: false }
+    const fromBarcode = scanResult?.product ? barcodeServingNutrition(scanResult.product) : null
+    return fromBarcode
+      ? { is_ready_meal: true, ...fromBarcode, nutrition_source: 'barcode' as const }
+      : { is_ready_meal: true }
+  }
 
   async function handleSubmit(e: React.FormEvent, addAnother = false) {
     e.preventDefault()
@@ -130,6 +142,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
             expires_at: expiryDate || null,
             purchase_price: purchasePrice === '' ? null : purchasePrice as number,
             is_staple: isStaple,
+            is_ready_meal: isReadyMeal,
           },
         })
       } else {
@@ -145,6 +158,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
           is_staple: isStaple,
           is_leftover: leftoverDefaults ? true : undefined,
           leftover_from_recipe_id: leftoverDefaults ? leftoverDefaults.recipeId : undefined,
+          ...readyMealFields(),
         })
       }
       if (addAnother && !editItem) {
@@ -156,6 +170,7 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
         setExpiryDate('')
         setPurchasePrice('')
         setIsStaple(false)
+        setIsReadyMeal(false)
         setAddedCount(c => c + 1)
         document.getElementById('inv-food-name')?.focus()
       } else {
@@ -292,6 +307,23 @@ export function AddInventoryItemModal({ isOpen, onClose, editItem, scanResult, l
                 className="w-full rounded-[--radius-btn] border border-secondary bg-background px-3 py-2 text-sm text-text focus:outline-none focus:border-accent"
               />
             </div>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isReadyMeal}
+                onChange={e => setIsReadyMeal(e.target.checked)}
+                className="w-4 h-4 mt-0.5 accent-primary"
+              />
+              <span className="text-sm text-text/70">
+                Ready meal — eaten as is or just heated (frozen meals, burritos, pizza)
+                {editItem?.is_ready_meal && editItem.serving_calories != null && (
+                  <span className="block text-xs text-text/50">
+                    ≈ {Math.round(editItem.serving_calories)} kcal per serving{editItem.nutrition_source === 'estimate' ? ' (estimate)' : ''}
+                  </span>
+                )}
+              </span>
+            </label>
 
             {/* Rarely-used fields, tucked away to keep the common path short */}
             <button

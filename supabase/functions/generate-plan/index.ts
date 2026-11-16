@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isCurrentlyPregnant, isPregnancyUnsafe, PREGNANCY_AVOID_RULE } from "../_shared/pregnancySafety.ts";
+import { fillEatSlots, readyMealServings, slotKey as fillSlotKey } from "../_shared/eatSlotFill.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -52,12 +53,21 @@ interface ScheduleSlotRow {
 }
 
 interface InventoryItemRow {
+  id: string;
   food_name: string;
   food_id: string | null;
   quantity_remaining: number;
   unit: string;
+  storage_location: string;
   is_leftover: boolean;
   expires_at: string | null;
+  is_ready_meal: boolean;
+  ready_meal_slots: string[] | null;
+  serving_grams: number | null;
+  serving_calories: number | null;
+  serving_protein_g: number | null;
+  serving_carbs_g: number | null;
+  serving_fat_g: number | null;
 }
 
 interface RatingRow {
@@ -372,7 +382,7 @@ serve(async (req) => {
           .eq("household_id", householdId),
         adminClient
           .from("inventory_items")
-          .select("food_name, food_id, quantity_remaining, unit, is_leftover, expires_at")
+          .select("id, food_name, food_id, quantity_remaining, unit, storage_location, is_leftover, expires_at, is_ready_meal, ready_meal_slots, serving_grams, serving_calories, serving_protein_g, serving_carbs_g, serving_fat_g")
           .eq("household_id", householdId)
           .is("removed_at", null),
         adminClient
@@ -1356,6 +1366,85 @@ serve(async (req) => {
         );
       }
 
+      // ── Eat-slot fill (deterministic) ───────────────────────────────────────
+      // An Eat (consume) slot may only hold food that will exist: leftovers of a
+      // meal cooked earlier this week, or a ready meal from inventory; otherwise
+      // the recipe stays, labelled make-ahead. Runs after the pregnancy filter so
+      // leftovers copy only safe recipes; ready meals are screened by name.
+      const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const dayNames = Array.from({ length: 7 }, (_, i) => DOW_NAMES[(weekStartDow + i) % 7]);
+      const assignedByKey = new Map(
+        bestResult.slots.filter((s) => s.recipe_id).map((s) => [fillSlotKey(s.day_index, capSlot(s.slot_name)), s]),
+      );
+      const readyMealRows = inventory.filter((i) => i.is_ready_meal && (!i.expires_at || i.expires_at >= todayStr));
+      const eatFill = fillEatSlots(
+        slotsToFill.map((s) => ({
+          day_index: s.day_index,
+          slot_name: s.slot_name,
+          status: scheduleStatus[`${s.day_index}_${s.slot_name}`] ?? "prep",
+          recipe_id: assignedByKey.get(fillSlotKey(s.day_index, s.slot_name))?.recipe_id ?? null,
+          eaters: memberCount - (awayCountByKey[`${s.day_index}_${s.slot_name}`] ?? 0),
+        })),
+        readyMealRows.map((i) => ({
+          id: i.id,
+          name: i.food_name,
+          storage_location: i.storage_location,
+          slots: i.ready_meal_slots && i.ready_meal_slots.length > 0 ? i.ready_meal_slots : ["Lunch", "Dinner"],
+          servings: readyMealServings(Number(i.quantity_remaining), i.unit, i.serving_grams),
+          expires_at: i.expires_at,
+        })),
+        dayNames,
+        (name) => pregnancyActive && isPregnancyUnsafe(name, []),
+      );
+      const readyMealSlotRows: { day_index: number; slot_name: string; mealId: string; note: string; name: string }[] = [];
+      for (const [key, fill] of eatFill.fills) {
+        const [dayStr, slotName] = key.split("|");
+        const dayIndex = Number(dayStr);
+        if (fill.fill_source === "ready_meal" && fill.ready_meal_id) {
+          bestResult.slots = bestResult.slots.filter((s) => fillSlotKey(s.day_index, capSlot(s.slot_name)) !== key);
+          const item = readyMealRows.find((i) => i.id === fill.ready_meal_id);
+          if (!item) continue;
+          const mealName = sanitizeString(item.food_name);
+          const { data: existingMeal } = await adminClient
+            .from("meals")
+            .select("id")
+            .eq("household_id", householdId)
+            .eq("name", mealName)
+            .is("deleted_at", null)
+            .limit(1);
+          let mealId = existingMeal?.[0]?.id as string | undefined;
+          if (!mealId) {
+            const { data: newMeal } = await adminClient
+              .from("meals")
+              .insert({ household_id: householdId, name: mealName, created_by: triggeredByUserId })
+              .select("id")
+              .single();
+            mealId = newMeal?.id;
+          }
+          if (!mealId) continue;
+          if (item.serving_calories != null) {
+            // Per-serving values stored at quantity 100 g so kcal shows per serving.
+            await adminClient.from("meal_items").delete().eq("meal_id", mealId).eq("item_type", "food").eq("item_id", item.id);
+            await adminClient.from("meal_items").insert({
+              meal_id: mealId,
+              item_type: "food",
+              item_id: item.id,
+              item_name: mealName,
+              quantity_grams: 100,
+              calories_per_100g: item.serving_calories,
+              protein_per_100g: item.serving_protein_g ?? 0,
+              carbs_per_100g: item.serving_carbs_g ?? 0,
+              fat_per_100g: item.serving_fat_g ?? 0,
+              sort_order: 0,
+            });
+          }
+          readyMealSlotRows.push({ day_index: dayIndex, slot_name: slotName, mealId, note: fill.fill_note, name: mealName });
+        } else if (fill.recipe_id) {
+          const existing = assignedByKey.get(key);
+          if (existing) existing.recipe_id = fill.recipe_id;
+        }
+      }
+
       // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
       const slotOrderMap: Record<string, number> = { "Breakfast": 0, "Lunch": 1, "Dinner": 2, "Snacks": 3 };
       const upsertRows = bestResult.slots
@@ -1363,16 +1452,35 @@ serve(async (req) => {
         .map((s) => {
           // Capitalize to match existing DB rows (e.g., "breakfast" -> "Breakfast")
           const capitalizedSlotName = s.slot_name.charAt(0).toUpperCase() + s.slot_name.slice(1).toLowerCase();
+          const key = fillSlotKey(s.day_index, capitalizedSlotName);
+          const fill = eatFill.fills.get(key);
           return {
             plan_id: planId,
             day_index: s.day_index,
             slot_name: capitalizedSlotName,
             slot_order: slotOrderMap[capitalizedSlotName] ?? 0,
             meal_id: mealIdByRecipeId[s.recipe_id],
-            generation_rationale: s.rationale,
+            generation_rationale: fill?.fill_source === "leftover" ? `Leftovers ${fill.fill_note}` : s.rationale,
             is_override: false,
+            fill_source: fill?.fill_source ?? null,
+            fill_note: fill?.fill_note ?? null,
+            extra_portions: eatFill.extraPortions.get(key) ?? 0,
           };
         });
+      for (const r of readyMealSlotRows) {
+        upsertRows.push({
+          plan_id: planId,
+          day_index: r.day_index,
+          slot_name: r.slot_name,
+          slot_order: slotOrderMap[r.slot_name] ?? 0,
+          meal_id: r.mealId,
+          generation_rationale: `Ready meal from inventory — ${r.name}`,
+          is_override: false,
+          fill_source: "ready_meal",
+          fill_note: r.note,
+          extra_portions: 0,
+        });
+      }
 
       let upsertError: string | null = null;
       if (upsertRows.length > 0) {
