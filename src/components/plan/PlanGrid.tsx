@@ -351,12 +351,6 @@ export function PlanGrid({
     }
   }, [planId, weekStart, householdId, priorityOrder, recipeMix, generatePlan])
 
-  // Recipe count — show suggestion card if fewer than 7
-  const recipeCount = useMemo(() => {
-    const mealNames = new Set(slots.map(s => s.meals?.name).filter(Boolean))
-    return mealNames.size
-  }, [slots])
-
   const suggestedRecipes = useMemo(() => {
     const snapshot = latestGeneration?.constraint_snapshot as Record<string, unknown> | undefined
     return (snapshot?.suggestedRecipes as { name: string; prepMinutes: number; description: string }[] | undefined) ?? []
@@ -909,8 +903,8 @@ export function PlanGrid({
         </div>
       )}
 
-      {/* Recipe suggestion card — when catalog is small */}
-      {recipeCount < 7 && suggestedRecipes.length > 0 && (
+      {/* Recipe ideas from the planner — for slots the cookbook couldn't fill */}
+      {suggestedRecipes.length > 0 && (
         <div className="mt-4">
           <RecipeSuggestionCard
             suggestions={suggestedRecipes}

@@ -14,8 +14,11 @@ export function RecipeSuggestionCard({ suggestions, onAdd }: RecipeSuggestionCar
 
   return (
     <div className="bg-secondary/50 border border-primary/20 rounded-[--radius-card] px-4 py-3">
-      <p className="text-sm font-semibold text-text font-sans mb-3">
-        Add more recipes to improve suggestions
+      <p className="text-sm font-semibold text-text font-sans mb-1">
+        Meal ideas for this week
+      </p>
+      <p className="text-xs text-text/60 font-sans mb-3">
+        Your cookbook didn&apos;t have a good fit for every slot, so the planner suggested these. Like one? Add it to your recipes and it can go in the plan.
       </p>
       <div className="flex flex-col gap-2">
         {suggestions.map((suggestion, i) => (
