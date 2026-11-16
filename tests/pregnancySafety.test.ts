@@ -178,6 +178,22 @@ describe('generate-plan pregnancy wiring', () => {
     expect(source).toMatch(/const poolForSlot = [\s\S]{0,400}\(!pregnancyActive \|\| pregnancySafeShortlistIds\.has\(r\.id\)\)/)
   })
 
+  it('tops up the shortlist so every slot type still to fill has tagged candidates', () => {
+    expect(source).toContain('const MIN_SHORTLIST_PER_SLOT = 6;')
+    expect(source).toMatch(/for \(const slotName of neededSlotNames\)[\s\S]{0,400}\.includes\(slotName\) &&\s*!pregnancyUnsafeIds\.has\(r\.id\)/)
+    expect(source.indexOf('shortlistedIds = [...toppedUpIds];')).toBeLessThan(source.indexOf('const shortlistedSet = new Set(shortlistedIds);'))
+  })
+
+  it('accepts the forced safety re-check without comparing violation counts', () => {
+    const block = source.slice(source.indexOf('const acceptForcedCheck'), source.indexOf('if (acceptForcedCheck ||'))
+    expect(block).toContain('(parsed.slots.length > 0 || clearedByForcedPass.length > 0)')
+    expect(block).not.toContain('violations')
+  })
+
+  it('screens suggested recipe descriptions, not just names', () => {
+    expect(source).toContain('isPregnancyUnsafe(String(r.name ?? ""), [String(r.description ?? "")])')
+  })
+
   it('selects the new profile columns from nutrition_targets', () => {
     expect(source).toMatch(/from\("nutrition_targets"\)\s*\.select\("[^"]*is_pregnant, due_date, notes/)
   })

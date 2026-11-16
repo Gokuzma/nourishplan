@@ -741,6 +741,39 @@ serve(async (req) => {
         }
       }
 
+      // The ~30-pick shortlist can skip a whole slot type (observed: zero
+      // Breakfast/Snacks recipes picked from a 133-recipe catalog), which leaves
+      // those slots empty for the week. Top up every slot type still to be
+      // filled with tagged, allergen/won't-eat/pregnancy-safe recipes, favorites
+      // first. Pass 2 and the verify pass still screen everything.
+      const MIN_SHORTLIST_PER_SLOT = 6;
+      const tierRank: Record<string, number> = { favorite: 0, liked: 1, novel: 2 };
+      const shortlistBanned = [...allergenNames, ...wontEatNames]
+        .map((n) => n.toLowerCase())
+        .filter((n) => n.length > 0);
+      const neededSlotNames = new Set(
+        slotsToFill.filter((s) => s.scheduleStatus !== "away").map((s) => s.slot_name),
+      );
+      const toppedUpIds = new Set(shortlistedIds);
+      for (const slotName of neededSlotNames) {
+        const tagged = recipeEnriched
+          .filter((r) =>
+            (r.meal_types ?? []).includes(slotName) &&
+            !pregnancyUnsafeIds.has(r.id) &&
+            !r.ingredient_names.some((n) => shortlistBanned.some((b) => n.toLowerCase().includes(b)))
+          )
+          .sort((a, b) => (tierRank[a.tier_hint] ?? 3) - (tierRank[b.tier_hint] ?? 3));
+        let have = tagged.filter((r) => toppedUpIds.has(r.id)).length;
+        for (const r of tagged) {
+          if (have >= MIN_SHORTLIST_PER_SLOT) break;
+          if (!toppedUpIds.has(r.id)) {
+            toppedUpIds.add(r.id);
+            have++;
+          }
+        }
+      }
+      shortlistedIds = [...toppedUpIds];
+
       // Recipe details for shortlisted candidates (Phase 24: enriched with cook history,
       // per-member ratings, cost_per_serving, tier_hint — Pitfall 1 says Pass 2 only).
       const shortlistedSet = new Set(shortlistedIds);
@@ -953,9 +986,12 @@ serve(async (req) => {
               validVerifySlots.push(s);
             }
             parsed.slots = validVerifySlots;
+            // The safety re-check is mandatory and merged per slot, so accept it
+            // whenever it returned assignments — even if the model lists more
+            // (usually non-safety) violations than before. Requiring no increase
+            // rejected every re-check and left plans unchecked.
             const acceptForcedCheck = forcePregnancyCheck &&
-              (parsed.slots.length > 0 || clearedByForcedPass.length > 0) &&
-              (parsed.violations ?? []).length <= (bestResult.violations ?? []).length;
+              (parsed.slots.length > 0 || clearedByForcedPass.length > 0);
             if (acceptForcedCheck || (parsed.violations ?? []).length < (bestResult.violations ?? []).length) {
               // The verify prompt has no tier-rationale rules, so its slots come
               // back with empty rationale. Preserve the prior pass's rationale for
@@ -1315,7 +1351,9 @@ serve(async (req) => {
         console.log(`[generate-plan] pregnancy filter repaired ${pregnancyFilterRepairs} assignment(s)`);
       }
       if (pregnancyActive && suggestedRecipes) {
-        suggestedRecipes = suggestedRecipes.filter((r) => !isPregnancyUnsafe(String(r.name ?? ""), []));
+        suggestedRecipes = suggestedRecipes.filter(
+          (r) => !isPregnancyUnsafe(String(r.name ?? ""), [String(r.description ?? "")]),
+        );
       }
 
       // Bulk write slot assignments — capitalize slot_name to match frontend DEFAULT_SLOTS
