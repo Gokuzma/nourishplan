@@ -15,6 +15,9 @@ function makeSlot(overrides: Partial<SlotWithMeal> = {}): SlotWithMeal {
     is_override: false,
     is_locked: false,
     generation_rationale: null,
+    fill_source: null,
+    fill_note: null,
+    extra_portions: 0,
     created_at: '2026-01-01T00:00:00Z',
     meals: {
       id: 'meal-1',
@@ -308,6 +311,9 @@ describe('calcWeeklyGaps', () => {
           is_override: false,
           is_locked: false,
           generation_rationale: null,
+          fill_source: null,
+          fill_note: null,
+          extra_portions: 0,
           created_at: '2026-01-01T00:00:00Z',
           meals: null,
         })

@@ -177,6 +177,9 @@ export interface MealPlanSlot {
   is_override: boolean
   is_locked: boolean
   generation_rationale: string | null
+  fill_source: string | null
+  fill_note: string | null
+  extra_portions: number
   created_at: string
 }
 
@@ -589,6 +592,14 @@ export interface InventoryItem {
   removed_reason: RemovalReason | null
   is_leftover: boolean
   leftover_from_recipe_id: string | null
+  is_ready_meal: boolean
+  ready_meal_slots: string[] | null
+  serving_grams: number | null
+  serving_calories: number | null
+  serving_protein_g: number | null
+  serving_carbs_g: number | null
+  serving_fat_g: number | null
+  nutrition_source: string | null
   created_at: string
   updated_at: string
 }
