@@ -33,11 +33,12 @@ interface ParsedItem extends ReadyMealFields {
   expires_at: string | null;
   purchase_price: number | null;
   brand: string | null;
+  unit_grams: number | null;
 }
 
 const SYSTEM_PROMPT = `You turn a messy description of groceries into structured inventory items. Input may be: spoken dictation ("two pounds of chicken breast in the freezer, uh, a dozen eggs..."), a typed list, or a pasted spreadsheet (comma/tab separated, possibly with a header row).
 
-Return ONLY a JSON object: {"items": [{"food_name": string, "quantity": number, "unit": "g"|"kg"|"ml"|"L"|"units", "storage_location": "pantry"|"fridge"|"freezer", "expires_at": string|null, "purchase_price": number|null, "brand": string|null, "is_ready_meal": boolean, "ready_meal_slots": string[]|null, "serving_grams": number|null, "serving_calories": number|null, "serving_protein_g": number|null, "serving_carbs_g": number|null, "serving_fat_g": number|null}]}
+Return ONLY a JSON object: {"items": [{"food_name": string, "quantity": number, "unit": "g"|"kg"|"ml"|"L"|"units", "storage_location": "pantry"|"fridge"|"freezer", "expires_at": string|null, "purchase_price": number|null, "brand": string|null, "unit_grams": number|null, "is_ready_meal": boolean, "ready_meal_slots": string[]|null, "serving_grams": number|null, "serving_calories": number|null, "serving_protein_g": number|null, "serving_carbs_g": number|null, "serving_fat_g": number|null}]}
 
 Rules:
 1. food_name: the canonical food, Title Case, no quantities or packaging words ("Chicken Breast", not "2 lbs chicken breasts").
@@ -46,6 +47,7 @@ Rules:
 4. expires_at: null unless an expiry is stated. Resolve relative dates against today's date given in the user message; format YYYY-MM-DD.
 5. purchase_price: null unless a price is clearly stated for that item.
 6. brand: null unless a brand name is clearly part of the description.
+6b. unit_grams: only when unit is "units" — your estimate of what ONE unit weighs in grams (a large egg ≈ 50, a 796 ml can ≈ 796, a 400 g bag ≈ 400, a frozen pizza ≈ 900, an apple ≈ 180). null for g/kg/ml/L.
 7. Spreadsheet input: map columns by header names when present (name/item, qty/quantity, unit, location, expiry/expires, price, brand); skip the header row itself; skip empty rows.
 8. Split multi-item lines. Ignore filler words, greetings, and anything that is not a food item.
 9. If nothing in the input looks like food items, return {"items": []}.
@@ -94,7 +96,12 @@ function sanitizeItems(raw: unknown): ParsedItem[] {
       ? Math.round(o.purchase_price * 100) / 100
       : null;
     const brand = typeof o.brand === "string" && o.brand.trim() ? o.brand.trim().slice(0, 80) : null;
+    const unitGrams = unit === "units" && typeof o.unit_grams === "number" && isFinite(o.unit_grams) &&
+        o.unit_grams > 0 && o.unit_grams <= 20000
+      ? Math.round(o.unit_grams)
+      : null;
     out.push({
+      unit_grams: unitGrams,
       food_name: name,
       quantity: Math.round(qty * 100) / 100,
       unit,

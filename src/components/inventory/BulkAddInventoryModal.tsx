@@ -21,6 +21,7 @@ export interface ParsedInventoryItem {
   expires_at: string | null
   purchase_price: number | null
   brand: string | null
+  unit_grams?: number | null
   is_ready_meal?: boolean
   ready_meal_slots?: string[] | null
   serving_grams?: number | null
@@ -235,6 +236,7 @@ export function BulkAddInventoryModal({ isOpen, onClose, initialReceiptFiles }: 
           storage_location: it.storage_location,
           expires_at: it.expires_at,
           purchase_price: it.purchase_price,
+          unit_grams: it.unit === 'units' ? it.unit_grams ?? null : null,
           is_ready_meal: it.is_ready_meal ?? false,
           ready_meal_slots: it.is_ready_meal ? it.ready_meal_slots ?? null : null,
           serving_grams: it.is_ready_meal ? it.serving_grams ?? null : null,
@@ -435,7 +437,9 @@ export function BulkAddInventoryModal({ isOpen, onClose, initialReceiptFiles }: 
                         {[
                           item.brand,
                           item.expires_at ? `expires ${item.expires_at}` : null,
-                          item.purchase_price != null ? `$${item.purchase_price.toFixed(2)}` : null,
+                          item.purchase_price != null
+                            ? `$${item.purchase_price.toFixed(2)}${item.unit === 'units' && item.quantity > 1 ? ` ($${(item.purchase_price / item.quantity).toFixed(2)} each)` : ''}`
+                            : null,
                         ].filter(Boolean).join(' · ')}
                       </p>
                     )}

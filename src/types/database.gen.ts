@@ -381,6 +381,8 @@ export type Database = {
       food_prices: {
         Row: {
           cost_per_100g: number
+          cost_per_unit: number | null
+          grams_per_unit: number | null
           created_at: string
           created_by: string
           food_id: string
@@ -392,6 +394,8 @@ export type Database = {
         }
         Insert: {
           cost_per_100g: number
+          cost_per_unit?: number | null
+          grams_per_unit?: number | null
           created_at?: string
           created_by: string
           food_id: string
@@ -403,6 +407,8 @@ export type Database = {
         }
         Update: {
           cost_per_100g?: number
+          cost_per_unit?: number | null
+          grams_per_unit?: number | null
           created_at?: string
           created_by?: string
           food_id?: string

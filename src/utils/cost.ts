@@ -78,3 +78,47 @@ export function summariseWeeklySpend(
     : cookSpend + foodLogSpend
   return { totalSpend, cookSpend, grocerySpend, foodLogSpend }
 }
+
+/**
+ * Turns a purchase (price paid for a quantity) into a Food Prices entry.
+ * Weighed/volume foods get a price per 100 g; counted foods (eggs, cans) get a
+ * price each, plus the weight of one unit so gram-based recipe costing works.
+ * Without a food id the entry is keyed by name. Returns null when it can't be
+ * priced (no price, nothing bought, or a counted food with no unit weight).
+ */
+export function purchasePriceEntry(purchase: {
+  food_id?: string | null
+  food_name: string
+  purchase_price?: number | null
+  quantity: number
+  unit: 'g' | 'kg' | 'ml' | 'L' | 'units'
+  unit_grams?: number | null
+}): { food_id: string; food_name: string; cost_per_100g: number; cost_per_unit: number | null; grams_per_unit: number | null } | null {
+  const name = purchase.food_name.trim()
+  if (purchase.purchase_price == null || purchase.purchase_price < 0 || purchase.quantity <= 0 || !name) return null
+  const food_id = purchase.food_id || `name:${name.toLowerCase()}`
+  if (purchase.unit === 'units') {
+    if (!purchase.unit_grams || purchase.unit_grams <= 0) return null
+    const costPerUnit = purchase.purchase_price / purchase.quantity
+    return {
+      food_id,
+      food_name: name,
+      cost_per_100g: (costPerUnit / purchase.unit_grams) * 100,
+      cost_per_unit: Math.round(costPerUnit * 10000) / 10000,
+      grams_per_unit: purchase.unit_grams,
+    }
+  }
+  const unit = purchase.unit.toLowerCase() as 'g' | 'kg' | 'ml' | 'l'
+  return {
+    food_id,
+    food_name: name,
+    cost_per_100g: normaliseToCostPer100g(purchase.purchase_price, purchase.quantity, unit),
+    cost_per_unit: null,
+    grams_per_unit: null,
+  }
+}
+
+/** "$0.42 each" for counted foods, "$1.12/100g" otherwise. */
+export function formatFoodPrice(price: { cost_per_100g: number; cost_per_unit?: number | null }): string {
+  return price.cost_per_unit != null ? `${formatCost(price.cost_per_unit)} each` : `${formatCost(price.cost_per_100g)}/100g`
+}

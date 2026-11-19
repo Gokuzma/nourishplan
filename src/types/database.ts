@@ -274,6 +274,8 @@ export interface FoodPrice {
   food_name: string
   store: string
   cost_per_100g: number
+  cost_per_unit: number | null
+  grams_per_unit: number | null
   created_by: string
   created_at: string
   updated_at: string

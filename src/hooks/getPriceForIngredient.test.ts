@@ -12,7 +12,7 @@ function ref(name: string, cost: number): ReferenceFoodPrice {
 function hh(food_id: string, food_name: string, cost: number, store = ''): FoodPrice {
   return {
     id: food_id + store, household_id: 'h', food_id, food_name, store,
-    cost_per_100g: cost, created_by: 'u', created_at: '', updated_at: '',
+    cost_per_100g: cost, cost_per_unit: null, grams_per_unit: null, created_by: 'u', created_at: '', updated_at: '',
   }
 }
 

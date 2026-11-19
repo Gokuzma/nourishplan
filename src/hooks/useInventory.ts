@@ -4,7 +4,7 @@ import { useAuth } from './useAuth'
 import { useHousehold } from './useHousehold'
 import { queryKeys } from '../lib/queryKeys'
 import type { InventoryItem, StorageLocation, InventoryUnit, RemovalReason } from '../types/database'
-import { normaliseToCostPer100g } from '../utils/cost'
+import { normaliseToCostPer100g, purchasePriceEntry } from '../utils/cost'
 import type { ConsolidationPlan } from '../utils/inventory'
 import { useSaveFoodPrice } from './useFoodPrices'
 
@@ -56,6 +56,8 @@ interface AddInventoryItemParams {
   serving_carbs_g?: number | null
   serving_fat_g?: number | null
   nutrition_source?: 'estimate' | 'barcode' | null
+  // Weight of one unit (counted items only) — prices the food per unit; not stored on the item.
+  unit_grams?: number | null
 }
 
 function readyMealColumns(params: AddInventoryItemParams) {
@@ -171,26 +173,40 @@ export function useBulkAddInventoryItems() {
       )
       if (error) throw error
 
-      // D-04 price integration, bulk form: one upsert covering every priced,
-      // weight-based item (deduped — upsert can't touch the same row twice)
-      const priceRows = new Map<string, { household_id: string; food_id: string; food_name: string; store: string; cost_per_100g: number; created_by: string }>()
+      // D-04 price integration, bulk form: every priced item becomes a Food
+      // Prices entry (per 100 g, or each for counted food), keyed by food id or
+      // by name. Deduped — upsert can't touch the same row twice.
+      const priceRows = new Map<string, NonNullable<ReturnType<typeof purchasePriceEntry>> & { household_id: string; store: string; created_by: string }>()
       for (const params of items) {
-        if (params.purchase_price == null || !params.food_id || params.unit === 'units') continue
-        if (priceRows.has(params.food_id)) continue
-        priceRows.set(params.food_id, {
-          household_id: householdId,
+        const entry = purchasePriceEntry({
           food_id: params.food_id,
           food_name: params.food_name,
-          store: '',
-          cost_per_100g: normaliseToCostPer100g(
-            params.purchase_price,
-            params.quantity_remaining,
-            params.unit.toLowerCase() as 'g' | 'kg' | 'ml' | 'l'
-          ),
-          created_by: userId,
+          purchase_price: params.purchase_price,
+          quantity: params.quantity_remaining,
+          unit: params.unit,
+          unit_grams: params.unit_grams,
         })
+        if (!entry || priceRows.has(entry.food_id)) continue
+        priceRows.set(entry.food_id, { ...entry, household_id: householdId, store: '', created_by: userId })
       }
       if (priceRows.size > 0) {
+        // The newest price wins: drop older entries for the same food name
+        // that are stored under a different key.
+        const { data: existing } = await supabase
+          .from('food_prices')
+          .select('id, food_id, food_name')
+          .eq('household_id', householdId)
+        const newByName = new Map([...priceRows.values()].map(r => [r.food_name.toLowerCase(), r.food_id]))
+        const staleIds = (existing ?? [])
+          .filter(p => {
+            const newKey = newByName.get(p.food_name.toLowerCase())
+            return newKey !== undefined && newKey !== p.food_id
+          })
+          .map(p => p.id)
+        if (staleIds.length > 0) {
+          const { error: deleteError } = await supabase.from('food_prices').delete().in('id', staleIds)
+          if (deleteError) throw deleteError
+        }
         const { error: priceError } = await supabase
           .from('food_prices')
           .upsert([...priceRows.values()], { onConflict: 'household_id,food_id,store' })

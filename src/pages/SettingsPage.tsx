@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useHousehold, useHouseholdMembers } from '../hooks/useHousehold'
 import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile'
 import { useFoodPrices, useDeleteFoodPrice } from '../hooks/useFoodPrices'
-import { formatCost } from '../utils/cost'
+import { formatFoodPrice } from '../utils/cost'
 import { supabase } from '../lib/supabase'
 import { toggleTheme } from '../utils/theme'
 import type { ThemePreference } from '../utils/theme'
@@ -286,7 +286,7 @@ export function SettingsPage() {
                       {price.store && (
                         <span className="mono ml-2" style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>{price.store}</span>
                       )}
-                      <span className="mono tnum ml-2" style={{ fontSize: 11, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>{formatCost(price.cost_per_100g)}/100g</span>
+                      <span className="mono tnum ml-2" style={{ fontSize: 11, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>{formatFoodPrice(price)}</span>
                     </div>
                     <button
                       onClick={() => setConfirmDeletePriceId(price.id)}

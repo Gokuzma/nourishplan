@@ -505,6 +505,10 @@ serve(async (req) => {
       const priceByFoodId = new Map<string, number>(
         foodPrices.map((p) => [p.food_id, p.cost_per_100g]),
       );
+      // Receipt/bulk-add prices have no food id; match those by name.
+      const priceByName = new Map<string, number>(
+        foodPrices.map((p) => [p.food_name.toLowerCase(), p.cost_per_100g]),
+      );
 
       const cookCountByRecipe: Record<string, number> = {};
       const lastCookedByRecipe: Record<string, string | null> = {};
@@ -639,6 +643,7 @@ serve(async (req) => {
           quantity_grams: i.quantity_grams,
           // Household price wins; fall back to the StatCan reference by name.
           cost_per_100g: (i.ingredient_id ? priceByFoodId.get(i.ingredient_id) ?? null : null)
+            ?? (i.ingredient_name ? priceByName.get(i.ingredient_name.toLowerCase()) ?? null : null)
             ?? getReferencePriceForIngredient(referencePrices, i.ingredient_name),
         }));
         const { costPerServing } = computeRecipeCostPerServing(ingsWithPrice, r.servings || 1);

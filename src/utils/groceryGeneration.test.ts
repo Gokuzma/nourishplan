@@ -345,6 +345,8 @@ describe('computeItemCost', () => {
       food_name: 'Banana',
       store: 'Grocery Store',
       cost_per_100g: 0.50,
+      cost_per_unit: null,
+      grams_per_unit: null,
       created_by: 'user-1',
       created_at: '2026-03-01T00:00:00Z',
       updated_at: '2026-03-01T00:00:00Z',
