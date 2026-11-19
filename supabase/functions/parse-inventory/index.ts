@@ -10,6 +10,17 @@ const CORS_HEADERS = {
 const FETCH_TIMEOUT_MS = 100000;
 const MAX_INPUT_CHARS = 8000;
 const MAX_ITEMS = 100;
+const MAX_IMAGES = 3;
+const MAX_IMAGE_BASE64_CHARS = 5_000_000; // ~3.7 MB decoded; client sends ~0.5 MB
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const RECEIPT_RULES = `These photos are a grocery receipt (several photos are parts of the SAME receipt and may overlap — never count an overlapping line twice). Also return "receipt_total": the final amount paid including tax (number, or null if not visible).
+- One item per purchased food line. Expand receipt abbreviations into the real food ("GV WHL MLK 2L" → food_name "Whole Milk", 2 L; "BNLS SKNLS CHKN BRST" → "Chicken Breast").
+- Skip tax, subtotal, total, payment, change, savings/discount lines, bottle deposits, eco fees and bags.
+- Leave out EVERY line that is not food or drink — laundry and dish soap (Tide, Cascade), cleaning products, toiletries, paper towels, toilet paper, batteries, pet supplies. This inventory is food only.
+- Quantity: "2 @ 1.99" → 2 units; a multi-buy line like that may print just above or below its item — match it to the item whose price equals count × unit price; weighed produce "0.85 kg @ $4.39/kg" → 0.85 kg; a size in the name (2L, 500G, 12PK) → that size (12PK of something countable → 12 units). Otherwise 1 units.
+- purchase_price: the line's total price for that quantity, after any discount printed directly under it.
+- brand: only when clearly printed. expires_at: null.`;
 
 const VALID_UNITS = ["g", "kg", "ml", "L", "units"] as const;
 const VALID_LOCATIONS = ["pantry", "fridge", "freezer"] as const;
@@ -103,9 +114,18 @@ serve(async (req) => {
   }
 
   try {
-    const { input } = await req.json();
+    const { input, images } = await req.json();
 
-    if (!input || typeof input !== "string" || input.trim().length === 0) {
+    const receiptImages: { data: string; media_type: string }[] = Array.isArray(images)
+      ? images.filter((im) =>
+        !!im && typeof im.data === "string" && im.data.length > 0 &&
+        im.data.length <= MAX_IMAGE_BASE64_CHARS &&
+        IMAGE_TYPES.includes(im.media_type)
+      ).slice(0, MAX_IMAGES)
+      : [];
+    const isReceipt = receiptImages.length > 0;
+
+    if (!isReceipt && (!input || typeof input !== "string" || input.trim().length === 0)) {
       return jsonResponse({ success: false, error: "input is required" });
     }
 
@@ -143,10 +163,18 @@ serve(async (req) => {
     }
 
     const today = new Date().toISOString().slice(0, 10);
-    if (input.trim().length > MAX_INPUT_CHARS) {
+    if (!isReceipt && input.trim().length > MAX_INPUT_CHARS) {
       return jsonResponse({ success: false, error: `That's too long for one batch (limit ${MAX_INPUT_CHARS.toLocaleString("en-CA")} characters). Split it into smaller lists.` });
     }
-    const content = input.trim();
+    const userContent = isReceipt
+      ? [
+        ...receiptImages.map((im) => ({
+          type: "image",
+          source: { type: "base64", media_type: im.media_type, data: im.data },
+        })),
+        { type: "text", text: `Today's date is ${today}. Parse this grocery receipt into inventory items.\n\n${RECEIPT_RULES}` },
+      ]
+      : `Today's date is ${today}. Parse these groceries into inventory items:\n\n${input.trim()}`;
 
     // AI extraction — user input stays in the user message (prompt-injection mitigation)
     const aiResponse = await fetchWithTimeout("https://api.anthropic.com/v1/messages", {
@@ -161,10 +189,7 @@ serve(async (req) => {
         max_tokens: 16000,
         system: SYSTEM_PROMPT,
         messages: [
-          {
-            role: "user",
-            content: `Today's date is ${today}. Parse these groceries into inventory items:\n\n${content}`,
-          },
+          { role: "user", content: userContent },
         ],
       }),
     });
@@ -189,10 +214,20 @@ serve(async (req) => {
 
     const items = sanitizeItems(parsed);
     if (items.length === 0) {
-      return jsonResponse({ success: false, error: "No food items found in that. Try naming the items with quantities, e.g. \"2 kg rice, a dozen eggs, 3 cans of tuna\"." });
+      return jsonResponse({
+        success: false,
+        error: isReceipt
+          ? "Couldn't read any food on that receipt. Try a sharper, flatter photo in good light."
+          : "No food items found in that. Try naming the items with quantities, e.g. \"2 kg rice, a dozen eggs, 3 cans of tuna\".",
+      });
     }
 
-    return jsonResponse({ success: true, items, truncated: rawItemCount(parsed) > MAX_ITEMS, maxItems: MAX_ITEMS });
+    const rawTotal = (parsed as { receipt_total?: unknown }).receipt_total;
+    const receiptTotal = isReceipt && typeof rawTotal === "number" && isFinite(rawTotal) && rawTotal > 0 && rawTotal < 10000
+      ? Math.round(rawTotal * 100) / 100
+      : null;
+
+    return jsonResponse({ success: true, items, truncated: rawItemCount(parsed) > MAX_ITEMS, maxItems: MAX_ITEMS, receiptTotal });
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       return jsonResponse({ success: false, error: "That took too long to sort out. Try a shorter batch, like one shelf at a time." });

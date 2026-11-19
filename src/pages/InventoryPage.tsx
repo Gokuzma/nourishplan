@@ -22,6 +22,7 @@ export function InventoryPage() {
   const [activeTab, setActiveTab] = useState<StorageLocation>('fridge')
   const [showAddModal, setShowAddModal] = useState(false)
   const [showBulkAdd, setShowBulkAdd] = useState(false)
+  const [receiptFiles, setReceiptFiles] = useState<File[] | null>(null)
   const [editItem, setEditItem] = useState<InventoryItem | null>(null)
   const [showScanner, setShowScanner] = useState(false)
   const [showQuickScan, setShowQuickScan] = useState(false)
@@ -226,6 +227,21 @@ export function InventoryPage() {
           <button type="button" onClick={() => setShowBulkAdd(true)} className="btn btn-sm">
             Bulk add
           </button>
+          <label className="btn btn-sm cursor-pointer" title="Take or pick a photo of a grocery receipt">
+            Scan receipt
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="sr-only"
+              aria-label="Scan a receipt"
+              onChange={e => {
+                const files = Array.from(e.target.files ?? [])
+                e.target.value = ''
+                if (files.length > 0) { setReceiptFiles(files); setShowBulkAdd(true) }
+              }}
+            />
+          </label>
           <button
             type="button"
             onClick={() => setShowReadyMeals(true)}
@@ -332,7 +348,8 @@ export function InventoryPage() {
       <ReadyMealReviewModal isOpen={showReadyMeals} onClose={() => setShowReadyMeals(false)} />
       <BulkAddInventoryModal
         isOpen={showBulkAdd}
-        onClose={() => setShowBulkAdd(false)}
+        onClose={() => { setShowBulkAdd(false); setReceiptFiles(null) }}
+        initialReceiptFiles={receiptFiles}
       />
 
       <BarcodeScanner

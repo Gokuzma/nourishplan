@@ -4,7 +4,14 @@ import { BulkAddInventoryModal } from '../src/components/inventory/BulkAddInvent
 
 const invoke = vi.fn()
 vi.mock('../src/lib/supabase', () => ({ supabase: { functions: { invoke: (...a: unknown[]) => invoke(...a) } } }))
-vi.mock('../src/hooks/useInventory', () => ({ useBulkAddInventoryItems: () => ({ mutateAsync: vi.fn() }) }))
+const bulkAddMutate = vi.fn()
+const spendMutate = vi.fn()
+vi.mock('../src/hooks/useInventory', () => ({ useBulkAddInventoryItems: () => ({ mutateAsync: bulkAddMutate }) }))
+vi.mock('../src/hooks/useSpendLog', () => ({ useCreateSpendLog: () => ({ mutateAsync: spendMutate, isPending: false }) }))
+vi.mock('../src/utils/receiptImage', () => ({
+  MAX_RECEIPT_PHOTOS: 3,
+  prepareReceiptImage: async () => ({ data: 'abc', media_type: 'image/jpeg' }),
+}))
 
 function typeText(value: string) {
   fireEvent.change(screen.getByRole('textbox'), { target: { value } })
@@ -63,5 +70,51 @@ describe('BulkAddInventoryModal limits', () => {
     expect(screen.getByText(/This batch is full, so the mic stopped/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dictate your list' })).toBeInTheDocument()
     delete (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition
+  })
+})
+
+describe('BulkAddInventoryModal receipt scan', () => {
+  const receiptReply = {
+    data: {
+      success: true,
+      receiptTotal: 42.5,
+      items: [{ food_name: 'Whole Milk', quantity: 2, unit: 'L', storage_location: 'fridge', expires_at: null, purchase_price: 5.49, brand: null }],
+    },
+    error: null,
+  }
+  const photo = () => new File(['x'], 'receipt.jpg', { type: 'image/jpeg' })
+
+  it('sends the photo and shows the items with the receipt total', async () => {
+    invoke.mockResolvedValueOnce(receiptReply)
+    render(<BulkAddInventoryModal isOpen onClose={() => {}} />)
+    fireEvent.change(screen.getByLabelText('Scan a receipt'), { target: { files: [photo()] } })
+    expect(await screen.findByText(/Add the receipt total, \$42.50/)).toBeInTheDocument()
+    expect(invoke).toHaveBeenLastCalledWith('parse-inventory', { body: { images: [{ data: 'abc', media_type: 'image/jpeg' }] } })
+    expect(screen.getByDisplayValue('Whole Milk')).toBeInTheDocument()
+  })
+
+  it('logs the total as grocery spend when ticked, and not when unticked', async () => {
+    invoke.mockResolvedValueOnce(receiptReply)
+    spendMutate.mockClear()
+    const { unmount } = render(<BulkAddInventoryModal isOpen onClose={() => {}} initialReceiptFiles={[photo()]} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Add 1 item' }))
+    await act(async () => { await Promise.resolve() })
+    expect(spendMutate).toHaveBeenCalledWith({ amount: 42.5, is_partial: false, source: 'grocery' })
+    unmount()
+
+    invoke.mockResolvedValueOnce(receiptReply)
+    spendMutate.mockClear()
+    render(<BulkAddInventoryModal isOpen onClose={() => {}} initialReceiptFiles={[photo()]} />)
+    fireEvent.click(await screen.findByRole('checkbox', { name: /Add the receipt total/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add 1 item' }))
+    await act(async () => { await Promise.resolve() })
+    expect(bulkAddMutate).toHaveBeenCalled()
+    expect(spendMutate).not.toHaveBeenCalled()
+  })
+
+  it('refuses more than 3 photos', async () => {
+    render(<BulkAddInventoryModal isOpen onClose={() => {}} />)
+    fireEvent.change(screen.getByLabelText('Scan a receipt'), { target: { files: [photo(), photo(), photo(), photo()] } })
+    expect(await screen.findByText('Pick up to 3 photos of one receipt.')).toBeInTheDocument()
   })
 })

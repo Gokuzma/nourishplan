@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { StorageLocation, InventoryUnit } from '../../types/database'
 import { useBulkAddInventoryItems } from '../../hooks/useInventory'
+import { useCreateSpendLog } from '../../hooks/useSpendLog'
+import { prepareReceiptImage, MAX_RECEIPT_PHOTOS } from '../../utils/receiptImage'
 import { supabase } from '../../lib/supabase'
 import { Icon } from '../Icon'
 
 interface BulkAddInventoryModalProps {
   isOpen: boolean
   onClose: () => void
+  // Photos picked from the Inventory page's "Scan receipt" button; read on open.
+  initialReceiptFiles?: File[] | null
 }
 
 export interface ParsedInventoryItem {
@@ -66,8 +70,9 @@ function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
-export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModalProps) {
+export function BulkAddInventoryModal({ isOpen, onClose, initialReceiptFiles }: BulkAddInventoryModalProps) {
   const bulkAdd = useBulkAddInventoryItems()
+  const createSpendLog = useCreateSpendLog()
   const [step, setStep] = useState<'input' | 'review'>('input')
   const [text, setText] = useState('')
   const [interim, setInterim] = useState('')
@@ -77,6 +82,9 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
   const [items, setItems] = useState<ParsedInventoryItem[]>([])
   const [truncated, setTruncated] = useState(false)
   const [autoStopped, setAutoStopped] = useState(false)
+  const [readingReceipt, setReadingReceipt] = useState(false)
+  const [receiptTotal, setReceiptTotal] = useState<number | null>(null)
+  const [logSpend, setLogSpend] = useState(true)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const voiceSupported = getSpeechRecognition() !== null
 
@@ -90,6 +98,9 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
       setError(null)
       setTruncated(false)
       setAutoStopped(false)
+      setReceiptTotal(null)
+      setLogSpend(true)
+      if (initialReceiptFiles && initialReceiptFiles.length > 0) handleScanReceipt(initialReceiptFiles)
     }
     return () => stopListening()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,11 +172,41 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
       if (!data?.success) throw new Error(data?.error || 'Could not understand that list.')
       setItems(data.items as ParsedInventoryItem[])
       setTruncated(data.truncated === true)
+      setReceiptTotal(null)
       setStep('review')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not understand that list. Try again.')
     } finally {
       setParsing(false)
+    }
+  }
+
+  async function handleScanReceipt(files: File[]) {
+    stopListening()
+    setError(null)
+    if (files.length > MAX_RECEIPT_PHOTOS) {
+      setError(`Pick up to ${MAX_RECEIPT_PHOTOS} photos of one receipt.`)
+      return
+    }
+    setParsing(true)
+    setReadingReceipt(true)
+    try {
+      const images = await Promise.all(files.map(prepareReceiptImage))
+      const { data, error: fnError } = await supabase.functions.invoke('parse-inventory', {
+        body: { images },
+      })
+      if (fnError) throw fnError
+      if (!data?.success) throw new Error(data?.error || 'Could not read that receipt.')
+      setItems(data.items as ParsedInventoryItem[])
+      setTruncated(data.truncated === true)
+      setReceiptTotal(typeof data.receiptTotal === 'number' ? data.receiptTotal : null)
+      setLogSpend(true)
+      setStep('review')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not read that receipt. Try again.')
+    } finally {
+      setParsing(false)
+      setReadingReceipt(false)
     }
   }
 
@@ -205,6 +246,9 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
           nutrition_source: it.is_ready_meal && it.serving_calories != null ? 'estimate' as const : null,
         }))
       )
+      if (receiptTotal != null && logSpend) {
+        await createSpendLog.mutateAsync({ amount: receiptTotal, is_partial: false, source: 'grocery' })
+      }
       onClose()
     } catch {
       setError('Could not save the items. Check your connection and try again.')
@@ -267,8 +311,30 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
                   ● Listening… speak naturally, tap the mic again to stop.
                 </p>
               )}
+              {readingReceipt && (
+                <p className="text-sm text-text/60" role="status">Reading your receipt…</p>
+              )}
               {error && <p className="text-sm text-red-600">{error}</p>}
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <label
+                  className={`rounded-[--radius-btn] px-4 py-2.5 text-sm font-semibold bg-secondary text-text hover:bg-secondary/70 transition-colors cursor-pointer ${parsing ? 'opacity-50 pointer-events-none' : ''}`}
+                  title={`Take or pick a photo of the receipt — up to ${MAX_RECEIPT_PHOTOS} photos for a long one`}
+                >
+                  📷 Scan receipt
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="sr-only"
+                    aria-label="Scan a receipt"
+                    disabled={parsing}
+                    onChange={e => {
+                      const files = Array.from(e.target.files ?? [])
+                      e.target.value = ''
+                      if (files.length > 0) handleScanReceipt(files)
+                    }}
+                  />
+                </label>
                 {voiceSupported && (
                   <button
                     type="button"
@@ -376,6 +442,20 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
                   </div>
                 ))}
               </div>
+              {receiptTotal != null && (
+                <label className="flex items-start gap-2 text-sm text-text">
+                  <input
+                    type="checkbox"
+                    checked={logSpend}
+                    onChange={e => setLogSpend(e.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>
+                    Add the receipt total, ${receiptTotal.toFixed(2)}, to this week's grocery spend
+                    <span className="block text-xs text-text/50">Untick if you already logged this shop from the grocery list.</span>
+                  </span>
+                </label>
+              )}
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex items-center gap-3 pt-1">
                 <button
@@ -391,7 +471,7 @@ export function BulkAddInventoryModal({ isOpen, onClose }: BulkAddInventoryModal
                   disabled={bulkAdd.isPending || items.length === 0}
                   className="flex-1 rounded-[--radius-btn] bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
-                  {bulkAdd.isPending ? 'Adding…' : `Add ${items.length} item${items.length === 1 ? '' : 's'}`}
+                  {bulkAdd.isPending || createSpendLog.isPending ? 'Adding…' : `Add ${items.length} item${items.length === 1 ? '' : 's'}`}
                 </button>
               </div>
             </div>
