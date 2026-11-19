@@ -67,7 +67,7 @@ interface RegenerateParams {
   recipeId: string
   recipeName: string
   servings: number
-  ingredientsSnapshot: { name: string; quantity_grams: number }[]
+  ingredientsSnapshot: { name: string; quantity_grams: number; amount?: string }[]
   existingSteps?: RecipeStep[]
   notes?: string | null
 }

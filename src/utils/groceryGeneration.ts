@@ -1,6 +1,7 @@
 import { getAvailableQuantity, getLowStockStaples, convertToGrams } from './inventory'
 import { getReferencePriceForIngredient } from './referencePrices'
 import type { InventoryItem, FoodPrice, ReferenceFoodPrice } from '../types/database'
+import { SHOPPING_COUNT_UNITS } from './ingredientDisplay'
 
 const MAX_RECIPE_DEPTH = 5
 
@@ -80,12 +81,18 @@ export interface AggregatedIngredient {
   food_id: string | null
   food_name: string
   total_grams: number
+  // Set when every recipe asks for this food in the same buy-by-count unit
+  // ('' = a count, e.g. eggs; 'can (796 ml)'); null otherwise.
+  shop_unit?: string | null
+  shop_amount?: number
 }
 
 export interface GroceryItemDraft {
   food_id: string | null
   food_name: string
   quantity_grams: number
+  shop_unit?: string | null
+  shop_amount?: number
   covered_grams?: number
   total_needed_grams?: number
   is_staple_restock?: boolean
@@ -98,6 +105,8 @@ export interface RecipeIngredientNode {
   ingredient_id: string
   quantity_grams: number
   ingredient_name?: string | null
+  display_amount?: number | null
+  display_unit?: string | null
   recipe_ingredients?: RecipeIngredientNode[]
 }
 
@@ -116,6 +125,13 @@ export interface ResolvedSlot {
 }
 
 // ─── aggregateIngredients ────────────────────────────────────────────────────
+
+/** The buy-by-count unit of one recipe ingredient, or null if it's bought by weight. */
+export function shoppingUnitOf(ing: { display_amount?: number | null; display_unit?: string | null }): string | null {
+  if (ing.display_unit == null || !ing.display_amount || ing.display_amount <= 0) return null
+  const head = ing.display_unit.split(/[\s(,]/)[0]
+  return SHOPPING_COUNT_UNITS.includes(head) ? ing.display_unit : null
+}
 
 /**
  * Traverses resolved slot data and aggregates all food ingredients by food_id.
@@ -142,13 +158,21 @@ export function aggregateIngredients(
         const key = ing.ingredient_id ?? (ing.ingredient_name ?? '').toLowerCase()
         if (!key) continue
         const existing = map.get(key)
+        const unit = shoppingUnitOf(ing)
         if (existing) {
           existing.total_grams += ing.quantity_grams
+          if (unit !== null && existing.shop_unit === unit) {
+            existing.shop_amount = (existing.shop_amount ?? 0) + ing.display_amount!
+          } else {
+            existing.shop_unit = null
+          }
         } else {
           map.set(key, {
             food_id: ing.ingredient_id || null,
             food_name: ing.ingredient_name ?? ing.ingredient_id,
             total_grams: ing.quantity_grams,
+            shop_unit: unit,
+            shop_amount: unit !== null ? ing.display_amount! : undefined,
           })
         }
       } else if (ing.ingredient_type === 'recipe') {
@@ -171,6 +195,7 @@ export function aggregateIngredients(
         const existing = map.get(key)
         if (existing) {
           existing.total_grams += item.quantity_grams
+          existing.shop_unit = null
         } else {
           map.set(key, {
             food_id: item.item_id || null,
@@ -220,11 +245,18 @@ export function subtractInventory(
         }, 0)
     }
 
+    // Count-unit amount for a share of the grams (rounded up at display time).
+    const shopShare = (grams: number) =>
+      ingredient.shop_unit != null && ingredient.shop_amount
+        ? { shop_unit: ingredient.shop_unit, shop_amount: ingredient.shop_amount * (grams / ingredient.total_grams) }
+        : {}
+
     if (available === 0) {
       needToBuy.push({
         food_id: ingredient.food_id,
         food_name: ingredient.food_name,
         quantity_grams: ingredient.total_grams,
+        ...shopShare(ingredient.total_grams),
       })
     } else if (available >= ingredient.total_grams) {
       alreadyHave.push({
@@ -233,6 +265,7 @@ export function subtractInventory(
         quantity_grams: ingredient.total_grams,
         covered_grams: ingredient.total_grams,
         total_needed_grams: ingredient.total_grams,
+        ...shopShare(ingredient.total_grams),
       })
     } else {
       // Partial coverage
@@ -241,6 +274,7 @@ export function subtractInventory(
         food_id: ingredient.food_id,
         food_name: ingredient.food_name,
         quantity_grams: remainder,
+        ...shopShare(remainder),
       })
       alreadyHave.push({
         food_id: ingredient.food_id,
@@ -248,6 +282,7 @@ export function subtractInventory(
         quantity_grams: available,
         covered_grams: available,
         total_needed_grams: ingredient.total_grams,
+        ...shopShare(available),
       })
     }
   }
@@ -329,6 +364,18 @@ export function formatDisplayQuantity(
     display_quantity: quantity_grams,
     display_unit: isLiquid ? 'ml' : 'g',
   }
+}
+
+/**
+ * Grocery list quantity and unit: whole cans/eggs when the recipes use a
+ * buy-by-count unit (unit 'units' for a plain count), else g/kg.
+ */
+export function groceryQuantity(item: { quantity_grams: number; shop_unit?: string | null; shop_amount?: number }): { quantity: number; unit: string } {
+  if (item.shop_unit != null && item.shop_amount && item.shop_amount > 0) {
+    return { quantity: Math.ceil(item.shop_amount - 1e-6), unit: item.shop_unit === '' ? 'units' : item.shop_unit }
+  }
+  const { display_quantity, display_unit } = formatDisplayQuantity(item.quantity_grams)
+  return { quantity: display_quantity, unit: display_unit }
 }
 
 // ─── addRestockStaples ───────────────────────────────────────────────────────

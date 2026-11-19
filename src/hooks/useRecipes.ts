@@ -199,6 +199,8 @@ export function useAddIngredient() {
       fat_per_100g,
       carbs_per_100g,
       micronutrients,
+      display_amount,
+      display_unit,
     }: {
       recipe_id: string
       ingredient_type: 'food' | 'recipe'
@@ -212,6 +214,8 @@ export function useAddIngredient() {
       fat_per_100g?: number
       carbs_per_100g?: number
       micronutrients?: Record<string, number> | null
+      display_amount?: number | null
+      display_unit?: string | null
     }): Promise<RecipeIngredient> => {
       const { data, error } = await supabase
         .from('recipe_ingredients')
@@ -228,6 +232,8 @@ export function useAddIngredient() {
           fat_per_100g: fat_per_100g ?? null,
           carbs_per_100g: carbs_per_100g ?? null,
           micronutrients: micronutrients ?? null,
+          display_amount: display_amount ?? null,
+          display_unit: display_unit ?? null,
         })
         .select()
         .single()
@@ -254,7 +260,7 @@ export function useUpdateIngredient() {
     }: {
       id: string
       recipe_id: string
-      updates: { quantity_grams?: number; weight_state?: 'raw' | 'cooked'; sort_order?: number }
+      updates: { quantity_grams?: number; weight_state?: 'raw' | 'cooked'; sort_order?: number; display_amount?: number | null; display_unit?: string | null }
     }): Promise<RecipeIngredient> => {
       const { data, error } = await supabase
         .from('recipe_ingredients')

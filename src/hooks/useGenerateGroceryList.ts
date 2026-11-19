@@ -9,7 +9,7 @@ import {
   assignCategories,
   addRestockStaples,
   computeItemCost,
-  formatDisplayQuantity,
+  groceryQuantity,
   type RecipeIngredientNode,
   type ResolvedSlot,
 } from '../utils/groceryGeneration'
@@ -67,7 +67,7 @@ export function useGenerateGroceryList() {
         if (recipeIds.size > 0) {
           const { data: allIngredients, error: ingError } = await supabase
             .from('recipe_ingredients')
-            .select('id, recipe_id, ingredient_type, ingredient_id, ingredient_name, quantity_grams')
+            .select('id, recipe_id, ingredient_type, ingredient_id, ingredient_name, quantity_grams, display_amount, display_unit')
             .in('recipe_id', Array.from(recipeIds))
           if (ingError) throw ingError
 
@@ -176,7 +176,7 @@ export function useGenerateGroceryList() {
       // 11. Build items to insert
       const allNeedToBuy = [...categorizedNeedToBuy, ...categorizedRestock]
       const needToBuyInserts = allNeedToBuy.map(item => {
-        const { display_quantity, display_unit } = formatDisplayQuantity(item.quantity_grams)
+        const { quantity: display_quantity, unit: display_unit } = groceryQuantity(item)
         const estimatedCost = computeItemCost(item.quantity_grams, item.food_id, foodPrices ?? [], item.food_name, referencePrices ?? [])
         return {
           list_id: listId,
@@ -199,7 +199,7 @@ export function useGenerateGroceryList() {
 
       const categorizedAlreadyHave = assignCategories(alreadyHave, previousItems ?? [])
       const alreadyHaveInserts = categorizedAlreadyHave.map(item => {
-        const { display_quantity, display_unit } = formatDisplayQuantity(item.quantity_grams)
+        const { quantity: display_quantity, unit: display_unit } = groceryQuantity(item)
         return {
           list_id: listId,
           household_id: householdId,

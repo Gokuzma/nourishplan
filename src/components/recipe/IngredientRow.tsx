@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { RecipeIngredient, MacroSummary } from '../../types/database'
+import { formatIngredientQuantity } from '../../utils/ingredientDisplay'
 
 interface IngredientRowProps {
   ingredient: RecipeIngredient
@@ -64,7 +65,10 @@ export function IngredientRow({
             <span className="text-sm text-text truncate">{name}</span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs text-text/50">{ingredient.quantity_grams}g</span>
+            <span className="text-xs text-text/70">{formatIngredientQuantity(ingredient).text}</span>
+            {formatIngredientQuantity(ingredient).grams && (
+              <span className="text-xs text-text/40">{formatIngredientQuantity(ingredient).grams}</span>
+            )}
             {macros && (
               <span className="text-xs text-text/40">
                 {macros.calories.toFixed(0)} kcal · P {macros.protein.toFixed(1)}g · C {macros.carbs.toFixed(1)}g · F {macros.fat.toFixed(1)}g

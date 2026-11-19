@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useIngredientUnitBackfill } from '../../hooks/useIngredientUnitBackfill'
 import {
   useRecipe,
   useRecipeIngredients,
@@ -23,6 +24,7 @@ import { supabase } from '../../lib/supabase'
 import { FoodSearchOverlay } from '../food/FoodSearchOverlay'
 import { NutritionBar } from './NutritionBar'
 import { IngredientRow } from './IngredientRow'
+import { isMetricUnit, metricToGrams, portionToDisplay, formatIngredientQuantity, METRIC_UNITS } from '../../utils/ingredientDisplay'
 import { MicronutrientPanel } from '../plan/MicronutrientPanel'
 import { CookDeductionReceipt } from '../inventory/CookDeductionReceipt'
 import { AddInventoryItemModal } from '../inventory/AddInventoryItemModal'
@@ -57,9 +59,14 @@ interface FoodDataEntry {
   micronutrients?: Record<string, number> | null
 }
 
+export interface IngredientDisplay {
+  display_amount: number
+  display_unit: string
+}
+
 interface QuantityModalProps {
   food: NormalizedFoodResult
-  onConfirm: (grams: number) => void
+  onConfirm: (grams: number, display: IngredientDisplay) => void
   onCancel: () => void
 }
 
@@ -70,21 +77,34 @@ function QuantityModal({ food, onConfirm, onCancel }: QuantityModalProps) {
   const [selectedPortion, setSelectedPortion] = useState<string>(
     food.portions && food.portions.length > 0 ? food.portions[0].description : 'custom'
   )
+  const [count, setCount] = useState('1')
+
+  function portionGrams(desc: string): number | null {
+    return food.portions?.find(p => p.description === desc)?.grams ?? null
+  }
 
   function handlePortionChange(desc: string) {
     setSelectedPortion(desc)
-    if (desc !== 'custom' && food.portions) {
-      const portion = food.portions.find(p => p.description === desc)
-      if (portion) setGrams(String(portion.grams))
-    }
+    const g = portionGrams(desc)
+    if (desc !== 'custom' && g != null) setGrams(String(Math.round(g * (parseFloat(count) || 1) * 10) / 10))
+  }
+
+  function handleCountChange(value: string) {
+    setCount(value)
+    const g = portionGrams(selectedPortion)
+    const n = parseFloat(value)
+    if (g != null && !isNaN(n) && n > 0) setGrams(String(Math.round(g * n * 10) / 10))
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const parsed = parseFloat(grams)
-    if (!isNaN(parsed) && parsed > 0) {
-      onConfirm(parsed)
-    }
+    if (isNaN(parsed) || parsed <= 0) return
+    const n = parseFloat(count)
+    const display = selectedPortion !== 'custom' && !isNaN(n) && n > 0
+      ? portionToDisplay(selectedPortion, n)
+      : { display_amount: parsed, display_unit: 'g' }
+    onConfirm(parsed, display)
   }
 
   return (
@@ -113,6 +133,21 @@ function QuantityModal({ food, onConfirm, onCancel }: QuantityModalProps) {
                 ))}
                 <option value="custom">Custom (grams)</option>
               </select>
+            </div>
+          )}
+          {selectedPortion !== 'custom' && (
+            <div className="flex flex-col gap-1">
+              <label className="eyebrow">How many</label>
+              <input
+                type="number"
+                min="0.1"
+                step="any"
+                value={count}
+                onChange={e => handleCountChange(e.target.value)}
+                aria-label="How many"
+                className="mono tnum px-3 py-2 text-sm"
+                style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
+              />
             </div>
           )}
           <div className="flex flex-col gap-1">
@@ -151,19 +186,33 @@ function QuantityModal({ food, onConfirm, onCancel }: QuantityModalProps) {
 
 interface EditQuantityModalProps {
   ingredient: RecipeIngredient
-  onConfirm: (grams: number) => void
+  onConfirm: (grams: number, display: IngredientDisplay) => void
   onCancel: () => void
 }
 
+const UNIT_SUGGESTIONS = ['', 'cup', 'tbsp', 'tsp', 'clove', 'slice', 'can', 'pinch', 'bunch', ...METRIC_UNITS]
+
 function EditQuantityModal({ ingredient, onConfirm, onCancel }: EditQuantityModalProps) {
+  const hasDisplay = ingredient.display_unit != null && ingredient.display_amount != null && ingredient.display_amount > 0
+  const [amount, setAmount] = useState<string>(String(hasDisplay ? ingredient.display_amount : ingredient.quantity_grams))
+  const [unit, setUnit] = useState<string>(hasDisplay ? ingredient.display_unit! : 'g')
   const [grams, setGrams] = useState<string>(String(ingredient.quantity_grams))
+  // Grams in one of the original unit, so changing the amount keeps the weight in step.
+  const gramsPerUnit = hasDisplay ? ingredient.quantity_grams / ingredient.display_amount! : 1
+
+  function recalcGrams(nextAmount: string, nextUnit: string) {
+    const n = parseFloat(nextAmount)
+    if (isNaN(n) || n <= 0) return
+    if (isMetricUnit(nextUnit)) setGrams(String(Math.round(metricToGrams(n, nextUnit) * 10) / 10))
+    else if (nextUnit === (hasDisplay ? ingredient.display_unit : 'g')) setGrams(String(Math.round(gramsPerUnit * n * 10) / 10))
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const parsed = parseFloat(grams)
-    if (!isNaN(parsed) && parsed > 0) {
-      onConfirm(parsed)
-    }
+    const parsedGrams = parseFloat(grams)
+    const parsedAmount = parseFloat(amount)
+    if (isNaN(parsedGrams) || parsedGrams <= 0 || isNaN(parsedAmount) || parsedAmount <= 0) return
+    onConfirm(parsedGrams, { display_amount: parsedAmount, display_unit: unit.trim() })
   }
 
   return (
@@ -175,8 +224,40 @@ function EditQuantityModal({ ingredient, onConfirm, onCancel }: EditQuantityModa
       >
         <h2 className="serif text-lg mb-4" style={{ color: 'var(--ink)' }}>Edit quantity</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1 w-24">
+              <label className="eyebrow" htmlFor="edit-amount">Amount</label>
+              <input
+                id="edit-amount"
+                type="number"
+                min="0.01"
+                step="any"
+                value={amount}
+                onChange={e => { setAmount(e.target.value); recalcGrams(e.target.value, unit) }}
+                className="mono tnum px-3 py-2 text-sm"
+                style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
+                autoFocus
+              />
+            </div>
+            <div className="flex flex-col gap-1 flex-1">
+              <label className="eyebrow" htmlFor="edit-unit">Unit</label>
+              <input
+                id="edit-unit"
+                type="text"
+                list="ingredient-unit-suggestions"
+                value={unit}
+                placeholder="blank = count (2 eggs)"
+                onChange={e => { setUnit(e.target.value); recalcGrams(amount, e.target.value) }}
+                className="px-3 py-2 text-sm"
+                style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
+              />
+              <datalist id="ingredient-unit-suggestions">
+                {UNIT_SUGGESTIONS.filter(Boolean).map(u => <option key={u} value={u} />)}
+              </datalist>
+            </div>
+          </div>
           <div className="flex flex-col gap-1">
-            <label className="eyebrow">Grams</label>
+            <label className="eyebrow">Grams (for nutrition and cost)</label>
             <input
               type="number"
               min="0.1"
@@ -185,7 +266,6 @@ function EditQuantityModal({ ingredient, onConfirm, onCancel }: EditQuantityModa
               onChange={e => setGrams(e.target.value)}
               className="mono tnum px-3 py-2 text-sm"
               style={{ background: 'transparent', border: '1px solid var(--rule-soft)', color: 'var(--ink)' }}
-              autoFocus
             />
           </div>
           <div className="flex gap-3">
@@ -270,6 +350,7 @@ function RecipePicker({ currentRecipeId, recipes, onSelect, cycleError }: Recipe
  * Manages ingredient list, food search overlay, and live per-serving nutrition bar.
  */
 export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
+  useIngredientUnitBackfill()
   const { data: recipe, isPending: recipePending } = useRecipe(recipeId)
   const { data: ingredients, isPending: ingredientsPending } = useRecipeIngredients(recipeId)
   const { data: allRecipes } = useRecipes()
@@ -400,7 +481,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     setPendingFood(food)
   }
 
-  function handleQuantityConfirm(grams: number) {
+  function handleQuantityConfirm(grams: number, display: IngredientDisplay) {
     if (!pendingFood) return
 
     const food = pendingFood
@@ -430,6 +511,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       fat_per_100g: food.fat,
       carbs_per_100g: food.carbs,
       micronutrients: food.micronutrients ?? null,
+      ...display,
     }, {
       onSuccess: () => {
         // D-03: eager step generation on ingredient mutation (V-07: name/servings changes do NOT trigger)
@@ -437,9 +519,11 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           const ingredientsSnapshot = [...ingredients, {
             ingredient_name: food.name,
             quantity_grams: grams,
+            ...display,
           }].map(ing => ({
             name: (ing as { ingredient_name?: string | null; name?: string }).ingredient_name ?? (ing as { name?: string }).name ?? '',
             quantity_grams: ing.quantity_grams,
+            amount: formatIngredientQuantity(ing).text,
           }))
           regenerateSteps.mutate({
             recipeId,
@@ -475,7 +559,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     }
   }
 
-  async function handleRecipeQuantityConfirm(grams: number) {
+  async function handleRecipeQuantityConfirm(grams: number, display: IngredientDisplay) {
     if (!pendingRecipe) return
 
     const selectedRecipe = pendingRecipe
@@ -500,6 +584,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
       protein_per_100g: subNutrition.per100g.protein,
       fat_per_100g: subNutrition.per100g.fat,
       carbs_per_100g: subNutrition.per100g.carbs,
+      ...display,
     }, {
       onSuccess: () => {
         // D-03: eager step generation on ingredient mutation (V-07: name/servings changes do NOT trigger)
@@ -507,9 +592,11 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           const ingredientsSnapshot = [...ingredients, {
             ingredient_name: selectedRecipe.name,
             quantity_grams: grams,
+            ...display,
           }].map(ing => ({
             name: (ing as { ingredient_name?: string | null; name?: string }).ingredient_name ?? (ing as { name?: string }).name ?? '',
             quantity_grams: ing.quantity_grams,
+            amount: formatIngredientQuantity(ing).text,
           }))
           regenerateSteps.mutate({
             recipeId,
@@ -526,13 +613,13 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
     setPendingRecipe(null)
   }
 
-  function handleEditConfirm(grams: number) {
+  function handleEditConfirm(grams: number, display: IngredientDisplay) {
     if (!editingIngredient) return
     const editedIngId = editingIngredient.id
     updateIngredient.mutate({
       id: editingIngredient.id,
       recipe_id: editingIngredient.recipe_id,
-      updates: { quantity_grams: grams },
+      updates: { quantity_grams: grams, ...display },
     }, {
       onSuccess: () => {
         // D-03: eager step generation on ingredient mutation (V-07: name/servings changes do NOT trigger)
@@ -540,6 +627,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
           const ingredientsSnapshot = ingredients.map(ing => ({
             name: ing.ingredient_name ?? '',
             quantity_grams: ing.id === editedIngId ? grams : ing.quantity_grams,
+            amount: formatIngredientQuantity(ing.id === editedIngId ? { quantity_grams: grams, ...display } : ing).text,
           }))
           regenerateSteps.mutate({
             recipeId,
@@ -897,7 +985,7 @@ export function RecipeBuilder({ recipeId }: RecipeBuilderProps) {
             recipeId={recipe.id}
             recipeName={recipe.name}
             servings={recipe.servings}
-            ingredientsSnapshot={(ingredients ?? []).map(ing => ({ name: ing.ingredient_name ?? '', quantity_grams: ing.quantity_grams }))}
+            ingredientsSnapshot={(ingredients ?? []).map(ing => ({ name: ing.ingredient_name ?? '', quantity_grams: ing.quantity_grams, amount: formatIngredientQuantity(ing).text }))}
             notes={recipe.notes}
           />
         )}

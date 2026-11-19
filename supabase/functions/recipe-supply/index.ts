@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { DISPLAY_UNIT_RULES, DISPLAY_UNIT_SCHEMA, sanitizeDisplayUnit } from "../_shared/displayUnits.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CORS_HEADERS = {
@@ -12,6 +13,8 @@ type MealSlot = (typeof VALID_MEAL_TYPES)[number];
 interface GeneratedIngredient {
   name: string;
   quantity_grams: number;
+  display_amount: number | null;
+  display_unit: string | null;
   calories_per_100g: number;
   protein_per_100g: number;
   fat_per_100g: number;
@@ -51,6 +54,7 @@ function sanitizeIngredient(ing: unknown): GeneratedIngredient | null {
   return {
     name,
     quantity_grams: quantity,
+    ...sanitizeDisplayUnit(i),
     calories_per_100g: clamp(i.calories_per_100g, 900),
     protein_per_100g: clamp(i.protein_per_100g, 100),
     fat_per_100g: clamp(i.fat_per_100g, 100),
@@ -125,7 +129,7 @@ serve(async (req) => {
       };
 
       const system =
-        `You are a recipe generator for a household meal app. Generate exactly ${count} distinct, realistic ${slot} recipes a family would actually choose. Each MUST be genuinely appropriate for ${slot} (${slotGuidance[slot]}). Return ONLY a JSON array of objects matching: { "name": string, "servings": number, "instructions": "numbered steps as a single string", "ingredients": [{ "name": string, "quantity_grams": number, "calories_per_100g": number, "protein_per_100g": number, "fat_per_100g": number, "carbs_per_100g": number }] }. Use realistic per-100g nutrition. Keep instructions concise. No prose, no markdown fences.`;
+        `You are a recipe generator for a household meal app. Generate exactly ${count} distinct, realistic ${slot} recipes a family would actually choose. Each MUST be genuinely appropriate for ${slot} (${slotGuidance[slot]}). Return ONLY a JSON array of objects matching: { "name": string, "servings": number, "instructions": "numbered steps as a single string", "ingredients": [{ "name": string, "quantity_grams": number, ${DISPLAY_UNIT_SCHEMA}, "calories_per_100g": number, "protein_per_100g": number, "fat_per_100g": number, "carbs_per_100g": number }] }. Use realistic per-100g nutrition. Keep instructions concise. ${DISPLAY_UNIT_RULES} No prose, no markdown fences.`;
 
       const text = await callAnthropic(apiKey, 8192, system, `Generate ${count} ${slot} recipes.`);
       if (!text) return json({ success: false, error: "AI generation failed" });
@@ -215,9 +219,9 @@ serve(async (req) => {
         (targetSlot
           ? `Every recipe must genuinely suit the ${targetSlot} slot. `
           : `Spread suggestions across Breakfast, Lunch, Dinner, and Snacks. `) +
-        `Return ONLY a JSON array of objects matching: { "name": string, "description": "one enticing sentence — why the family will love it", "meal_types": string[], "servings": number, "instructions": "numbered steps as a single string", "ingredients": [{ "name": string, "quantity_grams": number, "calories_per_100g": number, "protein_per_100g": number, "fat_per_100g": number, "carbs_per_100g": number }] }. ` +
+        `Return ONLY a JSON array of objects matching: { "name": string, "description": "one enticing sentence — why the family will love it", "meal_types": string[], "servings": number, "instructions": "numbered steps as a single string", "ingredients": [{ "name": string, "quantity_grams": number, ${DISPLAY_UNIT_SCHEMA}, "calories_per_100g": number, "protein_per_100g": number, "fat_per_100g": number, "carbs_per_100g": number }] }. ` +
         `meal_types rules: pick from Breakfast, Lunch, Dinner, Snacks. Most recipes get EXACTLY ONE slot; two ONLY when genuinely flexible. NEVER three. Breakfast is STRICT — only genuine breakfast foods (eggs, oatmeal, yogurt/smoothie bowls, pancakes, breakfast wraps, granola); never soups, stews, curries, chili, mains, or plain breads. ` +
-        `Use realistic per-100g nutrition. Keep instructions concise. No prose, no markdown fences.`;
+        `Use realistic per-100g nutrition. Keep instructions concise. ${DISPLAY_UNIT_RULES} No prose, no markdown fences.`;
 
       const contextLines = [
         craving ? `The family is in the mood for: ${craving}.` : "",
@@ -309,6 +313,8 @@ serve(async (req) => {
           ingredient_id: crypto.randomUUID(),
           ingredient_name: ing.name,
           quantity_grams: ing.quantity_grams,
+          display_amount: ing.display_amount,
+          display_unit: ing.display_unit,
           calories_per_100g: ing.calories_per_100g,
           protein_per_100g: ing.protein_per_100g,
           fat_per_100g: ing.fat_per_100g,

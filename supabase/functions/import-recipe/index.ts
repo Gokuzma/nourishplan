@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { DISPLAY_UNIT_RULES, DISPLAY_UNIT_SCHEMA, sanitizeDisplayUnit } from "../_shared/displayUnits.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CORS_HEADERS = {
@@ -63,6 +64,8 @@ Return ONLY valid JSON matching this exact schema:
     {
       "name": "ingredient name",
       "quantity_grams": <number>,
+      "display_amount": <number>,
+      "display_unit": "<unit word, or empty for counted items>",
       "category": "meat|poultry|fish|vegetables|legumes|grains|dairy|other",
       "calories_per_100g": <number>,
       "protein_per_100g": <number>,
@@ -87,7 +90,9 @@ Rules:
 3. For the category field, choose from: meat, poultry, fish, vegetables, legumes, grains, dairy, other.
 4. meal_types: pick the slot(s) this recipe naturally fits. Most recipes get EXACTLY ONE slot; allow two ONLY when genuinely flexible: a salad → ["Lunch", "Dinner"], a frittata → ["Breakfast", "Lunch"], hummus → ["Snacks", "Lunch"]. NEVER three. Breakfast is STRICT: tag Breakfast ONLY for genuine breakfast foods — eggs, oatmeal/porridge, yogurt or smoothie bowls, smoothies, pancakes/waffles/French toast, breakfast pastries, breakfast wraps/burritos, cereal/granola. Breads and flatbreads (roti, naan, biscuits, rolls), plain sides, mains, soups, stews, curries, and chili are NEVER Breakfast. Return [] only if truly slot-agnostic.
 5. If content is too vague to extract a recipe, return { "error": "Could not extract recipe" }.
-6. Return ONLY the JSON object — no prose, no markdown fences.`;
+6. Return ONLY the JSON object — no prose, no markdown fences.
+
+${DISPLAY_UNIT_RULES}`;
 
 function detectInputType(input: string): "youtube" | "url" | "text" {
   const trimmed = input.trim();
@@ -390,6 +395,8 @@ serve(async (req) => {
       fat_per_100g: number;
       carbs_per_100g: number;
       sort_order: number;
+      display_amount: number | null;
+      display_unit: string | null;
     }[] = [];
 
     for (let i = 0; i < generatedIngredients.length; i++) {
@@ -437,6 +444,7 @@ serve(async (req) => {
         fat_per_100g: ing.fat_per_100g || 0,
         carbs_per_100g: ing.carbs_per_100g || 0,
         sort_order: i,
+        ...sanitizeDisplayUnit(ing),
       });
     }
 

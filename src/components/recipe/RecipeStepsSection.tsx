@@ -17,7 +17,7 @@ interface RecipeStepsSectionProps {
   recipeId: string
   recipeName: string
   servings: number
-  ingredientsSnapshot: { name: string; quantity_grams: number }[]
+  ingredientsSnapshot: { name: string; quantity_grams: number; amount?: string }[]
   notes?: string | null
 }
 

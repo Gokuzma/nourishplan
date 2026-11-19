@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { DISPLAY_UNIT_RULES, DISPLAY_UNIT_SCHEMA, sanitizeDisplayUnit } from "../_shared/displayUnits.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CORS_HEADERS = {
@@ -97,7 +98,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "claude-haiku-4-5",
         max_tokens: 2048,
-        system: "You are a recipe generator. Given a recipe name and optional description, generate a complete recipe with ingredients (including accurate nutritional data per 100g) and cooking instructions. Return ONLY valid JSON matching this schema: { \"servings\": number, \"instructions\": \"step-by-step cooking method as a single string with numbered steps\", \"ingredients\": [{ \"name\": \"ingredient name\", \"quantity_grams\": number, \"calories_per_100g\": number, \"protein_per_100g\": number, \"fat_per_100g\": number, \"carbs_per_100g\": number }] }. Use realistic nutritional values. Keep instructions concise but complete.",
+        system: "You are a recipe generator. Given a recipe name and optional description, generate a complete recipe with ingredients (including accurate nutritional data per 100g) and cooking instructions. Return ONLY valid JSON matching this schema: { \"servings\": number, \"instructions\": \"step-by-step cooking method as a single string with numbered steps\", \"ingredients\": [{ \"name\": \"ingredient name\", \"quantity_grams\": number, \"display_amount\": number, \"display_unit\": string, \"calories_per_100g\": number, \"protein_per_100g\": number, \"fat_per_100g\": number, \"carbs_per_100g\": number }] }. Use realistic nutritional values. Keep instructions concise but complete. " + DISPLAY_UNIT_RULES,
         messages: [
           {
             role: "user",
@@ -163,6 +164,7 @@ serve(async (req) => {
       ingredient_id: crypto.randomUUID(),
       ingredient_name: ing.name,
       quantity_grams: ing.quantity_grams || 100,
+      ...sanitizeDisplayUnit(ing),
       calories_per_100g: ing.calories_per_100g || 0,
       protein_per_100g: ing.protein_per_100g || 0,
       fat_per_100g: ing.fat_per_100g || 0,

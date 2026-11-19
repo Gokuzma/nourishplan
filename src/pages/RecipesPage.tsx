@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useIngredientUnitBackfill } from '../hooks/useIngredientUnitBackfill'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useHousehold } from '../hooks/useHousehold'
@@ -21,6 +22,7 @@ function relativeTime(isoString: string): string {
 }
 
 export function RecipesPage() {
+  useIngredientUnitBackfill()
   const navigate = useNavigate()
   const { session } = useAuth()
   const { data: membership } = useHousehold()

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { GroceryItem } from '../../types/database'
+import { pluralizeUnit } from '../../utils/ingredientDisplay'
 
 interface GroceryAlreadyHaveSectionProps {
   items: GroceryItem[]
@@ -38,7 +39,7 @@ export function GroceryAlreadyHaveSection({ items }: GroceryAlreadyHaveSectionPr
                 <span className="text-sm text-text">{item.food_name}</span>
                 {item.quantity != null && item.unit && (
                   <span className="block text-xs text-text/50 mt-0.5">
-                    {item.quantity} {item.unit}
+                    {item.unit === 'units' ? item.quantity : `${item.quantity} ${pluralizeUnit(item.unit, item.quantity)}`}
                   </span>
                 )}
               </div>

@@ -1,5 +1,6 @@
 import { formatCost } from '../../utils/cost'
 import { formatDisplayQuantity } from '../../utils/groceryGeneration'
+import { pluralizeUnit } from '../../utils/ingredientDisplay'
 import type { GroceryItem } from '../../types/database'
 
 interface GroceryItemRowProps {
@@ -11,8 +12,10 @@ export function GroceryItemRow({ item, onToggle }: GroceryItemRowProps) {
   const isChecked = item.is_checked
 
   const displayQty =
-    item.quantity != null && item.unit
-      ? `${item.quantity} ${item.unit}`
+    item.quantity != null && item.unit === 'units'
+      ? `${item.quantity}`
+      : item.quantity != null && item.unit
+      ? `${item.quantity} ${pluralizeUnit(item.unit, item.quantity)}`
       : item.quantity != null
         ? (() => {
             const { display_quantity, display_unit } = formatDisplayQuantity(item.quantity)

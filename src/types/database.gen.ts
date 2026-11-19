@@ -1354,6 +1354,8 @@ export type Database = {
         Row: {
           calories_per_100g: number | null
           carbs_per_100g: number | null
+          display_amount: number | null
+          display_unit: string | null
           created_at: string
           fat_per_100g: number | null
           id: string
@@ -1370,6 +1372,8 @@ export type Database = {
         Insert: {
           calories_per_100g?: number | null
           carbs_per_100g?: number | null
+          display_amount?: number | null
+          display_unit?: string | null
           created_at?: string
           fat_per_100g?: number | null
           id?: string
@@ -1386,6 +1390,8 @@ export type Database = {
         Update: {
           calories_per_100g?: number | null
           carbs_per_100g?: number | null
+          display_amount?: number | null
+          display_unit?: string | null
           created_at?: string
           fat_per_100g?: number | null
           id?: string

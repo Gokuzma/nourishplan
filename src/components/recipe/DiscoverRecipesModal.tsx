@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatIngredientQuantity } from '../../utils/ingredientDisplay'
 import { Link } from 'react-router-dom'
 import { MEAL_SLOTS, type MealSlot } from '../../utils/recipeSupply'
 import { calcPerServingMacros } from '../../utils/recipeMacros'
@@ -64,7 +65,7 @@ function SuggestionCard({
           {proposal.ingredients.map((ing, i) => (
             <li key={i} className="flex justify-between py-0.5" style={{ borderTop: '1px dashed var(--rule-soft)' }}>
               <span>{ing.name}</span>
-              <span className="mono tnum" style={{ fontSize: 11 }}>{Math.round(ing.quantity_grams)} g</span>
+              <span className="mono tnum" style={{ fontSize: 11 }}>{formatIngredientQuantity(ing).text}</span>
             </li>
           ))}
         </ul>

@@ -131,6 +131,8 @@ export interface RecipeIngredient {
   fat_per_100g?: number | null
   carbs_per_100g?: number | null
   micronutrients?: Record<string, number> | null
+  display_amount?: number | null
+  display_unit?: string | null
   created_at: string
 }
 

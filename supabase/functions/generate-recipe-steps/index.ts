@@ -9,6 +9,7 @@ const CORS_HEADERS = {
 interface IngredientSnapshot {
   name: string;
   quantity_grams: number;
+  amount?: string;
 }
 
 interface RecipeStep {
@@ -215,7 +216,12 @@ serve(async (req) => {
     const userInput: Record<string, unknown> = {
       recipe_name: sanitizeString(recipeName),
       servings,
-      ingredients: ingredientsSnapshot.map(i => ({ name: sanitizeString(i.name), quantity_grams: i.quantity_grams })),
+      ingredients: ingredientsSnapshot.map(i => ({
+        name: sanitizeString(i.name),
+        quantity_grams: i.quantity_grams,
+        ...(typeof i.amount === "string" && i.amount ? { amount: sanitizeString(i.amount).slice(0, 40) } : {}),
+      })),
+      quantity_style: "When a step mentions how much of an ingredient, use its \"amount\" as written (e.g. \"1 cup\", \"2\" eggs, \"3 cloves\"), not grams.",
     };
     if (notes) userInput.notes = sanitizeString(notes);
     if (existingSteps && existingSteps.length > 0) {
